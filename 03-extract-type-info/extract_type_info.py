@@ -42,6 +42,7 @@ class TypeInfoExtractor(HTMLParser):
         self.seen_pagetitle = False
         self.seen_first_h1 = False
         self.description_parts = []
+        self.description_depth = 0
 
         # For collecting remarks content
         self.remarks_parts = []
@@ -59,7 +60,17 @@ class TypeInfoExtractor(HTMLParser):
         if tag == "h1" and self.seen_pagetitle and not self.seen_first_h1:
             self.seen_first_h1 = True
             self.in_description = False
+            self.description_depth = 0
             return
+
+        # Collect all HTML tags in description section (like we do for remarks)
+        if self.in_description and not self.in_pagetitle:
+            self.description_depth += 1
+            # Reconstruct HTML tags for description
+            attrs_str = ""
+            if attrs:
+                attrs_str = " " + " ".join([f'{k}="{v}"' for k, v in attrs])
+            self.description_parts.append(f"<{tag}{attrs_str}>")
 
         # Detect Example section
         if tag == "h1" and not self.current_section:
@@ -67,14 +78,18 @@ class TypeInfoExtractor(HTMLParser):
             pass
 
         # Detect links in example section
+        # Only collect links to example files (not references to other types)
         if self.in_example_section and tag == "a":
             href = attrs_dict.get("href", "")
-            if href and not href.startswith("#"):
+            # Example links contain "Example" or "_Example_" in the filename
+            # and typically end with .htm (not .html for type pages)
+            is_example_link = ("Example" in href or "_Example_" in href) and href.endswith(".htm")
+            if href and not href.startswith("#") and is_example_link:
                 self.in_link = True
                 self.current_link_href = href
                 self.current_link_text = ""
 
-        # Collect all content in remarks section
+        # Collect all HTML tags in remarks section
         if self.in_remarks_section:
             self.remarks_depth += 1
             # Reconstruct HTML tags for remarks
@@ -88,7 +103,13 @@ class TypeInfoExtractor(HTMLParser):
             self.in_pagetitle = False
             self.seen_pagetitle = True
             self.in_description = True
+            self.description_depth = 0
             return
+
+        # Track closing tags in description section
+        if self.in_description and not self.in_pagetitle:
+            self.description_depth -= 1
+            self.description_parts.append(f"</{tag}>")
 
         # Handle end of link in example section
         if tag == "a" and self.in_link:
@@ -128,8 +149,9 @@ class TypeInfoExtractor(HTMLParser):
             self.type_name = text.replace(" Interface", "").replace(" Class", "").strip()
 
         # Capture description (text between pagetitle and first h1)
-        if self.in_description and text and not self.in_pagetitle:
-            self.description_parts.append(text)
+        # Use original data (not stripped) to preserve spacing
+        if self.in_description and data and not self.in_pagetitle:
+            self.description_parts.append(data)
 
         # Detect section headers
         if text == "Example" or text == "Examples":
@@ -151,11 +173,9 @@ class TypeInfoExtractor(HTMLParser):
             self.current_link_text += data
 
         # Collect remarks content with proper spacing
-        if self.in_remarks_section and text:
-            # Add space before appending if we already have content
-            if self.remarks_parts and not self.remarks_parts[-1].endswith(" "):
-                self.remarks_parts.append(" ")
-            self.remarks_parts.append(text)
+        # Use original data (not stripped) to preserve spacing
+        if self.in_remarks_section and data:
+            self.remarks_parts.append(data)
 
     def _parse_example_link(self, link_text: str, href: str) -> Optional[Dict]:
         """
@@ -200,8 +220,13 @@ class TypeInfoExtractor(HTMLParser):
             return "Unknown"
 
     def get_description(self) -> str:
-        """Get the cleaned description text."""
-        return " ".join(self.description_parts).strip()
+        """Get the cleaned description text (with link conversion)."""
+        description_html = "".join(self.description_parts).strip()
+
+        # Clean up the HTML - convert <a> tags to <see cref="...">
+        description_html = self._convert_links_to_see_refs(description_html)
+
+        return description_html
 
     def get_remarks(self) -> str:
         """Get the remarks content (may include HTML)."""
@@ -235,8 +260,9 @@ class TypeInfoExtractor(HTMLParser):
             cref = self._parse_href_to_cref(href)
 
             if cref:
-                # Clean up link text (replace :: with ., and strip inside the tag only)
-                clean_text = link_text.strip().replace("::", ".")
+                # Keep the link text exactly as it appears (don't replace ::)
+                # Only strip whitespace inside the tag
+                clean_text = link_text.strip()
 
                 # Preserve leading/trailing spaces around the see tag
                 leading_space = len(link_text) - len(link_text.lstrip())

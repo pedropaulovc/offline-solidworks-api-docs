@@ -40,6 +40,32 @@ class TestTypeInfoExtractor(unittest.TestCase):
         self.assertEqual(parser.type_name, "IAdvancedHoleFeatureData")
         self.assertIn("Advanced Hole feature data", parser.get_description())
 
+    def test_description_with_links_converted_to_see_cref(self):
+        """Test that links in description are converted to XMLDoc <see cref> format (IDocumentSpecification bug)."""
+        html = """
+        <html>
+        <div id="pagetop">
+            <span id="pagetitle">IDocumentSpecification Interface</span>
+        </div>
+        <div id="mainbody">
+            <br>Allows you to specify how to open a model document. Use this interface's properties before calling <a href="SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.ISldWorks~OpenDoc7.html">ISldWorks::OpenDoc7</a> to specify how you want to open a model document.
+            <h1>.NET Syntax</h1>
+        </div>
+        </html>
+        """
+
+        parser = TypeInfoExtractor()
+        parser.feed(html)
+
+        description = parser.get_description()
+
+        # Should convert HTML link to XMLDoc see cref
+        self.assertIn('<see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.OpenDoc7">ISldWorks::OpenDoc7</see>', description)
+        # Should preserve :: in the see tag body
+        self.assertIn("ISldWorks::OpenDoc7</see>", description)
+        # Should not contain the original HTML anchor tag
+        self.assertNotIn("<a href=", description)
+
     def test_example_extraction(self):
         """Test extracting examples from type documentation."""
         html = """
@@ -114,9 +140,9 @@ class TestTypeInfoExtractor(unittest.TestCase):
         remarks = parser.get_remarks()
 
         # Should convert HTML link to XMLDoc see cref
-        self.assertIn('<see cref="SolidWorks.Interop.sldworks.IFeatureManager.AdvancedHole">IFeatureManager.AdvancedHole</see>', remarks)
-        # Should replace :: with . in link text
-        self.assertNotIn("IFeatureManager::", remarks)
+        self.assertIn('<see cref="SolidWorks.Interop.sldworks.IFeatureManager.AdvancedHole">IFeatureManager::AdvancedHole</see>', remarks)
+        # Should preserve :: in the see tag body
+        self.assertIn("IFeatureManager::AdvancedHole</see>", remarks)
         # Should clean up &nbsp; entities
         self.assertNotIn("&nbsp;", remarks)
         # Should not contain the original HTML anchor tag
