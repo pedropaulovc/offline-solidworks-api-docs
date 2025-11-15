@@ -225,12 +225,13 @@ class ApiDocsSpider(scrapy.Spider):
     def handle_error(self, failure: Failure) -> Generator[dict[str, Any], None, None]:
         """Handle failed requests"""
         self.stats["failed_pages"] += 1
-        self.logger.error(f"Failed to crawl {failure.request.url}: {failure.value}")
+        request_url = failure.request.url  # type: ignore[attr-defined]
+        self.logger.error(f"Failed to crawl {request_url}: {failure.value}")
 
         # Create error item for logging
         error_item: dict[str, Any] = {
             "type": "error",
-            "url": failure.request.url,
+            "url": request_url,
             "error": str(failure.value),
             "timestamp": datetime.now().isoformat(),
             "session_id": self.session_id,

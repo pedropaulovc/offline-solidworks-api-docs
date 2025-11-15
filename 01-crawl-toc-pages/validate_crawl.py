@@ -23,15 +23,15 @@ import jsonlines
 class CrawlValidator:
     """Validates crawl completeness and integrity"""
 
-    def __init__(self, output_dir):
-        self.output_dir = Path(output_dir)
-        self.html_dir = self.output_dir / "html"
-        self.metadata_dir = self.output_dir.parent / "metadata"
-        self.errors = []
-        self.warnings = []
-        self.stats = defaultdict(int)
+    def __init__(self, output_dir: str | Path) -> None:
+        self.output_dir: Path = Path(output_dir)
+        self.html_dir: Path = self.output_dir / "html"
+        self.metadata_dir: Path = self.output_dir.parent / "metadata"
+        self.errors: list[str] = []
+        self.warnings: list[str] = []
+        self.stats: defaultdict[str, int] = defaultdict(int)
 
-    def validate(self, verbose=False):
+    def validate(self, verbose: bool = False) -> bool:
         """Run all validation checks"""
         print("=" * 60)
         print("SOLIDWORKS API DOCUMENTATION CRAWL VALIDATOR")
@@ -75,7 +75,7 @@ class CrawlValidator:
 
         return success
 
-    def _check_directory_structure(self):
+    def _check_directory_structure(self) -> bool:
         """Check that expected directories exist"""
         print("Checking directory structure...")
 
@@ -93,7 +93,7 @@ class CrawlValidator:
         print("  [OK] Directory structure verified\n")
         return True
 
-    def _validate_metadata_files(self, verbose):
+    def _validate_metadata_files(self, verbose: bool) -> None:
         """Validate metadata files exist and are valid"""
         print("Validating metadata files...")
 
@@ -134,7 +134,7 @@ class CrawlValidator:
 
         print("  [OK] Metadata files validated\n")
 
-    def _validate_urls_crawled(self, verbose):
+    def _validate_urls_crawled(self, verbose: bool) -> bool:
         """Validate URLs crawled metadata"""
         print("Validating crawled URLs...")
 
@@ -203,7 +203,7 @@ class CrawlValidator:
             self.errors.append(f"Error validating URLs: {e}")
             return False
 
-    def _validate_html_files(self, verbose):
+    def _validate_html_files(self, verbose: bool) -> bool:
         """Validate HTML files match metadata"""
         print("Validating HTML files...")
 
@@ -250,8 +250,8 @@ class CrawlValidator:
 
             for file in sample:
                 try:
-                    with open(file, encoding="utf-8") as f:
-                        content = f.read()
+                    with open(file, encoding="utf-8") as file_handle:
+                        content = file_handle.read()
 
                     if len(content) < 100:
                         self.warnings.append(f"Suspiciously small HTML file: {file.name}")
@@ -265,7 +265,7 @@ class CrawlValidator:
         print("  [OK] HTML files validated\n")
         return True
 
-    def _check_duplicates(self, verbose):
+    def _check_duplicates(self, verbose: bool) -> None:
         """Check for duplicate content based on hashes"""
         print("Checking for duplicates...")
 
@@ -294,7 +294,7 @@ class CrawlValidator:
         print(f"  Duplicate content groups: {len(duplicates)}")
         print("  [OK] Duplicate check completed\n")
 
-    def _validate_statistics(self):
+    def _validate_statistics(self) -> bool:
         """Validate crawl statistics"""
         print("Validating crawl statistics...")
 
@@ -332,7 +332,7 @@ class CrawlValidator:
             self.errors.append(f"Error reading statistics: {e}")
             return False
 
-    def _generate_report(self):
+    def _generate_report(self) -> None:
         """Generate validation report"""
         print("Validation Report Summary")
         print("-" * 40)
@@ -379,7 +379,7 @@ class CrawlValidator:
         print(f"\nDetailed report saved to: {report_file.name}")
 
 
-def main():
+def main() -> None:
     """Main entry point"""
     parser = argparse.ArgumentParser(description="Validate SolidWorks API documentation crawl")
     parser.add_argument(
