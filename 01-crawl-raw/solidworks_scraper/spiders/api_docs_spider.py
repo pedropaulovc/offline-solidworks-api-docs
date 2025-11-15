@@ -31,6 +31,8 @@ class ApiDocsSpider(CrawlSpider):
     # Custom settings for this spider
     custom_settings = {
         'DEPTH_LIMIT': 0,  # No depth limit, we use URL boundaries instead
+        # Enable Playwright for all requests in this spider
+        'PLAYWRIGHT_ENABLED': True,
     }
 
     def __init__(self, *args, **kwargs):
@@ -66,7 +68,8 @@ class ApiDocsSpider(CrawlSpider):
     )
 
     def process_links(self, links):
-        """Process discovered links to ensure they stay within boundaries"""
+        """Process discovered links to ensure they stay within boundaries and convert to print preview"""
+        from scrapy.link import Link
         processed_links = []
 
         for link in links:
@@ -79,6 +82,7 @@ class ApiDocsSpider(CrawlSpider):
                 continue
 
             # Convert to print preview URL
+            # Playwright will render the JavaScript to get the actual content
             print_url = self.convert_to_print_preview(link.url)
 
             # Create new link with print preview URL
@@ -115,17 +119,23 @@ class ApiDocsSpider(CrawlSpider):
         """
         Generate initial requests.
 
-        The start URL (Welcome.htm) is downloaded in full format (not print preview)
-        because it contains the complete table of contents with all navigation links.
-        All subsequent pages discovered will be converted to print preview format.
+        Uses Playwright to render JavaScript-based React/Next.js pages.
+        Waits for network to be idle before extracting content.
         """
         for url in self.start_urls:
-            # Do NOT convert start URL to print preview - we need the full TOC
             yield scrapy.Request(
                 url,
                 callback=self.parse_page,
                 errback=self.handle_error,
-                meta={'original_url': url, 'is_start_page': True}
+                meta={
+                    'playwright': True,
+                    'playwright_include_page': True,
+                    'playwright_page_methods': [
+                        ('wait_for_load_state', 'networkidle'),
+                    ],
+                    'original_url': url,
+                    'is_start_page': True
+                }
             )
 
     def parse_page(self, response):
@@ -235,12 +245,19 @@ class ApiDocsSpider(CrawlSpider):
 
                 self.logger.debug(f"Yielding URL from JSON: {print_url}")
 
-                # Yield request for this URL
+                # Yield Playwright request for print preview URL (pages need JavaScript)
                 yield scrapy.Request(
-                    print_url,
+                    print_url,  # Use print preview URL
                     callback=self.parse_page,
                     errback=self.handle_error,
-                    meta={'original_url': full_url}
+                    meta={
+                        'playwright': True,
+                        'playwright_include_page': True,
+                        'playwright_page_methods': [
+                            ('wait_for_load_state', 'networkidle'),
+                        ],
+                        'original_url': full_url
+                    }
                 )
 
         except json.JSONDecodeError as e:
