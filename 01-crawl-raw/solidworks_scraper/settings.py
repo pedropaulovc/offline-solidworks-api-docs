@@ -122,29 +122,6 @@ LOG_CONFIG = {
     },
 }
 
-# ===============================================
-# PLAYWRIGHT CONFIGURATION
-# ===============================================
-# Enable Playwright for JavaScript rendering
-# Required because SolidWorks docs use React/Next.js
-
-DOWNLOAD_HANDLERS = {
-    "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-    "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-}
-
-TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
-
-# Playwright settings
-PLAYWRIGHT_BROWSER_TYPE = "chromium"
-PLAYWRIGHT_LAUNCH_OPTIONS = {
-    "headless": True,
-    "timeout": 30000,  # 30 second timeout
-}
-
-# Wait for network idle before considering page loaded
-PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT = 30000  # 30 seconds
-
 # Disable downloading of non-HTML resources
 # Only accept HTML content types
 DEFAULT_REQUEST_HEADERS = {
