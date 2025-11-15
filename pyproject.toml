@@ -75,7 +75,6 @@ select = [
 ]
 ignore = [
     "E501", # line too long (handled by formatter)
-    "SIM103", # Allow if-else instead of direct return for clarity
     "SIM108", # Allow if-else instead of ternary for clarity
 ]
 
