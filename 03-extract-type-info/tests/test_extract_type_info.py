@@ -238,6 +238,32 @@ class TestTypeInfoExtractor(unittest.TestCase):
         # Verify no __cdata__ attributes in final output
         self.assertNotIn('__cdata__="true"', xml_output)
 
+    def test_non_type_links_converted_to_see_href(self):
+        """Test that non-type links (guide pages) are converted to <see href> format (IPLMObjectSpecification bug)."""
+        html = """
+        <html>
+        <div id="pagetop">
+            <span id="pagetitle">IPLMObjectSpecification Interface</span>
+        </div>
+        <div id="mainbody">
+            Allows access to a <a href="../sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm">SOLIDWORKS Design connected to the 3DEXPERIENCE platform</a> document specification.
+            <h1>.NET Syntax</h1>
+        </div>
+        </html>
+        """
+
+        parser = TypeInfoExtractor()
+        parser.feed(html)
+
+        description = parser.get_description()
+
+        # Should convert non-type link to XMLDoc see href
+        self.assertIn('<see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm">', description)
+        # Should preserve link text
+        self.assertIn('SOLIDWORKS Design connected to the 3DEXPERIENCE platform</see>', description)
+        # Should not contain the original HTML anchor tag
+        self.assertNotIn("<a href=", description)
+
 
 class TestFilenameExtraction(unittest.TestCase):
     """Test extracting metadata from filenames."""

@@ -239,12 +239,17 @@ class TypeInfoExtractor(HTMLParser):
 
     def _convert_links_to_see_refs(self, html: str) -> str:
         """
-        Convert HTML anchor tags to XML <see cref="..."> tags.
+        Convert HTML anchor tags to XML <see cref="..."> or <see href="..."> tags.
 
-        Example:
+        Type references:
         <a href="SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFeatureManager~AdvancedHole.html">IFeatureManager::AdvancedHole</a>
         becomes:
-        <see cref="SolidWorks.Interop.sldworks.IFeatureManager.AdvancedHole">IFeatureManager.AdvancedHole</see>
+        <see cref="SolidWorks.Interop.sldworks.IFeatureManager.AdvancedHole">IFeatureManager::AdvancedHole</see>
+
+        Non-type references (guide pages):
+        <a href="../sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm">SOLIDWORKS Design</a>
+        becomes:
+        <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm">SOLIDWORKS Design</see>
         """
         # Pattern to match anchor tags with SolidWorks API links
         # Matches: <a href="Assembly~Namespace.Type~Member.html">LinkText</a>
@@ -259,22 +264,20 @@ class TypeInfoExtractor(HTMLParser):
             # Format: Assembly~Namespace.Type~Member.html or Namespace.Type.html
             cref = self._parse_href_to_cref(href)
 
+            # Prepare spacing preservation
+            clean_text = link_text.strip()
+            leading_space = len(link_text) - len(link_text.lstrip())
+            trailing_space = len(link_text) - len(link_text.rstrip())
+            prefix = link_text[:leading_space] if leading_space else ""
+            suffix = link_text[-trailing_space:] if trailing_space else ""
+
             if cref:
-                # Keep the link text exactly as it appears (don't replace ::)
-                # Only strip whitespace inside the tag
-                clean_text = link_text.strip()
-
-                # Preserve leading/trailing spaces around the see tag
-                leading_space = len(link_text) - len(link_text.lstrip())
-                trailing_space = len(link_text) - len(link_text.rstrip())
-
-                prefix = link_text[:leading_space] if leading_space else ""
-                suffix = link_text[-trailing_space:] if trailing_space else ""
-
+                # Type reference - use <see cref="...">
                 return f'{prefix}<see cref="{cref}">{clean_text}</see>{suffix}'
             else:
-                # If we can't parse it, just return the link text
-                return link_text
+                # Non-type reference (e.g., guide page) - use <see href="...">
+                full_url = self._convert_to_full_url(href)
+                return f'{prefix}<see href="{full_url}">{clean_text}</see>{suffix}'
 
         result = re.sub(pattern, replace_link, html)
 
@@ -292,7 +295,7 @@ class TypeInfoExtractor(HTMLParser):
 
     def _parse_href_to_cref(self, href: str) -> Optional[str]:
         """
-        Parse an href to extract the cref value.
+        Parse an href to extract the cref value for type references only.
 
         Examples:
         - "SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFeatureManager~AdvancedHole.html"
@@ -301,7 +304,14 @@ class TypeInfoExtractor(HTMLParser):
           -> "SolidWorks.Interop.sldworks.IFeature"
         - "SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.IFeature~GetDefinition.html"
           -> "SOLIDWORKS.Interop.sldworks.IFeature.GetDefinition"
+
+        Non-type references (paths) return None:
+        - "../sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm" -> None
         """
+        # If this looks like a file path (has slashes or ..), it's not a type reference
+        if "/" in href or "\\" in href or href.startswith(".."):
+            return None
+
         # Remove .html extension
         href = href.replace(".html", "").replace(".htm", "")
 
@@ -320,6 +330,32 @@ class TypeInfoExtractor(HTMLParser):
             return parts[0]
         else:
             return None
+
+    def _convert_to_full_url(self, href: str) -> str:
+        """
+        Convert a relative URL to a full URL.
+
+        Examples:
+        - "../sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm"
+          -> "https://help.solidworks.com/2026/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm"
+        - "https://example.com/page.htm" (already full)
+          -> "https://example.com/page.htm"
+        """
+        # If already a full URL, return as-is
+        if href.startswith("http://") or href.startswith("https://"):
+            return href
+
+        # Base URL for SolidWorks API documentation
+        base_url = "https://help.solidworks.com/2026/english/api/sldworksapi/"
+
+        # Handle relative paths
+        if href.startswith("../"):
+            # Remove leading ../ and construct from api/ level
+            clean_href = href.replace("../", "", 1)
+            return f"https://help.solidworks.com/2026/english/api/{clean_href}"
+        else:
+            # Relative to current directory (sldworksapi)
+            return f"{base_url}{href}"
 
 
 def extract_namespace_from_filename(html_file: Path) -> tuple:
