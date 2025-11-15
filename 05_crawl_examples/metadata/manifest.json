@@ -1,0 +1,10 @@
+{
+  "crawler_version": "1.0.0",
+  "last_updated": "2025-11-15T13:21:02.042205",
+  "source_file": "03_extract_type_info/metadata/api_types.xml",
+  "urls_file": "05_crawl_examples/metadata/example_urls.txt",
+  "base_url": "https://help.solidworks.com/2026/english/api",
+  "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+  "respect_robots_txt": false,
+  "crawl_delay_seconds": 0.1
+}
