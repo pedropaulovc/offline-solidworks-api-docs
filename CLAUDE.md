@@ -6,18 +6,33 @@ This is a multi-phase pipeline project for creating offline, searchable versions
 
 ## Current Status
 
-✅ **Phase 1 (01-crawl-raw)**: Complete
+✅ **Phase 1 (01_crawl_toc_pages)**: Complete
 - Scrapy-based crawler implemented
-- Print preview URL conversion working
+- expandToc API integration working
 - Metadata tracking for reproducibility
 - Validation scripts ready
 - Test suite complete
 
+✅ **Phase 2 (02_extract_members)**: Complete
+- Member extraction (properties and methods) implemented
+- XML output generation
+- Validation and test suite complete
+
+✅ **Phase 3 (03_extract_type_info)**: Complete
+- Type information extraction (descriptions, examples, remarks)
+- XML output generation
+- Validation and test suite complete
+
+✅ **Phase 4 (04_extract_enum_members)**: Complete
+- Enumeration member extraction
+- XML output generation
+- Test suite complete
+
 ⏳ **Future Phases**: Not yet implemented
-- 02-extract-structure: Parse HTML to extract API structure
-- 03-generate-xmldoc: Generate XMLDoc for IntelliSense
-- 04-create-index: Build searchable offline index
-- 05-export-formats: Export to various formats
+- Phase 5: Merge all XML outputs into unified structure
+- Phase 6: Generate XMLDoc for IntelliSense
+- Phase 7: Build searchable offline index
+- Phase 8: Export to various formats
 
 ## Key Technical Details
 
@@ -65,17 +80,17 @@ This is a multi-phase pipeline project for creating offline, searchable versions
 
 ### Running a Test Crawl
 ```bash
-uv run python 01-crawl-raw/run_crawler.py --test
+uv run python 01_crawl_toc_pages/run_crawler.py --test
 ```
 
 ### Validating Results
 ```bash
-uv run python 01-crawl-raw/validate_crawl.py --verbose
+uv run python 01_crawl_toc_pages/validate_crawl.py --verbose
 ```
 
 ### Running Tests
 ```bash
-uv run pytest 01-crawl-raw/tests/ -v
+uv run pytest 01_crawl_toc_pages/tests/ -v
 ```
 
 ## Project Constraints

@@ -5,7 +5,7 @@ This directory contains the Scrapy-based crawler for downloading the SolidWorks 
 ## 📁 Directory Structure
 
 ```
-01-crawl-raw/
+01_crawl_toc_pages/
 ├── solidworks_scraper/       # Scrapy project
 │   ├── settings.py          # Crawler configuration
 │   ├── pipelines.py         # Data processing pipelines
@@ -34,10 +34,10 @@ Test the crawler with a small subset of pages:
 
 ```bash
 # From project root
-uv run python 01-crawl-raw/run_crawler.py --test
+uv run python 01_crawl_toc_pages/run_crawler.py --test
 
 # Or from this directory
-cd 01-crawl-raw
+cd 01_crawl_toc_pages
 uv run python run_crawler.py --test
 ```
 
@@ -46,7 +46,7 @@ uv run python run_crawler.py --test
 Run a complete crawl of the API documentation:
 
 ```bash
-uv run python 01-crawl-raw/run_crawler.py
+uv run python 01_crawl_toc_pages/run_crawler.py
 ```
 
 **Note**: A full crawl will:
@@ -60,7 +60,7 @@ uv run python 01-crawl-raw/run_crawler.py
 If the crawl is interrupted, resume from where it left off:
 
 ```bash
-uv run python 01-crawl-raw/run_crawler.py --resume
+uv run python 01_crawl_toc_pages/run_crawler.py --resume
 ```
 
 ### Validate Results
@@ -69,10 +69,10 @@ Check the completeness and integrity of the crawl:
 
 ```bash
 # Basic validation
-uv run python 01-crawl-raw/validate_crawl.py
+uv run python 01_crawl_toc_pages/validate_crawl.py
 
 # Detailed validation with verbose output
-uv run python 01-crawl-raw/validate_crawl.py --verbose
+uv run python 01_crawl_toc_pages/validate_crawl.py --verbose
 ```
 
 ## 🔧 Configuration
@@ -285,21 +285,21 @@ Error records:
 
 ### Run All Tests
 ```bash
-uv run pytest 01-crawl-raw/tests/ -v
+uv run pytest 01_crawl_toc_pages/tests/ -v
 ```
 
 ### Run Specific Tests
 ```bash
 # Test spider only
-uv run pytest 01-crawl-raw/tests/test_spider.py -v
+uv run pytest 01_crawl_toc_pages/tests/test_spider.py -v
 
 # Test pipelines only
-uv run pytest 01-crawl-raw/tests/test_pipelines.py -v
+uv run pytest 01_crawl_toc_pages/tests/test_pipelines.py -v
 ```
 
 ### Coverage Report
 ```bash
-uv run pytest 01-crawl-raw/tests/ --cov=solidworks_scraper --cov-report=html
+uv run pytest 01_crawl_toc_pages/tests/ --cov=solidworks_scraper --cov-report=html
 ```
 
 ## ✅ Validation Criteria

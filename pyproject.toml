@@ -54,10 +54,10 @@ ignore_missing_imports = true
 line-length = 120
 target-version = "py312"
 extend-exclude = [
-    "01-crawl-toc-pages/output",
-    "02-extract-members/metadata",
-    "03-extract-type-info/metadata",
-    "04-extract-enum-members/metadata",
+    "01_crawl_toc_pages/output",
+    "02_extract_members/metadata",
+    "03_extract_type_info/metadata",
+    "04_extract_enum_members/metadata",
 ]
 
 [tool.ruff.lint]
@@ -83,9 +83,9 @@ ignore = [
 
 [tool.pytest.ini_options]
 pythonpath = [
-    "01-crawl-toc-pages",
-    "02-extract-members",
-    "03-extract-type-info",
-    "04-extract-enum-members",
+    "01_crawl_toc_pages",
+    "02_extract_members",
+    "03_extract_type_info",
+    "04_extract_enum_members",
     "shared",
 ]

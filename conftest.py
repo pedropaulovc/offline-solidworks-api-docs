@@ -1,7 +1,7 @@
 """
 Pytest configuration for multi-phase project.
 
-Each phase directory (01-crawl-toc-pages, 02-extract-members, etc.)
+Each phase directory (01_crawl_toc_pages, 02_extract_members, etc.)
 needs to be added to the Python path so tests can import their modules.
 """
 
@@ -11,10 +11,10 @@ from pathlib import Path
 # Add each phase directory to Python path
 project_root = Path(__file__).parent
 phase_dirs = [
-    "01-crawl-toc-pages",
-    "02-extract-members",
-    "03-extract-type-info",
-    "04-extract-enum-members",
+    "01_crawl_toc_pages",
+    "02_extract_members",
+    "03_extract_type_info",
+    "04_extract_enum_members",
     "shared",
 ]
 

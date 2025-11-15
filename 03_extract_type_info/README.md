@@ -4,7 +4,7 @@ This phase extracts type-level information (descriptions, examples, and remarks)
 
 ## Overview
 
-**Input**: HTML files from Phase 1 (01-crawl-toc-pages/output/html)
+**Input**: HTML files from Phase 1 (01_crawl_toc_pages/output/html)
 **Output**: XML file containing type information (metadata/api_types.xml)
 **Status**: Complete and tested
 
@@ -59,13 +59,13 @@ The extracted information is saved as XML in this format:
 
 ```bash
 # Extract all type information
-uv run python 03-extract-type-info/extract_type_info.py
+uv run python 03_extract_type_info/extract_type_info.py
 
 # Extract with verbose output
-uv run python 03-extract-type-info/extract_type_info.py --verbose
+uv run python 03_extract_type_info/extract_type_info.py --verbose
 
 # Specify custom input/output directories
-uv run python 03-extract-type-info/extract_type_info.py \
+uv run python 03_extract_type_info/extract_type_info.py \
   --input-dir path/to/html \
   --output-dir path/to/output
 ```
@@ -74,20 +74,20 @@ uv run python 03-extract-type-info/extract_type_info.py \
 
 ```bash
 # Run validation checks
-uv run python 03-extract-type-info/validate_extraction.py
+uv run python 03_extract_type_info/validate_extraction.py
 
 # Validate with verbose output
-uv run python 03-extract-type-info/validate_extraction.py --verbose
+uv run python 03_extract_type_info/validate_extraction.py --verbose
 ```
 
 ### Run Tests
 
 ```bash
 # Run all tests
-uv run pytest 03-extract-type-info/tests/ -v
+uv run pytest 03_extract_type_info/tests/ -v
 
 # Run with coverage
-uv run pytest 03-extract-type-info/tests/ --cov=03-extract-type-info
+uv run pytest 03_extract_type_info/tests/ --cov=03-extract-type-info
 ```
 
 ## Architecture
@@ -134,7 +134,7 @@ From a full crawl of SolidWorks 2026 API documentation:
 ## File Structure
 
 ```
-03-extract-type-info/
+03_extract_type_info/
 ├── extract_type_info.py      # Main extraction script
 ├── validate_extraction.py    # Validation script
 ├── README.md                  # This file
@@ -215,4 +215,4 @@ Check the validation output for specific issues. Most common:
 
 ---
 
-**Remember**: This phase focuses on **type-level** documentation. For member-level information (properties and methods), see Phase 2 (02-extract-members).
+**Remember**: This phase focuses on **type-level** documentation. For member-level information (properties and methods), see Phase 2 (02_extract_members).

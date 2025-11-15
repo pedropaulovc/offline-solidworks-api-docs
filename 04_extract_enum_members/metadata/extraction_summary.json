@@ -3,6 +3,6 @@
   "enums_with_members": 955,
   "enums_without_members": 1,
   "errors": 0,
-  "output_file": "04-extract-enum-members\\metadata\\enum_members.xml",
+  "output_file": "04_extract_enum_members\\metadata\\enum_members.xml",
   "error_files": []
 }

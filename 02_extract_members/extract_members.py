@@ -235,11 +235,11 @@ def main() -> int:
     parser.add_argument(
         "--input-dir",
         type=Path,
-        default=Path("01-crawl-toc-pages/output/html"),
+        default=Path("01_crawl_toc_pages/output/html"),
         help="Directory containing crawled HTML files",
     )
     parser.add_argument(
-        "--output-dir", type=Path, default=Path("02-extract-members/metadata"), help="Directory to save output files"
+        "--output-dir", type=Path, default=Path("02_extract_members/metadata"), help="Directory to save output files"
     )
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
 

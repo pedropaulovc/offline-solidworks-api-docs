@@ -25,7 +25,7 @@ This project provides a reproducible pipeline for:
 
 ```
 offline-solidworks-api-docs/
-├── 01-crawl-toc-pages/          # Phase 1: Crawl API docs via expandToc API
+├── 01_crawl_toc_pages/          # Phase 1: Crawl API docs via expandToc API
 │   ├── solidworks_scraper/      # Scrapy project
 │   ├── tests/                   # Test suite
 │   ├── output/                  # Crawled data (gitignored)
@@ -33,17 +33,17 @@ offline-solidworks-api-docs/
 │   │   └── metadata/            # Crawl metadata (tracked)
 │   ├── run_crawler.py           # Main entry point
 │   └── validate_crawl.py        # Validation script
-├── 02-extract-members/          # Phase 2: Extract properties & methods
+├── 02_extract_members/          # Phase 2: Extract properties & methods
 │   ├── extract_members.py       # Main extraction script
 │   ├── validate_extraction.py   # Validation script
 │   ├── metadata/                # Output (api_members.xml)
 │   └── tests/                   # Test suite
-├── 03-extract-type-info/        # Phase 3: Extract type descriptions & examples
+├── 03_extract_type_info/        # Phase 3: Extract type descriptions & examples
 │   ├── extract_type_info.py     # Main extraction script
 │   ├── validate_extraction.py   # Validation script
 │   ├── metadata/                # Output (api_types.xml)
 │   └── tests/                   # Test suite
-├── 04-extract-enum-members/     # Phase 4: Extract enumeration members
+├── 04_extract_enum_members/     # Phase 4: Extract enumeration members
 │   ├── extract_enum_members.py  # Main extraction script
 │   ├── metadata/                # Output (api_enums.xml)
 │   └── tests/                   # Test suite
@@ -77,43 +77,43 @@ uv sync
 
 ```bash
 # Run a test crawl (limited pages)
-uv run python 01-crawl-toc-pages/run_crawler.py --test
+uv run python 01_crawl_toc_pages/run_crawler.py --test
 
 # Run full crawl (will take several hours)
-uv run python 01-crawl-toc-pages/run_crawler.py
+uv run python 01_crawl_toc_pages/run_crawler.py
 
 # Resume interrupted crawl
-uv run python 01-crawl-toc-pages/run_crawler.py --resume
+uv run python 01_crawl_toc_pages/run_crawler.py --resume
 
 # Validate crawl results
-uv run python 01-crawl-toc-pages/validate_crawl.py
+uv run python 01_crawl_toc_pages/validate_crawl.py
 ```
 
 #### Phase 2: Extract Members
 
 ```bash
 # Extract properties and methods from crawled HTML
-uv run python 02-extract-members/extract_members.py
+uv run python 02_extract_members/extract_members.py
 
 # Validate extraction results
-uv run python 02-extract-members/validate_extraction.py
+uv run python 02_extract_members/validate_extraction.py
 ```
 
 #### Phase 3: Extract Type Information
 
 ```bash
 # Extract type descriptions, examples, and remarks
-uv run python 03-extract-type-info/extract_type_info.py
+uv run python 03_extract_type_info/extract_type_info.py
 
 # Validate extraction results
-uv run python 03-extract-type-info/validate_extraction.py
+uv run python 03_extract_type_info/validate_extraction.py
 ```
 
 #### Phase 4: Extract Enum Members
 
 ```bash
 # Extract enumeration members and values
-uv run python 04-extract-enum-members/extract_enum_members.py
+uv run python 04_extract_enum_members/extract_enum_members.py
 ```
 
 ## 📊 Expected Results
@@ -149,10 +149,10 @@ uv run python 04-extract-enum-members/extract_enum_members.py
 uv run pytest -v
 
 # Run tests for specific phase
-uv run pytest 01-crawl-toc-pages/tests/ -v
-uv run pytest 02-extract-members/tests/ -v
-uv run pytest 03-extract-type-info/tests/ -v
-uv run pytest 04-extract-enum-members/tests/ -v
+uv run pytest 01_crawl_toc_pages/tests/ -v
+uv run pytest 02_extract_members/tests/ -v
+uv run pytest 03_extract_type_info/tests/ -v
+uv run pytest 04_extract_enum_members/tests/ -v
 
 # Run with coverage
 uv run pytest --cov=01-crawl-toc-pages --cov=02-extract-members --cov=03-extract-type-info --cov-report=html
@@ -201,7 +201,7 @@ Each extraction also produces a summary JSON file with statistics.
 
 ### Crawler Settings
 
-Key settings in `01-crawl-toc-pages/solidworks_scraper/settings.py`:
+Key settings in `01_crawl_toc_pages/solidworks_scraper/settings.py`:
 
 - **User Agent**: Chrome browser to ensure proper access
 - **Crawl Delay**: 2 seconds (respectful crawling)
@@ -248,9 +248,9 @@ Each phase includes validation scripts that check:
 
 ```bash
 # Type checking with mypy
-uv run mypy 01-crawl-toc-pages/
-uv run mypy 02-extract-members/
-uv run mypy 03-extract-type-info/
+uv run mypy 01_crawl_toc_pages/
+uv run mypy 02_extract_members/
+uv run mypy 03_extract_type_info/
 
 # Linting with ruff
 uv run ruff check .
@@ -295,7 +295,7 @@ Please ensure all contributions maintain reproducibility and respect copyright.
 ### Phase 1: Crawling Issues
 
 1. **"scrapy: command not found"**
-   - Use `uv run` prefix: `uv run python 01-crawl-toc-pages/run_crawler.py`
+   - Use `uv run` prefix: `uv run python 01_crawl_toc_pages/run_crawler.py`
 
 2. **Rate limiting or 403 errors**
    - Increase DOWNLOAD_DELAY in settings.py
@@ -328,9 +328,9 @@ Please ensure all contributions maintain reproducibility and respect copyright.
 Each phase has detailed documentation:
 
 - **README.md** (this file) - Project overview
-- **01-crawl-toc-pages/README.md** - Crawler implementation details
-- **02-extract-members/README.md** - Member extraction details
-- **03-extract-type-info/README.md** - Type info extraction details
+- **01_crawl_toc_pages/README.md** - Crawler implementation details
+- **02_extract_members/README.md** - Member extraction details
+- **03_extract_type_info/README.md** - Type info extraction details
 - **CLAUDE.md** - Project context for AI assistants
 
 ## 🔮 Future Phases (Planned)

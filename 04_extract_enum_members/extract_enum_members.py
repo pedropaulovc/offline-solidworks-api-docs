@@ -316,14 +316,14 @@ def main() -> int:
     parser.add_argument(
         "--input-dir",
         type=Path,
-        default=Path("01-crawl-toc-pages/output/html"),
-        help="Input directory containing HTML files (default: 01-crawl-toc-pages/output/html)",
+        default=Path("01_crawl_toc_pages/output/html"),
+        help="Input directory containing HTML files (default: 01_crawl_toc_pages/output/html)",
     )
     parser.add_argument(
         "--output-file",
         type=Path,
-        default=Path("04-extract-enum-members/metadata/enum_members.xml"),
-        help="Output XML file (default: 04-extract-enum-members/metadata/enum_members.xml)",
+        default=Path("04_extract_enum_members/metadata/enum_members.xml"),
+        help="Output XML file (default: 04_extract_enum_members/metadata/enum_members.xml)",
     )
     parser.add_argument("--verbose", action="store_true", help="Print verbose output")
 

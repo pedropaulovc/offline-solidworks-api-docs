@@ -14,26 +14,26 @@ The extraction script scans all `*_members_*.html` files from the crawl phase an
 ### Basic Extraction
 
 ```bash
-uv run python 02-extract-members/extract_members.py
+uv run python 02_extract_members/extract_members.py
 ```
 
 ### With Custom Paths
 
 ```bash
-uv run python 02-extract-members/extract_members.py \
-  --input-dir 01-crawl-toc-pages/output/html \
-  --output-dir 02-extract-members/metadata
+uv run python 02_extract_members/extract_members.py \
+  --input-dir 01_crawl_toc_pages/output/html \
+  --output-dir 02_extract_members/metadata
 ```
 
 ### Verbose Mode
 
 ```bash
-uv run python 02-extract-members/extract_members.py --verbose
+uv run python 02_extract_members/extract_members.py --verbose
 ```
 
 ## Output
 
-The script generates two files in `02-extract-members/metadata/`:
+The script generates two files in `02_extract_members/metadata/`:
 
 ### 1. api_members.xml
 
@@ -72,7 +72,7 @@ Summary metadata about the extraction:
   "total_files_processed": 458,
   "types_extracted": 456,
   "errors": 2,
-  "output_file": "02-extract-members/metadata/api_members.xml",
+  "output_file": "02_extract_members/metadata/api_members.xml",
   "error_files": [...]
 }
 ```
@@ -114,7 +114,7 @@ Uses only Python standard library:
 Run tests with:
 
 ```bash
-uv run pytest 02-extract-members/tests/ -v
+uv run pytest 02_extract_members/tests/ -v
 ```
 
 ## Next Steps
