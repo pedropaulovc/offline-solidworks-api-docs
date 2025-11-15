@@ -1,0 +1,21 @@
+{
+  "timestamp": "2025-11-14T19:22:50.446892",
+  "stats": {
+    "metadata_manifest.json_valid": 1,
+    "urls_crawled.jsonl_lines": 2,
+    "metadata_crawl_stats.json_valid": 1,
+    "urls_crawled": 2,
+    "unique_urls": 1,
+    "total_size_bytes": 1019062,
+    "html_files": 2,
+    "duplicate_content": 0,
+    "success_rate": 100.0
+  },
+  "errors": [
+    "Insufficient pages crawled: 2 < 435"
+  ],
+  "warnings": [
+    "Duplicate URL in metadata: https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Welcome.htm?id=0&format=p&value=1"
+  ],
+  "success": false
+}

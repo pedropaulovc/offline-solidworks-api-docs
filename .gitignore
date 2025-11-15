@@ -205,3 +205,55 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# ===============================================
+# SOLIDWORKS API DOCUMENTATION CRAWLER
+# ===============================================
+
+# Crawled HTML content (copyright-protected)
+# DO NOT COMMIT - For personal use only
+01-crawl-raw/output/html/
+02-*/output/html/
+03-*/output/html/
+*.html
+*.htm
+
+# Temporary reference file
+Welcome.htm
+
+# Keep metadata for reproducibility
+!*/output/metadata/
+!*/output/metadata/*.json
+!*/output/metadata/*.jsonl
+
+# Scrapy cache
+.scrapy/
+*/.scrapy/
+
+# Python virtual environment (already covered above but being explicit)
+.venv/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Test coverage reports (project-specific)
+01-crawl-raw/htmlcov/
+01-crawl-raw/.coverage
+01-crawl-raw/.pytest_cache/
+
+# Logs
+*.log
+01-crawl-raw/logs/
+
+# Temporary files
+*.tmp
+*.temp

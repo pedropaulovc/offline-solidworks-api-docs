@@ -1,0 +1,1 @@
+"""Tests for SolidWorks API documentation crawler."""

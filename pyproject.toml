@@ -1,0 +1,13 @@
+[project]
+name = "offline-solidworks-api-docs"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "jsonlines>=4.0.0",
+    "pytest>=9.0.1",
+    "pytest-cov>=7.0.0",
+    "python-dateutil>=2.9.0.post0",
+    "scrapy>=2.13.3",
+]
