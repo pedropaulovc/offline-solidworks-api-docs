@@ -1,31 +1,27 @@
 """
 SolidWorks API Documentation Spider
 
-This spider crawls the SolidWorks API documentation starting from the main welcome page,
-staying within the /2026/english/api/ boundary.
-
-The start URL (Welcome.htm) is downloaded in its full format to capture the complete
-table of contents with all navigation links. All subsequently discovered pages are
-saved in print preview format for cleaner, more compact HTML.
+This spider crawls the SolidWorks API documentation by:
+1. Fetching the table of contents from the JSON API endpoint
+2. Recursively extracting all URLs from the children array
+3. Downloading each page
 """
 
 import scrapy
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
-from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+from urllib.parse import urlparse, parse_qs
 import hashlib
 from datetime import datetime
 import json
 from pathlib import Path
 
 
-class ApiDocsSpider(CrawlSpider):
+class ApiDocsSpider(scrapy.Spider):
     name = "api_docs"
     allowed_domains = ["help.solidworks.com"]
 
-    # Starting URL - main API documentation page
+    # Starting URL - JSON TOC endpoint
     start_urls = [
-        "https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Welcome.htm?id=0"
+        "https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id=-1"
     ]
 
     # Custom settings for this spider
@@ -37,6 +33,7 @@ class ApiDocsSpider(CrawlSpider):
         super().__init__(*args, **kwargs)
         self.crawled_urls = set()
         self.base_path = "/2026/english/api/"
+        self.base_url = "https://help.solidworks.com"
         self.session_id = datetime.now().strftime("%Y-%m-%d-%H%M%S")
 
         # Statistics tracking
@@ -48,85 +45,92 @@ class ApiDocsSpider(CrawlSpider):
             'skipped_pages': 0,
         }
 
-    # Define rules for following links
-    rules = (
-        Rule(
-            LinkExtractor(
-                allow=r'/2026/english/api/.*',
-                deny=[
-                    r'.*\.(css|js|jpg|jpeg|png|gif|svg|ico|pdf|zip|exe|msi)$',  # Skip non-HTML files
-                    r'.*/print\.html.*',  # Skip if already a print URL
-                ],
-                unique=True,
-            ),
-            callback='parse_page',
-            follow=True,
-            process_links='process_links',
-        ),
-    )
-
-    def process_links(self, links):
-        """Process discovered links to ensure they stay within boundaries"""
-        processed_links = []
-
-        for link in links:
-            # Check if URL is within our allowed boundary
-            parsed = urlparse(link.url)
-
-            # Must be within /2026/english/api/ path
-            if not parsed.path.startswith(self.base_path):
-                self.logger.debug(f"Skipping URL outside boundary: {link.url}")
-                continue
-
-            # Convert to print preview URL
-            print_url = self.convert_to_print_preview(link.url)
-
-            # Create new link with print preview URL
-            link.url = print_url
-            processed_links.append(link)
-
-        return processed_links
-
-    def convert_to_print_preview(self, url):
-        """Convert a regular URL to its print preview version"""
-        parsed = urlparse(url)
-
-        # Parse existing query parameters
-        query_params = parse_qs(parsed.query)
-
-        # Add print preview parameters
-        query_params['format'] = ['p']
-        query_params['value'] = ['1']
-
-        # Rebuild the URL with new parameters
-        new_query = urlencode(query_params, doseq=True)
-        print_url = urlunparse((
-            parsed.scheme,
-            parsed.netloc,
-            parsed.path,
-            parsed.params,
-            new_query,
-            parsed.fragment
-        ))
-
-        return print_url
-
-    def start_requests(self):
+    def parse(self, response):
         """
-        Generate initial requests.
+        Parse the JSON TOC response and extract all page URLs.
 
-        The start URL (Welcome.htm) is downloaded in full format (not print preview)
-        because it contains the complete table of contents with all navigation links.
-        All subsequent pages discovered will be converted to print preview format.
+        The JSON structure has a 'children' array where each item may have:
+        - url: The page URL to crawl
+        - children: Nested array of more pages (recursive)
         """
-        for url in self.start_urls:
-            # Do NOT convert start URL to print preview - we need the full TOC
-            yield scrapy.Request(
-                url,
-                callback=self.parse_page,
-                errback=self.handle_error,
-                meta={'original_url': url, 'is_start_page': True}
-            )
+        try:
+            data = json.loads(response.text)
+
+            # Recursively extract all URLs from the JSON structure
+            urls = self.extract_urls_from_json(data)
+
+            self.logger.info(f"Found {len(urls)} URLs in JSON TOC")
+
+            # Create requests for each URL
+            for url in urls:
+                # Convert relative URL to absolute
+                if url.startswith('/'):
+                    full_url = self.base_url + url
+                else:
+                    full_url = url
+
+                # Check if URL is within our allowed boundary
+                parsed = urlparse(full_url)
+                if not parsed.path.startswith(self.base_path):
+                    self.logger.debug(f"Skipping URL outside boundary: {full_url}")
+                    continue
+
+                # Yield request for the page itself
+                yield scrapy.Request(
+                    full_url,
+                    callback=self.parse_page,
+                    errback=self.handle_error,
+                    meta={'original_url': full_url}
+                )
+
+                # Extract id parameter and create expandToc request
+                query_params = parse_qs(parsed.query)
+                if 'id' in query_params:
+                    id_value = query_params['id'][0]
+                    expand_toc_url = f"{self.base_url}/expandToc?version=2026&language=english&product=api&queryParam=?id={id_value}"
+
+                    self.logger.debug(f"Adding expandToc URL for id={id_value}: {expand_toc_url}")
+
+                    yield scrapy.Request(
+                        expand_toc_url,
+                        callback=self.parse,
+                        errback=self.handle_error,
+                        dont_filter=False
+                    )
+
+        except json.JSONDecodeError as e:
+            self.logger.error(f"Failed to parse JSON from {response.url}: {e}")
+        except Exception as e:
+            self.logger.error(f"Error processing JSON TOC: {e}")
+
+    def extract_urls_from_json(self, data):
+        """
+        Recursively extract all URLs from the JSON structure.
+
+        Args:
+            data: JSON object or array to process
+
+        Returns:
+            List of URLs found in the structure
+        """
+        urls = []
+
+        # Handle array (list of children)
+        if isinstance(data, list):
+            for item in data:
+                urls.extend(self.extract_urls_from_json(item))
+
+        # Handle object (dict)
+        elif isinstance(data, dict):
+            # Extract URL if present
+            if 'url' in data and data['url']:
+                urls.append(data['url'])
+
+            # Recursively process children
+            if 'children' in data and data['children']:
+                urls.extend(self.extract_urls_from_json(data['children']))
+
+        return urls
 
     def parse_page(self, response):
         """Parse and save a documentation page"""
@@ -176,77 +180,6 @@ class ApiDocsSpider(CrawlSpider):
 
         # Yield the item to be processed by pipelines
         yield item
-
-        # Extract and follow links
-        # For JavaScript-rendered pages (like Welcome.htm), extract links from JSON data
-        if response.meta.get('is_start_page'):
-            yield from self.extract_links_from_json(response)
-
-        # Also follow regular HTML links (for subsequent pages)
-        # The rules will handle link extraction and following
-
-    def extract_links_from_json(self, response):
-        """
-        Extract links from __NEXT_DATA__ JSON blob in JavaScript-rendered pages.
-
-        The Welcome.htm page is a React/Next.js SPA where navigation links are embedded
-        in a JSON blob rather than regular HTML <a> tags.
-        """
-        import json
-
-        # Extract JSON from script tag
-        json_text = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
-
-        if not json_text:
-            self.logger.warning(f"No __NEXT_DATA__ JSON found in {response.url}")
-            return
-
-        try:
-            # Parse the JSON
-            data = json.loads(json_text)
-
-            # Navigate to the section data: props.pageProps.allGuidesSectionData
-            sections = data.get('props', {}).get('pageProps', {}).get('allGuidesSectionData', [])
-
-            if not sections:
-                self.logger.warning(f"No sections found in JSON for {response.url}")
-                return
-
-            self.logger.info(f"Found {len(sections)} URLs in JSON data")
-
-            # Extract URLs from each section
-            for section in sections:
-                url_path = section.get('url')
-
-                if not url_path:
-                    continue
-
-                # Convert relative URL to absolute
-                full_url = response.urljoin(url_path)
-
-                # Check if URL is within our allowed boundary
-                parsed = urlparse(full_url)
-                if not parsed.path.startswith(self.base_path):
-                    self.logger.debug(f"Skipping URL outside boundary from JSON: {full_url}")
-                    continue
-
-                # Convert to print preview format
-                print_url = self.convert_to_print_preview(full_url)
-
-                self.logger.debug(f"Yielding URL from JSON: {print_url}")
-
-                # Yield request for this URL
-                yield scrapy.Request(
-                    print_url,
-                    callback=self.parse_page,
-                    errback=self.handle_error,
-                    meta={'original_url': full_url}
-                )
-
-        except json.JSONDecodeError as e:
-            self.logger.error(f"Failed to parse JSON from {response.url}: {e}")
-        except Exception as e:
-            self.logger.error(f"Error extracting links from JSON in {response.url}: {e}")
 
     def handle_error(self, failure):
         """Handle failed requests"""

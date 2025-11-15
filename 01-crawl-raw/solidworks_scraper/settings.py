@@ -26,9 +26,9 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 ROBOTSTXT_OBEY = False
 
 # Concurrency and throttling settings - Be polite!
-CONCURRENT_REQUESTS = 1
-CONCURRENT_REQUESTS_PER_DOMAIN = 1
-DOWNLOAD_DELAY = 2  # 2 seconds between requests
+CONCURRENT_REQUESTS = 5
+CONCURRENT_REQUESTS_PER_DOMAIN = 5
+DOWNLOAD_DELAY = 1  # 1 second between requests
 
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED = False

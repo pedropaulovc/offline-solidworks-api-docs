@@ -128,8 +128,7 @@ class MetadataLogPipeline:
 
         # Prepare metadata entry
         metadata = {
-            'original_url': adapter.get('original_url'),
-            'print_url': adapter.get('url'),
+            'url': adapter.get('url'),
             'timestamp': adapter.get('timestamp'),
             'file_path': adapter.get('file_path'),
             'content_hash': adapter.get('content_hash'),
@@ -143,7 +142,7 @@ class MetadataLogPipeline:
         try:
             with jsonlines.open(self.urls_file, mode='a') as writer:
                 writer.write(metadata)
-            spider.logger.debug(f"Logged metadata for {metadata['print_url']}")
+            spider.logger.debug(f"Logged metadata for {metadata['url']}")
 
         except Exception as e:
             spider.logger.error(f"Failed to log metadata: {e}")
@@ -183,8 +182,8 @@ class DuplicateCheckPipeline:
             try:
                 with jsonlines.open(urls_file) as reader:
                     for obj in reader:
-                        if obj.get('print_url'):
-                            self.seen_urls.add(obj['print_url'])
+                        if obj.get('url'):
+                            self.seen_urls.add(obj['url'])
 
             except Exception as e:
                 print(f"Could not load existing URLs: {e}")
