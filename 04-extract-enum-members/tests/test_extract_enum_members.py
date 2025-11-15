@@ -16,7 +16,7 @@ from extract_enum_members import EnumMemberExtractor, create_xml_output, extract
 class TestEnumMemberExtractor(unittest.TestCase):
     """Test the EnumMemberExtractor HTML parser."""
 
-    def test_basic_enum_member_extraction(self):
+    def test_basic_enum_member_extraction(self) -> None:
         """Test extracting basic enum members."""
         html = """
         <html>
@@ -53,7 +53,7 @@ class TestEnumMemberExtractor(unittest.TestCase):
         self.assertEqual(parser.enum_members[1]["Name"], "swTangencyNone")
         self.assertEqual(parser.enum_members[1]["Description"], "0")
 
-    def test_enum_members_with_links(self):
+    def test_enum_members_with_links(self) -> None:
         """Test that links in member descriptions are converted to XMLDoc format."""
         html = """
         <html>
@@ -82,7 +82,7 @@ class TestEnumMemberExtractor(unittest.TestCase):
         self.assertIn('<see cref="SolidWorks.Interop.swconst.swOtherType_e">', parser.enum_members[0]["Description"])
         self.assertIn("swOtherType_e</see>", parser.enum_members[0]["Description"])
 
-    def test_empty_enum(self):
+    def test_empty_enum(self) -> None:
         """Test enum with no members."""
         html = """
         <html>
@@ -105,24 +105,24 @@ class TestEnumMemberExtractor(unittest.TestCase):
 class TestFileFiltering(unittest.TestCase):
     """Test filtering enum files from other files."""
 
-    def test_is_enum_file_valid(self):
+    def test_is_enum_file_valid(self) -> None:
         """Test identifying valid enum files."""
         valid_file = Path("SolidWorks.Interop.swconst~SolidWorks.Interop.swconst.swTangencyType_e_84c83747.html")
         self.assertTrue(is_enum_file(valid_file))
 
-    def test_is_enum_file_not_enum(self):
+    def test_is_enum_file_not_enum(self) -> None:
         """Test rejecting non-enum type files."""
         non_enum_file = Path("SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFeature_84c83747.html")
         self.assertFalse(is_enum_file(non_enum_file))
 
-    def test_is_enum_file_members(self):
+    def test_is_enum_file_members(self) -> None:
         """Test rejecting members files."""
         members_file = Path(
             "SolidWorks.Interop.swconst~SolidWorks.Interop.swconst.swTangencyType_e_members_84c83747.html"
         )
         self.assertFalse(is_enum_file(members_file))
 
-    def test_is_enum_file_namespace(self):
+    def test_is_enum_file_namespace(self) -> None:
         """Test rejecting namespace files."""
         namespace_file = Path("SolidWorks.Interop.swconst~SolidWorks.Interop.swconst_namespace_84c83747.html")
         self.assertFalse(is_enum_file(namespace_file))
@@ -131,7 +131,7 @@ class TestFileFiltering(unittest.TestCase):
 class TestFilenameExtraction(unittest.TestCase):
     """Test extracting metadata from filenames."""
 
-    def test_extract_namespace_from_filename(self):
+    def test_extract_namespace_from_filename(self) -> None:
         """Test extracting assembly, namespace, and type name from filename."""
         test_file = Path("SolidWorks.Interop.swconst~SolidWorks.Interop.swconst.swTangencyType_e_84c83747.html")
 
@@ -145,7 +145,7 @@ class TestFilenameExtraction(unittest.TestCase):
 class TestXMLOutput(unittest.TestCase):
     """Test XML output generation."""
 
-    def test_xml_output_with_members(self):
+    def test_xml_output_with_members(self) -> None:
         """Test creating XML output with enum members."""
         enums = [
             {

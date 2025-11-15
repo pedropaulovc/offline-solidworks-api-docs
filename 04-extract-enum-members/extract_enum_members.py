@@ -8,11 +8,13 @@ into an XML format separate from the type definitions.
 
 import argparse
 import json
+import re
 import sys
 import xml.dom.minidom as minidom
 import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
 from pathlib import Path
+from typing import Any
 
 # Add parent directory to path for shared module imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -23,23 +25,23 @@ from shared.xmldoc_links import convert_links_to_see_refs
 class EnumMemberExtractor(HTMLParser):
     """HTML parser to extract enum member information from SolidWorks API documentation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.type_name = None
-        self.enum_members = []
+        self.type_name: str | None = None
+        self.enum_members: list[dict[str, str]] = []
 
         # State tracking
-        self.in_pagetitle = False
-        self.in_members_section = False
-        self.in_members_table = False
-        self.in_member_row = False
-        self.in_member_name_cell = False
-        self.in_member_desc_cell = False
-        self.current_member_name = None
-        self.current_member_desc_parts = []
-        self.member_desc_depth = 0
+        self.in_pagetitle: bool = False
+        self.in_members_section: bool = False
+        self.in_members_table: bool = False
+        self.in_member_row: bool = False
+        self.in_member_name_cell: bool = False
+        self.in_member_desc_cell: bool = False
+        self.current_member_name: str | None = None
+        self.current_member_desc_parts: list[str] = []
+        self.member_desc_depth: int = 0
 
-    def handle_starttag(self, tag, attrs):
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attrs_dict = dict(attrs)
 
         # Detect page title
@@ -78,7 +80,7 @@ class EnumMemberExtractor(HTMLParser):
                 attrs_str = " " + " ".join([f'{k}="{v}"' for k, v in attrs])
             self.current_member_desc_parts.append(f"<{tag}{attrs_str}>")
 
-    def handle_endtag(self, tag):
+    def handle_endtag(self, tag: str) -> None:
         if tag == "span" and self.in_pagetitle:
             self.in_pagetitle = False
             return
@@ -117,7 +119,7 @@ class EnumMemberExtractor(HTMLParser):
             self.member_desc_depth -= 1
             self.current_member_desc_parts.append(f"</{tag}>")
 
-    def handle_data(self, data):
+    def handle_data(self, data: str) -> None:
         text = data.strip()
 
         # Capture type name from pagetitle
@@ -140,12 +142,12 @@ class EnumMemberExtractor(HTMLParser):
             self.current_member_desc_parts.append(data)
 
 
-def extract_namespace_from_filename(html_file: Path) -> tuple:
+def extract_namespace_from_filename(html_file: Path) -> tuple[str, str, str]:
     """
     Extract namespace and assembly from the file path.
 
     Returns:
-        tuple: (assembly, namespace, type_name)
+        tuple[str, str, str]: (assembly, namespace, type_name)
     """
     # Example filename format:
     # SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IAdvancedHoleFeatureData_84c83747.html
@@ -158,8 +160,6 @@ def extract_namespace_from_filename(html_file: Path) -> tuple:
 
     # Remove hash suffixes (underscore followed by hex digits)
     # Keep removing until we don't have hash pattern
-    import re
-
     while re.search(r"_[0-9a-f]{8}$", filename):
         filename = filename.rsplit("_", 1)[0]
 
@@ -254,12 +254,11 @@ def _wrap_cdata_sections(xml_str: str) -> str:
     This is a post-processing step since ElementTree doesn't natively support CDATA.
     """
     import html as html_module
-    import re
 
     # Pattern to find Description elements marked with __cdata__="true"
     pattern = r'<Description __cdata__="true">(.*?)</Description>'
 
-    def replace_with_cdata(match):
+    def replace_with_cdata(match: re.Match[str]) -> str:
         content = match.group(1)
         # Unescape XML entities since CDATA doesn't need escaping
         content = html_module.unescape(content)
@@ -268,7 +267,7 @@ def _wrap_cdata_sections(xml_str: str) -> str:
     return re.sub(pattern, replace_with_cdata, xml_str, flags=re.DOTALL)
 
 
-def create_xml_output(enums: list[dict]) -> str:
+def create_xml_output(enums: list[dict[str, Any]]) -> str:
     """Create XML output from extracted enum member information."""
     root = ET.Element("EnumMembers")
 
@@ -312,7 +311,7 @@ def create_xml_output(enums: list[dict]) -> str:
     return dom.toprettyxml(indent="    ")
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="Extract enum members from SolidWorks API HTML files")
     parser.add_argument(
         "--input-dir",
@@ -347,8 +346,8 @@ def main():
     print(f"Found {len(enum_files)} enum files to process (out of {len(all_html_files)} total HTML files)")
 
     # Extract enum members from each file
-    enums = []
-    errors = []
+    enums: list[dict[str, Any]] = []
+    errors: list[str] = []
 
     for html_file in enum_files:
         if args.verbose:
