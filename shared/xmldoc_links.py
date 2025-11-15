@@ -7,7 +7,6 @@ and <see href> tags for IntelliSense documentation.
 """
 
 import re
-from typing import Optional
 
 
 def convert_links_to_see_refs(html: str) -> str:
@@ -62,12 +61,12 @@ def convert_links_to_see_refs(html: str) -> str:
 
     # Clean up remaining HTML tags (like <p>, <div>, etc.)
     # Keep <see cref="..."> and </see> tags
-    result = re.sub(r'<(?!/?see[\s>])[^>]+>', '', result)
+    result = re.sub(r"<(?!/?see[\s>])[^>]+>", "", result)
 
     return result.strip()
 
 
-def parse_href_to_cref(href: str) -> Optional[str]:
+def parse_href_to_cref(href: str) -> str | None:
     """
     Parse an href to extract the cref value for type references only.
 

@@ -9,11 +9,10 @@ into an XML format separate from the type definitions.
 import argparse
 import json
 import sys
-from pathlib import Path
-from typing import Dict, List, Optional
-import xml.etree.ElementTree as ET
 import xml.dom.minidom as minidom
+import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
+from pathlib import Path
 
 # Add parent directory to path for shared module imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -105,10 +104,7 @@ class EnumMemberExtractor(HTMLParser):
                 desc_html = "".join(self.current_member_desc_parts).strip()
                 desc_clean = convert_links_to_see_refs(desc_html)
 
-                self.enum_members.append({
-                    "Name": self.current_member_name,
-                    "Description": desc_clean
-                })
+                self.enum_members.append({"Name": self.current_member_name, "Description": desc_clean})
             return
 
         # Handle end of members table
@@ -163,7 +159,8 @@ def extract_namespace_from_filename(html_file: Path) -> tuple:
     # Remove hash suffixes (underscore followed by hex digits)
     # Keep removing until we don't have hash pattern
     import re
-    while re.search(r'_[0-9a-f]{8}$', filename):
+
+    while re.search(r"_[0-9a-f]{8}$", filename):
         filename = filename.rsplit("_", 1)[0]
 
     name_part = filename
@@ -218,12 +215,12 @@ def is_enum_file(html_file: Path) -> bool:
     return type_name.endswith("_e")
 
 
-def extract_enum_members_from_file(html_file: Path) -> Optional[Dict]:
+def extract_enum_members_from_file(html_file: Path) -> dict | None:
     """Extract enum members from a single HTML file."""
     parser = EnumMemberExtractor()
 
     try:
-        with open(html_file, 'r', encoding='utf-8') as f:
+        with open(html_file, encoding="utf-8") as f:
             content = f.read()
             parser.feed(content)
     except Exception as e:
@@ -246,7 +243,7 @@ def extract_enum_members_from_file(html_file: Path) -> Optional[Dict]:
         "Assembly": assembly,
         "Namespace": namespace,
         "Members": parser.enum_members,
-        "SourceFile": str(html_file)
+        "SourceFile": str(html_file),
     }
 
 
@@ -266,12 +263,12 @@ def _wrap_cdata_sections(xml_str: str) -> str:
         content = match.group(1)
         # Unescape XML entities since CDATA doesn't need escaping
         content = html_module.unescape(content)
-        return f'<Description><![CDATA[{content}]]></Description>'
+        return f"<Description><![CDATA[{content}]]></Description>"
 
     return re.sub(pattern, replace_with_cdata, xml_str, flags=re.DOTALL)
 
 
-def create_xml_output(enums: List[Dict]) -> str:
+def create_xml_output(enums: list[dict]) -> str:
     """Create XML output from extracted enum member information."""
     root = ET.Element("EnumMembers")
 
@@ -306,7 +303,7 @@ def create_xml_output(enums: List[Dict]) -> str:
                 mem_desc.set("__cdata__", "true")
 
     # Pretty print the XML
-    xml_str = ET.tostring(root, encoding='unicode')
+    xml_str = ET.tostring(root, encoding="unicode")
 
     # Post-process to add CDATA sections for Description elements
     xml_str = _wrap_cdata_sections(xml_str)
@@ -316,33 +313,29 @@ def create_xml_output(enums: List[Dict]) -> str:
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Extract enum members from SolidWorks API HTML files')
+    parser = argparse.ArgumentParser(description="Extract enum members from SolidWorks API HTML files")
     parser.add_argument(
-        '--input-dir',
+        "--input-dir",
         type=Path,
-        default=Path('01-crawl-toc-pages/output/html'),
-        help='Input directory containing HTML files (default: 01-crawl-toc-pages/output/html)'
+        default=Path("01-crawl-toc-pages/output/html"),
+        help="Input directory containing HTML files (default: 01-crawl-toc-pages/output/html)",
     )
     parser.add_argument(
-        '--output-file',
+        "--output-file",
         type=Path,
-        default=Path('04-extract-enum-members/metadata/enum_members.xml'),
-        help='Output XML file (default: 04-extract-enum-members/metadata/enum_members.xml)'
+        default=Path("04-extract-enum-members/metadata/enum_members.xml"),
+        help="Output XML file (default: 04-extract-enum-members/metadata/enum_members.xml)",
     )
-    parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help='Print verbose output'
-    )
+    parser.add_argument("--verbose", action="store_true", help="Print verbose output")
 
     args = parser.parse_args()
 
     # Find all HTML files
-    html_dirs = list(args.input_dir.glob('*'))
+    html_dirs = list(args.input_dir.glob("*"))
     all_html_files = []
     for html_dir in html_dirs:
         if html_dir.is_dir():
-            all_html_files.extend(html_dir.glob('*.html'))
+            all_html_files.extend(html_dir.glob("*.html"))
 
     # Filter to enum files only
     enum_files = [f for f in all_html_files if is_enum_file(f)]
@@ -378,7 +371,7 @@ def main():
     xml_output = create_xml_output(enums)
 
     # Write to file
-    with open(args.output_file, 'w', encoding='utf-8') as f:
+    with open(args.output_file, "w", encoding="utf-8") as f:
         f.write(xml_output)
 
     # Write summary
@@ -388,14 +381,14 @@ def main():
         "enums_without_members": len(enum_files) - len(enums),
         "errors": len(errors),
         "output_file": str(args.output_file),
-        "error_files": errors
+        "error_files": errors,
     }
 
     summary_file = args.output_file.parent / "extraction_summary.json"
-    with open(summary_file, 'w', encoding='utf-8') as f:
+    with open(summary_file, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
 
-    print(f"\nExtraction complete!")
+    print("\nExtraction complete!")
     print(f"  Enums with members: {len(enums)}")
     print(f"  Enums without members: {len(enum_files) - len(enums)}")
     print(f"  Errors: {len(errors)}")

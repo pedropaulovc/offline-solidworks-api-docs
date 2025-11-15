@@ -9,10 +9,9 @@ import argparse
 import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Dict, List
 
 
-def validate_xml_structure(xml_file: Path) -> Dict:
+def validate_xml_structure(xml_file: Path) -> dict:
     """
     Validate that the XML file is well-formed and has expected structure.
 
@@ -27,7 +26,7 @@ def validate_xml_structure(xml_file: Path) -> Dict:
         "types_with_examples": 0,
         "types_with_remarks": 0,
         "total_examples": 0,
-        "issues": []
+        "issues": [],
     }
 
     try:
@@ -79,7 +78,7 @@ def validate_xml_structure(xml_file: Path) -> Dict:
     return results
 
 
-def validate_summary(summary_file: Path) -> Dict:
+def validate_summary(summary_file: Path) -> dict:
     """
     Validate the extraction summary metadata.
 
@@ -92,11 +91,11 @@ def validate_summary(summary_file: Path) -> Dict:
         "total_files": 0,
         "types_extracted": 0,
         "error_count": 0,
-        "issues": []
+        "issues": [],
     }
 
     try:
-        with open(summary_file, 'r', encoding='utf-8') as f:
+        with open(summary_file, encoding="utf-8") as f:
             summary = json.load(f)
 
         results["valid_json"] = True
@@ -121,20 +120,14 @@ def validate_summary(summary_file: Path) -> Dict:
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Validate type information extraction results"
-    )
+    parser = argparse.ArgumentParser(description="Validate type information extraction results")
     parser.add_argument(
         "--metadata-dir",
         type=Path,
         default=Path("03-extract-type-info/metadata"),
-        help="Directory containing extraction metadata"
+        help="Directory containing extraction metadata",
     )
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Enable verbose output"
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
 
     args = parser.parse_args()
 
@@ -163,10 +156,16 @@ def main():
     print("  [PASS] XML is well-formed")
     print(f"  [PASS] Root element: {'Types' if xml_results['has_root'] else 'INVALID'}")
     print(f"  [INFO] Type count: {xml_results['type_count']}")
-    print(f"  [INFO] Types with description: {xml_results['types_with_description']} ({100*xml_results['types_with_description']//xml_results['type_count'] if xml_results['type_count'] > 0 else 0}%)")
-    print(f"  [INFO] Types with examples: {xml_results['types_with_examples']} ({100*xml_results['types_with_examples']//xml_results['type_count'] if xml_results['type_count'] > 0 else 0}%)")
+    print(
+        f"  [INFO] Types with description: {xml_results['types_with_description']} ({100*xml_results['types_with_description']//xml_results['type_count'] if xml_results['type_count'] > 0 else 0}%)"
+    )
+    print(
+        f"  [INFO] Types with examples: {xml_results['types_with_examples']} ({100*xml_results['types_with_examples']//xml_results['type_count'] if xml_results['type_count'] > 0 else 0}%)"
+    )
     print(f"  [INFO] Total examples: {xml_results['total_examples']}")
-    print(f"  [INFO] Types with remarks: {xml_results['types_with_remarks']} ({100*xml_results['types_with_remarks']//xml_results['type_count'] if xml_results['type_count'] > 0 else 0}%)")
+    print(
+        f"  [INFO] Types with remarks: {xml_results['types_with_remarks']} ({100*xml_results['types_with_remarks']//xml_results['type_count'] if xml_results['type_count'] > 0 else 0}%)"
+    )
 
     if xml_results["issues"]:
         print(f"  [WARN] Issues found: {len(xml_results['issues'])}")
@@ -208,7 +207,9 @@ def main():
     if xml_results["type_count"] == summary_results["types_extracted"]:
         print(f"  [PASS] Type count matches summary ({xml_results['type_count']})")
     else:
-        print(f"  [FAIL] Type count mismatch: XML={xml_results['type_count']}, Summary={summary_results['types_extracted']}")
+        print(
+            f"  [FAIL] Type count mismatch: XML={xml_results['type_count']}, Summary={summary_results['types_extracted']}"
+        )
         return 1
 
     # Overall assessment

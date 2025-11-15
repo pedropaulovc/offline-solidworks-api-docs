@@ -2,24 +2,25 @@
 Tests for the SolidWorks API documentation pipelines.
 """
 
-import pytest
-from unittest.mock import Mock, patch, mock_open, MagicMock
-from pathlib import Path
 import json
+import shutil
 import sys
 import tempfile
-import shutil
+from pathlib import Path
+from unittest.mock import Mock, patch
+
+import pytest
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from scrapy.exceptions import DropItem
 from solidworks_scraper.pipelines import (
+    DuplicateCheckPipeline,
     HtmlSavePipeline,
     MetadataLogPipeline,
-    DuplicateCheckPipeline,
-    ValidationPipeline
+    ValidationPipeline,
 )
-from scrapy.exceptions import DropItem
 
 
 class TestHtmlSavePipeline:
@@ -32,7 +33,7 @@ class TestHtmlSavePipeline:
         self.pipeline = HtmlSavePipeline()
 
         # Override output directory to use temp directory
-        self.pipeline.output_dir = Path(self.temp_dir) / 'html'
+        self.pipeline.output_dir = Path(self.temp_dir) / "html"
         self.pipeline.output_dir.mkdir(parents=True, exist_ok=True)
 
     def teardown_method(self):
@@ -82,29 +83,29 @@ class TestHtmlSavePipeline:
 
         # Create test item
         item = {
-            'url': 'https://help.solidworks.com/2026/english/api/test.html',
-            'content': '<html><body>Test content</body></html>',
+            "url": "https://help.solidworks.com/2026/english/api/test.html",
+            "content": "<html><body>Test content</body></html>",
         }
 
         # Process the item
         processed_item = self.pipeline.process_item(item, mock_spider)
 
         # Check file was created
-        expected_path = self.pipeline.url_to_file_path(item['url'])
+        expected_path = self.pipeline.url_to_file_path(item["url"])
         assert expected_path.exists()
 
         # Check file content
-        with open(expected_path, 'r', encoding='utf-8') as f:
+        with open(expected_path, encoding="utf-8") as f:
             saved_content = f.read()
-        assert saved_content == item['content']
+        assert saved_content == item["content"]
 
         # Check file path was added to item
-        assert 'file_path' in processed_item
+        assert "file_path" in processed_item
 
     def test_process_item_skips_error_items(self):
         """Test that error items are skipped"""
         mock_spider = Mock()
-        error_item = {'type': 'error', 'url': 'test.html', 'error': 'Failed'}
+        error_item = {"type": "error", "url": "test.html", "error": "Failed"}
 
         result = self.pipeline.process_item(error_item, mock_spider)
         assert result == error_item  # Should return unchanged
@@ -114,7 +115,7 @@ class TestHtmlSavePipeline:
         mock_spider = Mock()
         mock_spider.logger = Mock()
 
-        item = {'url': 'https://test.com/test.html'}  # No content
+        item = {"url": "https://test.com/test.html"}  # No content
 
         result = self.pipeline.process_item(item, mock_spider)
         assert result == item
@@ -130,11 +131,11 @@ class TestMetadataLogPipeline:
 
         # Create pipeline and override paths to use temp directory
         self.pipeline = MetadataLogPipeline()
-        self.pipeline.metadata_dir = Path(self.temp_dir) / 'metadata'
+        self.pipeline.metadata_dir = Path(self.temp_dir) / "metadata"
         self.pipeline.metadata_dir.mkdir(parents=True, exist_ok=True)
-        self.pipeline.urls_file = self.pipeline.metadata_dir / 'urls_crawled.jsonl'
-        self.pipeline.errors_file = self.pipeline.metadata_dir / 'errors.jsonl'
-        self.pipeline.manifest_file = self.pipeline.metadata_dir / 'manifest.json'
+        self.pipeline.urls_file = self.pipeline.metadata_dir / "urls_crawled.jsonl"
+        self.pipeline.errors_file = self.pipeline.metadata_dir / "errors.jsonl"
+        self.pipeline.manifest_file = self.pipeline.metadata_dir / "manifest.json"
 
     def teardown_method(self):
         """Clean up after tests"""
@@ -145,12 +146,12 @@ class TestMetadataLogPipeline:
         self.pipeline.init_manifest()
         assert self.pipeline.manifest_file.exists()
 
-        with open(self.pipeline.manifest_file, 'r') as f:
+        with open(self.pipeline.manifest_file) as f:
             manifest = json.load(f)
 
-        assert manifest['crawler_version'] == '1.0.0'
-        assert manifest['boundary'] == '/2026/english/api/'
-        assert manifest['crawl_delay_seconds'] == 2
+        assert manifest["crawler_version"] == "1.0.0"
+        assert manifest["boundary"] == "/2026/english/api/"
+        assert manifest["crawl_delay_seconds"] == 2
 
     def test_process_item_logs_metadata(self):
         """Test that metadata is logged correctly"""
@@ -158,15 +159,15 @@ class TestMetadataLogPipeline:
         mock_spider.logger = Mock()
 
         item = {
-            'url': 'https://test.com/test.html',
-            'original_url': 'https://test.com/test.html',
-            'timestamp': '2024-01-01T12:00:00',
-            'file_path': 'test/test.html',
-            'content_hash': 'abc123',
-            'content_length': 1000,
-            'status_code': 200,
-            'title': 'Test Page',
-            'session_id': 'session-001',
+            "url": "https://test.com/test.html",
+            "original_url": "https://test.com/test.html",
+            "timestamp": "2024-01-01T12:00:00",
+            "file_path": "test/test.html",
+            "content_hash": "abc123",
+            "content_length": 1000,
+            "status_code": 200,
+            "title": "Test Page",
+            "session_id": "session-001",
         }
 
         self.pipeline.process_item(item, mock_spider)
@@ -176,21 +177,22 @@ class TestMetadataLogPipeline:
 
         # Read and verify metadata
         import jsonlines
+
         with jsonlines.open(self.pipeline.urls_file) as reader:
             saved_metadata = list(reader)[0]
 
-        assert saved_metadata['url'] == item['url']
-        assert saved_metadata['content_hash'] == 'abc123'
-        assert saved_metadata['title'] == 'Test Page'
+        assert saved_metadata["url"] == item["url"]
+        assert saved_metadata["content_hash"] == "abc123"
+        assert saved_metadata["title"] == "Test Page"
 
     def test_log_error(self):
         """Test error logging"""
         error_item = {
-            'type': 'error',
-            'url': 'https://test.com/error.html',
-            'error': 'Connection failed',
-            'timestamp': '2024-01-01T12:00:00',
-            'session_id': 'session-001',
+            "type": "error",
+            "url": "https://test.com/error.html",
+            "error": "Connection failed",
+            "timestamp": "2024-01-01T12:00:00",
+            "session_id": "session-001",
         }
 
         self.pipeline.log_error(error_item)
@@ -200,11 +202,12 @@ class TestMetadataLogPipeline:
 
         # Read and verify error log
         import jsonlines
+
         with jsonlines.open(self.pipeline.errors_file) as reader:
             saved_error = list(reader)[0]
 
-        assert saved_error['url'] == error_item['url']
-        assert saved_error['error'] == 'Connection failed'
+        assert saved_error["url"] == error_item["url"]
+        assert saved_error["error"] == "Connection failed"
 
 
 class TestDuplicateCheckPipeline:
@@ -215,23 +218,21 @@ class TestDuplicateCheckPipeline:
         self.temp_dir = tempfile.mkdtemp()
 
         # Create test metadata file with existing URLs
-        metadata_dir = Path(self.temp_dir) / 'metadata'
+        metadata_dir = Path(self.temp_dir) / "metadata"
         metadata_dir.mkdir(parents=True, exist_ok=True)
-        self.urls_file = metadata_dir / 'urls_crawled.jsonl'
+        self.urls_file = metadata_dir / "urls_crawled.jsonl"
 
         # Write some existing URLs
         import jsonlines
-        with jsonlines.open(self.urls_file, mode='w') as writer:
-            writer.write({'url': 'https://test.com/existing1.html'})
-            writer.write({'url': 'https://test.com/existing2.html'})
+
+        with jsonlines.open(self.urls_file, mode="w") as writer:
+            writer.write({"url": "https://test.com/existing1.html"})
+            writer.write({"url": "https://test.com/existing2.html"})
 
         # Patch Path to use temp directory
-        with patch.object(Path, '__new__', return_value=Path(self.temp_dir)):
+        with patch.object(Path, "__new__", return_value=Path(self.temp_dir)):
             self.pipeline = DuplicateCheckPipeline()
-            self.pipeline.seen_urls = {
-                'https://test.com/existing1.html',
-                'https://test.com/existing2.html'
-            }
+            self.pipeline.seen_urls = {"https://test.com/existing1.html", "https://test.com/existing2.html"}
 
     def teardown_method(self):
         """Clean up after tests"""
@@ -243,7 +244,7 @@ class TestDuplicateCheckPipeline:
         mock_spider.logger = Mock()
 
         # Try to process existing URL
-        duplicate_item = {'url': 'https://test.com/existing1.html'}
+        duplicate_item = {"url": "https://test.com/existing1.html"}
 
         with pytest.raises(DropItem) as exc_info:
             self.pipeline.process_item(duplicate_item, mock_spider)
@@ -255,11 +256,11 @@ class TestDuplicateCheckPipeline:
         mock_spider = Mock()
 
         # Process new URL
-        new_item = {'url': 'https://test.com/new.html'}
+        new_item = {"url": "https://test.com/new.html"}
         result = self.pipeline.process_item(new_item, mock_spider)
 
         assert result == new_item
-        assert new_item['url'] in self.pipeline.seen_urls
+        assert new_item["url"] in self.pipeline.seen_urls
 
 
 class TestValidationPipeline:
@@ -275,10 +276,10 @@ class TestValidationPipeline:
         mock_spider.logger = Mock()
 
         item = {
-            'url': 'https://test.com/test.html',
-            'content': '<html><body>' + 'x' * 200 + '</body></html>',
-            'timestamp': '2024-01-01T12:00:00',
-            'content_hash': 'abc123',
+            "url": "https://test.com/test.html",
+            "content": "<html><body>" + "x" * 200 + "</body></html>",
+            "timestamp": "2024-01-01T12:00:00",
+            "content_hash": "abc123",
         }
 
         result = self.pipeline.process_item(item, mock_spider)
@@ -292,7 +293,7 @@ class TestValidationPipeline:
         mock_spider.logger = Mock()
 
         item = {
-            'url': 'https://test.com/test.html',
+            "url": "https://test.com/test.html",
             # Missing content, timestamp, content_hash
         }
 
@@ -306,10 +307,10 @@ class TestValidationPipeline:
         mock_spider.logger = Mock()
 
         item = {
-            'url': 'https://test.com/test.html',
-            'content': '<html>x</html>',  # Very short content
-            'timestamp': '2024-01-01T12:00:00',
-            'content_hash': 'abc123',
+            "url": "https://test.com/test.html",
+            "content": "<html>x</html>",  # Very short content
+            "timestamp": "2024-01-01T12:00:00",
+            "content_hash": "abc123",
         }
 
         self.pipeline.process_item(item, mock_spider)
@@ -323,10 +324,10 @@ class TestValidationPipeline:
         mock_spider.logger = Mock()
 
         item = {
-            'url': 'https://test.com/test.html',
-            'content': 'This is just plain text, not HTML' * 10,
-            'timestamp': '2024-01-01T12:00:00',
-            'content_hash': 'abc123',
+            "url": "https://test.com/test.html",
+            "content": "This is just plain text, not HTML" * 10,
+            "timestamp": "2024-01-01T12:00:00",
+            "content_hash": "abc123",
         }
 
         self.pipeline.process_item(item, mock_spider)
@@ -343,14 +344,12 @@ def test_regression_crawl_count():
     # This test would typically:
     # 1. Run a crawl
     # 2. Count pages in metadata
-    # 3. Compare against expected minimum
+    # 3. Compare against expected minimum (e.g., 450 pages, allowing 5% drop from 458)
     # 4. Fail if dropped more than 5%
-
-    expected_minimum = 450  # Expecting at least 450 pages (allowing 5% drop from 458)
 
     # In a real test, you would read actual metadata
     # For now, this is a placeholder
     # actual_count = count_crawled_pages()
-    # assert actual_count >= expected_minimum, f"Crawl regression: only {actual_count} pages (expected >= {expected_minimum})"
+    # assert actual_count >= 450, f"Crawl regression: only {actual_count} pages (expected >= 450)"
 
     assert True  # Placeholder for now

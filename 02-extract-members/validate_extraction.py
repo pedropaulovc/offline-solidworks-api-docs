@@ -8,9 +8,9 @@ to ensure data quality and completeness.
 
 import argparse
 import json
-from pathlib import Path
 import xml.etree.ElementTree as ET
 from collections import Counter
+from pathlib import Path
 
 
 def load_xml(xml_file: Path) -> ET.Element:
@@ -25,11 +25,7 @@ def load_xml(xml_file: Path) -> ET.Element:
 
 def validate_structure(root: ET.Element) -> dict:
     """Validate the basic XML structure."""
-    results = {
-        "valid": True,
-        "errors": [],
-        "warnings": []
-    }
+    results = {"valid": True, "errors": [], "warnings": []}
 
     if root.tag != "Types":
         results["valid"] = False
@@ -62,7 +58,7 @@ def analyze_types(root: ET.Element) -> dict:
         "types_with_no_members": 0,
         "total_properties": 0,
         "total_methods": 0,
-        "type_names": []
+        "type_names": [],
     }
 
     for type_elem in root.findall("Type"):
@@ -103,11 +99,7 @@ def check_duplicates(root: ET.Element) -> dict:
     counter = Counter(type_names)
     duplicates = {name: count for name, count in counter.items() if count > 1}
 
-    return {
-        "has_duplicates": len(duplicates) > 0,
-        "duplicates": duplicates,
-        "unique_types": len(counter)
-    }
+    return {"has_duplicates": len(duplicates) > 0, "duplicates": duplicates, "unique_types": len(counter)}
 
 
 def check_url_format(root: ET.Element) -> dict:
@@ -139,33 +131,19 @@ def check_url_format(root: ET.Element) -> dict:
                     if not url_elem.text.endswith(".html"):
                         issues.append(f"{type_name_text}: Method URL doesn't end with .html: {url_elem.text}")
 
-    return {
-        "total_urls": total_urls,
-        "issues": issues,
-        "all_valid": len(issues) == 0
-    }
+    return {"total_urls": total_urls, "issues": issues, "all_valid": len(issues) == 0}
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Validate extracted API members XML"
-    )
+    parser = argparse.ArgumentParser(description="Validate extracted API members XML")
     parser.add_argument(
         "--xml-file",
         type=Path,
         default=Path("02-extract-members/metadata/api_members.xml"),
-        help="Path to the XML file to validate"
+        help="Path to the XML file to validate",
     )
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Show detailed validation results"
-    )
-    parser.add_argument(
-        "--output",
-        type=Path,
-        help="Save validation report to JSON file"
-    )
+    parser.add_argument("--verbose", action="store_true", help="Show detailed validation results")
+    parser.add_argument("--output", type=Path, help="Save validation report to JSON file")
 
     args = parser.parse_args()
 
@@ -241,11 +219,11 @@ def main():
 
     # Save report if requested
     if args.output:
-        with open(args.output, 'w') as f:
+        with open(args.output, "w") as f:
             json.dump(validation_report, f, indent=2)
         print(f"\nValidation report saved to: {args.output}")
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     if structure["valid"] and url_check["all_valid"]:
         print("Validation PASSED")
         return 0

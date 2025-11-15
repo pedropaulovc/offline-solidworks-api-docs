@@ -10,14 +10,14 @@ This script validates the completeness and integrity of a crawl by:
 - Generating a detailed validation report
 """
 
-import json
-import jsonlines
-import hashlib
-from pathlib import Path
-from datetime import datetime
-from collections import defaultdict
-import sys
 import argparse
+import json
+import sys
+from collections import defaultdict
+from datetime import datetime
+from pathlib import Path
+
+import jsonlines
 
 
 class CrawlValidator:
@@ -33,9 +33,9 @@ class CrawlValidator:
 
     def validate(self, verbose=False):
         """Run all validation checks"""
-        print("="*60)
+        print("=" * 60)
         print("SOLIDWORKS API DOCUMENTATION CRAWL VALIDATOR")
-        print("="*60)
+        print("=" * 60)
         print(f"Validation started: {datetime.now().isoformat()}")
         print(f"Output directory: {self.output_dir}\n")
 
@@ -64,14 +64,14 @@ class CrawlValidator:
         # Determine overall result
         success = len(self.errors) == 0 and urls_valid and html_valid and stats_valid
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         if success:
             print("[PASSED] VALIDATION PASSED")
         else:
             print("[FAILED] VALIDATION FAILED")
             print(f"   Errors: {len(self.errors)}")
             print(f"   Warnings: {len(self.warnings)}")
-        print("="*60)
+        print("=" * 60)
 
         return success
 
@@ -97,11 +97,7 @@ class CrawlValidator:
         """Validate metadata files exist and are valid"""
         print("Validating metadata files...")
 
-        expected_files = [
-            "manifest.json",
-            "urls_crawled.jsonl",
-            "crawl_stats.json"
-        ]
+        expected_files = ["manifest.json", "urls_crawled.jsonl", "crawl_stats.json"]
 
         for filename in expected_files:
             filepath = self.metadata_dir / filename
@@ -111,7 +107,7 @@ class CrawlValidator:
 
             if filename.endswith(".json"):
                 try:
-                    with open(filepath, 'r') as f:
+                    with open(filepath) as f:
                         data = json.load(f)
                     self.stats[f"metadata_{filename}_valid"] = 1
 
@@ -158,32 +154,34 @@ class CrawlValidator:
                     url_count += 1
 
                     # Check required fields
-                    required_fields = ['print_url', 'file_path', 'content_hash', 'timestamp']
+                    required_fields = ["print_url", "file_path", "content_hash", "timestamp"]
                     for field in required_fields:
                         if field not in obj:
-                            self.warnings.append(f"Missing field '{field}' in URL record: {obj.get('print_url', 'Unknown')}")
+                            self.warnings.append(
+                                f"Missing field '{field}' in URL record: {obj.get('print_url', 'Unknown')}"
+                            )
 
                     # Check for duplicate URLs
-                    url = obj.get('print_url')
+                    url = obj.get("print_url")
                     if url in urls_seen:
                         self.warnings.append(f"Duplicate URL in metadata: {url}")
                     urls_seen.add(url)
 
                     # Track file paths
-                    if 'file_path' in obj:
-                        file_paths.add(obj['file_path'])
+                    if "file_path" in obj:
+                        file_paths.add(obj["file_path"])
 
                     # Track size
-                    if 'content_length' in obj:
-                        total_size += obj['content_length']
+                    if "content_length" in obj:
+                        total_size += obj["content_length"]
 
                     # Check URL is within boundary
-                    if url and '/2026/english/api/' not in url:
+                    if url and "/2026/english/api/" not in url:
                         self.warnings.append(f"URL outside boundary: {url}")
 
-            self.stats['urls_crawled'] = url_count
-            self.stats['unique_urls'] = len(urls_seen)
-            self.stats['total_size_bytes'] = total_size
+            self.stats["urls_crawled"] = url_count
+            self.stats["unique_urls"] = len(urls_seen)
+            self.stats["total_size_bytes"] = total_size
 
             print(f"  Total URLs: {url_count}")
             print(f"  Unique URLs: {len(urls_seen)}")
@@ -210,7 +208,7 @@ class CrawlValidator:
         print("Validating HTML files...")
 
         html_files = list(self.html_dir.rglob("*.html")) + list(self.html_dir.rglob("*.htm"))
-        self.stats['html_files'] = len(html_files)
+        self.stats["html_files"] = len(html_files)
 
         print(f"  HTML files found: {len(html_files)}")
 
@@ -221,9 +219,9 @@ class CrawlValidator:
         if urls_file.exists():
             with jsonlines.open(urls_file) as reader:
                 for obj in reader:
-                    if 'file_path' in obj:
+                    if "file_path" in obj:
                         # Convert relative path in metadata to absolute
-                        file_path = self.output_dir.parent / obj['file_path']
+                        file_path = self.output_dir.parent / obj["file_path"]
                         metadata_files.add(file_path)
 
             # Check for orphaned files
@@ -247,17 +245,18 @@ class CrawlValidator:
         if html_files and verbose:
             print("  Sampling HTML files for validation...")
             import random
+
             sample = random.sample(html_files, min(5, len(html_files)))
 
             for file in sample:
                 try:
-                    with open(file, 'r', encoding='utf-8') as f:
+                    with open(file, encoding="utf-8") as f:
                         content = f.read()
 
                     if len(content) < 100:
                         self.warnings.append(f"Suspiciously small HTML file: {file.name}")
 
-                    if not ('<html' in content.lower() or '<!doctype' in content.lower()):
+                    if not ("<html" in content.lower() or "<!doctype" in content.lower()):
                         self.warnings.append(f"File doesn't appear to be HTML: {file.name}")
 
                 except Exception as e:
@@ -278,8 +277,8 @@ class CrawlValidator:
 
         with jsonlines.open(urls_file) as reader:
             for obj in reader:
-                if 'content_hash' in obj and 'print_url' in obj:
-                    hash_to_urls[obj['content_hash']].append(obj['print_url'])
+                if "content_hash" in obj and "print_url" in obj:
+                    hash_to_urls[obj["content_hash"]].append(obj["print_url"])
 
         duplicates = {h: urls for h, urls in hash_to_urls.items() if len(urls) > 1}
 
@@ -291,7 +290,7 @@ class CrawlValidator:
                     for url in urls[:2]:  # Show first 2 URLs
                         print(f"    - {url}")
 
-        self.stats['duplicate_content'] = len(duplicates)
+        self.stats["duplicate_content"] = len(duplicates)
         print(f"  Duplicate content groups: {len(duplicates)}")
         print("  [OK] Duplicate check completed\n")
 
@@ -305,16 +304,16 @@ class CrawlValidator:
             return True  # Not critical
 
         try:
-            with open(stats_file, 'r') as f:
+            with open(stats_file) as f:
                 stats = json.load(f)
 
             # Calculate success rate
-            total = stats.get('total_pages', 0)
-            successful = stats.get('successful_pages', 0)
+            total = stats.get("total_pages", 0)
+            successful = stats.get("successful_pages", 0)
 
             if total > 0:
                 success_rate = (successful / total) * 100
-                self.stats['success_rate'] = success_rate
+                self.stats["success_rate"] = success_rate
 
                 print(f"  Total pages: {total}")
                 print(f"  Successful: {successful}")
@@ -346,7 +345,7 @@ class CrawlValidator:
         print(f"Total size: {self.stats.get('total_size_bytes', 0) / (1024*1024):.2f} MB")
 
         # Issues
-        print(f"\nIssues found:")
+        print("\nIssues found:")
         print(f"  Errors: {len(self.errors)}")
         print(f"  Warnings: {len(self.warnings)}")
 
@@ -367,14 +366,14 @@ class CrawlValidator:
         # Save detailed report
         report_file = self.metadata_dir / f"validation_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         report_data = {
-            'timestamp': datetime.now().isoformat(),
-            'stats': dict(self.stats),
-            'errors': self.errors,
-            'warnings': self.warnings,
-            'success': len(self.errors) == 0
+            "timestamp": datetime.now().isoformat(),
+            "stats": dict(self.stats),
+            "errors": self.errors,
+            "warnings": self.warnings,
+            "success": len(self.errors) == 0,
         }
 
-        with open(report_file, 'w') as f:
+        with open(report_file, "w") as f:
             json.dump(report_data, f, indent=2)
 
         print(f"\nDetailed report saved to: {report_file.name}")
@@ -386,13 +385,9 @@ def main():
     parser.add_argument(
         "--output-dir",
         default="01-crawl-raw/output",
-        help="Output directory to validate (default: 01-crawl-raw/output)"
+        help="Output directory to validate (default: 01-crawl-raw/output)",
     )
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Show detailed validation information"
-    )
+    parser.add_argument("--verbose", action="store_true", help="Show detailed validation information")
 
     args = parser.parse_args()
 

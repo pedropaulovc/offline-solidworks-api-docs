@@ -3,18 +3,14 @@
 Unit tests for type information extraction.
 """
 
-import unittest
 import sys
+import unittest
 from pathlib import Path
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from extract_type_info import (
-    TypeInfoExtractor,
-    extract_namespace_from_filename,
-    is_type_file
-)
+from extract_type_info import TypeInfoExtractor, extract_namespace_from_filename, is_type_file
 
 
 class TestTypeInfoExtractor(unittest.TestCase):
@@ -60,7 +56,9 @@ class TestTypeInfoExtractor(unittest.TestCase):
         description = parser.get_description()
 
         # Should convert HTML link to XMLDoc see cref
-        self.assertIn('<see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.OpenDoc7">ISldWorks::OpenDoc7</see>', description)
+        self.assertIn(
+            '<see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.OpenDoc7">ISldWorks::OpenDoc7</see>', description
+        )
         # Should preserve :: in the see tag body
         self.assertIn("ISldWorks::OpenDoc7</see>", description)
         # Should not contain the original HTML anchor tag
@@ -140,7 +138,10 @@ class TestTypeInfoExtractor(unittest.TestCase):
         remarks = parser.get_remarks()
 
         # Should convert HTML link to XMLDoc see cref
-        self.assertIn('<see cref="SolidWorks.Interop.sldworks.IFeatureManager.AdvancedHole">IFeatureManager::AdvancedHole</see>', remarks)
+        self.assertIn(
+            '<see cref="SolidWorks.Interop.sldworks.IFeatureManager.AdvancedHole">IFeatureManager::AdvancedHole</see>',
+            remarks,
+        )
         # Should preserve :: in the see tag body
         self.assertIn("IFeatureManager::AdvancedHole</see>", remarks)
         # Should clean up &nbsp; entities
@@ -208,7 +209,6 @@ class TestTypeInfoExtractor(unittest.TestCase):
         self.assertNotIn("/sldworksapi/SWObjectModel.pdf#CrossBreakFeatureData", example_urls)
         self.assertNotIn("/sldworksapi/ICrossBreakFeatureData_members.html", example_urls)
 
-
     def test_cdata_wrapping_in_xml_output(self):
         """Test that descriptions and remarks are wrapped in CDATA in final XML output."""
         from extract_type_info import create_xml_output
@@ -218,10 +218,10 @@ class TestTypeInfoExtractor(unittest.TestCase):
                 "Name": "ITestType",
                 "Assembly": "Test.Assembly",
                 "Namespace": "Test.Namespace",
-                "Description": "Test description with <see cref=\"SomeType\">link</see> inside.",
+                "Description": 'Test description with <see cref="SomeType">link</see> inside.',
                 "PublicProperties": [],
                 "PublicMethods": [],
-                "Remarks": "Test remarks with <see cref=\"SomeMethod\">method link</see> inside."
+                "Remarks": 'Test remarks with <see cref="SomeMethod">method link</see> inside.',
             }
         ]
 
@@ -258,9 +258,12 @@ class TestTypeInfoExtractor(unittest.TestCase):
         description = parser.get_description()
 
         # Should convert non-type link to XMLDoc see href
-        self.assertIn('<see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm">', description)
+        self.assertIn(
+            '<see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm">',
+            description,
+        )
         # Should preserve link text
-        self.assertIn('SOLIDWORKS Design connected to the 3DEXPERIENCE platform</see>', description)
+        self.assertIn("SOLIDWORKS Design connected to the 3DEXPERIENCE platform</see>", description)
         # Should not contain the original HTML anchor tag
         self.assertNotIn("<a href=", description)
 
@@ -289,9 +292,9 @@ class TestTypeInfoExtractor(unittest.TestCase):
         # Should convert type reference to XMLDoc see cref (not href!)
         self.assertIn('<see cref="SolidWorks.Interop.sldworks.ISectionViewData.SectionedZones">', remarks)
         # Should preserve :: in link text
-        self.assertIn('ISectionViewData::SectionedZones</see>', remarks)
+        self.assertIn("ISectionViewData::SectionedZones</see>", remarks)
         # Should NOT use href for type references
-        self.assertNotIn('<see href=', remarks)
+        self.assertNotIn("<see href=", remarks)
 
     def test_remarks_only_from_h1_section(self):
         """Test that 'Remarks' text in member descriptions doesn't trigger remarks section (swWzdHoleStandardFastenerTypes_e bug)."""
@@ -339,7 +342,9 @@ class TestFilenameExtraction(unittest.TestCase):
     def test_extract_namespace_from_filename(self):
         """Test extracting assembly, namespace, and type name from filename."""
         # Create a mock Path object
-        test_file = Path("SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IAdvancedHoleFeatureData_84c83747_84c83747.htmll.html")
+        test_file = Path(
+            "SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IAdvancedHoleFeatureData_84c83747_84c83747.htmll.html"
+        )
 
         assembly, namespace, type_name = extract_namespace_from_filename(test_file)
 
@@ -349,7 +354,9 @@ class TestFilenameExtraction(unittest.TestCase):
 
     def test_extract_namespace_different_assembly(self):
         """Test with different assembly and namespace."""
-        test_file = Path("SolidWorks.Interop.dsgnchk~SolidWorks.Interop.dsgnchk.ISWDesignCheck_8a2a04ee_8a2a04ee.htmll.html")
+        test_file = Path(
+            "SolidWorks.Interop.dsgnchk~SolidWorks.Interop.dsgnchk.ISWDesignCheck_8a2a04ee_8a2a04ee.htmll.html"
+        )
 
         assembly, namespace, type_name = extract_namespace_from_filename(test_file)
 
@@ -363,12 +370,16 @@ class TestFileFiltering(unittest.TestCase):
 
     def test_is_type_file_valid(self):
         """Test identifying valid type files."""
-        valid_file = Path("SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IAdvancedHoleFeatureData_84c83747.html")
+        valid_file = Path(
+            "SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IAdvancedHoleFeatureData_84c83747.html"
+        )
         self.assertTrue(is_type_file(valid_file))
 
     def test_is_type_file_members(self):
         """Test rejecting members files."""
-        members_file = Path("SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IAdvancedHoleFeatureData_members_84c83747.html")
+        members_file = Path(
+            "SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IAdvancedHoleFeatureData_members_84c83747.html"
+        )
         self.assertFalse(is_type_file(members_file))
 
     def test_is_type_file_namespace(self):

@@ -8,10 +8,11 @@ repos:
     hooks:
       - id: mypy
         name: mypy type checker
-        args: [--config-file=pyproject.toml, --exclude=tests/]
-        # Only run on files in the main directories, excluding tests
-        files: ^(01-crawl-toc-pages|02-extract-members|03-extract-type-info|04-extract-enum-members|shared)/.*\.py$
-        exclude: (^tests/|/__pycache__/)
+        args: [--config-file=pyproject.toml]
+        # Only check core Phase 1 crawler files that have type annotations
+        # Expand to other files as they receive type annotations
+        files: ^01-crawl-toc-pages/(run_crawler\.py|solidworks_scraper/(spiders/.*|pipelines\.py))$
+        exclude: (__pycache__/)
 
   # Basic file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks

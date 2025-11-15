@@ -3,19 +3,14 @@
 Unit tests for enum member extraction.
 """
 
-import unittest
 import sys
+import unittest
 from pathlib import Path
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from extract_enum_members import (
-    EnumMemberExtractor,
-    extract_namespace_from_filename,
-    is_enum_file,
-    create_xml_output
-)
+from extract_enum_members import EnumMemberExtractor, create_xml_output, extract_namespace_from_filename, is_enum_file
 
 
 class TestEnumMemberExtractor(unittest.TestCase):
@@ -85,7 +80,7 @@ class TestEnumMemberExtractor(unittest.TestCase):
 
         self.assertEqual(len(parser.enum_members), 1)
         self.assertIn('<see cref="SolidWorks.Interop.swconst.swOtherType_e">', parser.enum_members[0]["Description"])
-        self.assertIn('swOtherType_e</see>', parser.enum_members[0]["Description"])
+        self.assertIn("swOtherType_e</see>", parser.enum_members[0]["Description"])
 
     def test_empty_enum(self):
         """Test enum with no members."""
@@ -122,7 +117,9 @@ class TestFileFiltering(unittest.TestCase):
 
     def test_is_enum_file_members(self):
         """Test rejecting members files."""
-        members_file = Path("SolidWorks.Interop.swconst~SolidWorks.Interop.swconst.swTangencyType_e_members_84c83747.html")
+        members_file = Path(
+            "SolidWorks.Interop.swconst~SolidWorks.Interop.swconst.swTangencyType_e_members_84c83747.html"
+        )
         self.assertFalse(is_enum_file(members_file))
 
     def test_is_enum_file_namespace(self):
@@ -157,8 +154,8 @@ class TestXMLOutput(unittest.TestCase):
                 "Namespace": "Test.Namespace",
                 "Members": [
                     {"Name": "swMember1", "Description": "Description 1"},
-                    {"Name": "swMember2", "Description": "Description with <see cref=\"Test.Type\">link</see>"}
-                ]
+                    {"Name": "swMember2", "Description": 'Description with <see cref="Test.Type">link</see>'},
+                ],
             }
         ]
 

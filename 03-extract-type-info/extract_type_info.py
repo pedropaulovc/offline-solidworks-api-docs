@@ -11,11 +11,10 @@ import argparse
 import json
 import re
 import sys
-from pathlib import Path
-from typing import Dict, List, Optional
-import xml.etree.ElementTree as ET
 import xml.dom.minidom as minidom
+import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
+from pathlib import Path
 
 # Add parent directory to path for shared module imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -127,10 +126,7 @@ class TypeInfoExtractor(HTMLParser):
             if self.current_link_href and self.current_link_text:
                 # Parse example info from link text
                 # Format: "Create Advanced Hole Feature (VBA)"
-                example_info = self._parse_example_link(
-                    self.current_link_text,
-                    self.current_link_href
-                )
+                example_info = self._parse_example_link(self.current_link_text, self.current_link_href)
                 if example_info:
                     self.examples.append(example_info)
 
@@ -189,7 +185,7 @@ class TypeInfoExtractor(HTMLParser):
         if self.in_remarks_section and data and not self.in_h1:
             self.remarks_parts.append(data)
 
-    def _parse_example_link(self, link_text: str, href: str) -> Optional[Dict]:
+    def _parse_example_link(self, link_text: str, href: str) -> dict | None:
         """
         Parse example link text to extract name and language.
 
@@ -210,11 +206,7 @@ class TypeInfoExtractor(HTMLParser):
         # Prepend URL prefix
         full_url = f"{self.url_prefix}{href}"
 
-        return {
-            "Name": name,
-            "Language": language,
-            "Url": full_url
-        }
+        return {"Name": name, "Language": language, "Url": full_url}
 
     def _infer_language_from_filename(self, filename: str) -> str:
         """Infer language from filename patterns."""
@@ -267,8 +259,8 @@ def extract_namespace_from_filename(html_file: Path) -> tuple:
     filename = html_file.name
 
     # Split on ~ to get assembly and full type path
-    if '~' in filename:
-        parts = filename.split('~')
+    if "~" in filename:
+        parts = filename.split("~")
 
         # Assembly is the part before ~
         assembly = parts[0]
@@ -277,13 +269,13 @@ def extract_namespace_from_filename(html_file: Path) -> tuple:
         if len(parts) > 1:
             # Remove hash and extension: ...IAdvancedHoleFeatureData_84c83747_84c83747.htmll.html
             # Pattern: TypeName_hash_hash.htmll.html
-            type_part = parts[1].split('_')[0]
+            type_part = parts[1].split("_")[0]
 
             # Namespace is the full type name minus the last segment (the type name itself)
-            if '.' in type_part:
-                namespace_parts = type_part.split('.')
+            if "." in type_part:
+                namespace_parts = type_part.split(".")
                 type_name = namespace_parts[-1]
-                namespace = '.'.join(namespace_parts[:-1])
+                namespace = ".".join(namespace_parts[:-1])
             else:
                 # If there's no dot, the namespace is the same as assembly
                 namespace = assembly
@@ -294,7 +286,7 @@ def extract_namespace_from_filename(html_file: Path) -> tuple:
     return None, None, None
 
 
-def extract_type_info_from_file(html_file: Path) -> Optional[Dict]:
+def extract_type_info_from_file(html_file: Path) -> dict | None:
     """Extract type information from a single HTML file."""
     # Get URL prefix from parent directory
     parent_dir = html_file.parent.name
@@ -303,7 +295,7 @@ def extract_type_info_from_file(html_file: Path) -> Optional[Dict]:
     parser = TypeInfoExtractor(url_prefix=url_prefix)
 
     try:
-        with open(html_file, 'r', encoding='utf-8') as f:
+        with open(html_file, encoding="utf-8") as f:
             content = f.read()
             parser.feed(content)
     except Exception as e:
@@ -324,7 +316,7 @@ def extract_type_info_from_file(html_file: Path) -> Optional[Dict]:
         "Description": parser.get_description(),
         "Examples": parser.examples,
         "Remarks": parser.get_remarks(),
-        "SourceFile": str(html_file)
+        "SourceFile": str(html_file),
     }
 
 
@@ -347,12 +339,12 @@ def _wrap_cdata_sections(xml_str: str) -> str:
         content = match.group(2)
         # Unescape XML entities since CDATA doesn't need escaping
         content = html_module.unescape(content)
-        return f'<{tag_name}><![CDATA[{content}]]></{tag_name}>'
+        return f"<{tag_name}><![CDATA[{content}]]></{tag_name}>"
 
     return re.sub(pattern, replace_with_cdata, xml_str, flags=re.DOTALL)
 
 
-def create_xml_output(types: List[Dict]) -> str:
+def create_xml_output(types: list[dict]) -> str:
     """Create XML output from extracted type information."""
     root = ET.Element("Types")
 
@@ -401,7 +393,7 @@ def create_xml_output(types: List[Dict]) -> str:
             remarks_elem.set("__cdata__", "true")
 
     # Pretty print the XML
-    xml_str = ET.tostring(root, encoding='unicode')
+    xml_str = ET.tostring(root, encoding="unicode")
 
     # Post-process to add CDATA sections for Remarks elements
     # Replace marked elements with CDATA wrapped content
@@ -439,26 +431,17 @@ def is_type_file(html_file: Path) -> bool:
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Extract type information from crawled HTML files"
-    )
+    parser = argparse.ArgumentParser(description="Extract type information from crawled HTML files")
     parser.add_argument(
         "--input-dir",
         type=Path,
         default=Path("01-crawl-toc-pages/output/html"),
-        help="Directory containing crawled HTML files"
+        help="Directory containing crawled HTML files",
     )
     parser.add_argument(
-        "--output-dir",
-        type=Path,
-        default=Path("03-extract-type-info/metadata"),
-        help="Directory to save output files"
+        "--output-dir", type=Path, default=Path("03-extract-type-info/metadata"), help="Directory to save output files"
     )
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Enable verbose output"
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
 
     args = parser.parse_args()
 
@@ -497,10 +480,10 @@ def main():
 
     # Save XML file
     xml_file = args.output_dir / "api_types.xml"
-    with open(xml_file, 'w', encoding='utf-8') as f:
+    with open(xml_file, "w", encoding="utf-8") as f:
         f.write(xml_output)
 
-    print(f"\nExtraction complete!")
+    print("\nExtraction complete!")
     print(f"  Types extracted: {len(types)}")
     print(f"  Errors: {len(errors)}")
     print(f"  Output saved to: {xml_file}")
@@ -511,11 +494,11 @@ def main():
         "types_extracted": len(types),
         "errors": len(errors),
         "output_file": str(xml_file),
-        "error_files": errors
+        "error_files": errors,
     }
 
     summary_file = args.output_dir / "extraction_summary.json"
-    with open(summary_file, 'w', encoding='utf-8') as f:
+    with open(summary_file, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
 
     print(f"  Summary saved to: {summary_file}")

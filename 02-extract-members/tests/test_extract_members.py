@@ -2,14 +2,13 @@
 Tests for the member extraction script.
 """
 
-import pytest
-from pathlib import Path
 import sys
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 # Add parent directory to path to import the module
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from extract_members import MemberExtractor, extract_members_from_file, create_xml_output
+from extract_members import create_xml_output, extract_members_from_file
 
 
 class TestMemberExtractor:

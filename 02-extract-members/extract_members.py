@@ -8,11 +8,10 @@ extracts type information (properties and methods) into an XML format.
 
 import argparse
 import json
-from pathlib import Path
-from typing import Dict, List
-import xml.etree.ElementTree as ET
 import xml.dom.minidom as minidom
+import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
+from pathlib import Path
 
 
 class MemberExtractor(HTMLParser):
@@ -78,10 +77,7 @@ class MemberExtractor(HTMLParser):
                 # Prepend the URL prefix (e.g., /sldworksapi/)
                 full_url = f"{self.url_prefix}{self.current_link_href}"
 
-                member_info = {
-                    "Name": self.current_link_text.strip(),
-                    "Url": full_url
-                }
+                member_info = {"Name": self.current_link_text.strip(), "Url": full_url}
 
                 if self.current_section == "properties":
                     self.properties.append(member_info)
@@ -129,20 +125,20 @@ def extract_namespace_from_filename(html_file: Path) -> tuple:
     filename = html_file.name
 
     # Split on ~ to get assembly and full type path
-    if '~' in filename:
-        parts = filename.split('~')
+    if "~" in filename:
+        parts = filename.split("~")
 
         # Assembly is the part before ~
         assembly = parts[0]
 
         # Extract full type name (after ~ but before _members_)
         if len(parts) > 1:
-            full_type_part = parts[1].split('_members_')[0]
+            full_type_part = parts[1].split("_members_")[0]
 
             # Namespace is the full type name minus the last segment (the type name itself)
             # e.g., SolidWorks.Interop.sldworks.IAnnotationView -> SolidWorks.Interop.sldworks
-            if '.' in full_type_part:
-                namespace = '.'.join(full_type_part.split('.')[:-1])
+            if "." in full_type_part:
+                namespace = ".".join(full_type_part.split(".")[:-1])
             else:
                 # If there's no dot, the namespace is the same as assembly
                 namespace = assembly
@@ -152,7 +148,7 @@ def extract_namespace_from_filename(html_file: Path) -> tuple:
     return None, None, None
 
 
-def extract_members_from_file(html_file: Path) -> Dict:
+def extract_members_from_file(html_file: Path) -> dict:
     """Extract members from a single HTML file."""
     # Get URL prefix from parent directory
     # e.g., /sldworksapi/ for files in .../html/sldworksapi/...
@@ -162,7 +158,7 @@ def extract_members_from_file(html_file: Path) -> Dict:
     parser = MemberExtractor(url_prefix=url_prefix)
 
     try:
-        with open(html_file, 'r', encoding='utf-8') as f:
+        with open(html_file, encoding="utf-8") as f:
             content = f.read()
             parser.feed(content)
     except Exception as e:
@@ -183,11 +179,11 @@ def extract_members_from_file(html_file: Path) -> Dict:
         "FullTypeName": full_type_name,
         "PublicProperties": parser.properties,
         "PublicMethods": parser.methods,
-        "SourceFile": str(html_file)
+        "SourceFile": str(html_file),
     }
 
 
-def create_xml_output(types: List[Dict]) -> str:
+def create_xml_output(types: list[dict]) -> str:
     """Create XML output from extracted type information."""
     root = ET.Element("Types")
 
@@ -229,32 +225,23 @@ def create_xml_output(types: List[Dict]) -> str:
                 method_url.text = method["Url"]
 
     # Pretty print the XML
-    xml_str = ET.tostring(root, encoding='unicode')
+    xml_str = ET.tostring(root, encoding="unicode")
     dom = minidom.parseString(xml_str)
     return dom.toprettyxml(indent="    ")
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Extract API members from crawled HTML files"
-    )
+    parser = argparse.ArgumentParser(description="Extract API members from crawled HTML files")
     parser.add_argument(
         "--input-dir",
         type=Path,
         default=Path("01-crawl-toc-pages/output/html"),
-        help="Directory containing crawled HTML files"
+        help="Directory containing crawled HTML files",
     )
     parser.add_argument(
-        "--output-dir",
-        type=Path,
-        default=Path("02-extract-members/metadata"),
-        help="Directory to save output files"
+        "--output-dir", type=Path, default=Path("02-extract-members/metadata"), help="Directory to save output files"
     )
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Enable verbose output"
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
 
     args = parser.parse_args()
 
@@ -292,10 +279,10 @@ def main():
 
     # Save XML file
     xml_file = args.output_dir / "api_members.xml"
-    with open(xml_file, 'w', encoding='utf-8') as f:
+    with open(xml_file, "w", encoding="utf-8") as f:
         f.write(xml_output)
 
-    print(f"\nExtraction complete!")
+    print("\nExtraction complete!")
     print(f"  Types extracted: {len(types)}")
     print(f"  Errors: {len(errors)}")
     print(f"  Output saved to: {xml_file}")
@@ -306,11 +293,11 @@ def main():
         "types_extracted": len(types),
         "errors": len(errors),
         "output_file": str(xml_file),
-        "error_files": errors
+        "error_files": errors,
     }
 
     summary_file = args.output_dir / "extraction_summary.json"
-    with open(summary_file, 'w', encoding='utf-8') as f:
+    with open(summary_file, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
 
     print(f"  Summary saved to: {summary_file}")

@@ -3,18 +3,14 @@
 Unit tests for XMLDoc link conversion utilities.
 """
 
-import unittest
 import sys
+import unittest
 from pathlib import Path
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from shared.xmldoc_links import (
-    convert_links_to_see_refs,
-    parse_href_to_cref,
-    convert_to_full_url
-)
+from shared.xmldoc_links import convert_links_to_see_refs, convert_to_full_url, parse_href_to_cref
 
 
 class TestParseHrefToCref(unittest.TestCase):
@@ -58,7 +54,10 @@ class TestConvertToFullUrl(unittest.TestCase):
         """Test converting relative path with ../."""
         href = "../sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm"
         result = convert_to_full_url(href)
-        self.assertEqual(result, "https://help.solidworks.com/2026/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm")
+        self.assertEqual(
+            result,
+            "https://help.solidworks.com/2026/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm",
+        )
 
     def test_relative_path_current_dir(self):
         """Test converting relative path in current directory."""
@@ -80,44 +79,50 @@ class TestConvertLinksToSeeRefs(unittest.TestCase):
         """Test converting type reference to see cref."""
         html = 'Use <a href="SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFeatureManager~AdvancedHole.html">IFeatureManager::AdvancedHole</a> method.'
         result = convert_links_to_see_refs(html)
-        self.assertIn('<see cref="SolidWorks.Interop.sldworks.IFeatureManager.AdvancedHole">IFeatureManager::AdvancedHole</see>', result)
-        self.assertNotIn('<a href=', result)
+        self.assertIn(
+            '<see cref="SolidWorks.Interop.sldworks.IFeatureManager.AdvancedHole">IFeatureManager::AdvancedHole</see>',
+            result,
+        )
+        self.assertNotIn("<a href=", result)
 
     def test_guide_page_to_see_href(self):
         """Test converting guide page link to see href."""
         html = 'See <a href="../sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm">SOLIDWORKS Design</a> documentation.'
         result = convert_links_to_see_refs(html)
-        self.assertIn('<see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm">SOLIDWORKS Design</see>', result)
-        self.assertNotIn('<a href=', result)
+        self.assertIn(
+            '<see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm">SOLIDWORKS Design</see>',
+            result,
+        )
+        self.assertNotIn("<a href=", result)
 
     def test_preserves_spacing_around_links(self):
         """Test that spacing around links is preserved."""
         html = 'Text before <a href="SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFeature.html">IFeature</a> text after.'
         result = convert_links_to_see_refs(html)
-        self.assertIn(' <see cref=', result)
-        self.assertIn('</see> ', result)
+        self.assertIn(" <see cref=", result)
+        self.assertIn("</see> ", result)
 
     def test_preserves_double_colon_in_link_text(self):
         """Test that :: in link text is preserved."""
         html = '<a href="SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ISldWorks~OpenDoc7.html">ISldWorks::OpenDoc7</a>'
         result = convert_links_to_see_refs(html)
-        self.assertIn('ISldWorks::OpenDoc7</see>', result)
-        self.assertNotIn('ISldWorks.OpenDoc7</see>', result)
+        self.assertIn("ISldWorks::OpenDoc7</see>", result)
+        self.assertNotIn("ISldWorks.OpenDoc7</see>", result)
 
     def test_cleans_html_entities(self):
         """Test that HTML entities are cleaned up."""
         html = 'Text with&nbsp;<a href="SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFeature.html">IFeature</a>&nbsp;more text.'
         result = convert_links_to_see_refs(html)
-        self.assertNotIn('&nbsp;', result)
-        self.assertIn(' ', result)
+        self.assertNotIn("&nbsp;", result)
+        self.assertIn(" ", result)
 
     def test_removes_other_html_tags(self):
         """Test that other HTML tags are removed."""
         html = '<p>Text with <a href="SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFeature.html">IFeature</a> link.</p>'
         result = convert_links_to_see_refs(html)
-        self.assertNotIn('<p>', result)
-        self.assertNotIn('</p>', result)
-        self.assertIn('<see cref=', result)
+        self.assertNotIn("<p>", result)
+        self.assertNotIn("</p>", result)
+        self.assertIn("<see cref=", result)
 
 
 if __name__ == "__main__":
