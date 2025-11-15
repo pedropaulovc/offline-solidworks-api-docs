@@ -178,20 +178,38 @@ class ApiDocsSpider(scrapy.Spider):
             self.stats['skipped_pages'] += 1
             return
 
+        # Parse JSON and extract only helpContentData
+        try:
+            data = json.loads(json_text)
+            help_content_data = data.get('props', {}).get('pageProps', {}).get('helpContentData')
+
+            if not help_content_data:
+                self.logger.warning(f"No helpContentData found in {response.url}")
+                self.stats['skipped_pages'] += 1
+                return
+
+            # Convert back to JSON string for storage
+            content = json.dumps(help_content_data, ensure_ascii=False)
+
+        except json.JSONDecodeError as e:
+            self.logger.error(f"Failed to parse __NEXT_DATA__ JSON from {response.url}: {e}")
+            self.stats['skipped_pages'] += 1
+            return
+
         # Create item with JSON data
         item = {
             'url': response.url,
             'original_url': response.meta.get('original_url', response.url),
             'status_code': response.status,
-            'content': json_text,  # Save only the JSON content
+            'content': content,  # Save only the helpContentData JSON
             'headers': dict(response.headers),
             'timestamp': datetime.now().isoformat(),
             'session_id': self.session_id,
         }
 
         # Calculate content hash for integrity
-        item['content_hash'] = hashlib.sha256(json_text.encode('utf-8')).hexdigest()
-        item['content_length'] = len(json_text.encode('utf-8'))
+        item['content_hash'] = hashlib.sha256(content.encode('utf-8')).hexdigest()
+        item['content_length'] = len(content.encode('utf-8'))
 
         # Extract title for better organization
         title = response.xpath('//title/text()').get()
