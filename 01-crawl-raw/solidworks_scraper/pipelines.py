@@ -69,8 +69,8 @@ class HtmlSavePipeline:
             query_params = parse_qs(parsed.query)
             if 'queryParam' in query_params:
                 query_param_value = query_params['queryParam'][0]
-                # Parse the id from ?id=5
-                id_match = re.search(r'id=(-?\d+)', query_param_value)
+                # Parse the id from ?id=5 or ?id=2.1 (handles decimal IDs)
+                id_match = re.search(r'id=(-?[\d.]+)', query_param_value)
                 if id_match:
                     id_value = id_match.group(1)
                     path = f'expandToc_id_{id_value}.json'
