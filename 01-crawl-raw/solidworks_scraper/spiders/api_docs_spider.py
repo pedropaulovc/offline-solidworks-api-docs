@@ -177,8 +177,76 @@ class ApiDocsSpider(CrawlSpider):
         # Yield the item to be processed by pipelines
         yield item
 
-        # Follow links in the page
+        # Extract and follow links
+        # For JavaScript-rendered pages (like Welcome.htm), extract links from JSON data
+        if response.meta.get('is_start_page'):
+            yield from self.extract_links_from_json(response)
+
+        # Also follow regular HTML links (for subsequent pages)
         # The rules will handle link extraction and following
+
+    def extract_links_from_json(self, response):
+        """
+        Extract links from __NEXT_DATA__ JSON blob in JavaScript-rendered pages.
+
+        The Welcome.htm page is a React/Next.js SPA where navigation links are embedded
+        in a JSON blob rather than regular HTML <a> tags.
+        """
+        import json
+
+        # Extract JSON from script tag
+        json_text = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
+
+        if not json_text:
+            self.logger.warning(f"No __NEXT_DATA__ JSON found in {response.url}")
+            return
+
+        try:
+            # Parse the JSON
+            data = json.loads(json_text)
+
+            # Navigate to the section data: props.pageProps.allGuidesSectionData
+            sections = data.get('props', {}).get('pageProps', {}).get('allGuidesSectionData', [])
+
+            if not sections:
+                self.logger.warning(f"No sections found in JSON for {response.url}")
+                return
+
+            self.logger.info(f"Found {len(sections)} URLs in JSON data")
+
+            # Extract URLs from each section
+            for section in sections:
+                url_path = section.get('url')
+
+                if not url_path:
+                    continue
+
+                # Convert relative URL to absolute
+                full_url = response.urljoin(url_path)
+
+                # Check if URL is within our allowed boundary
+                parsed = urlparse(full_url)
+                if not parsed.path.startswith(self.base_path):
+                    self.logger.debug(f"Skipping URL outside boundary from JSON: {full_url}")
+                    continue
+
+                # Convert to print preview format
+                print_url = self.convert_to_print_preview(full_url)
+
+                self.logger.debug(f"Yielding URL from JSON: {print_url}")
+
+                # Yield request for this URL
+                yield scrapy.Request(
+                    print_url,
+                    callback=self.parse_page,
+                    errback=self.handle_error,
+                    meta={'original_url': full_url}
+                )
+
+        except json.JSONDecodeError as e:
+            self.logger.error(f"Failed to parse JSON from {response.url}: {e}")
+        except Exception as e:
+            self.logger.error(f"Error extracting links from JSON in {response.url}: {e}")
 
     def handle_error(self, failure):
         """Handle failed requests"""

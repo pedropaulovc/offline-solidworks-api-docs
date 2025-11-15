@@ -217,3 +217,55 @@ class TestApiDocsSpider:
         # Check only first parse created items
         assert len(items1) == 1
         assert len(items2) == 0  # Second parse should skip
+
+    def test_extract_links_from_json(self):
+        """Test extracting links from __NEXT_DATA__ JSON blob"""
+        import scrapy
+
+        # Create mock response with JSON data
+        json_content = '''
+        {
+            "props": {
+                "pageProps": {
+                    "allGuidesSectionData": [
+                        {"name": "Welcome", "url": "/2026/english/api/sldworksapiprogguide/Welcome.htm?id=0"},
+                        {"name": "Getting Started", "url": "/2026/english/api/help_list.htm?id=1"},
+                        {"name": "API Help", "url": "/2026/english/api/help_list.htm?id=2"},
+                        {"name": "Outside Boundary", "url": "/2025/english/docs/test.html"}
+                    ]
+                }
+            }
+        }
+        '''
+
+        mock_response = Mock(spec=HtmlResponse)
+        mock_response.url = "https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Welcome.htm?id=0"
+        mock_response.xpath = Mock()
+        mock_response.xpath.return_value.get = Mock(return_value=json_content)
+        mock_response.urljoin = lambda url: f"https://help.solidworks.com{url}"
+
+        # Extract links
+        requests = list(self.spider.extract_links_from_json(mock_response))
+
+        # Should yield 3 requests (4th is outside boundary)
+        assert len(requests) == 3
+
+        # Check that all requests are scrapy.Request objects
+        for req in requests:
+            assert isinstance(req, scrapy.Request)
+            # Check print preview format was applied
+            assert "format=p" in req.url
+            assert "value=1" in req.url
+            # Check within boundary
+            assert "/2026/english/api/" in req.url
+
+    def test_extract_links_from_json_no_data(self):
+        """Test extract_links_from_json handles missing JSON gracefully"""
+        mock_response = Mock(spec=HtmlResponse)
+        mock_response.url = "https://help.solidworks.com/2026/english/api/test.html"
+        mock_response.xpath = Mock()
+        mock_response.xpath.return_value.get = Mock(return_value=None)  # No JSON found
+
+        # Should return empty list without errors
+        requests = list(self.spider.extract_links_from_json(mock_response))
+        assert len(requests) == 0
