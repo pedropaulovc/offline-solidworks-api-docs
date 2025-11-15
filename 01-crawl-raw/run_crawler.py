@@ -6,7 +6,7 @@ Usage:
     python 01-crawl-raw/run_crawler.py [options]
 
 Options:
-    --test       Run a test crawl (first 10 pages only)
+    --test       Run a test crawl (first 100 pages only)
     --resume     Resume from previous crawl (uses existing metadata)
     --validate   Validate crawl after completion
     --help       Show this help message
@@ -50,9 +50,9 @@ def get_crawl_settings(test_mode=False, resume_mode=False):
 
     if test_mode:
         # Limit crawl for testing
-        settings.set('CLOSESPIDER_PAGECOUNT', 10)
+        settings.set('CLOSESPIDER_PAGECOUNT', 100)
         settings.set('LOG_LEVEL', 'DEBUG')
-        print("Running in TEST mode - limiting to 10 pages")
+        print("Running in TEST mode - limiting to 100 pages")
 
     if resume_mode:
         # Don't clear existing data

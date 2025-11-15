@@ -240,6 +240,9 @@ Welcome.htm
 *.swo
 *~
 
+# Claude Code local settings
+.claude/settings.local.json
+
 # OS Files
 .DS_Store
 Thumbs.db
