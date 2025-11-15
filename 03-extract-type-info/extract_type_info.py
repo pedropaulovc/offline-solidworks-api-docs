@@ -425,10 +425,7 @@ def is_type_file(html_file: Path) -> bool:
         return False
 
     # Must have the typical type file pattern: Assembly~Namespace.Type_hash_hash.html
-    if "~" in filename and ".html" in filename:
-        return True
-
-    return False
+    return "~" in filename and ".html" in filename
 
 
 def main() -> int:
