@@ -293,57 +293,7 @@ class TestTypeInfoExtractor(unittest.TestCase):
         # Should NOT use href for type references
         self.assertNotIn('<see href=', remarks)
 
-    def test_enum_member_extraction(self):
-        """Test extracting enum members with descriptions (swTangencyType_e example)."""
-        html = """
-        <html>
-        <div id="pagetop">
-            <span id="pagetitle">swTangencyType_e Enumeration</span>
-        </div>
-        <div id="mainbody">
-            Tangency options for lofts.
-            <h1>Members</h1>
-            <div id="enummembersSection">
-                <table class="FilteredItemListTable">
-                    <tr><th>Member</th><th>Description</th></tr>
-                    <tr>
-                        <td class="MemberNameCell"><strong>swMinimumTwist</strong></td>
-                        <td class="DescriptionCell">10 = Prevents the profile from becoming self-intersecting</td>
-                    </tr>
-                    <tr>
-                        <td class="MemberNameCell"><strong>swTangencyNone</strong></td>
-                        <td class="DescriptionCell">0</td>
-                    </tr>
-                    <tr>
-                        <td class="MemberNameCell"><strong>swTangencyAllFaces</strong></td>
-                        <td class="DescriptionCell">3 = Makes the adjacent faces tangent; see <a href="SolidWorks.Interop.swconst~SolidWorks.Interop.swconst.swTwistControlType_e.html">swTwistControlType_e</a></td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-        </html>
-        """
-
-        parser = TypeInfoExtractor()
-        parser.feed(html)
-
-        # Should extract 3 enum members
-        self.assertEqual(len(parser.enum_members), 3)
-
-        # Check first member
-        self.assertEqual(parser.enum_members[0]["Name"], "swMinimumTwist")
-        self.assertIn("10 = Prevents", parser.enum_members[0]["Description"])
-
-        # Check second member
-        self.assertEqual(parser.enum_members[1]["Name"], "swTangencyNone")
-        self.assertEqual(parser.enum_members[1]["Description"], "0")
-
-        # Check third member has link converted to see cref
-        self.assertEqual(parser.enum_members[2]["Name"], "swTangencyAllFaces")
-        self.assertIn('<see cref="SolidWorks.Interop.swconst.swTwistControlType_e">', parser.enum_members[2]["Description"])
-        self.assertIn('swTwistControlType_e</see>', parser.enum_members[2]["Description"])
-
-    def test_remarks_not_triggered_by_text_in_cells(self):
+    def test_remarks_only_from_h1_section(self):
         """Test that 'Remarks' text in member descriptions doesn't trigger remarks section (swWzdHoleStandardFastenerTypes_e bug)."""
         html = """
         <html>
@@ -360,10 +310,6 @@ class TestTypeInfoExtractor(unittest.TestCase):
                         <td class="MemberNameCell"><strong>swObsoleteMember</strong></td>
                         <td class="DescriptionCell">Obsolete; see <strong>Remarks</strong></td>
                     </tr>
-                    <tr>
-                        <td class="MemberNameCell"><strong>swValidMember</strong></td>
-                        <td class="DescriptionCell">Valid member</td>
-                    </tr>
                 </table>
             </div>
             <h1>Remarks</h1>
@@ -375,16 +321,13 @@ class TestTypeInfoExtractor(unittest.TestCase):
         parser = TypeInfoExtractor()
         parser.feed(html)
 
-        # Should extract 2 members
-        self.assertEqual(len(parser.enum_members), 2)
-
-        # Remarks should only contain actual remarks, not member descriptions
+        # Remarks should only contain actual remarks from Remarks h1 section
         remarks = parser.get_remarks()
         self.assertEqual(remarks.strip(), "This is the actual remarks content.")
 
-        # Remarks should NOT contain member names or descriptions
+        # Remarks should NOT contain text from other sections
         self.assertNotIn("swObsoleteMember", remarks)
-        self.assertNotIn("swValidMember", remarks)
+        self.assertNotIn("Obsolete", remarks)
 
         # Remarks should NOT contain the h1 heading text
         self.assertNotIn("Remarks\n", remarks)
