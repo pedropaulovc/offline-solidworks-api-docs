@@ -81,10 +81,9 @@ class ApiDocsSpider(scrapy.Spider):
             # Create requests for each URL
             for url in urls:
                 # Convert relative URL to absolute
+                full_url = url
                 if url.startswith("/"):
                     full_url = self.base_url + url
-                else:
-                    full_url = url
 
                 # Check if URL is within our allowed boundary
                 parsed = urlparse(full_url)

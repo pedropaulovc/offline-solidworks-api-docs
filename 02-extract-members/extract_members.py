@@ -138,11 +138,10 @@ def extract_namespace_from_filename(html_file: Path) -> tuple[str | None, str | 
 
             # Namespace is the full type name minus the last segment (the type name itself)
             # e.g., SolidWorks.Interop.sldworks.IAnnotationView -> SolidWorks.Interop.sldworks
+            # If there's no dot, the namespace is the same as assembly
+            namespace = assembly
             if "." in full_type_part:
                 namespace = ".".join(full_type_part.split(".")[:-1])
-            else:
-                # If there's no dot, the namespace is the same as assembly
-                namespace = assembly
 
             return assembly, namespace, full_type_part
 
