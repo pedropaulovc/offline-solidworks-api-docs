@@ -18,19 +18,19 @@ from solidworks_scraper.spiders.api_docs_spider import ApiDocsSpider
 class TestApiDocsSpider:
     """Test suite for ApiDocsSpider"""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures"""
         self.spider = ApiDocsSpider()
 
-    def test_spider_name(self):
+    def test_spider_name(self) -> None:
         """Test spider has correct name"""
         assert self.spider.name == "api_docs"
 
-    def test_allowed_domains(self):
+    def test_allowed_domains(self) -> None:
         """Test spider has correct allowed domains"""
         assert "help.solidworks.com" in self.spider.allowed_domains
 
-    def test_url_boundary_checking(self):
+    def test_url_boundary_checking(self) -> None:
         """Test that spider respects URL boundaries"""
         # Test that spider only processes URLs within the boundary
         from urllib.parse import urlparse
@@ -46,7 +46,7 @@ class TestApiDocsSpider:
         assert not urlparse(bad_url2).path.startswith(self.spider.base_path)
         assert not urlparse(bad_url3).path.startswith(self.spider.base_path)
 
-    def test_parse_page_with_valid_html(self):
+    def test_parse_page_with_valid_html(self) -> None:
         """Test parsing a valid HTML page"""
         # Create mock response with __NEXT_DATA__ JSON
         help_text_content = """
@@ -68,7 +68,7 @@ class TestApiDocsSpider:
         mock_response.body = b"<html><body>Test</body></html>"
 
         # Mock xpath to return the JSON and title
-        def xpath_side_effect(query):
+        def xpath_side_effect(query: str) -> Mock:
             result = Mock()
             if "__NEXT_DATA__" in query:
                 result.get = Mock(return_value=json.dumps(next_data_json))
@@ -95,7 +95,7 @@ class TestApiDocsSpider:
         assert "timestamp" in item
         assert "session_id" in item
 
-    def test_parse_page_skips_non_html(self):
+    def test_parse_page_skips_non_html(self) -> None:
         """Test that non-HTML content is skipped"""
         # Create mock response with non-HTML content type
         mock_response = Mock(spec=Response)
@@ -109,7 +109,7 @@ class TestApiDocsSpider:
         assert len(items) == 0
         assert self.spider.stats["skipped_pages"] == 1
 
-    def test_parse_page_skips_outside_boundary(self):
+    def test_parse_page_skips_outside_boundary(self) -> None:
         """Test that pages outside boundary are skipped"""
         # Create mock response outside boundary
         mock_response = Mock(spec=Response)
@@ -123,7 +123,7 @@ class TestApiDocsSpider:
         assert len(items) == 0
         assert self.spider.stats["skipped_pages"] == 1  # First skip in this test
 
-    def test_handle_error(self):
+    def test_handle_error(self) -> None:
         """Test error handling"""
         # Create mock failure
         mock_failure = Mock()
@@ -143,7 +143,7 @@ class TestApiDocsSpider:
         assert "timestamp" in error_item
         assert self.spider.stats["failed_pages"] == 1
 
-    def test_start_requests(self):
+    def test_start_requests(self) -> None:
         """Test that start URLs are correctly configured"""
         # Check that spider has the correct start URL for expandToc
         assert len(self.spider.start_urls) == 1
@@ -153,7 +153,7 @@ class TestApiDocsSpider:
         assert "language=english" in start_url
         assert "product=api" in start_url
 
-    def test_spider_statistics_tracking(self):
+    def test_spider_statistics_tracking(self) -> None:
         """Test that spider tracks statistics correctly"""
         # Initial state
         assert self.spider.stats["total_pages"] == 0
@@ -170,7 +170,7 @@ class TestApiDocsSpider:
         mock_response.headers = {"Content-Type": b"text/html"}
         mock_response.body = b"<html><body>Test</body></html>"
 
-        def xpath_side_effect(query):
+        def xpath_side_effect(query: str) -> Mock:
             result = Mock()
             if "__NEXT_DATA__" in query:
                 result.get = Mock(return_value=json.dumps(next_data))
@@ -190,7 +190,7 @@ class TestApiDocsSpider:
         assert self.spider.stats["total_pages"] == 1
         assert self.spider.stats["successful_pages"] == 1
 
-    def test_duplicate_url_handling(self):
+    def test_duplicate_url_handling(self) -> None:
         """Test that duplicate URLs are not processed twice"""
         # Create mock response with __NEXT_DATA__
         help_text = "<html><body>Test</body></html>"
@@ -202,7 +202,7 @@ class TestApiDocsSpider:
         mock_response.headers = {"Content-Type": b"text/html"}
         mock_response.body = b"<html><body>Test</body></html>"
 
-        def xpath_side_effect(query):
+        def xpath_side_effect(query: str) -> Mock:
             result = Mock()
             if "__NEXT_DATA__" in query:
                 result.get = Mock(return_value=json.dumps(next_data))
@@ -223,7 +223,7 @@ class TestApiDocsSpider:
         assert len(items1) == 1
         assert len(items2) == 0  # Second parse should skip
 
-    def test_extract_urls_from_json(self):
+    def test_extract_urls_from_json(self) -> None:
         """Test extracting URLs from JSON structure"""
         # Test with nested structure
         json_data = {
@@ -246,7 +246,7 @@ class TestApiDocsSpider:
         assert "/2026/english/api/page3.htm" in urls
         assert "/2026/english/api/page4.htm" in urls
 
-    def test_extract_urls_from_json_no_data(self):
+    def test_extract_urls_from_json_no_data(self) -> None:
         """Test extract_urls_from_json handles empty data gracefully"""
         # Test with empty dict
         assert self.spider.extract_urls_from_json({}) == []

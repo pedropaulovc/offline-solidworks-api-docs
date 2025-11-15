@@ -26,7 +26,7 @@ from solidworks_scraper.pipelines import (
 class TestHtmlSavePipeline:
     """Test suite for HtmlSavePipeline"""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures"""
         # Create temporary directory for testing
         self.temp_dir = tempfile.mkdtemp()
@@ -36,11 +36,11 @@ class TestHtmlSavePipeline:
         self.pipeline.output_dir = Path(self.temp_dir) / "html"
         self.pipeline.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def teardown_method(self):
+    def teardown_method(self) -> None:
         """Clean up after tests"""
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
-    def test_url_to_file_path_conversion(self):
+    def test_url_to_file_path_conversion(self) -> None:
         """Test URL to file path conversion"""
         # Test simple URL
         url1 = "https://help.solidworks.com/2026/english/api/sldworksapi/test.html"
@@ -59,7 +59,7 @@ class TestHtmlSavePipeline:
         path3 = self.pipeline.url_to_file_path(url3)
         assert path3.suffix == ".html"
 
-    def test_url_to_file_path_deterministic(self):
+    def test_url_to_file_path_deterministic(self) -> None:
         """Test that URL to file path conversion is deterministic"""
         url = "https://help.solidworks.com/2026/english/api/test.html?id=123&format=p"
 
@@ -75,7 +75,7 @@ class TestHtmlSavePipeline:
         assert "test_" in path1.name
         # The hash should be the same across test runs
 
-    def test_process_item_saves_html(self):
+    def test_process_item_saves_html(self) -> None:
         """Test that HTML content is saved correctly"""
         # Create mock spider
         mock_spider = Mock()
@@ -102,7 +102,7 @@ class TestHtmlSavePipeline:
         # Check file path was added to item
         assert "file_path" in processed_item
 
-    def test_process_item_skips_error_items(self):
+    def test_process_item_skips_error_items(self) -> None:
         """Test that error items are skipped"""
         mock_spider = Mock()
         error_item = {"type": "error", "url": "test.html", "error": "Failed"}
@@ -110,7 +110,7 @@ class TestHtmlSavePipeline:
         result = self.pipeline.process_item(error_item, mock_spider)
         assert result == error_item  # Should return unchanged
 
-    def test_process_item_handles_missing_content(self):
+    def test_process_item_handles_missing_content(self) -> None:
         """Test handling of items without content"""
         mock_spider = Mock()
         mock_spider.logger = Mock()
@@ -125,7 +125,7 @@ class TestHtmlSavePipeline:
 class TestMetadataLogPipeline:
     """Test suite for MetadataLogPipeline"""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures"""
         self.temp_dir = tempfile.mkdtemp()
 
@@ -137,11 +137,11 @@ class TestMetadataLogPipeline:
         self.pipeline.errors_file = self.pipeline.metadata_dir / "errors.jsonl"
         self.pipeline.manifest_file = self.pipeline.metadata_dir / "manifest.json"
 
-    def teardown_method(self):
+    def teardown_method(self) -> None:
         """Clean up after tests"""
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
-    def test_manifest_creation(self):
+    def test_manifest_creation(self) -> None:
         """Test that manifest file is created"""
         self.pipeline.init_manifest()
         assert self.pipeline.manifest_file.exists()
@@ -153,7 +153,7 @@ class TestMetadataLogPipeline:
         assert manifest["boundary"] == "/2026/english/api/"
         assert manifest["crawl_delay_seconds"] == 2
 
-    def test_process_item_logs_metadata(self):
+    def test_process_item_logs_metadata(self) -> None:
         """Test that metadata is logged correctly"""
         mock_spider = Mock()
         mock_spider.logger = Mock()
@@ -185,7 +185,7 @@ class TestMetadataLogPipeline:
         assert saved_metadata["content_hash"] == "abc123"
         assert saved_metadata["title"] == "Test Page"
 
-    def test_log_error(self):
+    def test_log_error(self) -> None:
         """Test error logging"""
         error_item = {
             "type": "error",
@@ -213,7 +213,7 @@ class TestMetadataLogPipeline:
 class TestDuplicateCheckPipeline:
     """Test suite for DuplicateCheckPipeline"""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures"""
         self.temp_dir = tempfile.mkdtemp()
 
@@ -234,11 +234,11 @@ class TestDuplicateCheckPipeline:
             self.pipeline = DuplicateCheckPipeline()
             self.pipeline.seen_urls = {"https://test.com/existing1.html", "https://test.com/existing2.html"}
 
-    def teardown_method(self):
+    def teardown_method(self) -> None:
         """Clean up after tests"""
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
-    def test_duplicate_detection(self):
+    def test_duplicate_detection(self) -> None:
         """Test that duplicates are detected"""
         mock_spider = Mock()
         mock_spider.logger = Mock()
@@ -251,7 +251,7 @@ class TestDuplicateCheckPipeline:
 
         assert "Duplicate URL" in str(exc_info.value)
 
-    def test_new_url_processing(self):
+    def test_new_url_processing(self) -> None:
         """Test that new URLs are processed"""
         mock_spider = Mock()
 
@@ -266,11 +266,11 @@ class TestDuplicateCheckPipeline:
 class TestValidationPipeline:
     """Test suite for ValidationPipeline"""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures"""
         self.pipeline = ValidationPipeline()
 
-    def test_validate_complete_item(self):
+    def test_validate_complete_item(self) -> None:
         """Test validation of complete item"""
         mock_spider = Mock()
         mock_spider.logger = Mock()
@@ -287,7 +287,7 @@ class TestValidationPipeline:
         # No warnings should be logged for valid item
         mock_spider.logger.warning.assert_not_called()
 
-    def test_validate_missing_fields(self):
+    def test_validate_missing_fields(self) -> None:
         """Test validation catches missing fields"""
         mock_spider = Mock()
         mock_spider.logger = Mock()
@@ -301,7 +301,7 @@ class TestValidationPipeline:
         # Should log warnings for missing fields
         assert mock_spider.logger.warning.call_count >= 3
 
-    def test_validate_short_content(self):
+    def test_validate_short_content(self) -> None:
         """Test validation warns about short content"""
         mock_spider = Mock()
         mock_spider.logger = Mock()
@@ -318,7 +318,7 @@ class TestValidationPipeline:
         mock_spider.logger.warning.assert_called()
         assert "short content" in mock_spider.logger.warning.call_args[0][0].lower()
 
-    def test_validate_non_html_content(self):
+    def test_validate_non_html_content(self) -> None:
         """Test validation detects non-HTML content"""
         mock_spider = Mock()
         mock_spider.logger = Mock()
@@ -336,7 +336,7 @@ class TestValidationPipeline:
         assert "doesn't appear to be HTML" in mock_spider.logger.warning.call_args[0][0]
 
 
-def test_regression_crawl_count():
+def test_regression_crawl_count() -> None:
     """
     Regression test to ensure crawler maintains minimum page count.
     This is a placeholder that would run after an actual crawl.

@@ -14,7 +14,7 @@ BOT_NAME = "solidworks_scraper"
 SPIDER_MODULES = ["solidworks_scraper.spiders"]
 NEWSPIDER_MODULE = "solidworks_scraper.spiders"
 
-ADDONS = {}
+ADDONS: dict[str, str] = {}
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
