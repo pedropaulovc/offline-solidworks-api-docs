@@ -138,7 +138,7 @@ class TestApiDocsSpider:
 
         # Check no items were created
         assert len(items) == 0
-        assert self.spider.stats['skipped_pages'] == 2  # Already incremented once in previous test
+        assert self.spider.stats['skipped_pages'] == 1  # First skip in this test
 
     def test_handle_error(self):
         """Test error handling"""
@@ -167,9 +167,10 @@ class TestApiDocsSpider:
         assert len(requests) == 1
         request = requests[0]
         assert isinstance(request, Request)
-        assert "format=p" in request.url
-        assert "value=1" in request.url
+        # Start URL should NOT be converted to print preview (to preserve full TOC)
+        assert "format=p" not in request.url or "value=1" not in request.url
         assert request.meta['original_url'] == self.spider.start_urls[0]
+        assert request.meta['is_start_page'] == True
 
     def test_spider_statistics_tracking(self):
         """Test that spider tracks statistics correctly"""

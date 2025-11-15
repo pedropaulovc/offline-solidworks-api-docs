@@ -128,14 +128,13 @@ class TestMetadataLogPipeline:
         """Set up test fixtures"""
         self.temp_dir = tempfile.mkdtemp()
 
-        # Patch the Path in the pipeline to use temp directory
-        with patch.object(Path, '__new__', return_value=Path(self.temp_dir)):
-            self.pipeline = MetadataLogPipeline()
-            self.pipeline.metadata_dir = Path(self.temp_dir) / 'metadata'
-            self.pipeline.metadata_dir.mkdir(parents=True, exist_ok=True)
-            self.pipeline.urls_file = self.pipeline.metadata_dir / 'urls_crawled.jsonl'
-            self.pipeline.errors_file = self.pipeline.metadata_dir / 'errors.jsonl'
-            self.pipeline.manifest_file = self.pipeline.metadata_dir / 'manifest.json'
+        # Create pipeline and override paths to use temp directory
+        self.pipeline = MetadataLogPipeline()
+        self.pipeline.metadata_dir = Path(self.temp_dir) / 'metadata'
+        self.pipeline.metadata_dir.mkdir(parents=True, exist_ok=True)
+        self.pipeline.urls_file = self.pipeline.metadata_dir / 'urls_crawled.jsonl'
+        self.pipeline.errors_file = self.pipeline.metadata_dir / 'errors.jsonl'
+        self.pipeline.manifest_file = self.pipeline.metadata_dir / 'manifest.json'
 
     def teardown_method(self):
         """Clean up after tests"""
