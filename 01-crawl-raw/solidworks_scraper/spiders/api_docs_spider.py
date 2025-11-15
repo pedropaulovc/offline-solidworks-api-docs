@@ -178,18 +178,19 @@ class ApiDocsSpider(scrapy.Spider):
             self.stats['skipped_pages'] += 1
             return
 
-        # Parse JSON and extract only helpContentData
+        # Parse JSON and extract only helpText from helpContentData
         try:
             data = json.loads(json_text)
-            help_content_data = data.get('props', {}).get('pageProps', {}).get('helpContentData')
+            help_content_data = data.get('props', {}).get('pageProps', {}).get('helpContentData', {})
+            help_text = help_content_data.get('helpText')
 
-            if not help_content_data:
-                self.logger.warning(f"No helpContentData found in {response.url}")
+            if not help_text:
+                self.logger.warning(f"No helpText found in {response.url}")
                 self.stats['skipped_pages'] += 1
                 return
 
-            # Convert back to JSON string for storage
-            content = json.dumps(help_content_data, ensure_ascii=False)
+            # Use the HTML content directly
+            content = help_text
 
         except json.JSONDecodeError as e:
             self.logger.error(f"Failed to parse __NEXT_DATA__ JSON from {response.url}: {e}")

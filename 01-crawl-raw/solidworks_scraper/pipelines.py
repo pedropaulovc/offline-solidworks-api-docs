@@ -94,12 +94,12 @@ class HtmlSavePipeline:
                 # Create a deterministic hash from query params for uniqueness
                 # Using MD5 for deterministic hashing (not for security)
                 query_hash = hashlib.md5(parsed.query.encode('utf-8')).hexdigest()[:8]
-                path = path.replace('.htm', f'_{query_hash}.json')
-                path = path.replace('.html', f'_{query_hash}.json')
+                path = path.replace('.htm', f'_{query_hash}.html')
+                path = path.replace('.html', f'_{query_hash}.html')
 
-            # Ensure it ends with .json (we're saving __NEXT_DATA__ JSON content)
-            if not path.endswith('.json'):
-                path += '.json'
+            # Ensure it ends with .html (we're saving helpText HTML content)
+            if not path.endswith('.html'):
+                path += '.html'
 
         # Clean up the path - replace unsafe characters
         path = re.sub(r'[<>:"|?*]', '_', path)
