@@ -12,27 +12,28 @@ import xml.dom.minidom as minidom
 import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
 from pathlib import Path
+from typing import Any
 
 
 class MemberExtractor(HTMLParser):
     """HTML parser to extract members from SolidWorks API documentation."""
 
-    def __init__(self, url_prefix=""):
+    def __init__(self, url_prefix: str = "") -> None:
         super().__init__()
-        self.type_name = None
-        self.properties = []
-        self.methods = []
-        self.current_section = None
-        self.in_title = False
-        self.in_link = False
-        self.current_link_href = None
-        self.current_link_text = ""
-        self.in_members_table = False
-        self.in_member_link_cell = False
-        self.in_member_link = False
-        self.url_prefix = url_prefix  # Prefix to add to all URLs
+        self.type_name: str | None = None
+        self.properties: list[dict[str, str]] = []
+        self.methods: list[dict[str, str]] = []
+        self.current_section: str | None = None
+        self.in_title: bool = False
+        self.in_link: bool = False
+        self.current_link_href: str | None = None
+        self.current_link_text: str = ""
+        self.in_members_table: bool = False
+        self.in_member_link_cell: bool = False
+        self.in_member_link: bool = False
+        self.url_prefix: str = url_prefix  # Prefix to add to all URLs
 
-    def handle_starttag(self, tag, attrs):
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attrs_dict = dict(attrs)
 
         # Detect page title to extract type name
@@ -60,7 +61,7 @@ class MemberExtractor(HTMLParser):
                 self.current_link_href = href
                 self.current_link_text = ""
 
-    def handle_endtag(self, tag):
+    def handle_endtag(self, tag: str) -> None:
         if tag == "span" and self.in_title:
             self.in_title = False
 
@@ -87,7 +88,7 @@ class MemberExtractor(HTMLParser):
             self.current_link_href = None
             self.current_link_text = ""
 
-    def handle_data(self, data):
+    def handle_data(self, data: str) -> None:
         text = data.strip()
 
         if self.in_title and text:
@@ -108,7 +109,7 @@ class MemberExtractor(HTMLParser):
             self.current_link_text += data
 
 
-def extract_namespace_from_filename(html_file: Path) -> tuple:
+def extract_namespace_from_filename(html_file: Path) -> tuple[str | None, str | None, str | None]:
     """
     Extract namespace and assembly from the file path.
 
@@ -148,7 +149,7 @@ def extract_namespace_from_filename(html_file: Path) -> tuple:
     return None, None, None
 
 
-def extract_members_from_file(html_file: Path) -> dict:
+def extract_members_from_file(html_file: Path) -> dict[str, Any] | None:
     """Extract members from a single HTML file."""
     # Get URL prefix from parent directory
     # e.g., /sldworksapi/ for files in .../html/sldworksapi/...
@@ -183,7 +184,7 @@ def extract_members_from_file(html_file: Path) -> dict:
     }
 
 
-def create_xml_output(types: list[dict]) -> str:
+def create_xml_output(types: list[dict[str, Any]]) -> str:
     """Create XML output from extracted type information."""
     root = ET.Element("Types")
 
@@ -230,7 +231,7 @@ def create_xml_output(types: list[dict]) -> str:
     return dom.toprettyxml(indent="    ")
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="Extract API members from crawled HTML files")
     parser.add_argument(
         "--input-dir",
