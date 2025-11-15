@@ -50,10 +50,10 @@ class EnumMemberExtractor(HTMLParser):
             return
 
         # Detect members table (enum members)
-        if self.in_members_section and tag == "table":
-            if attrs_dict.get("class") == "FilteredItemListTable":
-                self.in_members_table = True
-                return
+        is_enum_members_table = self.in_members_section and tag == "table" and attrs_dict.get("class") == "FilteredItemListTable"
+        if is_enum_members_table:
+            self.in_members_table = True
+            return
 
         # Detect table row in members table
         if self.in_members_table and tag == "tr":
@@ -132,10 +132,10 @@ class EnumMemberExtractor(HTMLParser):
             self.in_members_section = True
 
         # Collect member name (appears in <strong> tag within MemberNameCell)
-        if self.in_member_name_cell and text:
-            # Member names are in <strong> tags, so just collect the text
-            if not self.current_member_name:
-                self.current_member_name = text
+        # Member names are in <strong> tags, so just collect the text
+        should_collect_member_name = self.in_member_name_cell and text and not self.current_member_name
+        if should_collect_member_name:
+            self.current_member_name = text
 
         # Collect member description (appears in DescriptionCell)
         if self.in_member_desc_cell and data:
