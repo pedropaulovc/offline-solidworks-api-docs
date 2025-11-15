@@ -12,13 +12,15 @@ Options:
     --help       Show this help message
 """
 
-import sys
-import os
 import argparse
 import json
-from pathlib import Path
+import os
+import sys
 from datetime import datetime
+from pathlib import Path
+
 from scrapy.crawler import CrawlerProcess
+from scrapy.settings import Settings
 from scrapy.utils.project import get_project_settings
 
 # Add the scrapy project to path
@@ -27,7 +29,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from solidworks_scraper.spiders.api_docs_spider import ApiDocsSpider
 
 
-def setup_environment():
+def setup_environment() -> tuple[Path, Path, Path]:
     """Set up the environment for running the crawler"""
     # Change to the scrapy project directory
     project_dir = Path(__file__).parent
@@ -44,14 +46,14 @@ def setup_environment():
     return project_dir, output_dir, metadata_dir
 
 
-def clear_previous_crawl(metadata_dir, output_dir):
+def clear_previous_crawl(metadata_dir: Path, output_dir: Path) -> None:
     """Clear metadata and HTML files from previous crawl"""
     import shutil
 
     # Clear metadata files
     metadata_path = Path(metadata_dir)
     if metadata_path.exists():
-        for file in metadata_path.glob('*'):
+        for file in metadata_path.glob("*"):
             if file.is_file():
                 file.unlink()
         print(f"Cleared metadata files from {metadata_dir}")
@@ -64,14 +66,16 @@ def clear_previous_crawl(metadata_dir, output_dir):
         print(f"Cleared HTML files from {html_dir}")
 
 
-def get_crawl_settings(test_mode=False, resume_mode=False, metadata_dir=None, output_dir=None):
+def get_crawl_settings(
+    test_mode: bool = False, resume_mode: bool = False, metadata_dir: Path | None = None, output_dir: Path | None = None
+) -> Settings:
     """Get Scrapy settings for the crawl"""
     settings = get_project_settings()
 
     if test_mode:
         # Limit crawl for testing
-        settings.set('CLOSESPIDER_PAGECOUNT', 100)
-        settings.set('LOG_LEVEL', 'INFO')  # Don't use DEBUG to avoid logging full HTML content
+        settings.set("CLOSESPIDER_PAGECOUNT", 100)
+        settings.set("LOG_LEVEL", "INFO")  # Don't use DEBUG to avoid logging full HTML content
         print("Running in TEST mode - limiting to 100 pages")
 
     if resume_mode:
@@ -86,11 +90,11 @@ def get_crawl_settings(test_mode=False, resume_mode=False, metadata_dir=None, ou
     return settings
 
 
-def validate_crawl(metadata_dir):
+def validate_crawl(metadata_dir: Path) -> bool:
     """Validate the crawl results"""
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("VALIDATING CRAWL RESULTS")
-    print("="*50)
+    print("=" * 50)
 
     urls_file = metadata_dir / "urls_crawled.jsonl"
     errors_file = metadata_dir / "errors.jsonl"
@@ -99,7 +103,7 @@ def validate_crawl(metadata_dir):
     # Count crawled URLs
     crawled_count = 0
     if urls_file.exists():
-        with open(urls_file, 'r') as f:
+        with open(urls_file) as f:
             crawled_count = sum(1 for _ in f)
 
     print(f"Pages crawled: {crawled_count}")
@@ -107,17 +111,17 @@ def validate_crawl(metadata_dir):
     # Count errors
     error_count = 0
     if errors_file.exists():
-        with open(errors_file, 'r') as f:
+        with open(errors_file) as f:
             error_count = sum(1 for _ in f)
 
     print(f"Errors encountered: {error_count}")
 
     # Load and display statistics
     if stats_file.exists():
-        with open(stats_file, 'r') as f:
+        with open(stats_file) as f:
             stats = json.load(f)
 
-        print(f"\nCrawl Statistics:")
+        print("\nCrawl Statistics:")
         print(f"  Start time: {stats.get('start_time', 'Unknown')}")
         print(f"  End time: {stats.get('end_time', 'Unknown')}")
         print(f"  Total pages: {stats.get('total_pages', 0)}")
@@ -126,15 +130,15 @@ def validate_crawl(metadata_dir):
         print(f"  Skipped: {stats.get('skipped_pages', 0)}")
 
         # Calculate success rate
-        total = stats.get('total_pages', 0)
-        successful = stats.get('successful_pages', 0)
+        total = stats.get("total_pages", 0)
+        successful = stats.get("successful_pages", 0)
         if total > 0:
             success_rate = (successful / total) * 100
             print(f"  Success rate: {success_rate:.2f}%")
 
             # Check regression threshold (95% success)
             if success_rate < 95:
-                print(f"\n[WARNING]  WARNING: Success rate below 95% threshold!")
+                print("\n[WARNING]  WARNING: Success rate below 95% threshold!")
                 return False
     else:
         print("\n[WARNING]  No statistics file found!")
@@ -149,11 +153,11 @@ def validate_crawl(metadata_dir):
     return True
 
 
-def print_summary(metadata_dir):
+def print_summary(metadata_dir: Path) -> None:
     """Print a summary of the crawl"""
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("CRAWL SUMMARY")
-    print("="*50)
+    print("=" * 50)
 
     # Count saved files (HTML and JSON)
     html_dir = metadata_dir.parent / "html"
@@ -163,19 +167,20 @@ def print_summary(metadata_dir):
         total_count = html_count + json_count
         print(f"Files saved: {total_count} ({html_count} HTML, {json_count} JSON)")
     else:
-        print(f"Files saved: 0")
+        print("Files saved: 0")
 
     # Show sample of crawled URLs
     urls_file = metadata_dir / "urls_crawled.jsonl"
     if urls_file.exists():
         print("\nSample of crawled URLs:")
         import jsonlines
+
         with jsonlines.open(urls_file) as reader:
             for i, obj in enumerate(reader):
                 if i >= 5:  # Show first 5
                     break
-                title = obj.get('title', 'Untitled')
-                url = obj.get('url', '')
+                title = obj.get("title", "Untitled")
+                url = obj.get("url", "")
                 print(f"  - {title}: {url}")
 
     # Show metadata files
@@ -185,7 +190,7 @@ def print_summary(metadata_dir):
         print(f"  - {file.name}: {size:,} bytes")
 
 
-def main():
+def main() -> None:
     """Main entry point"""
     parser = argparse.ArgumentParser(description="Run the SolidWorks API documentation crawler")
     parser.add_argument("--test", action="store_true", help="Run test crawl (10 pages only)")
@@ -208,20 +213,17 @@ def main():
             sys.exit(1)
 
     try:
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("SOLIDWORKS API DOCUMENTATION CRAWLER")
-        print("="*50)
+        print("=" * 50)
         print(f"Start time: {datetime.now().isoformat()}")
         print(f"Output directory: {output_dir}")
         print(f"Mode: {'TEST' if args.test else 'FULL'} crawl")
-        print("="*50 + "\n")
+        print("=" * 50 + "\n")
 
         # Get settings
         settings = get_crawl_settings(
-            test_mode=args.test,
-            resume_mode=args.resume,
-            metadata_dir=metadata_dir,
-            output_dir=output_dir
+            test_mode=args.test, resume_mode=args.resume, metadata_dir=metadata_dir, output_dir=output_dir
         )
 
         # Create and configure the crawler process
@@ -234,10 +236,10 @@ def main():
         print("Starting crawl... (Press Ctrl+C to stop)\n")
         process.start()
 
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("Crawl completed successfully!")
         print(f"End time: {datetime.now().isoformat()}")
-        print("="*50)
+        print("=" * 50)
 
         # Print summary
         print_summary(metadata_dir)
@@ -254,6 +256,7 @@ def main():
     except Exception as e:
         print(f"\n[ERROR] Error during crawl: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 
