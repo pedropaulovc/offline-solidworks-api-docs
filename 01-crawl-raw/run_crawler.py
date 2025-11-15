@@ -44,14 +44,34 @@ def setup_environment():
     return project_dir, output_dir, metadata_dir
 
 
-def get_crawl_settings(test_mode=False, resume_mode=False):
+def clear_previous_crawl(metadata_dir, output_dir):
+    """Clear metadata and HTML files from previous crawl"""
+    import shutil
+
+    # Clear metadata files
+    metadata_path = Path(metadata_dir)
+    if metadata_path.exists():
+        for file in metadata_path.glob('*'):
+            if file.is_file():
+                file.unlink()
+        print(f"Cleared metadata files from {metadata_dir}")
+
+    # Clear HTML output
+    html_dir = Path(output_dir) / "html"
+    if html_dir.exists():
+        shutil.rmtree(html_dir)
+        html_dir.mkdir(parents=True, exist_ok=True)
+        print(f"Cleared HTML files from {html_dir}")
+
+
+def get_crawl_settings(test_mode=False, resume_mode=False, metadata_dir=None, output_dir=None):
     """Get Scrapy settings for the crawl"""
     settings = get_project_settings()
 
     if test_mode:
         # Limit crawl for testing
         settings.set('CLOSESPIDER_PAGECOUNT', 100)
-        settings.set('LOG_LEVEL', 'DEBUG')
+        settings.set('LOG_LEVEL', 'INFO')  # Don't use DEBUG to avoid logging full HTML content
         print("Running in TEST mode - limiting to 100 pages")
 
     if resume_mode:
@@ -60,6 +80,8 @@ def get_crawl_settings(test_mode=False, resume_mode=False):
     else:
         # Clear previous crawl data
         print("Starting fresh crawl - clearing previous data")
+        if metadata_dir and output_dir:
+            clear_previous_crawl(metadata_dir, output_dir)
 
     return settings
 
@@ -188,7 +210,12 @@ def main():
         print("="*50 + "\n")
 
         # Get settings
-        settings = get_crawl_settings(test_mode=args.test, resume_mode=args.resume)
+        settings = get_crawl_settings(
+            test_mode=args.test,
+            resume_mode=args.resume,
+            metadata_dir=metadata_dir,
+            output_dir=output_dir
+        )
 
         # Create and configure the crawler process
         process = CrawlerProcess(settings)

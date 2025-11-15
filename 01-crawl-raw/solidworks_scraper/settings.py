@@ -110,6 +110,18 @@ METADATA_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 # Log level
 LOG_LEVEL = "INFO"
 
+# Configure logging to exclude verbose scraped item output
+# This prevents HTML content from being dumped in logs
+LOG_CONFIG = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'loggers': {
+        'scrapy.core.scraper': {
+            'level': 'WARNING',  # Don't log DEBUG "Scraped from" messages with full item content
+        },
+    },
+}
+
 # Disable downloading of non-HTML resources
 # Only accept HTML content types
 DEFAULT_REQUEST_HEADERS = {
