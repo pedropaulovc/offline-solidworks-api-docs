@@ -80,3 +80,12 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["S101", "F841"]  # Allow assert and unused vars in tests
 "validate_crawl.py" = ["B007"]  # Allow unused loop vars in validation script
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "01-crawl-toc-pages",
+    "02-extract-members",
+    "03-extract-type-info",
+    "04-extract-enum-members",
+    "shared",
+]

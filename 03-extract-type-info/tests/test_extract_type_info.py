@@ -3,12 +3,8 @@
 Unit tests for type information extraction.
 """
 
-import sys
 import unittest
 from pathlib import Path
-
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from extract_type_info import TypeInfoExtractor, extract_namespace_from_filename, is_type_file
 
