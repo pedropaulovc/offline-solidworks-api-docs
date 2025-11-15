@@ -56,6 +56,20 @@ class ApiDocsSpider(scrapy.Spider):
         try:
             data = json.loads(response.text)
 
+            # Save the JSON response itself
+            item = {
+                'url': response.url,
+                'status_code': response.status,
+                'content': response.text,
+                'headers': dict(response.headers),
+                'timestamp': datetime.now().isoformat(),
+                'session_id': self.session_id,
+                'content_hash': hashlib.sha256(response.body).hexdigest(),
+                'content_length': len(response.body),
+                'title': 'expandToc JSON',
+            }
+            yield item
+
             # Recursively extract all URLs from the JSON structure
             urls = self.extract_urls_from_json(data)
 
