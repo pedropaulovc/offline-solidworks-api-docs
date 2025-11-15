@@ -300,23 +300,32 @@ class TypeInfoExtractor(HTMLParser):
         Examples:
         - "SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFeatureManager~AdvancedHole.html"
           -> "SolidWorks.Interop.sldworks.IFeatureManager.AdvancedHole"
-        - "SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFeature.html"
+        - "../sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ISectionViewData~SectionedZones.html"
+          -> "SolidWorks.Interop.sldworks.ISectionViewData.SectionedZones"
+        - "https://example.com/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFeature.html"
           -> "SolidWorks.Interop.sldworks.IFeature"
-        - "SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.IFeature~GetDefinition.html"
-          -> "SOLIDWORKS.Interop.sldworks.IFeature.GetDefinition"
 
-        Non-type references (paths) return None:
+        Non-type references (guide pages) return None:
         - "../sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm" -> None
         """
-        # If this looks like a file path (has slashes or ..), it's not a type reference
-        if "/" in href or "\\" in href or href.startswith(".."):
-            return None
+        # Extract filename from path (handle URLs and relative paths)
+        # If it has slashes, extract the filename part after the last slash
+        if "/" in href or "\\" in href:
+            filename = href.split("/")[-1].split("\\")[-1]
+        else:
+            filename = href
 
         # Remove .html extension
-        href = href.replace(".html", "").replace(".htm", "")
+        filename = filename.replace(".html", "").replace(".htm", "")
+
+        # Check if this filename matches type reference pattern (has ~ separator)
+        # Type references have format: Assembly~Namespace.Type~Member or Namespace.Type
+        if "~" not in filename and "." not in filename:
+            # No namespace/type pattern
+            return None
 
         # Split by ~ to get parts
-        parts = href.split("~")
+        parts = filename.split("~")
 
         if len(parts) >= 2:
             # Format: Assembly~Namespace.Type~Member or Assembly~Namespace.Type
@@ -326,8 +335,12 @@ class TypeInfoExtractor(HTMLParser):
             cref = ".".join(cref_parts)
             return cref
         elif len(parts) == 1 and "." in parts[0]:
-            # Simple case: just Namespace.Type
-            return parts[0]
+            # Simple case: just Namespace.Type (no path separators allowed)
+            # Make sure it's not a file path like "Overview.SOLIDWORKS"
+            if "/" not in href and "\\" not in href and ".." not in href:
+                return parts[0]
+            else:
+                return None
         else:
             return None
 

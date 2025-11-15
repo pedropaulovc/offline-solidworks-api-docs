@@ -264,6 +264,35 @@ class TestTypeInfoExtractor(unittest.TestCase):
         # Should not contain the original HTML anchor tag
         self.assertNotIn("<a href=", description)
 
+    def test_type_links_with_path_prefix_converted_to_see_cref(self):
+        """Test that type reference links with path prefixes are converted to <see cref> (swZonalSectionViewZones_e bug)."""
+        html = """
+        <html>
+        <div id="pagetop">
+            <span id="pagetitle">swZonalSectionViewZones_e Enumeration</span>
+        </div>
+        <div id="mainbody">
+            Test description
+            <h1>Remarks</h1>
+            <div id="remarksSection">
+                Descriptions appear in <a href="../sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ISectionViewData~SectionedZones.html">ISectionViewData::SectionedZones</a>.
+            </div>
+        </div>
+        </html>
+        """
+
+        parser = TypeInfoExtractor()
+        parser.feed(html)
+
+        remarks = parser.get_remarks()
+
+        # Should convert type reference to XMLDoc see cref (not href!)
+        self.assertIn('<see cref="SolidWorks.Interop.sldworks.ISectionViewData.SectionedZones">', remarks)
+        # Should preserve :: in link text
+        self.assertIn('ISectionViewData::SectionedZones</see>', remarks)
+        # Should NOT use href for type references
+        self.assertNotIn('<see href=', remarks)
+
 
 class TestFilenameExtraction(unittest.TestCase):
     """Test extracting metadata from filenames."""
