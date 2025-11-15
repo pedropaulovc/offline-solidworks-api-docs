@@ -101,7 +101,7 @@ PROJECT_ROOT = Path(__file__).parent.parent
 # Output directories
 OUTPUT_DIR = PROJECT_ROOT / "output"
 HTML_OUTPUT_DIR = OUTPUT_DIR / "html"
-METADATA_OUTPUT_DIR = OUTPUT_DIR / "metadata"
+METADATA_OUTPUT_DIR = PROJECT_ROOT / "metadata"
 
 # Create output directories if they don't exist
 HTML_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

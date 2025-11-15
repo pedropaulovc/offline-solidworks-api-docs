@@ -212,19 +212,14 @@ __marimo__/
 
 # Crawled HTML content (copyright-protected)
 # DO NOT COMMIT - For personal use only
-01-crawl-raw/output/html/
-02-*/output/html/
-03-*/output/html/
+01-crawl-raw/output/
+02-*/output/
+03-*/output/
 *.html
 *.htm
 
 # Temporary reference file
 Welcome.htm
-
-# Keep metadata for reproducibility
-!*/output/metadata/
-!*/output/metadata/*.json
-!*/output/metadata/*.jsonl
 
 # Scrapy cache
 .scrapy/

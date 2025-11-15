@@ -270,7 +270,7 @@ class ApiDocsSpider(CrawlSpider):
         self.stats['reason'] = reason
 
         # Save final statistics
-        stats_file = Path(__file__).parent.parent.parent / 'output' / 'metadata' / 'crawl_stats.json'
+        stats_file = Path(__file__).parent.parent.parent / 'metadata' / 'crawl_stats.json'
         stats_file.parent.mkdir(parents=True, exist_ok=True)
 
         with open(stats_file, 'w', encoding='utf-8') as f:

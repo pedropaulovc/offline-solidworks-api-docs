@@ -215,7 +215,7 @@ class TestDuplicateCheckPipeline:
         self.temp_dir = tempfile.mkdtemp()
 
         # Create test metadata file with existing URLs
-        metadata_dir = Path(self.temp_dir) / 'output' / 'metadata'
+        metadata_dir = Path(self.temp_dir) / 'metadata'
         metadata_dir.mkdir(parents=True, exist_ok=True)
         self.urls_file = metadata_dir / 'urls_crawled.jsonl'
 

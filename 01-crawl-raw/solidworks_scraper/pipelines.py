@@ -91,7 +91,7 @@ class MetadataLogPipeline:
     """Pipeline to log metadata about crawled pages"""
 
     def __init__(self):
-        self.metadata_dir = Path(__file__).parent.parent / 'output' / 'metadata'
+        self.metadata_dir = Path(__file__).parent.parent / 'metadata'
         self.metadata_dir.mkdir(parents=True, exist_ok=True)
 
         # File paths for different metadata
@@ -177,7 +177,7 @@ class DuplicateCheckPipeline:
 
     def load_existing_urls(self):
         """Load already crawled URLs from metadata"""
-        urls_file = Path(__file__).parent.parent / 'output' / 'metadata' / 'urls_crawled.jsonl'
+        urls_file = Path(__file__).parent.parent / 'metadata' / 'urls_crawled.jsonl'
 
         if urls_file.exists():
             try:

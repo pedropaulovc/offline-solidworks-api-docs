@@ -26,7 +26,7 @@ class CrawlValidator:
     def __init__(self, output_dir):
         self.output_dir = Path(output_dir)
         self.html_dir = self.output_dir / "html"
-        self.metadata_dir = self.output_dir / "metadata"
+        self.metadata_dir = self.output_dir.parent / "metadata"
         self.errors = []
         self.warnings = []
         self.stats = defaultdict(int)

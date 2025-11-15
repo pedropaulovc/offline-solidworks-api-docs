@@ -36,7 +36,7 @@ def setup_environment():
     # Ensure output directories exist
     output_dir = project_dir / "output"
     html_dir = output_dir / "html"
-    metadata_dir = output_dir / "metadata"
+    metadata_dir = project_dir / "metadata"
 
     html_dir.mkdir(parents=True, exist_ok=True)
     metadata_dir.mkdir(parents=True, exist_ok=True)
