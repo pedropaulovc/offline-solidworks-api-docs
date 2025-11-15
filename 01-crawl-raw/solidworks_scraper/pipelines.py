@@ -58,25 +58,48 @@ class HtmlSavePipeline:
 
     def url_to_file_path(self, url):
         """Convert URL to organized file path (deterministic)"""
+        from urllib.parse import parse_qs
+
         parsed = urlparse(url)
         path = parsed.path.strip('/')
 
-        # Remove the base path prefix
-        if path.startswith('2026/english/api/'):
-            path = path[len('2026/english/api/'):]
+        # Special handling for expandToc URLs
+        if path == 'expandToc':
+            # Extract id from queryParam
+            query_params = parse_qs(parsed.query)
+            if 'queryParam' in query_params:
+                query_param_value = query_params['queryParam'][0]
+                # Parse the id from ?id=5
+                id_match = re.search(r'id=(-?\d+)', query_param_value)
+                if id_match:
+                    id_value = id_match.group(1)
+                    path = f'expandToc_id_{id_value}.json'
+                else:
+                    # Fallback if no id found
+                    query_hash = hashlib.md5(parsed.query.encode('utf-8')).hexdigest()[:8]
+                    path = f'expandToc_{query_hash}.json'
+            else:
+                # No queryParam, use hash
+                query_hash = hashlib.md5(parsed.query.encode('utf-8')).hexdigest()[:8]
+                path = f'expandToc_{query_hash}.json'
+        else:
+            # Regular page handling
+            # Remove the base path prefix
+            if path.startswith('2026/english/api/'):
+                path = path[len('2026/english/api/'):]
 
-        # Remove query parameters from filename but keep them for uniqueness
-        # by appending a deterministic hash if query params exist
-        if parsed.query:
-            # Create a deterministic hash from query params for uniqueness
-            # Using MD5 for deterministic hashing (not for security)
-            query_hash = hashlib.md5(parsed.query.encode('utf-8')).hexdigest()[:8]
-            path = path.replace('.htm', f'_{query_hash}.htm')
-            path = path.replace('.html', f'_{query_hash}.html')
+            # Remove query parameters from filename but keep them for uniqueness
+            # by appending a deterministic hash if query params exist
+            if parsed.query:
+                # Create a deterministic hash from query params for uniqueness
+                # Using MD5 for deterministic hashing (not for security)
+                query_hash = hashlib.md5(parsed.query.encode('utf-8')).hexdigest()[:8]
+                path = path.replace('.htm', f'_{query_hash}.htm')
+                path = path.replace('.html', f'_{query_hash}.html')
 
-        # Ensure it ends with .html
-        if not path.endswith(('.html', '.htm')):
-            path += '.html'
+            # Ensure it ends with .html
+            if not path.endswith(('.html', '.htm')):
+                path += '.html'
 
         # Clean up the path - replace unsafe characters
         path = re.sub(r'[<>:"|?*]', '_', path)
