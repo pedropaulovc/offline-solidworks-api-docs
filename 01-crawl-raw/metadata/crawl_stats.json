@@ -1,9 +1,9 @@
 {
-  "start_time": "2025-11-14T19:52:22.124736",
-  "total_pages": 10,
-  "successful_pages": 10,
+  "start_time": "2025-11-15T08:11:09.192641",
+  "total_pages": 52,
+  "successful_pages": 52,
   "failed_pages": 0,
   "skipped_pages": 0,
-  "end_time": "2025-11-14T19:52:52.477664",
+  "end_time": "2025-11-15T08:11:16.272129",
   "reason": "closespider_pagecount"
 }

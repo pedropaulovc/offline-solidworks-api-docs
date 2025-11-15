@@ -21,7 +21,7 @@ class ApiDocsSpider(scrapy.Spider):
 
     # Starting URL - JSON TOC endpoint
     start_urls = [
-        "https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id=-1"
+        "https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id=2"
     ]
 
     # Custom settings for this spider
@@ -170,20 +170,28 @@ class ApiDocsSpider(scrapy.Spider):
         self.crawled_urls.add(response.url)
         self.stats['total_pages'] += 1
 
-        # Create item with page data
+        # Extract __NEXT_DATA__ JSON from the page
+        json_text = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
+
+        if not json_text:
+            self.logger.warning(f"No __NEXT_DATA__ JSON found in {response.url}")
+            self.stats['skipped_pages'] += 1
+            return
+
+        # Create item with JSON data
         item = {
             'url': response.url,
             'original_url': response.meta.get('original_url', response.url),
             'status_code': response.status,
-            'content': response.text,
+            'content': json_text,  # Save only the JSON content
             'headers': dict(response.headers),
             'timestamp': datetime.now().isoformat(),
             'session_id': self.session_id,
         }
 
         # Calculate content hash for integrity
-        item['content_hash'] = hashlib.sha256(response.body).hexdigest()
-        item['content_length'] = len(response.body)
+        item['content_hash'] = hashlib.sha256(json_text.encode('utf-8')).hexdigest()
+        item['content_length'] = len(json_text.encode('utf-8'))
 
         # Extract title for better organization
         title = response.xpath('//title/text()').get()
