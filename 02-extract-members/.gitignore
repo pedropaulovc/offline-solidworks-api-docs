@@ -1,0 +1,28 @@
+# Generated output files (users generate these themselves)
+metadata/api_members.xml
+metadata/extraction_summary.json
+metadata/*.json
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
