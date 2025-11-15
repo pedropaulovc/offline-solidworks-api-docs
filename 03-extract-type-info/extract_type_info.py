@@ -26,6 +26,7 @@ class TypeInfoExtractor(HTMLParser):
         self.description = ""
         self.examples = []
         self.remarks = ""
+        self.enum_members = []
 
         # State tracking
         self.in_pagetitle = False
@@ -33,6 +34,7 @@ class TypeInfoExtractor(HTMLParser):
         self.current_section = None
         self.in_example_section = False
         self.in_remarks_section = False
+        self.in_members_section = False
         self.in_link = False
         self.current_link_href = None
         self.current_link_text = ""
@@ -47,6 +49,15 @@ class TypeInfoExtractor(HTMLParser):
         # For collecting remarks content
         self.remarks_parts = []
         self.remarks_depth = 0
+
+        # For collecting enum members
+        self.in_members_table = False
+        self.in_member_row = False
+        self.in_member_name_cell = False
+        self.in_member_desc_cell = False
+        self.current_member_name = None
+        self.current_member_desc_parts = []
+        self.member_desc_depth = 0
 
     def handle_starttag(self, tag, attrs):
         attrs_dict = dict(attrs)
@@ -98,6 +109,37 @@ class TypeInfoExtractor(HTMLParser):
                 attrs_str = " " + " ".join([f'{k}="{v}"' for k, v in attrs])
             self.remarks_parts.append(f"<{tag}{attrs_str}>")
 
+        # Detect members table (enum members)
+        if self.in_members_section and tag == "table":
+            if attrs_dict.get("class") == "FilteredItemListTable":
+                self.in_members_table = True
+                return
+
+        # Detect table row in members table
+        if self.in_members_table and tag == "tr":
+            self.in_member_row = True
+            self.current_member_name = None
+            self.current_member_desc_parts = []
+            return
+
+        # Detect member name cell and description cell
+        if self.in_member_row and tag == "td":
+            cell_class = attrs_dict.get("class", "")
+            if cell_class == "MemberNameCell":
+                self.in_member_name_cell = True
+            elif cell_class == "DescriptionCell":
+                self.in_member_desc_cell = True
+                self.member_desc_depth = 0
+            return
+
+        # Collect HTML tags in member description cell (for link conversion)
+        if self.in_member_desc_cell:
+            self.member_desc_depth += 1
+            attrs_str = ""
+            if attrs:
+                attrs_str = " " + " ".join([f'{k}="{v}"' for k, v in attrs])
+            self.current_member_desc_parts.append(f"<{tag}{attrs_str}>")
+
     def handle_endtag(self, tag):
         if tag == "span" and self.in_pagetitle:
             self.in_pagetitle = False
@@ -140,6 +182,43 @@ class TypeInfoExtractor(HTMLParser):
             if self.remarks_depth == 0 and tag == "div":
                 self.in_remarks_section = False
 
+        # Handle end of member description cell
+        if tag == "td" and self.in_member_desc_cell:
+            self.in_member_desc_cell = False
+            self.member_desc_depth -= 1
+            self.current_member_desc_parts.append(f"</{tag}>")
+            return
+
+        # Handle end of member name cell
+        if tag == "td" and self.in_member_name_cell:
+            self.in_member_name_cell = False
+            return
+
+        # Handle end of table row - save the member
+        if tag == "tr" and self.in_member_row:
+            self.in_member_row = False
+            # Only save if we have both name and description (skip header row)
+            if self.current_member_name and self.current_member_desc_parts:
+                # Convert description HTML (including links) to XMLDoc format
+                desc_html = "".join(self.current_member_desc_parts).strip()
+                desc_clean = self._convert_links_to_see_refs(desc_html)
+
+                self.enum_members.append({
+                    "Name": self.current_member_name,
+                    "Description": desc_clean
+                })
+            return
+
+        # Handle end of members table
+        if tag == "table" and self.in_members_table:
+            self.in_members_table = False
+            return
+
+        # Track closing tags in member description cell
+        if self.in_member_desc_cell:
+            self.member_desc_depth -= 1
+            self.current_member_desc_parts.append(f"</{tag}>")
+
     def handle_data(self, data):
         text = data.strip()
 
@@ -158,14 +237,23 @@ class TypeInfoExtractor(HTMLParser):
             self.current_section = "example"
             self.in_example_section = True
             self.in_remarks_section = False
+            self.in_members_section = False
         elif text == "Remarks":
             self.current_section = "remarks"
             self.in_example_section = False
             self.in_remarks_section = True
+            self.in_members_section = False
+        elif text == "Members":
+            self.current_section = "members"
+            self.in_example_section = False
+            self.in_remarks_section = False
+            self.in_members_section = True
         elif text in ["See Also", "Accessors", "Access Diagram", ".NET Syntax"]:
             # End current section - turn off all section flags
             self.in_example_section = False
             self.in_remarks_section = False
+            self.in_members_section = False
+            self.in_members_table = False
             self.current_section = None
 
         # Collect link text in example section
@@ -176,6 +264,16 @@ class TypeInfoExtractor(HTMLParser):
         # Use original data (not stripped) to preserve spacing
         if self.in_remarks_section and data:
             self.remarks_parts.append(data)
+
+        # Collect member name (appears in <strong> tag within MemberNameCell)
+        if self.in_member_name_cell and text:
+            # Member names are in <strong> tags, so just collect the text
+            if not self.current_member_name:
+                self.current_member_name = text
+
+        # Collect member description (appears in DescriptionCell)
+        if self.in_member_desc_cell and data:
+            self.current_member_desc_parts.append(data)
 
     def _parse_example_link(self, link_text: str, href: str) -> Optional[Dict]:
         """
@@ -445,6 +543,7 @@ def extract_type_info_from_file(html_file: Path) -> Optional[Dict]:
         "Description": parser.get_description(),
         "Examples": parser.examples,
         "Remarks": parser.get_remarks(),
+        "EnumMembers": parser.enum_members,
         "SourceFile": str(html_file)
     }
 
@@ -520,6 +619,19 @@ def create_xml_output(types: List[Dict]) -> str:
             remarks_elem = ET.SubElement(type_elem, "Remarks")
             remarks_elem.text = type_info["Remarks"]
             remarks_elem.set("__cdata__", "true")
+
+        # Add enum members (if any)
+        if type_info.get("EnumMembers"):
+            members_elem = ET.SubElement(type_elem, "EnumMembers")
+            for member in type_info["EnumMembers"]:
+                member_elem = ET.SubElement(members_elem, "Member")
+
+                mem_name = ET.SubElement(member_elem, "Name")
+                mem_name.text = member["Name"]
+
+                mem_desc = ET.SubElement(member_elem, "Description")
+                mem_desc.text = member["Description"]
+                mem_desc.set("__cdata__", "true")
 
     # Pretty print the XML
     xml_str = ET.tostring(root, encoding='unicode')
