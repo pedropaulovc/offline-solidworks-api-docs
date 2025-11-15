@@ -155,10 +155,15 @@ def print_summary(metadata_dir):
     print("CRAWL SUMMARY")
     print("="*50)
 
-    # Count HTML files
+    # Count saved files (HTML and JSON)
     html_dir = metadata_dir.parent / "html"
-    html_count = sum(1 for _ in html_dir.rglob("*.html")) if html_dir.exists() else 0
-    print(f"HTML files saved: {html_count}")
+    if html_dir.exists():
+        html_count = sum(1 for _ in html_dir.rglob("*.html"))
+        json_count = sum(1 for _ in html_dir.rglob("*.json"))
+        total_count = html_count + json_count
+        print(f"Files saved: {total_count} ({html_count} HTML, {json_count} JSON)")
+    else:
+        print(f"Files saved: 0")
 
     # Show sample of crawled URLs
     urls_file = metadata_dir / "urls_crawled.jsonl"
@@ -169,7 +174,9 @@ def print_summary(metadata_dir):
             for i, obj in enumerate(reader):
                 if i >= 5:  # Show first 5
                     break
-                print(f"  - {obj.get('title', 'Untitled')}: {obj.get('print_url', '')}")
+                title = obj.get('title', 'Untitled')
+                url = obj.get('url', '')
+                print(f"  - {title}: {url}")
 
     # Show metadata files
     print("\nMetadata files created:")
