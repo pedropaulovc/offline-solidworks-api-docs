@@ -83,10 +83,9 @@ def parse_href_to_cref(href: str) -> str | None:
     """
     # Extract filename from path (handle URLs and relative paths)
     # If it has slashes, extract the filename part after the last slash
+    filename = href
     if "/" in href or "\\" in href:
         filename = href.split("/")[-1].split("\\")[-1]
-    else:
-        filename = href
 
     # Remove .html extension
     filename = filename.replace(".html", "").replace(".htm", "")

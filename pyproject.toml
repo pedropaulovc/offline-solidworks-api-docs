@@ -76,7 +76,6 @@ select = [
 ignore = [
     "E501", # line too long (handled by formatter)
     "SIM102", # Allow nested ifs for clarity
-    "SIM108", # Allow if-else instead of ternary for clarity
 ]
 
 [tool.ruff.lint.per-file-ignores]
