@@ -212,9 +212,7 @@ __marimo__/
 
 # Crawled HTML content (copyright-protected)
 # DO NOT COMMIT - For personal use only
-01-crawl-raw/output/
-02-*/output/
-03-*/output/
+*/output/
 *.html
 *.htm
 
@@ -244,13 +242,13 @@ Thumbs.db
 desktop.ini
 
 # Test coverage reports (project-specific)
-01-crawl-raw/htmlcov/
-01-crawl-raw/.coverage
-01-crawl-raw/.pytest_cache/
+*/htmlcov/
+*/.coverage
+*/.pytest_cache/
 
 # Logs
 *.log
-01-crawl-raw/logs/
+*/logs/
 
 # Temporary files
 *.tmp
