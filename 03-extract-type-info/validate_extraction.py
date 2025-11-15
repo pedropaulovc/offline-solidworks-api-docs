@@ -9,16 +9,17 @@ import argparse
 import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Any
 
 
-def validate_xml_structure(xml_file: Path) -> dict:
+def validate_xml_structure(xml_file: Path) -> dict[str, Any]:
     """
     Validate that the XML file is well-formed and has expected structure.
 
     Returns:
         Dictionary with validation results
     """
-    results = {
+    results: dict[str, Any] = {
         "valid_xml": False,
         "has_root": False,
         "type_count": 0,
@@ -78,14 +79,14 @@ def validate_xml_structure(xml_file: Path) -> dict:
     return results
 
 
-def validate_summary(summary_file: Path) -> dict:
+def validate_summary(summary_file: Path) -> dict[str, Any]:
     """
     Validate the extraction summary metadata.
 
     Returns:
         Dictionary with validation results
     """
-    results = {
+    results: dict[str, Any] = {
         "valid_json": False,
         "has_required_fields": False,
         "total_files": 0,
@@ -119,7 +120,7 @@ def validate_summary(summary_file: Path) -> dict:
     return results
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="Validate type information extraction results")
     parser.add_argument(
         "--metadata-dir",
@@ -157,14 +158,14 @@ def main():
     print(f"  [PASS] Root element: {'Types' if xml_results['has_root'] else 'INVALID'}")
     print(f"  [INFO] Type count: {xml_results['type_count']}")
     print(
-        f"  [INFO] Types with description: {xml_results['types_with_description']} ({100*xml_results['types_with_description']//xml_results['type_count'] if xml_results['type_count'] > 0 else 0}%)"
+        f"  [INFO] Types with description: {xml_results['types_with_description']} ({100 * xml_results['types_with_description'] // xml_results['type_count'] if xml_results['type_count'] > 0 else 0}%)"
     )
     print(
-        f"  [INFO] Types with examples: {xml_results['types_with_examples']} ({100*xml_results['types_with_examples']//xml_results['type_count'] if xml_results['type_count'] > 0 else 0}%)"
+        f"  [INFO] Types with examples: {xml_results['types_with_examples']} ({100 * xml_results['types_with_examples'] // xml_results['type_count'] if xml_results['type_count'] > 0 else 0}%)"
     )
     print(f"  [INFO] Total examples: {xml_results['total_examples']}")
     print(
-        f"  [INFO] Types with remarks: {xml_results['types_with_remarks']} ({100*xml_results['types_with_remarks']//xml_results['type_count'] if xml_results['type_count'] > 0 else 0}%)"
+        f"  [INFO] Types with remarks: {xml_results['types_with_remarks']} ({100 * xml_results['types_with_remarks'] // xml_results['type_count'] if xml_results['type_count'] > 0 else 0}%)"
     )
 
     if xml_results["issues"]:
