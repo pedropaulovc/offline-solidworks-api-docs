@@ -1,6 +1,6 @@
 # Phase 1: Raw HTML Crawler
 
-This directory contains the Scrapy-based crawler for downloading the SolidWorks API documentation. The start page (Welcome.htm) is downloaded in full format to capture the complete table of contents, while all subsequent pages are saved in print preview format for cleaner, more compact HTML.
+This directory contains the Scrapy-based crawler for downloading the SolidWorks API documentation. The crawler uses the SolidWorks expandToc JSON API to discover all documentation pages, then extracts clean HTML content from the `__NEXT_DATA__` JSON embedded in each page.
 
 ## 📁 Directory Structure
 
@@ -103,29 +103,94 @@ DEFAULT_REQUEST_HEADERS = {
 To modify crawl behavior, edit:
 
 1. **Starting URL**: In `api_docs_spider.py`, modify `start_urls`
+   - Current: `https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id=2`
+   - Change version, language, or starting id as needed
 2. **URL Boundaries**: In `api_docs_spider.py`, adjust `base_path`
+   - Current: `/2026/english/api/`
 3. **Crawl Delay**: In `settings.py`, change `DOWNLOAD_DELAY`
 4. **Concurrent Requests**: In `settings.py`, modify `CONCURRENT_REQUESTS`
 
+## 🔬 How It Works: The expandToc API
+
+The SolidWorks documentation site uses a JSON API called `expandToc` to serve its table of contents. Understanding this is key to understanding how the crawler works:
+
+### expandToc API Structure
+
+**Request Format:**
+```
+https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id=<N>
+```
+
+**Response Structure:**
+```json
+{
+  "children": [
+    {
+      "name": "Page Title",
+      "url": "/2026/english/api/sldworksapi/SomeClass.htm?id=123",
+      "children": [
+        // Nested pages...
+      ]
+    }
+  ]
+}
+```
+
+The crawler:
+1. Starts with `id=2` (root API documentation node)
+2. Extracts all URLs from the `children` array
+3. For each URL with an `id` parameter, makes another expandToc request
+4. Recursively discovers all pages in the documentation tree
+
+### Page Content Extraction
+
+Each documentation page contains a `<script id="__NEXT_DATA__">` tag with JSON data:
+```json
+{
+  "props": {
+    "pageProps": {
+      "helpContentData": {
+        "helpText": "<html>...actual documentation HTML...</html>"
+      }
+    }
+  }
+}
+```
+
+The crawler extracts only the `helpText` field, which contains clean HTML without navigation, headers, or other page chrome.
+
 ## 🕷️ Spider Implementation
 
-The main spider (`api_docs_spider.py`) implements:
+The main spider (`api_docs_spider.py`) implements a two-stage crawling approach:
+
+### Stage 1: Table of Contents Discovery
+- **Start URL**: `https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id=2`
+- Fetches JSON structure containing all documentation page URLs
+- Recursively extracts URLs from nested `children` arrays
+- Creates expandToc requests for each page's `id` parameter to discover nested pages
+
+### Stage 2: Content Extraction
+- Visits each documentation page URL
+- Extracts `__NEXT_DATA__` JSON blob embedded in the HTML
+- Parses `props.pageProps.helpContentData.helpText` to get clean HTML content
+- Saves only the helpText HTML (no navigation, headers, or other page chrome)
 
 ### URL Processing
-- **Start URL** (Welcome.htm): Downloaded in full format to capture complete table of contents
-- **Subsequent URLs**: Converted to print preview format (`&format=p&value=1`) for cleaner HTML
 - Enforces boundary checking (stays within `/2026/english/api/`)
 - Filters out non-HTML resources (CSS, JS, images)
+- Tracks visited URLs to prevent duplicates
 
 ### Data Extraction
-- Captures page content and metadata
-- Calculates content hashes for integrity
+- Captures clean HTML content from helpText field
+- Calculates content hashes (SHA-256) for integrity
 - Extracts page titles for organization
+- Stores complete metadata for reproducibility
 
 ### Error Handling
 - Retries failed requests (up to 3 times)
 - Logs errors to `errors.jsonl`
 - Continues crawling despite individual failures
+- Gracefully handles missing JSON data
 
 ## 📦 Pipelines
 
@@ -154,16 +219,24 @@ The crawler uses multiple pipelines for data processing:
 
 ### HTML Files (`output/html/`)
 
-Files are organized by URL path:
+Files are organized by URL path and include both HTML content and JSON TOC data:
 ```
 output/html/
+├── expandToc_id_2.json           # Main TOC structure
+├── expandToc_id_0.json           # Sub-TOC for id=0
+├── expandToc_id_1.json           # Sub-TOC for id=1
 ├── sldworksapiprogguide/
-│   └── Welcome_16777215.htm
+│   └── Welcome_<hash>.html       # helpText HTML content
 ├── sldworksapi/
-│   ├── SolidWorks.Interop.sldworks~IAdvancedHoleFeatureData_12345.html
+│   ├── SolidWorks.Interop.sldworks~IAdvancedHoleFeatureData_<hash>.html
 │   └── ...
 └── ...
 ```
+
+**File naming:**
+- **expandToc files**: Named by ID parameter (e.g., `expandToc_id_2.json`)
+- **HTML files**: Original path with query parameter hash appended (deterministic)
+- Query parameter hash ensures unique filenames for pages with different parameters
 
 ### Metadata Files (`output/metadata/`)
 
@@ -171,8 +244,7 @@ output/html/
 One JSON object per line, containing:
 ```json
 {
-  "original_url": "https://help.solidworks.com/2026/english/api/...",
-  "print_url": "https://help.solidworks.com/...&format=p&value=1",
+  "url": "https://help.solidworks.com/2026/english/api/sldworksapi/...",
   "timestamp": "2025-11-14T10:30:00Z",
   "file_path": "output/html/sldworksapi/...",
   "content_hash": "sha256:...",
@@ -182,6 +254,8 @@ One JSON object per line, containing:
   "session_id": "2025-11-14-103000"
 }
 ```
+
+**Note**: For expandToc JSON files, the content is the full JSON response. For HTML pages, the content is the extracted helpText HTML.
 
 #### crawl_stats.json
 Summary statistics:
@@ -263,8 +337,9 @@ The validation script checks:
 
 **Solutions**:
 - Check URL boundary settings
-- Verify print preview URLs work
-- Look for patterns in skipped pages
+- Verify expandToc API is returning data
+- Check for pages missing `__NEXT_DATA__` JSON
+- Look for patterns in skipped pages in metadata/errors.jsonl
 
 ## 🔍 Monitoring Progress
 
@@ -291,19 +366,25 @@ If you need faster crawling (use with caution):
 
 When a new SolidWorks version is released:
 
-1. Update the year in URL paths (e.g., 2026 → 2027)
-2. Modify `BASE_URL_PATH` in settings.py
-3. Update `start_urls` in api_docs_spider.py
-4. Clear previous crawl data
-5. Run fresh crawl and validate
+1. **Update expandToc URL** in `api_docs_spider.py`:
+   - Change `version=2026` to `version=2027` in `start_urls`
+2. **Update base path** in `api_docs_spider.py`:
+   - Change `self.base_path = "/2026/english/api/"` to `"/2027/english/api/"`
+3. **Update manifest** in `pipelines.py`:
+   - Update `start_url` and `boundary` in `MetadataLogPipeline.init_manifest()`
+4. **Clear previous crawl data**:
+   - Delete or archive `output/` and `metadata/` directories
+5. **Run fresh crawl and validate**
 
 ## 📝 Notes
 
-- Print preview format (`&format=p&value=1`) provides cleaner HTML
-- The crawler respects robots.txt by default
-- Duplicate detection allows resuming interrupted crawls
-- All timestamps are in ISO 8601 format (UTC)
-- Content hashes use SHA-256 for integrity verification
+- **Clean HTML**: Content is extracted from `__NEXT_DATA__` JSON, providing pure documentation HTML without navigation or page chrome
+- **JSON TOC Structure**: The expandToc API provides the complete table of contents in JSON format
+- **Duplicate Detection**: Tracks visited URLs to prevent reprocessing and allow resuming interrupted crawls
+- **Deterministic Filenames**: Query parameters are hashed (MD5) to create unique, deterministic filenames
+- **Timestamps**: All timestamps are in ISO 8601 format (UTC)
+- **Content Hashes**: SHA-256 hashes ensure integrity verification
+- **Robots.txt**: The crawler respects robots.txt by default
 
 ---
 

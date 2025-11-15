@@ -179,7 +179,7 @@ class TestMetadataLogPipeline:
         with jsonlines.open(self.pipeline.urls_file) as reader:
             saved_metadata = list(reader)[0]
 
-        assert saved_metadata['print_url'] == item['url']
+        assert saved_metadata['url'] == item['url']
         assert saved_metadata['content_hash'] == 'abc123'
         assert saved_metadata['title'] == 'Test Page'
 
@@ -222,8 +222,8 @@ class TestDuplicateCheckPipeline:
         # Write some existing URLs
         import jsonlines
         with jsonlines.open(self.urls_file, mode='w') as writer:
-            writer.write({'print_url': 'https://test.com/existing1.html'})
-            writer.write({'print_url': 'https://test.com/existing2.html'})
+            writer.write({'url': 'https://test.com/existing1.html'})
+            writer.write({'url': 'https://test.com/existing2.html'})
 
         # Patch Path to use temp directory
         with patch.object(Path, '__new__', return_value=Path(self.temp_dir)):
