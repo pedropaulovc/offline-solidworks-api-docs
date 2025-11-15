@@ -11,9 +11,10 @@ import json
 import xml.etree.ElementTree as ET
 from collections import Counter
 from pathlib import Path
+from typing import Any
 
 
-def load_xml(xml_file: Path) -> ET.Element:
+def load_xml(xml_file: Path) -> ET.Element | None:
     """Load and parse the XML file."""
     try:
         tree = ET.parse(xml_file)
@@ -23,9 +24,9 @@ def load_xml(xml_file: Path) -> ET.Element:
         return None
 
 
-def validate_structure(root: ET.Element) -> dict:
+def validate_structure(root: ET.Element) -> dict[str, Any]:
     """Validate the basic XML structure."""
-    results = {"valid": True, "errors": [], "warnings": []}
+    results: dict[str, Any] = {"valid": True, "errors": [], "warnings": []}
 
     if root.tag != "Types":
         results["valid"] = False
@@ -49,9 +50,9 @@ def validate_structure(root: ET.Element) -> dict:
     return results
 
 
-def analyze_types(root: ET.Element) -> dict:
+def analyze_types(root: ET.Element) -> dict[str, Any]:
     """Analyze the extracted types."""
-    stats = {
+    stats: dict[str, Any] = {
         "total_types": 0,
         "types_with_properties": 0,
         "types_with_methods": 0,
@@ -74,11 +75,11 @@ def analyze_types(root: ET.Element) -> dict:
         has_props = props is not None and len(props.findall("Property")) > 0
         has_methods = methods is not None and len(methods.findall("Method")) > 0
 
-        if has_props:
+        if has_props and props is not None:
             stats["types_with_properties"] += 1
             stats["total_properties"] += len(props.findall("Property"))
 
-        if has_methods:
+        if has_methods and methods is not None:
             stats["types_with_methods"] += 1
             stats["total_methods"] += len(methods.findall("Method"))
 
@@ -88,9 +89,9 @@ def analyze_types(root: ET.Element) -> dict:
     return stats
 
 
-def check_duplicates(root: ET.Element) -> dict:
+def check_duplicates(root: ET.Element) -> dict[str, Any]:
     """Check for duplicate type names."""
-    type_names = []
+    type_names: list[str] = []
     for type_elem in root.findall("Type"):
         name_elem = type_elem.find("Name")
         if name_elem is not None and name_elem.text:
@@ -102,10 +103,10 @@ def check_duplicates(root: ET.Element) -> dict:
     return {"has_duplicates": len(duplicates) > 0, "duplicates": duplicates, "unique_types": len(counter)}
 
 
-def check_url_format(root: ET.Element) -> dict:
+def check_url_format(root: ET.Element) -> dict[str, Any]:
     """Check that URLs follow expected format."""
-    issues = []
-    total_urls = 0
+    issues: list[str] = []
+    total_urls: int = 0
 
     for type_elem in root.findall("Type"):
         type_name = type_elem.find("Name")
@@ -134,7 +135,7 @@ def check_url_format(root: ET.Element) -> dict:
     return {"total_urls": total_urls, "issues": issues, "all_valid": len(issues) == 0}
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="Validate extracted API members XML")
     parser.add_argument(
         "--xml-file",
