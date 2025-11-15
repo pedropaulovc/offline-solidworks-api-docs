@@ -2,7 +2,11 @@
 SolidWorks API Documentation Spider
 
 This spider crawls the SolidWorks API documentation starting from the main welcome page,
-staying within the /2026/english/api/ boundary, and saving print preview versions of pages.
+staying within the /2026/english/api/ boundary.
+
+The start URL (Welcome.htm) is downloaded in its full format to capture the complete
+table of contents with all navigation links. All subsequently discovered pages are
+saved in print preview format for cleaner, more compact HTML.
 """
 
 import scrapy
@@ -108,14 +112,20 @@ class ApiDocsSpider(CrawlSpider):
         return print_url
 
     def start_requests(self):
-        """Generate initial requests with print preview URLs"""
+        """
+        Generate initial requests.
+
+        The start URL (Welcome.htm) is downloaded in full format (not print preview)
+        because it contains the complete table of contents with all navigation links.
+        All subsequent pages discovered will be converted to print preview format.
+        """
         for url in self.start_urls:
-            print_url = self.convert_to_print_preview(url)
+            # Do NOT convert start URL to print preview - we need the full TOC
             yield scrapy.Request(
-                print_url,
+                url,
                 callback=self.parse_page,
                 errback=self.handle_error,
-                meta={'original_url': url}
+                meta={'original_url': url, 'is_start_page': True}
             )
 
     def parse_page(self, response):

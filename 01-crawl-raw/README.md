@@ -1,6 +1,6 @@
 # Phase 1: Raw HTML Crawler
 
-This directory contains the Scrapy-based crawler for downloading the SolidWorks API documentation in print preview format.
+This directory contains the Scrapy-based crawler for downloading the SolidWorks API documentation. The start page (Welcome.htm) is downloaded in full format to capture the complete table of contents, while all subsequent pages are saved in print preview format for cleaner, more compact HTML.
 
 ## 📁 Directory Structure
 
@@ -112,7 +112,8 @@ To modify crawl behavior, edit:
 The main spider (`api_docs_spider.py`) implements:
 
 ### URL Processing
-- Converts all URLs to print preview format (`&format=p&value=1`)
+- **Start URL** (Welcome.htm): Downloaded in full format to capture complete table of contents
+- **Subsequent URLs**: Converted to print preview format (`&format=p&value=1`) for cleaner HTML
 - Enforces boundary checking (stays within `/2026/english/api/`)
 - Filters out non-HTML resources (CSS, JS, images)
 
