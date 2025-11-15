@@ -92,7 +92,8 @@ class MemberExtractor(HTMLParser):
         text = data.strip()
 
         # Extract type name from title like "IAnnotationView Interface Members"
-        if self.in_title and text and " Interface Members" in text:
+        is_interface_members_title = self.in_title and text and " Interface Members" in text
+        if is_interface_members_title:
             self.type_name = text.replace(" Interface Members", "").strip()
 
         # Detect section headers
