@@ -343,6 +343,52 @@ class TestTypeInfoExtractor(unittest.TestCase):
         self.assertIn('<see cref="SolidWorks.Interop.swconst.swTwistControlType_e">', parser.enum_members[2]["Description"])
         self.assertIn('swTwistControlType_e</see>', parser.enum_members[2]["Description"])
 
+    def test_remarks_not_triggered_by_text_in_cells(self):
+        """Test that 'Remarks' text in member descriptions doesn't trigger remarks section (swWzdHoleStandardFastenerTypes_e bug)."""
+        html = """
+        <html>
+        <div id="pagetop">
+            <span id="pagetitle">swTest Enumeration</span>
+        </div>
+        <div id="mainbody">
+            Test enum.
+            <h1>Members</h1>
+            <div id="enummembersSection">
+                <table class="FilteredItemListTable">
+                    <tr><th>Member</th><th>Description</th></tr>
+                    <tr>
+                        <td class="MemberNameCell"><strong>swObsoleteMember</strong></td>
+                        <td class="DescriptionCell">Obsolete; see <strong>Remarks</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="MemberNameCell"><strong>swValidMember</strong></td>
+                        <td class="DescriptionCell">Valid member</td>
+                    </tr>
+                </table>
+            </div>
+            <h1>Remarks</h1>
+            <div id="remarksSection">This is the actual remarks content.</div>
+        </div>
+        </html>
+        """
+
+        parser = TypeInfoExtractor()
+        parser.feed(html)
+
+        # Should extract 2 members
+        self.assertEqual(len(parser.enum_members), 2)
+
+        # Remarks should only contain actual remarks, not member descriptions
+        remarks = parser.get_remarks()
+        self.assertEqual(remarks.strip(), "This is the actual remarks content.")
+
+        # Remarks should NOT contain member names or descriptions
+        self.assertNotIn("swObsoleteMember", remarks)
+        self.assertNotIn("swValidMember", remarks)
+
+        # Remarks should NOT contain the h1 heading text
+        self.assertNotIn("Remarks\n", remarks)
+
 
 class TestFilenameExtraction(unittest.TestCase):
     """Test extracting metadata from filenames."""

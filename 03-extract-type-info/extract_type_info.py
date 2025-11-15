@@ -31,6 +31,7 @@ class TypeInfoExtractor(HTMLParser):
         # State tracking
         self.in_pagetitle = False
         self.in_description = False
+        self.in_h1 = False
         self.current_section = None
         self.in_example_section = False
         self.in_remarks_section = False
@@ -67,11 +68,14 @@ class TypeInfoExtractor(HTMLParser):
             self.in_pagetitle = True
             return
 
-        # Track when we've seen the first h1 (stops description collection)
-        if tag == "h1" and self.seen_pagetitle and not self.seen_first_h1:
-            self.seen_first_h1 = True
-            self.in_description = False
-            self.description_depth = 0
+        # Track when we're inside an h1 tag (for section detection)
+        if tag == "h1":
+            self.in_h1 = True
+            # Track when we've seen the first h1 (stops description collection)
+            if self.seen_pagetitle and not self.seen_first_h1:
+                self.seen_first_h1 = True
+                self.in_description = False
+                self.description_depth = 0
             return
 
         # Collect all HTML tags in description section (like we do for remarks)
@@ -171,7 +175,7 @@ class TypeInfoExtractor(HTMLParser):
 
         # Close h1 tag - might signal end of section header
         if tag == "h1":
-            pass
+            self.in_h1 = False
 
         # Track closing tags in remarks section
         if self.in_remarks_section:
@@ -232,29 +236,30 @@ class TypeInfoExtractor(HTMLParser):
         if self.in_description and data and not self.in_pagetitle:
             self.description_parts.append(data)
 
-        # Detect section headers
-        if text == "Example" or text == "Examples":
-            self.current_section = "example"
-            self.in_example_section = True
-            self.in_remarks_section = False
-            self.in_members_section = False
-        elif text == "Remarks":
-            self.current_section = "remarks"
-            self.in_example_section = False
-            self.in_remarks_section = True
-            self.in_members_section = False
-        elif text == "Members":
-            self.current_section = "members"
-            self.in_example_section = False
-            self.in_remarks_section = False
-            self.in_members_section = True
-        elif text in ["See Also", "Accessors", "Access Diagram", ".NET Syntax"]:
-            # End current section - turn off all section flags
-            self.in_example_section = False
-            self.in_remarks_section = False
-            self.in_members_section = False
-            self.in_members_table = False
-            self.current_section = None
+        # Detect section headers (only when inside h1 tags)
+        if self.in_h1:
+            if text == "Example" or text == "Examples":
+                self.current_section = "example"
+                self.in_example_section = True
+                self.in_remarks_section = False
+                self.in_members_section = False
+            elif text == "Remarks":
+                self.current_section = "remarks"
+                self.in_example_section = False
+                self.in_remarks_section = True
+                self.in_members_section = False
+            elif text == "Members":
+                self.current_section = "members"
+                self.in_example_section = False
+                self.in_remarks_section = False
+                self.in_members_section = True
+            elif text in ["See Also", "Accessors", "Access Diagram", ".NET Syntax"]:
+                # End current section - turn off all section flags
+                self.in_example_section = False
+                self.in_remarks_section = False
+                self.in_members_section = False
+                self.in_members_table = False
+                self.current_section = None
 
         # Collect link text in example section
         if self.in_link and data:
@@ -262,7 +267,8 @@ class TypeInfoExtractor(HTMLParser):
 
         # Collect remarks content with proper spacing
         # Use original data (not stripped) to preserve spacing
-        if self.in_remarks_section and data:
+        # Don't collect h1 heading text
+        if self.in_remarks_section and data and not self.in_h1:
             self.remarks_parts.append(data)
 
         # Collect member name (appears in <strong> tag within MemberNameCell)
