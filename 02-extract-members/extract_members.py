@@ -91,10 +91,9 @@ class MemberExtractor(HTMLParser):
     def handle_data(self, data: str) -> None:
         text = data.strip()
 
-        if self.in_title and text:
-            # Extract type name from title like "IAnnotationView Interface Members"
-            if " Interface Members" in text:
-                self.type_name = text.replace(" Interface Members", "").strip()
+        # Extract type name from title like "IAnnotationView Interface Members"
+        if self.in_title and text and " Interface Members" in text:
+            self.type_name = text.replace(" Interface Members", "").strip()
 
         # Detect section headers
         if text == "Public Properties":
