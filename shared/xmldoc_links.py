@@ -28,7 +28,7 @@ def convert_links_to_see_refs(html: str) -> str:
     # Or: <a href="Assembly~Namespace.Type.html">LinkText</a>
     pattern = r'<a\s+[^>]*?href="([^"]+?\.html?)"[^>]*?>([^<]+?)</a>'
 
-    def replace_link(match):
+    def replace_link(match: re.Match[str]) -> str:
         href = match.group(1)
         link_text = match.group(2)  # Don't strip - preserve spacing
 
