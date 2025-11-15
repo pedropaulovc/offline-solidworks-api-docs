@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 import re
 from datetime import datetime
 from itemadapter import ItemAdapter
+import hashlib
 
 
 class HtmlSavePipeline:
@@ -56,7 +57,7 @@ class HtmlSavePipeline:
         return item
 
     def url_to_file_path(self, url):
-        """Convert URL to organized file path"""
+        """Convert URL to organized file path (deterministic)"""
         parsed = urlparse(url)
         path = parsed.path.strip('/')
 
@@ -65,10 +66,11 @@ class HtmlSavePipeline:
             path = path[len('2026/english/api/'):]
 
         # Remove query parameters from filename but keep them for uniqueness
-        # by appending a hash if query params exist
+        # by appending a deterministic hash if query params exist
         if parsed.query:
-            # Create a simple hash from query params for uniqueness
-            query_hash = str(hash(parsed.query) & 0xFFFFFF)  # Keep it short
+            # Create a deterministic hash from query params for uniqueness
+            # Using MD5 for deterministic hashing (not for security)
+            query_hash = hashlib.md5(parsed.query.encode('utf-8')).hexdigest()[:8]
             path = path.replace('.htm', f'_{query_hash}.htm')
             path = path.replace('.html', f'_{query_hash}.html')
 

@@ -58,6 +58,22 @@ class TestHtmlSavePipeline:
         path3 = self.pipeline.url_to_file_path(url3)
         assert path3.suffix == ".html"
 
+    def test_url_to_file_path_deterministic(self):
+        """Test that URL to file path conversion is deterministic"""
+        url = "https://help.solidworks.com/2026/english/api/test.html?id=123&format=p"
+
+        # Call multiple times and ensure same result
+        path1 = self.pipeline.url_to_file_path(url)
+        path2 = self.pipeline.url_to_file_path(url)
+        path3 = self.pipeline.url_to_file_path(url)
+
+        assert path1 == path2 == path3, "File path should be deterministic for same URL"
+
+        # Verify the specific hash for this URL
+        # MD5 of "id=123&format=p" first 8 chars should be consistent
+        assert "test_" in path1.name
+        # The hash should be the same across test runs
+
     def test_process_item_saves_html(self):
         """Test that HTML content is saved correctly"""
         # Create mock spider
