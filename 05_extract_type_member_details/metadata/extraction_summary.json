@@ -1,0 +1,10 @@
+{
+  "total_files_processed": 11523,
+  "members_extracted": 11523,
+  "members_with_parameters": 5063,
+  "members_with_return_values": 5703,
+  "members_with_remarks": 6485,
+  "errors": 0,
+  "output_file": "05_extract_type_member_details\\metadata\\api_member_details.xml",
+  "error_files": []
+}
