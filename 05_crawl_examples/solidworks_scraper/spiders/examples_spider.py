@@ -35,11 +35,9 @@ class ExamplesSpider(scrapy.Spider):
         super().__init__(*args, **kwargs)
         self.crawled_urls: set[str] = set()
         self.base_url: str = "https://help.solidworks.com/2026/english/api"
-        self.session_id: str = datetime.now().strftime("%Y-%m-%d-%H%M%S")
 
         # Statistics tracking
         self.stats: dict[str, Any] = {
-            "start_time": datetime.now().isoformat(),
             "total_pages": 0,
             "successful_pages": 0,
             "failed_pages": 0,
@@ -143,8 +141,6 @@ class ExamplesSpider(scrapy.Spider):
             "status_code": response.status,
             "content": content,  # Save only the helpText HTML
             "headers": dict(response.headers),
-            "timestamp": datetime.now().isoformat(),
-            "session_id": self.session_id,
         }
 
         # Calculate content hash for integrity
@@ -172,15 +168,12 @@ class ExamplesSpider(scrapy.Spider):
             "type": "error",
             "url": request_url,
             "error": str(failure.value),
-            "timestamp": datetime.now().isoformat(),
-            "session_id": self.session_id,
         }
 
         yield error_item
 
     def closed(self, reason: str) -> None:
         """Called when the spider is closed"""
-        self.stats["end_time"] = datetime.now().isoformat()
         self.stats["reason"] = reason
 
         # Save final statistics

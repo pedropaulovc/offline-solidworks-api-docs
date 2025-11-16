@@ -41,7 +41,6 @@ class CrawlValidator:
 
         # Validation results
         self.results: dict[str, Any] = {
-            "timestamp": datetime.now().isoformat(),
             "validation_passed": True,
             "checks": {},
             "warnings": [],
@@ -214,7 +213,7 @@ class CrawlValidator:
             print("  [PASS] No duplicate URLs")
 
         # Check for missing required fields
-        required_fields = ["url", "timestamp", "content_hash", "file_path"]
+        required_fields = ["url", "content_hash", "file_path"]
         incomplete_entries = []
 
         for entry in metadata_entries:

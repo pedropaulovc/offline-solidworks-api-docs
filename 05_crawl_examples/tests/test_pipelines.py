@@ -56,7 +56,6 @@ def test_validation_pipeline_checks_required_fields(spider):
     complete_item = {
         "url": "https://example.com/test.htm",
         "content": "<html><body>Test content with enough text to pass validation</body></html>",
-        "timestamp": "2024-01-01T00:00:00",
         "content_hash": "abc123",
     }
 
@@ -67,7 +66,6 @@ def test_validation_pipeline_checks_required_fields(spider):
     incomplete_item = {
         "url": "https://example.com/test.htm",
         "content": "<html><body>Test content</body></html>",
-        "timestamp": "2024-01-01T00:00:00",
     }
 
     # Should still process but log warning (check via spider logger)
@@ -82,7 +80,6 @@ def test_validation_pipeline_warns_on_short_content(spider):
     short_item = {
         "url": "https://example.com/test.htm",
         "content": "<html></html>",  # Too short
-        "timestamp": "2024-01-01T00:00:00",
         "content_hash": "abc123",
     }
 

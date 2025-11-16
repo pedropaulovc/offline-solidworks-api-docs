@@ -92,8 +92,6 @@ class TestApiDocsSpider:
         assert item["content"] == help_text_content
         assert item["title"] == "Test Page"
         assert "content_hash" in item
-        assert "timestamp" in item
-        assert "session_id" in item
 
     def test_parse_page_skips_non_html(self) -> None:
         """Test that non-HTML content is skipped"""
@@ -140,7 +138,6 @@ class TestApiDocsSpider:
         assert error_item["type"] == "error"
         assert error_item["url"] == mock_failure.request.url
         assert "Connection timeout" in error_item["error"]
-        assert "timestamp" in error_item
         assert self.spider.stats["failed_pages"] == 1
 
     def test_start_requests(self) -> None:

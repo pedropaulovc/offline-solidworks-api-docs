@@ -119,7 +119,6 @@ class MetadataLogPipeline:
         """Initialize or update the manifest file"""
         manifest = {
             "crawler_version": "1.0.0",
-            "last_updated": datetime.now().isoformat(),
             "source_file": "03_extract_type_info/metadata/api_types.xml",
             "urls_file": "05_crawl_examples/metadata/example_urls.txt",
             "base_url": "https://help.solidworks.com/2026/english/api",
@@ -143,13 +142,11 @@ class MetadataLogPipeline:
         # Prepare metadata entry
         metadata = {
             "url": adapter.get("url"),
-            "timestamp": adapter.get("timestamp"),
             "file_path": adapter.get("file_path"),
             "content_hash": adapter.get("content_hash"),
             "content_length": adapter.get("content_length"),
             "status_code": adapter.get("status_code"),
             "title": adapter.get("title"),
-            "session_id": adapter.get("session_id"),
         }
 
         # Log to URLs file
@@ -168,8 +165,6 @@ class MetadataLogPipeline:
         error_data: dict[str, Any] = {
             "url": error_item.get("url"),
             "error": error_item.get("error"),
-            "timestamp": error_item.get("timestamp"),
-            "session_id": error_item.get("session_id"),
         }
 
         try:
@@ -234,7 +229,7 @@ class ValidationPipeline:
         adapter = ItemAdapter(item)
 
         # Check required fields
-        required_fields = ["url", "content", "timestamp", "content_hash"]
+        required_fields = ["url", "content", "content_hash"]
         for field in required_fields:
             if not adapter.get(field):
                 spider.logger.warning(f"Missing required field '{field}' for {adapter.get('url')}")

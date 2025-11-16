@@ -154,7 +154,7 @@ class CrawlValidator:
                     url_count += 1
 
                     # Check required fields
-                    required_fields = ["print_url", "file_path", "content_hash", "timestamp"]
+                    required_fields = ["print_url", "file_path", "content_hash"]
                     for field in required_fields:
                         if field not in obj:
                             self.warnings.append(
@@ -364,9 +364,8 @@ class CrawlValidator:
                 print(f"  ... and {len(self.warnings) - 5} more")
 
         # Save detailed report
-        report_file = self.metadata_dir / f"validation_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        report_file = self.metadata_dir / "validation_report.json"
         report_data = {
-            "timestamp": datetime.now().isoformat(),
             "stats": dict(self.stats),
             "errors": self.errors,
             "warnings": self.warnings,

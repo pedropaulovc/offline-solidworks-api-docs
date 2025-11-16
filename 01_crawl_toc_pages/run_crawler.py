@@ -122,8 +122,6 @@ def validate_crawl(metadata_dir: Path) -> bool:
             stats = json.load(f)
 
         print("\nCrawl Statistics:")
-        print(f"  Start time: {stats.get('start_time', 'Unknown')}")
-        print(f"  End time: {stats.get('end_time', 'Unknown')}")
         print(f"  Total pages: {stats.get('total_pages', 0)}")
         print(f"  Successful: {stats.get('successful_pages', 0)}")
         print(f"  Failed: {stats.get('failed_pages', 0)}")

@@ -161,13 +161,11 @@ class TestMetadataLogPipeline:
         item = {
             "url": "https://test.com/test.html",
             "original_url": "https://test.com/test.html",
-            "timestamp": "2024-01-01T12:00:00",
             "file_path": "test/test.html",
             "content_hash": "abc123",
             "content_length": 1000,
             "status_code": 200,
             "title": "Test Page",
-            "session_id": "session-001",
         }
 
         self.pipeline.process_item(item, mock_spider)
@@ -191,8 +189,6 @@ class TestMetadataLogPipeline:
             "type": "error",
             "url": "https://test.com/error.html",
             "error": "Connection failed",
-            "timestamp": "2024-01-01T12:00:00",
-            "session_id": "session-001",
         }
 
         self.pipeline.log_error(error_item)
@@ -278,7 +274,6 @@ class TestValidationPipeline:
         item = {
             "url": "https://test.com/test.html",
             "content": "<html><body>" + "x" * 200 + "</body></html>",
-            "timestamp": "2024-01-01T12:00:00",
             "content_hash": "abc123",
         }
 
@@ -294,12 +289,12 @@ class TestValidationPipeline:
 
         item = {
             "url": "https://test.com/test.html",
-            # Missing content, timestamp, content_hash
+            # Missing content, content_hash
         }
 
         self.pipeline.process_item(item, mock_spider)
         # Should log warnings for missing fields
-        assert mock_spider.logger.warning.call_count >= 3
+        assert mock_spider.logger.warning.call_count >= 2
 
     def test_validate_short_content(self) -> None:
         """Test validation warns about short content"""
@@ -309,7 +304,6 @@ class TestValidationPipeline:
         item = {
             "url": "https://test.com/test.html",
             "content": "<html>x</html>",  # Very short content
-            "timestamp": "2024-01-01T12:00:00",
             "content_hash": "abc123",
         }
 
@@ -326,7 +320,6 @@ class TestValidationPipeline:
         item = {
             "url": "https://test.com/test.html",
             "content": "This is just plain text, not HTML" * 10,
-            "timestamp": "2024-01-01T12:00:00",
             "content_hash": "abc123",
         }
 

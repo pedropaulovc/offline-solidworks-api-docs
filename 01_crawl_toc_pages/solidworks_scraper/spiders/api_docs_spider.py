@@ -37,11 +37,9 @@ class ApiDocsSpider(scrapy.Spider):
         self.crawled_urls: set[str] = set()
         self.base_path: str = "/2026/english/api/"
         self.base_url: str = "https://help.solidworks.com"
-        self.session_id: str = datetime.now().strftime("%Y-%m-%d-%H%M%S")
 
         # Statistics tracking
         self.stats: dict[str, Any] = {
-            "start_time": datetime.now().isoformat(),
             "total_pages": 0,
             "successful_pages": 0,
             "failed_pages": 0,
@@ -65,8 +63,6 @@ class ApiDocsSpider(scrapy.Spider):
                 "status_code": response.status,
                 "content": response.text,
                 "headers": dict(response.headers),
-                "timestamp": datetime.now().isoformat(),
-                "session_id": self.session_id,
                 "content_hash": hashlib.sha256(response.body).hexdigest(),
                 "content_length": len(response.body),
                 "title": "expandToc JSON",
@@ -203,8 +199,6 @@ class ApiDocsSpider(scrapy.Spider):
             "status_code": response.status,
             "content": content,  # Save only the helpContentData JSON
             "headers": dict(response.headers),
-            "timestamp": datetime.now().isoformat(),
-            "session_id": self.session_id,
         }
 
         # Calculate content hash for integrity
@@ -232,15 +226,12 @@ class ApiDocsSpider(scrapy.Spider):
             "type": "error",
             "url": request_url,
             "error": str(failure.value),
-            "timestamp": datetime.now().isoformat(),
-            "session_id": self.session_id,
         }
 
         yield error_item
 
     def closed(self, reason: str) -> None:
         """Called when the spider is closed"""
-        self.stats["end_time"] = datetime.now().isoformat()
         self.stats["reason"] = reason
 
         # Save final statistics

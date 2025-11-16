@@ -1,6 +1,5 @@
 {
   "crawler_version": "1.0.0",
-  "last_updated": "2025-11-15T13:00:15.506046",
   "start_url": "https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Welcome.htm?id=0",
   "boundary": "/2026/english/api/",
   "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
