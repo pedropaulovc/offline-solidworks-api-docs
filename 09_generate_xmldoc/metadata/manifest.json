@@ -1,12 +1,13 @@
 {
   "generator_version": "1.0.0",
   "input_sources": [
-    "02_extract_members/metadata/api_members.xml",
-    "03_extract_type_info/metadata/api_types.xml",
-    "04_extract_enum_members/metadata/enum_members.xml",
-    "06_parse_examples/output/examples.xml"
+    "02_extract_types/metadata/api_members.xml",
+    "04_extract_type_details/metadata/api_types.xml",
+    "05_extract_type_member_details/metadata/api_member_details.xml",
+    "06_extract_enum_members/metadata/enum_members.xml",
+    "08_parse_examples/output/examples.xml"
   ],
-  "output_directory": "07_generate_xmldoc\\output",
+  "output_directory": "09_generate_xmldoc\\output",
   "total_assemblies": 10,
   "xmldoc_format": "Microsoft XMLDoc (VS IntelliSense)"
 }

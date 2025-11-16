@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-11-15 18:42:54",
+  "timestamp": "2025-11-15 21:49:21",
   "statistics": {
     "total_assemblies": 10,
     "total_types": 2518,
@@ -9,18 +9,21 @@
     "types_with_descriptions": 1508,
     "types_with_remarks": 389,
     "types_with_examples": 457,
-    "examples_added": 623
+    "examples_added": 623,
+    "properties_with_params": 105,
+    "methods_with_params": 5104,
+    "total_parameters_documented": 15492
   },
   "output_files": {
-    "SolidWorks.Interop.swdimxpert": "07_generate_xmldoc\\output\\SolidWorks.Interop.swdimxpert.xml",
-    "SolidWorks.Interop.swmotionstudy": "07_generate_xmldoc\\output\\SolidWorks.Interop.swmotionstudy.xml",
-    "SolidWorks.Interop.sldworks": "07_generate_xmldoc\\output\\SolidWorks.Interop.sldworks.xml",
-    "SolidWorks.Interop.swpublished": "07_generate_xmldoc\\output\\SolidWorks.Interop.swpublished.xml",
-    "SolidWorks.Interop.dsgnchk": "07_generate_xmldoc\\output\\SolidWorks.Interop.dsgnchk.xml",
-    "SolidWorks.Interop.swscanto3d": "07_generate_xmldoc\\output\\SolidWorks.Interop.swscanto3d.xml",
-    "SolidWorks.Interop.sw3dprinter": "07_generate_xmldoc\\output\\SolidWorks.Interop.sw3dprinter.xml",
-    "SolidWorks.Interop.swhtmlcontrol": "07_generate_xmldoc\\output\\SolidWorks.Interop.swhtmlcontrol.xml",
-    "SolidWorks.Interop.swconst": "07_generate_xmldoc\\output\\SolidWorks.Interop.swconst.xml",
-    "SolidWorks.Interop.swcommands": "07_generate_xmldoc\\output\\SolidWorks.Interop.swcommands.xml"
+    "SolidWorks.Interop.swdimxpert": "09_generate_xmldoc\\output\\SolidWorks.Interop.swdimxpert.xml",
+    "SolidWorks.Interop.swmotionstudy": "09_generate_xmldoc\\output\\SolidWorks.Interop.swmotionstudy.xml",
+    "SolidWorks.Interop.sldworks": "09_generate_xmldoc\\output\\SolidWorks.Interop.sldworks.xml",
+    "SolidWorks.Interop.swpublished": "09_generate_xmldoc\\output\\SolidWorks.Interop.swpublished.xml",
+    "SolidWorks.Interop.dsgnchk": "09_generate_xmldoc\\output\\SolidWorks.Interop.dsgnchk.xml",
+    "SolidWorks.Interop.swscanto3d": "09_generate_xmldoc\\output\\SolidWorks.Interop.swscanto3d.xml",
+    "SolidWorks.Interop.sw3dprinter": "09_generate_xmldoc\\output\\SolidWorks.Interop.sw3dprinter.xml",
+    "SolidWorks.Interop.swhtmlcontrol": "09_generate_xmldoc\\output\\SolidWorks.Interop.swhtmlcontrol.xml",
+    "SolidWorks.Interop.swconst": "09_generate_xmldoc\\output\\SolidWorks.Interop.swconst.xml",
+    "SolidWorks.Interop.swcommands": "09_generate_xmldoc\\output\\SolidWorks.Interop.swcommands.xml"
   }
 }

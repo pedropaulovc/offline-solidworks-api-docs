@@ -2,7 +2,7 @@
 """
 Generate XMLDoc files from merged API documentation data.
 
-This script combines data from phases 02, 03, 04, and 06 to generate
+This script combines data from phases 02, 04, 05, 06, and 08 to generate
 standard XMLDoc files (one per assembly) that can be used for IntelliSense
 in Visual Studio and other IDEs.
 
@@ -107,6 +107,9 @@ class XMLDocGenerator:
             'types_with_remarks': 0,
             'types_with_examples': 0,
             'examples_added': 0,
+            'properties_with_params': 0,
+            'methods_with_params': 0,
+            'total_parameters_documented': 0,
         }
 
     def log(self, message: str) -> None:
@@ -358,13 +361,12 @@ class XMLDocGenerator:
         self.stats['total_properties'] += 1
 
         # Generate property ID
-        # Note: COM interop properties typically don't have parameters
-        # but indexed properties would need parameter info
+        # Use parameter_types from Phase 05 if available (for indexed properties)
         prop_id = self.id_gen.generate_property_id(
             type_info.namespace,
             type_info.name,
             prop.name,
-            parameters=None  # Would need actual parameter info from metadata
+            parameters=getattr(prop, 'parameter_types', None)
         )
 
         # Create member element
@@ -379,6 +381,16 @@ class XMLDocGenerator:
             # Placeholder summary
             summary = ET.SubElement(member, 'summary')
             summary.text = f"Gets or sets {prop.name}."
+
+        # Add param tags for indexed properties
+        if hasattr(prop, 'parameters') and prop.parameters:
+            self.stats['properties_with_params'] += 1
+            for param in prop.parameters:
+                param_elem = ET.SubElement(member, 'param')
+                param_elem.set('name', param.name)
+                if param.description:
+                    set_element_content(param_elem, param.description)
+                self.stats['total_parameters_documented'] += 1
 
         # Add value description if available
         if hasattr(prop, 'value') and prop.value:
@@ -409,13 +421,12 @@ class XMLDocGenerator:
         self.stats['total_methods'] += 1
 
         # Generate method ID
-        # Note: COM interop methods may have parameters but we don't have
-        # parameter metadata in the current pipeline
+        # Use parameter_types from Phase 05 if available
         method_id = self.id_gen.generate_method_id(
             type_info.namespace,
             type_info.name,
             method.name,
-            parameters=None  # Would need actual parameter info from metadata
+            parameters=getattr(method, 'parameter_types', None)
         )
 
         # Create member element
@@ -430,6 +441,16 @@ class XMLDocGenerator:
             # Placeholder summary
             summary = ET.SubElement(member, 'summary')
             summary.text = f"{method.name} method."
+
+        # Add param tags for each parameter
+        if hasattr(method, 'parameters') and method.parameters:
+            self.stats['methods_with_params'] += 1
+            for param in method.parameters:
+                param_elem = ET.SubElement(member, 'param')
+                param_elem.set('name', param.name)
+                if param.description:
+                    set_element_content(param_elem, param.description)
+                self.stats['total_parameters_documented'] += 1
 
         # Add returns if available
         if hasattr(method, 'returns') and method.returns:
@@ -504,6 +525,7 @@ class XMLDocGenerator:
             'input_sources': [
                 '02_extract_types/metadata/api_members.xml',
                 '04_extract_type_details/metadata/api_types.xml',
+                '05_extract_type_member_details/metadata/api_member_details.xml',
                 '06_extract_enum_members/metadata/enum_members.xml',
                 '08_parse_examples/output/examples.xml',
             ],
@@ -546,6 +568,13 @@ Examples:
         type=Path,
         default=Path('04_extract_type_details/metadata/api_types.xml'),
         help='Path to api_types.xml from Phase 4'
+    )
+
+    parser.add_argument(
+        '--member-details-file',
+        type=Path,
+        default=Path('05_extract_type_member_details/metadata/api_member_details.xml'),
+        help='Path to api_member_details.xml from Phase 5'
     )
 
     parser.add_argument(
@@ -596,6 +625,13 @@ Examples:
     try:
         merger.load_api_members(args.members_file)
         merger.load_api_types(args.types_file)
+
+        # Member details file is optional but recommended
+        if args.member_details_file.exists():
+            merger.load_member_details(args.member_details_file)
+        else:
+            print(f"Warning: Member details file not found: {args.member_details_file}")
+
         merger.load_enum_members(args.enums_file)
 
         # Examples file is optional
@@ -607,10 +643,11 @@ Examples:
     except FileNotFoundError as e:
         print(f"Error: {e}")
         print("\nPlease ensure all prerequisite phases have been run:")
-        print("  - Phase 02: Extract Members")
-        print("  - Phase 03: Extract Type Info")
-        print("  - Phase 04: Extract Enum Members")
-        print("  - Phase 06: Parse Examples (optional)")
+        print("  - Phase 02: Extract Types")
+        print("  - Phase 04: Extract Type Details")
+        print("  - Phase 05: Extract Type Member Details (optional)")
+        print("  - Phase 06: Extract Enum Members")
+        print("  - Phase 08: Parse Examples (optional)")
         return
 
     # Generate XMLDoc files
@@ -632,7 +669,10 @@ Examples:
     print(f"  - With examples: {generator.stats['types_with_examples']}")
     print(f"  - C# examples added: {generator.stats['examples_added']}")
     print(f"Properties: {generator.stats['total_properties']}")
+    print(f"  - With parameter info: {generator.stats['properties_with_params']}")
     print(f"Methods: {generator.stats['total_methods']}")
+    print(f"  - With parameter info: {generator.stats['methods_with_params']}")
+    print(f"Parameters documented: {generator.stats['total_parameters_documented']}")
     print(f"Enum members: {generator.stats['total_enum_members']}")
     print(f"\nOutput directory: {args.output_dir}")
     print("\nGeneration complete!")
