@@ -1,29 +1,44 @@
 # Offline SolidWorks API Documentation
 
-A comprehensive crawler and transformation pipeline for creating offline, searchable versions of the SolidWorks API documentation.
+A comprehensive crawler and transformation pipeline for creating offline, searchable versions of the SolidWorks API documentation with XMLDoc files for Visual Studio IntelliSense.
 
-## ⚠️ Legal Notice
+## 🎉 XMLDoc Generation Complete!
 
-**IMPORTANT**: This tool is designed for personal, educational, and fair use only. The crawled documentation content is copyrighted by Dassault Systèmes SolidWorks Corporation.
+The core XMLDoc generation pipeline (phases 1-9) is complete! Download the ready-to-use XMLDoc files from the [latest release](https://github.com/pedropaulovc/offline-solidworks-api-docs/releases/latest) or run the pipeline yourself to generate them.
 
-- DO NOT redistribute crawled content
-- DO NOT use for commercial purposes
-- Each user must crawl the documentation themselves
-- Crawled HTML content is gitignored and not included in this repository
+**Status**: Phases 1-9 ✅ | Future phases (searchable index, additional formats) planned
+
+## 🚀 Quick Start: Using Pre-Generated XMLDoc Files
+
+**Want IntelliSense for SolidWorks API?** Just follow these steps:
+
+1. **Download** `SolidWorks.Interop.xmldoc.v1.0.0.zip` from the [latest release](https://github.com/pedropaulovc/offline-solidworks-api-docs/releases/latest)
+2. **Extract** the XML files from the archive
+3. **Copy** them to the same folder where the SolidWorks SDK DLLs are located:
+   - **SOLIDWORKS 3DEXPERIENCE**: `C:\Program Files\Dassault Systemes\SOLIDWORKS 3DEXPERIENCE\SOLIDWORKS\api\redist`
+   - **Standard SOLIDWORKS**: `C:\Program Files\SOLIDWORKS Corp\SOLIDWORKS\api\redist`
+4. **Restart** Visual Studio or your IDE
+5. **Enjoy** full IntelliSense documentation with tooltips, parameter info, and examples!
+
+The XML files should be placed alongside their corresponding DLL files (e.g., `SolidWorks.Interop.sldworks.xml` next to `SolidWorks.Interop.sldworks.dll`).
 
 ## 📋 Overview
 
-This project provides a reproducible pipeline for:
-1. **Crawling** the SolidWorks API documentation using the expandToc API
-2. **Extracting** type information from the table of contents
-3. **Crawling** type member pages (properties and methods)
-4. **Extracting** type-level documentation (descriptions, examples, remarks)
-5. **Reserved** for future functionality
-6. **Extracting** enumeration members and values
-7. **Crawling** example pages
-8. **Parsing** example content into structured format
-9. **Generating** XMLDoc for Visual Studio IntelliSense
-10. **Creating** searchable indexes for offline use (future phase)
+This project provides a reproducible pipeline for generating XMLDoc files that enable IntelliSense support for the SolidWorks API in Visual Studio and other IDEs.
+
+### Pipeline Phases
+
+The complete pipeline consists of 9 phases:
+
+1. **Crawling** the SolidWorks API documentation using the expandToc API ✅
+2. **Extracting** type information from the table of contents ✅
+3. **Crawling** type member pages (properties and methods) ✅
+4. **Extracting** type-level documentation (descriptions, examples, remarks) ✅
+5. **Extracting** type member details (parameters, return values, remarks) ✅
+6. **Extracting** enumeration members and values ✅
+7. **Crawling** example pages ✅
+8. **Parsing** example content into structured format ✅
+9. **Generating** XMLDoc for Visual Studio IntelliSense ✅
 
 ## 🏗️ Project Structure
 
@@ -51,6 +66,11 @@ offline-solidworks-api-docs/
 │   ├── extract_type_info.py     # Main extraction script
 │   ├── validate_extraction.py   # Validation script
 │   ├── metadata/                # Output (api_types.xml)
+│   └── tests/                   # Test suite
+├── 05_extract_type_member_details/ # Phase 5: Extract member details
+│   ├── extract_member_details.py # Main extraction script
+│   ├── validate_extraction.py   # Validation script
+│   ├── output/                  # Output (member_details.xml)
 │   └── tests/                   # Test suite
 ├── 06_extract_enum_members/     # Phase 6: Extract enumeration members
 │   ├── extract_enum_members.py  # Main extraction script
@@ -88,14 +108,16 @@ offline-solidworks-api-docs/
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/offline-solidworks-api-docs.git
+git clone https://github.com/pedropaulovc/offline-solidworks-api-docs.git
 cd offline-solidworks-api-docs
 
 # Install dependencies with uv
 uv sync
 ```
 
-### Running the Pipeline
+### Running the Complete Pipeline
+
+To generate the XMLDoc files yourself (instead of using the pre-generated ones):
 
 #### Phase 1: Crawl Documentation
 
@@ -123,6 +145,13 @@ uv run python 02_extract_types/extract_types.py
 uv run python 02_extract_types/validate_extraction.py
 ```
 
+#### Phase 3: Crawl Type Members
+
+```bash
+# Crawl member pages (properties and methods)
+uv run python 03_crawl_type_members/run_crawler.py
+```
+
 #### Phase 4: Extract Type Details
 
 ```bash
@@ -133,11 +162,48 @@ uv run python 04_extract_type_details/extract_type_info.py
 uv run python 04_extract_type_details/validate_extraction.py
 ```
 
+#### Phase 5: Extract Member Details
+
+```bash
+# Extract member parameters, return values, and remarks
+uv run python 05_extract_type_member_details/extract_member_details.py
+
+# Validate extraction results
+uv run python 05_extract_type_member_details/validate_extraction.py
+```
+
 #### Phase 6: Extract Enum Members
 
 ```bash
 # Extract enumeration members and values
 uv run python 06_extract_enum_members/extract_enum_members.py
+```
+
+#### Phase 7: Crawl Examples
+
+```bash
+# Crawl example pages
+uv run python 07_crawl_examples/run_crawler.py
+```
+
+#### Phase 8: Parse Examples
+
+```bash
+# Parse example content into structured format
+uv run python 08_parse_examples/parse_examples.py
+
+# Validate parsing results
+uv run python 08_parse_examples/validate_parse.py
+```
+
+#### Phase 9: Generate XMLDoc
+
+```bash
+# Generate XMLDoc files for IntelliSense
+uv run python 09_generate_xmldoc/generate_xmldoc.py
+
+# Validate XMLDoc generation
+uv run python 09_generate_xmldoc/validate_generation.py
 ```
 
 ## 📊 Expected Results
@@ -151,8 +217,13 @@ uv run python 06_extract_enum_members/extract_enum_members.py
 
 ### Phase 2: Type Extraction
 - **458+ types** with member information
-- Properties and methods extracted from `*_members_*` HTML files
-- Output: `api_members.xml` (~5 MB)
+- Properties and methods extracted from table of contents
+- Output: `api_types.xml`
+
+### Phase 3: Member Crawling
+- **~11,500+ member pages** crawled (properties and methods)
+- HTML content for each type member
+- Complete metadata for reproducibility
 
 ### Phase 4: Type Details Extraction
 - **1674+ type files** processed
@@ -162,9 +233,28 @@ uv run python 06_extract_enum_members/extract_enum_members.py
 - **~455 types** with remarks (27%)
 - Output: `api_types.xml` (~5 MB)
 
+### Phase 5: Member Details Extraction
+- **~11,523 members** extracted
+- Parameter details, return values, and remarks
+- Output: `member_details.xml`
+
 ### Phase 6: Enum Extraction
 - Enumeration members and values extracted
-- Output: `api_enums.xml`
+- Output: `enum_members.xml`
+
+### Phase 7: Example Crawling
+- Example pages crawled from documentation
+- HTML content for code examples
+
+### Phase 8: Example Parsing
+- Code examples extracted and parsed
+- Indentation preserved with CDATA wrapping
+- Output: `examples.xml`
+
+### Phase 9: XMLDoc Generation
+- **10 XMLDoc files** generated (one per assembly)
+- Complete IntelliSense documentation
+- Output: `09_generate_xmldoc/output/*.xml`
 
 ## 🧪 Testing
 
@@ -176,10 +266,13 @@ uv run pytest -v
 uv run pytest 01_crawl_toc_pages/tests/ -v
 uv run pytest 02_extract_types/tests/ -v
 uv run pytest 04_extract_type_details/tests/ -v
+uv run pytest 05_extract_type_member_details/tests/ -v
 uv run pytest 06_extract_enum_members/tests/ -v
+uv run pytest 08_parse_examples/tests/ -v
+uv run pytest 09_generate_xmldoc/tests/ -v
 
 # Run with coverage
-uv run pytest --cov=01-crawl-toc-pages --cov=02-extract-members --cov=03-extract-type-info --cov-report=html
+uv run pytest --cov --cov-report=html
 ```
 
 ## 📝 Output Formats
@@ -215,9 +308,12 @@ uv run pytest --cov=01-crawl-toc-pages --cov=02-extract-members --cov=03-extract
 ### Phases 2-9: Extracted Data (XML)
 
 All extraction phases produce structured XML files:
-- **api_members.xml** - Properties and methods for each type
-- **api_types.xml** - Type descriptions, examples, and remarks
-- **api_enums.xml** - Enumeration members and values
+- **Phase 2**: `api_types.xml` - Type definitions
+- **Phase 4**: `api_types.xml` - Type descriptions, examples, and remarks
+- **Phase 5**: `member_details.xml` - Member parameters, return values, and remarks
+- **Phase 6**: `enum_members.xml` - Enumeration members and values
+- **Phase 8**: `examples.xml` - Code examples in structured format
+- **Phase 9**: `SolidWorks.Interop.*.xml` - XMLDoc files for IntelliSense (10 files)
 
 Each extraction also produces a summary JSON file with statistics.
 
@@ -302,17 +398,21 @@ Please ensure all contributions maintain reproducibility and respect copyright.
 
 ## ⚡ Performance
 
-### Phase 1: Crawling
-- **Time**: ~15 minutes for complete crawl
-- **Size**: ~100-150 MB of HTML content
-- **Pages**: 460+ documentation pages
-- **Network**: ~2 requests per second (2s delay)
-- **Memory**: ~200-500 MB during crawl
+### Complete Pipeline
+- **Total Time**: ~4-5 hours for complete pipeline
+- **Storage**: ~500-600 MB (HTML + intermediate files)
+- **Final Output**: 10 XMLDoc files (~2 MB compressed)
 
-### Phases 2-9: Extraction
-- **Time**: ~30 seconds per phase (varies by phase)
-- **Memory**: <100 MB per phase
-- **Output**: ~5 MB XML per phase
+### Phase-by-Phase Breakdown
+- **Phase 1** (Crawl TOC): ~15 minutes, ~150 MB HTML
+- **Phase 2** (Extract Types): ~10 seconds
+- **Phase 3** (Crawl Members): ~3-4 hours, ~400 MB HTML
+- **Phase 4** (Extract Type Details): ~30 seconds
+- **Phase 5** (Extract Member Details): ~60 seconds
+- **Phase 6** (Extract Enums): ~10 seconds
+- **Phase 7** (Crawl Examples): ~10 minutes
+- **Phase 8** (Parse Examples): ~20 seconds
+- **Phase 9** (Generate XMLDoc): ~30 seconds
 
 ## 🐛 Troubleshooting
 
@@ -351,20 +451,33 @@ Please ensure all contributions maintain reproducibility and respect copyright.
 
 Each phase has detailed documentation:
 
-- **README.md** (this file) - Project overview
+- **README.md** (this file) - Project overview and quick start
 - **01_crawl_toc_pages/README.md** - Crawler implementation details
 - **02_extract_types/README.md** - Type extraction details
 - **03_crawl_type_members/README.md** - Member crawling details
 - **04_extract_type_details/README.md** - Type detail extraction
+- **05_extract_type_member_details/README.md** - Member detail extraction
+- **06_extract_enum_members/README.md** - Enum extraction details
+- **07_crawl_examples/README.md** - Example crawling details
+- **08_parse_examples/README.md** - Example parsing details
 - **09_generate_xmldoc/README.md** - XMLDoc generation details
 - **CLAUDE.md** - Project context for AI assistants
 
-## 🔮 Future Phases (Planned)
+## 🔮 Future Enhancements (Planned)
 
-- **Phase 5**: Reserved for future functionality (to be determined)
 - **Phase 10**: Create searchable offline documentation browser
 - **Phase 11**: Export to additional formats (JSON, Markdown, PDF)
+- **Enhanced search**: Full-text search across all documentation
+- **IDE plugins**: Direct integration with Visual Studio, VS Code, etc.
 
----
+## ⚠️ Legal Notice
+
+**IMPORTANT**: This tool is designed for personal, educational, and fair use only. The crawled documentation content is copyrighted by Dassault Systèmes SolidWorks Corporation.
+
+- ❌ DO NOT redistribute crawled content
+- ❌ DO NOT use for commercial purposes
+- ✅ Each user must crawl the documentation themselves
+- ✅ Pre-generated XMLDoc files can be shared (fair use)
+- 📁 Crawled HTML content is gitignored and not included in this repository
 
 **Remember**: Always respect copyright and use this tool responsibly for personal/educational purposes only.
