@@ -272,6 +272,10 @@ class ExampleParser:
         # This makes the output more standard and easier to work with
         text = text.replace('\xa0', ' ')
 
+        # Replace any remaining LINEBREAK markers with actual newlines
+        # This ensures markers are removed even if they weren't processed by the preserve_newlines branch
+        text = text.replace(LINEBREAK_MARKER, '\n')
+
         # Only strip trailing whitespace - preserve leading indentation
         text = text.rstrip()
         # But also strip leading newlines (not spaces - that's indentation!)

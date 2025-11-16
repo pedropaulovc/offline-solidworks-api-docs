@@ -302,6 +302,48 @@ class TestExampleParser:
         # Should not have double spaces
         assert '  ' not in content.replace('\n', ' ')
 
+    def test_no_linebreak_markers_in_output(self, parser, temp_dirs):
+        """Test that <<<LINEBREAK>>> markers are never left in the output."""
+        html_dir, _ = temp_dirs
+
+        # Test case 1: <pre> block with <br> tags
+        html_with_pre_br = """
+        <h1>Test Pre</h1>
+        <pre>Line 1<br>Line 2<br>Line 3</pre>
+        """
+
+        test_file = html_dir / 'pre_br.htm'
+        test_file.write_text(html_with_pre_br)
+        content = parser.parse_html_file(test_file)
+        assert content is not None
+        assert '<<<LINEBREAK>>>' not in content, "LINEBREAK marker found in <pre> output"
+
+        # Test case 2: Regular paragraph with <br> tags (not code)
+        html_with_p_br = """
+        <h1>Test Header<br>Second Line</h1>
+        <p>Paragraph with<br>line breaks<br>inside</p>
+        """
+
+        test_file2 = html_dir / 'p_br.htm'
+        test_file2.write_text(html_with_p_br)
+        content2 = parser.parse_html_file(test_file2)
+        assert content2 is not None
+        assert '<<<LINEBREAK>>>' not in content2, "LINEBREAK marker found in paragraph output"
+
+        # Test case 3: Mixed content with <br> tags
+        html_mixed = """
+        <h1>Mixed<br>Example</h1>
+        <p>Description with<br>breaks</p>
+        <p class="APICODE">Code line 1<br>Code line 2</p>
+        <pre>Pre line 1<br>Pre line 2</pre>
+        """
+
+        test_file3 = html_dir / 'mixed_br.htm'
+        test_file3.write_text(html_mixed)
+        content3 = parser.parse_html_file(test_file3)
+        assert content3 is not None
+        assert '<<<LINEBREAK>>>' not in content3, "LINEBREAK marker found in mixed content output"
+
 
 class TestIntegration:
     """Integration tests for the complete pipeline."""
