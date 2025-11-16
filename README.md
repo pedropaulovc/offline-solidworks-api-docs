@@ -2,12 +2,6 @@
 
 A comprehensive crawler and transformation pipeline for creating offline, searchable versions of the SolidWorks API documentation with XMLDoc files for Visual Studio IntelliSense.
 
-## 🎉 XMLDoc Generation Complete!
-
-The core XMLDoc generation pipeline (phases 1-9) is complete! Download the ready-to-use XMLDoc files from the [latest release](https://github.com/pedropaulovc/offline-solidworks-api-docs/releases/latest) or run the pipeline yourself to generate them.
-
-**Status**: Phases 1-9 ✅ | Future phases (searchable index, additional formats) planned
-
 ## 🚀 Quick Start: Using Pre-Generated XMLDoc Files
 
 **Want IntelliSense for SolidWorks API?** Just follow these steps:
