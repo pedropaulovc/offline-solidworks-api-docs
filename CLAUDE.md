@@ -77,8 +77,9 @@ This is a multi-phase pipeline project for creating offline, searchable versions
 
 ### Important URLs
 - **Documentation Base**: `https://help.solidworks.com/2026/english/api/`
-- **Starting Point**: `https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Welcome.htm?id=0`
-- **Print Preview Format**: Append `&format=p&value=1` to all URLs
+- **Crawler Start URL**: `https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id=2`
+- **expandToc API Pattern**: `https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id={id_value}`
+- **Human-Friendly Entry Point**: `https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Welcome.htm?id=0`
 
 ## Development Guidelines
 
@@ -129,14 +130,14 @@ uv run pytest 01_crawl_toc_pages/tests/ -v
 
 ### Technical
 - Must stay within `/2026/english/api/` boundary
-- Print preview format required for clean HTML
+- Content extracted from `__NEXT_DATA__` JSON (helpText field)
 - Minimum 95% success rate for validation
 - Expected ~458 pages from complete crawl
 
 ## Known Issues & Considerations
 
 1. **Large HTML Files**: Some documentation pages are >500KB
-2. **URL Parameters**: Print preview adds complexity to URL handling
+2. **expandToc API**: Recursive discovery of nested TOC sections via JSON API
 3. **Session Management**: Currently stateless, may need cookies in future
 4. **Version Updates**: URLs contain year (2026), needs updating annually
 
