@@ -28,8 +28,11 @@ This is a multi-phase pipeline project for creating offline, searchable versions
 - XML output generation
 - Validation and test suite complete
 
-⏳ **Phase 5**: Not yet implemented
-- Reserved for future functionality
+✅ **Phase 5 (05_extract_type_member_details)**: Complete
+- Member detail extraction (parameters, return values, remarks)
+- XML output generation
+- Shared utilities refactored for code reuse
+- Validation and test suite complete
 
 ✅ **Phase 6 (06_extract_enum_members)**: Complete
 - Enumeration member extraction
@@ -49,7 +52,7 @@ This is a multi-phase pipeline project for creating offline, searchable versions
 
 ✅ **Phase 9 (09_generate_xmldoc)**: Complete
 - XMLDoc ID generator following Microsoft's rules
-- Data merger combining phases 02, 03, 04, 06, 08
+- Data merger combining phases 02, 04, 05, 06, 08
 - XMLDoc file generation (one per assembly)
 - Validation script and test suite complete
 

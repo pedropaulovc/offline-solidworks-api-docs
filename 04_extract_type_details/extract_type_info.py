@@ -11,7 +11,6 @@ import argparse
 import json
 import re
 import sys
-import xml.dom.minidom as minidom
 import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
 from pathlib import Path
@@ -20,6 +19,12 @@ from typing import Any
 # Add parent directory to path for shared module imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from shared.extraction_utils import (
+    extract_namespace_from_filename,
+    infer_language_from_filename,
+    is_type_file,
+    prettify_xml,
+)
 from shared.xmldoc_links import convert_links_to_see_refs
 
 
@@ -211,18 +216,7 @@ class TypeInfoExtractor(HTMLParser):
 
     def _infer_language_from_filename(self, filename: str) -> str:
         """Infer language from filename patterns."""
-        filename_lower = filename.lower()
-
-        if "vbnet" in filename_lower or "_net.htm" in filename_lower:
-            return "VB.NET"
-        elif "_vb.htm" in filename_lower or "vba" in filename_lower:
-            return "VBA"
-        elif "csharp" in filename_lower or "_cs.htm" in filename_lower:
-            return "C#"
-        elif "cpp" in filename_lower:
-            return "C++"
-        else:
-            return "Unknown"
+        return infer_language_from_filename(filename)
 
     def get_description(self) -> str:
         """Get the cleaned description text (with link conversion)."""
@@ -241,50 +235,6 @@ class TypeInfoExtractor(HTMLParser):
         remarks_html = convert_links_to_see_refs(remarks_html)
 
         return remarks_html
-
-
-def extract_namespace_from_filename(html_file: Path) -> tuple[str | None, str | None, str | None]:
-    """
-    Extract namespace and assembly from the file path.
-
-    Returns:
-        (assembly, namespace, type_name)
-
-    Example filename:
-        SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IAdvancedHoleFeatureData_...
-        -> assembly: SolidWorks.Interop.sldworks (before ~)
-        -> full_type: SolidWorks.Interop.sldworks.IAdvancedHoleFeatureData (after ~ before _)
-        -> namespace: SolidWorks.Interop.sldworks
-        -> type_name: IAdvancedHoleFeatureData
-    """
-    filename = html_file.name
-
-    # Split on ~ to get assembly and full type path
-    if "~" in filename:
-        parts = filename.split("~")
-
-        # Assembly is the part before ~
-        assembly = parts[0]
-
-        # Extract full type name (after ~ but before the hash)
-        if len(parts) > 1:
-            # Remove hash and extension: ...IAdvancedHoleFeatureData_84c83747_84c83747.htmll.html
-            # Pattern: TypeName_hash_hash.htmll.html
-            type_part = parts[1].split("_")[0]
-
-            # Namespace is the full type name minus the last segment (the type name itself)
-            if "." in type_part:
-                namespace_parts = type_part.split(".")
-                type_name = namespace_parts[-1]
-                namespace = ".".join(namespace_parts[:-1])
-            else:
-                # If there's no dot, the namespace is the same as assembly
-                namespace = assembly
-                type_name = type_part
-
-            return assembly, namespace, type_name
-
-    return None, None, None
 
 
 def extract_type_info_from_file(html_file: Path) -> dict[str, Any] | None:
@@ -319,30 +269,6 @@ def extract_type_info_from_file(html_file: Path) -> dict[str, Any] | None:
         "Remarks": parser.get_remarks(),
         "SourceFile": str(html_file),
     }
-
-
-def _wrap_cdata_sections(xml_str: str) -> str:
-    """
-    Wrap content of elements marked with __cdata__="true" in CDATA sections.
-
-    This is a post-processing step since ElementTree doesn't natively support CDATA.
-    Handles both Description and Remarks elements.
-    """
-    import html as html_module
-
-    # Pattern to find elements marked with __cdata__="true"
-    # Matches: <Description __cdata__="true">content</Description>
-    #      or: <Remarks __cdata__="true">content</Remarks>
-    pattern = r'<(Description|Remarks) __cdata__="true">(.*?)</\1>'
-
-    def replace_with_cdata(match: re.Match[str]) -> str:
-        tag_name = match.group(1)
-        content = match.group(2)
-        # Unescape XML entities since CDATA doesn't need escaping
-        content = html_module.unescape(content)
-        return f"<{tag_name}><![CDATA[{content}]]></{tag_name}>"
-
-    return re.sub(pattern, replace_with_cdata, xml_str, flags=re.DOTALL)
 
 
 def create_xml_output(types: list[dict[str, Any]]) -> str:
@@ -393,39 +319,8 @@ def create_xml_output(types: list[dict[str, Any]]) -> str:
             remarks_elem.text = type_info["Remarks"]
             remarks_elem.set("__cdata__", "true")
 
-    # Pretty print the XML
-    xml_str = ET.tostring(root, encoding="unicode")
-
-    # Post-process to add CDATA sections for Remarks elements
-    # Replace marked elements with CDATA wrapped content
-    xml_str = _wrap_cdata_sections(xml_str)
-
-    dom = minidom.parseString(xml_str)
-    return dom.toprettyxml(indent="    ")
-
-
-def is_type_file(html_file: Path) -> bool:
-    """
-    Check if the HTML file is a type file (not members or namespace).
-
-    Type files don't have _members_ or _namespace_ in their name.
-    """
-    filename = html_file.name.lower()
-
-    # Exclude members and namespace files
-    if "_members_" in filename or "_namespace_" in filename:
-        return False
-
-    # Exclude special files
-    if filename.startswith("functionalcategories") or filename.startswith("releasenotes"):
-        return False
-
-    # Exclude help_list files
-    if filename.startswith("help_list"):
-        return False
-
-    # Must have the typical type file pattern: Assembly~Namespace.Type_hash_hash.html
-    return "~" in filename and ".html" in filename
+    # Pretty print the XML with CDATA sections
+    return prettify_xml(root)
 
 
 def main() -> int:
