@@ -55,9 +55,13 @@ line-length = 120
 target-version = "py312"
 extend-exclude = [
     "01_crawl_toc_pages/output",
-    "02_extract_members/metadata",
-    "03_extract_type_info/metadata",
-    "04_extract_enum_members/metadata",
+    "02_extract_types/metadata",
+    "03_crawl_type_members/output",
+    "04_extract_type_details/metadata",
+    "06_extract_enum_members/metadata",
+    "07_crawl_examples/output",
+    "08_parse_examples/output",
+    "09_generate_xmldoc/output",
 ]
 
 [tool.ruff.lint]
@@ -84,8 +88,13 @@ ignore = [
 [tool.pytest.ini_options]
 pythonpath = [
     "01_crawl_toc_pages",
-    "02_extract_members",
-    "03_extract_type_info",
-    "04_extract_enum_members",
+    "02_extract_types",
+    "03_crawl_type_members",
+    "04_extract_type_details",
+    "06_extract_enum_members",
+    "07_crawl_examples",
+    "08_parse_examples",
+    "09_generate_xmldoc",
     "shared",
 ]
+addopts = "--import-mode=importlib"

@@ -1,0 +1,34 @@
+# Crawled HTML content (copyrighted, not redistributable)
+output/html/
+
+# Metadata files (generated during crawl)
+metadata/urls_crawled.jsonl
+metadata/errors.jsonl
+metadata/crawl_stats.json
+metadata/manifest.json
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Scrapy
+.scrapy/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

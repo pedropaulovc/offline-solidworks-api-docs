@@ -13,41 +13,49 @@ This is a multi-phase pipeline project for creating offline, searchable versions
 - Validation scripts ready
 - Test suite complete
 
-✅ **Phase 2 (02_extract_members)**: Complete
-- Member extraction (properties and methods) implemented
+✅ **Phase 2 (02_extract_types)**: Complete
+- Type extraction from Table of Contents
 - XML output generation
 - Validation and test suite complete
 
-✅ **Phase 3 (03_extract_type_info)**: Complete
+✅ **Phase 3 (03_crawl_type_members)**: Complete
+- Member page crawling (properties and methods)
+- HTML storage with proper structure
+- Metadata tracking complete
+
+✅ **Phase 4 (04_extract_type_details)**: Complete
 - Type information extraction (descriptions, examples, remarks)
 - XML output generation
 - Validation and test suite complete
 
-✅ **Phase 4 (04_extract_enum_members)**: Complete
+⏳ **Phase 5**: Not yet implemented
+- Reserved for future functionality
+
+✅ **Phase 6 (06_extract_enum_members)**: Complete
 - Enumeration member extraction
 - XML output generation
 - Test suite complete
 
-✅ **Phase 5 (05_crawl_examples)**: Complete
+✅ **Phase 7 (07_crawl_examples)**: Complete
 - Example page crawling implemented
 - HTML storage with proper structure
 - Metadata tracking complete
 
-✅ **Phase 6 (06_parse_examples)**: Complete
+✅ **Phase 8 (08_parse_examples)**: Complete
 - Example content extraction with CDATA wrapping
 - Indentation preservation
 - XML output generation
 - Test suite complete
 
-✅ **Phase 7 (07_generate_xmldoc)**: Complete
+✅ **Phase 9 (09_generate_xmldoc)**: Complete
 - XMLDoc ID generator following Microsoft's rules
-- Data merger combining phases 02, 03, 04, 06
+- Data merger combining phases 02, 03, 04, 06, 08
 - XMLDoc file generation (one per assembly)
 - Validation script and test suite complete
 
 ⏳ **Future Phases**: Not yet implemented
-- Phase 8: Build searchable offline index
-- Phase 9: Export to various formats (HTML, PDF, etc.)
+- Phase 10: Build searchable offline index
+- Phase 11: Export to various formats (HTML, PDF, etc.)
 
 ## Key Technical Details
 

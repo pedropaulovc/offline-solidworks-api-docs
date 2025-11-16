@@ -1,4 +1,4 @@
-# Phase 3: Extract Type Information
+# Phase 4: Extract Type Information
 
 This phase extracts type-level information (descriptions, examples, and remarks) from crawled SolidWorks API documentation HTML files.
 

@@ -125,7 +125,7 @@ def main() -> int:
     parser.add_argument(
         "--metadata-dir",
         type=Path,
-        default=Path("03_extract_type_info/metadata"),
+        default=Path("04_extract_type_details/metadata"),
         help="Directory containing extraction metadata",
     )
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output")

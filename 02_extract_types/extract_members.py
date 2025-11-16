@@ -239,7 +239,7 @@ def main() -> int:
         help="Directory containing crawled HTML files",
     )
     parser.add_argument(
-        "--output-dir", type=Path, default=Path("02_extract_members/metadata"), help="Directory to save output files"
+        "--output-dir", type=Path, default=Path("02_extract_types/metadata"), help="Directory to save output files"
     )
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
 

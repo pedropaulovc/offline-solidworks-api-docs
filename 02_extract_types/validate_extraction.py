@@ -140,7 +140,7 @@ def main() -> int:
     parser.add_argument(
         "--xml-file",
         type=Path,
-        default=Path("02_extract_members/metadata/api_members.xml"),
+        default=Path("02_extract_types/metadata/api_members.xml"),
         help="Path to the XML file to validate",
     )
     parser.add_argument("--verbose", action="store_true", help="Show detailed validation results")
