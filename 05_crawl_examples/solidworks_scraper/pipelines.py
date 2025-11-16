@@ -84,12 +84,10 @@ class HtmlSavePipeline:
             else:
                 path += f"_{query_hash}.html"
         else:
-            # Ensure it ends with .html (we're saving helpText HTML content)
-            if not path.endswith(".html"):
-                if path.endswith(".htm"):
-                    path = path + ".html"
-                else:
-                    path += ".html"
+            # Ensure it has an HTML extension (preserve .htm or .html from original)
+            if not (path.endswith(".html") or path.endswith(".htm")):
+                # Only add extension if missing entirely
+                path += ".html"
 
         # Clean up the path - replace unsafe characters
         path = re.sub(r'[<>:"|?*]', "_", path)
