@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "html2text>=2024.2.26",
     "jsonlines>=4.0.0",
     "mypy>=1.13.0",
     "pre-commit>=4.0.1",
@@ -62,6 +63,8 @@ extend-exclude = [
     "07_crawl_examples/output",
     "08_parse_examples/output",
     "09_generate_xmldoc/output",
+    "10_crawl_programming_guide/output",
+    "11_extract_docs_md/output",
 ]
 
 [tool.ruff.lint]
@@ -95,6 +98,8 @@ pythonpath = [
     "07_crawl_examples",
     "08_parse_examples",
     "09_generate_xmldoc",
+    "10_crawl_programming_guide",
+    "11_extract_docs_md",
     "shared",
 ]
 addopts = "--import-mode=importlib"
