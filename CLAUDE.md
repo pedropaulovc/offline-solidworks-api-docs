@@ -56,9 +56,22 @@ This is a multi-phase pipeline project for creating offline, searchable versions
 - XMLDoc file generation (one per assembly)
 - Validation script and test suite complete
 
+✅ **Phase 10 (10_crawl_programming_guide)**: Complete
+- Programming Guide crawler implemented
+- expandToc API integration for hierarchical navigation
+- 145 pages crawled successfully
+- Metadata tracking and validation complete
+
+✅ **Phase 11 (11_extract_docs_md)**: Complete
+- HTML to Markdown conversion with html2text
+- Hierarchical file organization matching TOC structure
+- URL rewriting for relative links (134 URLs rewritten)
+- 125 content pages converted with 100% success rate
+- Validation script and test suite complete
+
 ⏳ **Future Phases**: Not yet implemented
-- Phase 10: Build searchable offline index
-- Phase 11: Export to various formats (HTML, PDF, etc.)
+- Phase 12: Build searchable offline index
+- Phase 13: Export to various formats (HTML, PDF, etc.)
 
 ## Key Technical Details
 
