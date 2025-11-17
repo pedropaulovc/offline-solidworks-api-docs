@@ -6,63 +6,63 @@ This is a multi-phase pipeline project for creating offline, searchable versions
 
 ## Current Status
 
-✅ **Phase 1 (01_crawl_toc_pages)**: Complete
+✅ **Phase 1 (10_crawl_toc_pages)**: Complete
 - Scrapy-based crawler implemented
 - expandToc API integration working
 - Metadata tracking for reproducibility
 - Validation scripts ready
 - Test suite complete
 
-✅ **Phase 2 (02_extract_types)**: Complete
+✅ **Phase 2 (20_extract_types)**: Complete
 - Type extraction from Table of Contents
 - XML output generation
 - Validation and test suite complete
 
-✅ **Phase 3 (03_crawl_type_members)**: Complete
+✅ **Phase 3 (30_crawl_type_members)**: Complete
 - Member page crawling (properties and methods)
 - HTML storage with proper structure
 - Metadata tracking complete
 
-✅ **Phase 4 (04_extract_type_details)**: Complete
+✅ **Phase 4 (40_extract_type_details)**: Complete
 - Type information extraction (descriptions, examples, remarks)
 - XML output generation
 - Validation and test suite complete
 
-✅ **Phase 5 (05_extract_type_member_details)**: Complete
+✅ **Phase 5 (50_extract_type_member_details)**: Complete
 - Member detail extraction (parameters, return values, remarks)
 - XML output generation
 - Shared utilities refactored for code reuse
 - Validation and test suite complete
 
-✅ **Phase 6 (06_extract_enum_members)**: Complete
+✅ **Phase 6 (60_extract_enum_members)**: Complete
 - Enumeration member extraction
 - XML output generation
 - Test suite complete
 
-✅ **Phase 7 (07_crawl_examples)**: Complete
+✅ **Phase 7 (70_crawl_examples)**: Complete
 - Example page crawling implemented
 - HTML storage with proper structure
 - Metadata tracking complete
 
-✅ **Phase 8 (08_parse_examples)**: Complete
+✅ **Phase 8 (80_parse_examples)**: Complete
 - Example content extraction with CDATA wrapping
 - Indentation preservation
 - XML output generation
 - Test suite complete
 
-✅ **Phase 9 (09_generate_xmldoc)**: Complete
+✅ **Phase 9 (90_generate_xmldoc)**: Complete
 - XMLDoc ID generator following Microsoft's rules
-- Data merger combining phases 02, 04, 05, 06, 08
+- Data merger combining phases 20, 40, 50, 60, 80
 - XMLDoc file generation (one per assembly)
 - Validation script and test suite complete
 
-✅ **Phase 10 (10_crawl_programming_guide)**: Complete
+✅ **Phase 10 (100_crawl_programming_guide)**: Complete
 - Programming Guide crawler implemented
 - expandToc API integration for hierarchical navigation
 - 145 pages crawled successfully
 - Metadata tracking and validation complete
 
-✅ **Phase 11 (11_extract_docs_md)**: Complete
+✅ **Phase 11 (110_extract_docs_md)**: Complete
 - HTML to Markdown conversion with html2text
 - Hierarchical file organization matching TOC structure
 - URL rewriting for relative links (134 URLs rewritten)
@@ -70,8 +70,8 @@ This is a multi-phase pipeline project for creating offline, searchable versions
 - Validation script and test suite complete
 
 ⏳ **Future Phases**: Not yet implemented
-- Phase 12: Build searchable offline index
-- Phase 13: Export to various formats (HTML, PDF, etc.)
+- Phase 120: Build searchable offline index
+- Phase 130: Export to various formats (HTML, PDF, etc.)
 
 ## Key Technical Details
 
@@ -120,17 +120,17 @@ This is a multi-phase pipeline project for creating offline, searchable versions
 
 ### Running a Test Crawl
 ```bash
-uv run python 01_crawl_toc_pages/run_crawler.py --test
+uv run python 10_crawl_toc_pages/run_crawler.py --test
 ```
 
 ### Validating Results
 ```bash
-uv run python 01_crawl_toc_pages/validate_crawl.py --verbose
+uv run python 10_crawl_toc_pages/validate_crawl.py --verbose
 ```
 
 ### Running Tests
 ```bash
-uv run pytest 01_crawl_toc_pages/tests/ -v
+uv run pytest 10_crawl_toc_pages/tests/ -v
 ```
 
 ## Project Constraints

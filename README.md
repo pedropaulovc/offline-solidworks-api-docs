@@ -38,7 +38,7 @@ The complete pipeline consists of 9 phases:
 
 ```
 offline-solidworks-api-docs/
-├── 01_crawl_toc_pages/          # Phase 1: Crawl API docs via expandToc API
+├── 10_crawl_toc_pages/          # Phase 1: Crawl API docs via expandToc API
 │   ├── solidworks_scraper/      # Scrapy project
 │   ├── tests/                   # Test suite
 │   ├── output/                  # Crawled data (gitignored)
@@ -46,45 +46,47 @@ offline-solidworks-api-docs/
 │   │   └── metadata/            # Crawl metadata (tracked)
 │   ├── run_crawler.py           # Main entry point
 │   └── validate_crawl.py        # Validation script
-├── 02_extract_types/            # Phase 2: Extract types from TOC
+├── 20_extract_types/            # Phase 2: Extract types from TOC
 │   ├── extract_types.py         # Main extraction script
 │   ├── validate_extraction.py   # Validation script
 │   ├── metadata/                # Output (api_types.xml)
 │   └── tests/                   # Test suite
-├── 03_crawl_type_members/       # Phase 3: Crawl member pages
+├── 30_crawl_type_members/       # Phase 3: Crawl member pages
 │   ├── solidworks_scraper/      # Scrapy project
 │   ├── tests/                   # Test suite
 │   ├── output/                  # Crawled HTML (gitignored)
 │   └── run_crawler.py           # Main entry point
-├── 04_extract_type_details/     # Phase 4: Extract type details
+├── 40_extract_type_details/     # Phase 4: Extract type details
 │   ├── extract_type_info.py     # Main extraction script
 │   ├── validate_extraction.py   # Validation script
 │   ├── metadata/                # Output (api_types.xml)
 │   └── tests/                   # Test suite
-├── 05_extract_type_member_details/ # Phase 5: Extract member details
+├── 50_extract_type_member_details/ # Phase 5: Extract member details
 │   ├── extract_member_details.py # Main extraction script
 │   ├── validate_extraction.py   # Validation script
 │   ├── output/                  # Output (member_details.xml)
 │   └── tests/                   # Test suite
-├── 06_extract_enum_members/     # Phase 6: Extract enumeration members
+├── 60_extract_enum_members/     # Phase 6: Extract enumeration members
 │   ├── extract_enum_members.py  # Main extraction script
 │   ├── metadata/                # Output (enum_members.xml)
 │   └── tests/                   # Test suite
-├── 07_crawl_examples/           # Phase 7: Crawl example pages
+├── 70_crawl_examples/           # Phase 7: Crawl example pages
 │   ├── solidworks_scraper/      # Scrapy project
 │   ├── output/                  # Crawled HTML (gitignored)
 │   └── run_crawler.py           # Main entry point
-├── 08_parse_examples/           # Phase 8: Parse example content
+├── 80_parse_examples/           # Phase 8: Parse example content
 │   ├── parse_examples.py        # Main parsing script
 │   ├── validate_parse.py        # Validation script
 │   ├── output/                  # Output (examples.xml)
 │   └── tests/                   # Test suite
-├── 09_generate_xmldoc/          # Phase 9: Generate XMLDoc files
+├── 90_generate_xmldoc/          # Phase 9: Generate XMLDoc files
 │   ├── generate_xmldoc.py       # Main generation script
 │   ├── data_merger.py           # Data merging utilities
 │   ├── xmldoc_id.py             # XMLDoc ID generation
 │   ├── output/                  # XMLDoc files
 │   └── tests/                   # Test suite
+├── 100_crawl_programming_guide/ # Phase 10: Crawl programming guide
+├── 110_extract_docs_md/         # Phase 11: Extract docs to Markdown
 ├── shared/                      # Shared utilities and helpers
 ├── CLAUDE.md                    # Project context for AI assistants
 ├── pyproject.toml               # Python project configuration
@@ -117,87 +119,87 @@ To generate the XMLDoc files yourself (instead of using the pre-generated ones):
 
 ```bash
 # Run a test crawl (limited pages)
-uv run python 01_crawl_toc_pages/run_crawler.py --test
+uv run python 10_crawl_toc_pages/run_crawler.py --test
 
 # Run full crawl (will take several hours)
-uv run python 01_crawl_toc_pages/run_crawler.py
+uv run python 10_crawl_toc_pages/run_crawler.py
 
 # Resume interrupted crawl
-uv run python 01_crawl_toc_pages/run_crawler.py --resume
+uv run python 10_crawl_toc_pages/run_crawler.py --resume
 
 # Validate crawl results
-uv run python 01_crawl_toc_pages/validate_crawl.py
+uv run python 10_crawl_toc_pages/validate_crawl.py
 ```
 
 #### Phase 2: Extract Types
 
 ```bash
 # Extract types from table of contents
-uv run python 02_extract_types/extract_types.py
+uv run python 20_extract_types/extract_types.py
 
 # Validate extraction results
-uv run python 02_extract_types/validate_extraction.py
+uv run python 20_extract_types/validate_extraction.py
 ```
 
 #### Phase 3: Crawl Type Members
 
 ```bash
 # Crawl member pages (properties and methods)
-uv run python 03_crawl_type_members/run_crawler.py
+uv run python 30_crawl_type_members/run_crawler.py
 ```
 
 #### Phase 4: Extract Type Details
 
 ```bash
 # Extract type descriptions, examples, and remarks
-uv run python 04_extract_type_details/extract_type_info.py
+uv run python 40_extract_type_details/extract_type_info.py
 
 # Validate extraction results
-uv run python 04_extract_type_details/validate_extraction.py
+uv run python 40_extract_type_details/validate_extraction.py
 ```
 
 #### Phase 5: Extract Member Details
 
 ```bash
 # Extract member parameters, return values, and remarks
-uv run python 05_extract_type_member_details/extract_member_details.py
+uv run python 50_extract_type_member_details/extract_member_details.py
 
 # Validate extraction results
-uv run python 05_extract_type_member_details/validate_extraction.py
+uv run python 50_extract_type_member_details/validate_extraction.py
 ```
 
 #### Phase 6: Extract Enum Members
 
 ```bash
 # Extract enumeration members and values
-uv run python 06_extract_enum_members/extract_enum_members.py
+uv run python 60_extract_enum_members/extract_enum_members.py
 ```
 
 #### Phase 7: Crawl Examples
 
 ```bash
 # Crawl example pages
-uv run python 07_crawl_examples/run_crawler.py
+uv run python 70_crawl_examples/run_crawler.py
 ```
 
 #### Phase 8: Parse Examples
 
 ```bash
 # Parse example content into structured format
-uv run python 08_parse_examples/parse_examples.py
+uv run python 80_parse_examples/parse_examples.py
 
 # Validate parsing results
-uv run python 08_parse_examples/validate_parse.py
+uv run python 80_parse_examples/validate_parse.py
 ```
 
 #### Phase 9: Generate XMLDoc
 
 ```bash
 # Generate XMLDoc files for IntelliSense
-uv run python 09_generate_xmldoc/generate_xmldoc.py
+uv run python 90_generate_xmldoc/generate_xmldoc.py
 
 # Validate XMLDoc generation
-uv run python 09_generate_xmldoc/validate_generation.py
+uv run python 90_generate_xmldoc/validate_generation.py
 ```
 
 ## 📊 Expected Results
@@ -248,7 +250,7 @@ uv run python 09_generate_xmldoc/validate_generation.py
 ### Phase 9: XMLDoc Generation
 - **10 XMLDoc files** generated (one per assembly)
 - Complete IntelliSense documentation
-- Output: `09_generate_xmldoc/output/*.xml`
+- Output: `90_generate_xmldoc/output/*.xml`
 
 ## 🧪 Testing
 
@@ -257,13 +259,13 @@ uv run python 09_generate_xmldoc/validate_generation.py
 uv run pytest -v
 
 # Run tests for specific phase
-uv run pytest 01_crawl_toc_pages/tests/ -v
-uv run pytest 02_extract_types/tests/ -v
-uv run pytest 04_extract_type_details/tests/ -v
-uv run pytest 05_extract_type_member_details/tests/ -v
-uv run pytest 06_extract_enum_members/tests/ -v
-uv run pytest 08_parse_examples/tests/ -v
-uv run pytest 09_generate_xmldoc/tests/ -v
+uv run pytest 10_crawl_toc_pages/tests/ -v
+uv run pytest 20_extract_types/tests/ -v
+uv run pytest 40_extract_type_details/tests/ -v
+uv run pytest 50_extract_type_member_details/tests/ -v
+uv run pytest 60_extract_enum_members/tests/ -v
+uv run pytest 80_parse_examples/tests/ -v
+uv run pytest 90_generate_xmldoc/tests/ -v
 
 # Run with coverage
 uv run pytest --cov --cov-report=html
@@ -315,7 +317,7 @@ Each extraction also produces a summary JSON file with statistics.
 
 ### Crawler Settings
 
-Key settings in `01_crawl_toc_pages/solidworks_scraper/settings.py`:
+Key settings in `10_crawl_toc_pages/solidworks_scraper/settings.py`:
 
 - **User Agent**: Chrome browser to ensure proper access
 - **Crawl Delay**: 2 seconds (respectful crawling)
@@ -362,9 +364,9 @@ Each phase includes validation scripts that check:
 
 ```bash
 # Type checking with mypy
-uv run mypy 01_crawl_toc_pages/
-uv run mypy 02_extract_types/
-uv run mypy 04_extract_type_details/
+uv run mypy 10_crawl_toc_pages/
+uv run mypy 20_extract_types/
+uv run mypy 40_extract_type_details/
 
 # Linting with ruff
 uv run ruff check .
@@ -413,7 +415,7 @@ Please ensure all contributions maintain reproducibility and respect copyright.
 ### Phase 1: Crawling Issues
 
 1. **"scrapy: command not found"**
-   - Use `uv run` prefix: `uv run python 01_crawl_toc_pages/run_crawler.py`
+   - Use `uv run` prefix: `uv run python 10_crawl_toc_pages/run_crawler.py`
 
 2. **Rate limiting or 403 errors**
    - Increase DOWNLOAD_DELAY in settings.py
@@ -446,21 +448,23 @@ Please ensure all contributions maintain reproducibility and respect copyright.
 Each phase has detailed documentation:
 
 - **README.md** (this file) - Project overview and quick start
-- **01_crawl_toc_pages/README.md** - Crawler implementation details
-- **02_extract_types/README.md** - Type extraction details
-- **03_crawl_type_members/README.md** - Member crawling details
-- **04_extract_type_details/README.md** - Type detail extraction
-- **05_extract_type_member_details/README.md** - Member detail extraction
-- **06_extract_enum_members/README.md** - Enum extraction details
-- **07_crawl_examples/README.md** - Example crawling details
-- **08_parse_examples/README.md** - Example parsing details
-- **09_generate_xmldoc/README.md** - XMLDoc generation details
+- **10_crawl_toc_pages/README.md** - Crawler implementation details
+- **20_extract_types/README.md** - Type extraction details
+- **30_crawl_type_members/README.md** - Member crawling details
+- **40_extract_type_details/README.md** - Type detail extraction
+- **50_extract_type_member_details/README.md** - Member detail extraction
+- **60_extract_enum_members/README.md** - Enum extraction details
+- **70_crawl_examples/README.md** - Example crawling details
+- **80_parse_examples/README.md** - Example parsing details
+- **90_generate_xmldoc/README.md** - XMLDoc generation details
+- **100_crawl_programming_guide/README.md** - Programming guide crawling
+- **110_extract_docs_md/README.md** - Markdown extraction details
 - **CLAUDE.md** - Project context for AI assistants
 
 ## 🔮 Future Enhancements (Planned)
 
-- **Phase 10**: Create searchable offline documentation browser
-- **Phase 11**: Export to additional formats (JSON, Markdown, PDF)
+- **Phase 120**: Create searchable offline documentation browser
+- **Phase 130**: Export to additional formats (JSON, PDF)
 - **Enhanced search**: Full-text search across all documentation
 - **IDE plugins**: Direct integration with Visual Studio, VS Code, etc.
 

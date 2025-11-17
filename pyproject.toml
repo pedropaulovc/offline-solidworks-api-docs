@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "beautifulsoup4>=4.12.3",
     "html2text>=2024.2.26",
     "jsonlines>=4.0.0",
     "mypy>=1.13.0",
@@ -55,16 +56,17 @@ ignore_missing_imports = true
 line-length = 120
 target-version = "py312"
 extend-exclude = [
-    "01_crawl_toc_pages/output",
-    "02_extract_types/metadata",
-    "03_crawl_type_members/output",
-    "04_extract_type_details/metadata",
-    "06_extract_enum_members/metadata",
-    "07_crawl_examples/output",
-    "08_parse_examples/output",
-    "09_generate_xmldoc/output",
-    "10_crawl_programming_guide/output",
-    "11_extract_docs_md/output",
+    "10_crawl_toc_pages/output",
+    "20_extract_types/metadata",
+    "30_crawl_type_members/output",
+    "40_extract_type_details/metadata",
+    "50_extract_type_member_details/metadata",
+    "60_extract_enum_members/metadata",
+    "70_crawl_examples/output",
+    "80_parse_examples/output",
+    "90_generate_xmldoc/output",
+    "100_crawl_programming_guide/output",
+    "110_extract_docs_md/output",
 ]
 
 [tool.ruff.lint]
@@ -90,16 +92,17 @@ ignore = [
 
 [tool.pytest.ini_options]
 pythonpath = [
-    "01_crawl_toc_pages",
-    "02_extract_types",
-    "03_crawl_type_members",
-    "04_extract_type_details",
-    "06_extract_enum_members",
-    "07_crawl_examples",
-    "08_parse_examples",
-    "09_generate_xmldoc",
-    "10_crawl_programming_guide",
-    "11_extract_docs_md",
+    "10_crawl_toc_pages",
+    "20_extract_types",
+    "30_crawl_type_members",
+    "40_extract_type_details",
+    "50_extract_type_member_details",
+    "60_extract_enum_members",
+    "70_crawl_examples",
+    "80_parse_examples",
+    "90_generate_xmldoc",
+    "100_crawl_programming_guide",
+    "110_extract_docs_md",
     "shared",
 ]
 addopts = "--import-mode=importlib"
