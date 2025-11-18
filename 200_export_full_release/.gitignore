@@ -1,0 +1,5 @@
+# Ignore generated zip packages (these should be distributed separately)
+output/*.zip
+
+# Allow metadata files to be committed (small, useful for tracking)
+!metadata/
