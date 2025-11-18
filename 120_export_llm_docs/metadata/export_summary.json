@@ -1,0 +1,17 @@
+{
+  "export_timestamp": "2025-11-17T17:57:30.985563",
+  "statistics": {
+    "total_types": 2518,
+    "types_with_descriptions": 1508,
+    "types_with_remarks": 389,
+    "types_with_examples": 457,
+    "total_properties": 3392,
+    "total_methods": 8131,
+    "total_enum_members": 10428,
+    "total_examples": 1198,
+    "functional_categories": 12,
+    "markdown_files_generated": 3716,
+    "programming_guide_files": 125
+  },
+  "output_location": "120_export_llm_docs\\output"
+}
