@@ -292,6 +292,68 @@ def test_yaml_frontmatter_format():
     print("[PASS] YAML frontmatter format validation")
 
 
+def test_readme_generation():
+    """Test that README.md is generated with proper content for LLMs."""
+    # Create a temporary directory
+    with tempfile.TemporaryDirectory() as temp_dir:
+        output_base = Path(temp_dir)
+
+        # Create sample data
+        types = {
+            "ITestType1": TypeInfo(
+                name="ITestType1",
+                assembly="SolidWorks.Interop.sldworks",
+                namespace="SolidWorks.Interop.sldworks"
+            ),
+            "swTestEnum_e": TypeInfo(
+                name="swTestEnum_e",
+                assembly="SolidWorks.Interop.swconst",
+                namespace="SolidWorks.Interop.swconst"
+            )
+        }
+
+        types["ITestType1"].methods.append(Method(name="TestMethod", description="Test"))
+        types["swTestEnum_e"].enum_members.append(EnumMember(name="swValue1", description="Val1"))
+
+        examples = {
+            "example1.html": None  # Just need count for test
+        }
+
+        # Import and use the pipeline's README generation
+        from export_pipeline import ExportPipeline
+        pipeline = ExportPipeline(output_base=str(output_base))
+        pipeline._generate_output_readme(types, examples)
+
+        # Verify README exists
+        readme_path = output_base / "README.md"
+        assert readme_path.exists(), "README.md should be generated"
+
+        # Read and verify content
+        readme_content = readme_path.read_text(encoding='utf-8')
+
+        # Check for key sections
+        assert "# SolidWorks API Documentation - LLM-Optimized" in readme_content
+        assert "## Structure" in readme_content
+        assert "## Query Patterns" in readme_content
+        assert "## YAML Frontmatter" in readme_content
+        assert "## Cross-References" in readme_content
+
+        # Check for essential query patterns
+        assert "Find type overview" in readme_content
+        assert "Find method/property" in readme_content
+        assert "List all members" in readme_content
+        assert "Find by category" in readme_content
+        assert "api/types/{TypeName}/_overview.md" in readme_content
+
+        # Check that statistics are populated
+        assert "Stats" in readme_content
+        assert "types" in readme_content
+        assert "enums" in readme_content
+        assert "examples" in readme_content
+
+        print("[PASS] README.md generation for LLMs")
+
+
 if __name__ == '__main__':
     test_type_overview_generation()
     test_member_documentation_generation()
@@ -300,4 +362,5 @@ if __name__ == '__main__':
     test_grep_optimized_file_structure()
     test_enum_file_structure()
     test_yaml_frontmatter_format()
+    test_readme_generation()
     print("\n[PASS] All grep-optimized export tests passed!")

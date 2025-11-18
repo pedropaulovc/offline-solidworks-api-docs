@@ -100,6 +100,15 @@ class ExportValidator:
 
         print(f"  Found {len([d for d in expected_dirs if d.exists()])} / {len(expected_dirs)} expected directories")
 
+        # Check for README.md in output root
+        readme_path = self.output_path / "README.md"
+        if not readme_path.exists():
+            self.errors.append("Missing README.md in output directory")
+        elif not readme_path.is_file():
+            self.errors.append("README.md is not a file")
+        else:
+            print(f"  Found README.md ({readme_path.stat().st_size:,} bytes)")
+
     def _validate_api_docs(self):
         """Validate API documentation files (grep-optimized structure)."""
         api_path = self.output_path / "api"

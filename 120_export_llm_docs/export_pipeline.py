@@ -91,28 +91,32 @@ class ExportPipeline:
                 type_info.functional_category = category_mapping_lower[fqn.lower()]
 
         # Step 3: Map examples to categories (needed for both API docs and example docs)
-        print("\n[3/8] Mapping examples to categories...")
+        print("\n[3/9] Mapping examples to categories...")
         example_categories = self._map_examples_to_categories(data_loader.examples, types)
         print(f"  Mapped {len(example_categories)} examples to categories")
 
         # Step 4: Generate API documentation
-        print("\n[4/8] Generating API documentation...")
+        print("\n[4/9] Generating API documentation...")
         self._generate_api_docs(types, data_loader, example_categories)
 
         # Step 5: Generate index files
-        print("\n[5/8] Generating index files...")
+        print("\n[5/9] Generating index files...")
         self._generate_indexes(types)
 
         # Step 6: Generate example documentation
-        print("\n[6/8] Generating example documentation...")
+        print("\n[6/9] Generating example documentation...")
         self._generate_example_docs(data_loader.examples, example_categories)
 
         # Step 7: Copy programming guide
-        print("\n[7/8] Copying programming guide...")
+        print("\n[7/9] Copying programming guide...")
         self._copy_programming_guide(phase110_path)
 
-        # Step 8: Generate summary report
-        print("\n[8/8] Generating summary report...")
+        # Step 8: Generate output README for LLMs
+        print("\n[8/9] Generating output README...")
+        self._generate_output_readme(types, data_loader.examples)
+
+        # Step 9: Generate summary report
+        print("\n[9/9] Generating summary report...")
         self._generate_summary_report()
 
         print("\n" + "="*80)
@@ -244,6 +248,71 @@ class ExportPipeline:
                     self.stats.programming_guide_files += 1
 
         print(f"  Copied {self.stats.programming_guide_files} programming guide files")
+
+    def _generate_output_readme(self, types: Dict[str, TypeInfo], examples: Dict[str, ExampleContent]):
+        """Generate a README.md in the output folder explaining how to consume the docs."""
+        readme_path = self.output_base / "README.md"
+
+        # Count stats for the README
+        regular_types = [t for t in types.values() if not t.is_enum]
+        enum_types = [t for t in types.values() if t.is_enum]
+        total_members = sum(len(t.properties) + len(t.methods) for t in regular_types)
+        total_enum_members = sum(len(t.enum_members) for t in enum_types)
+
+        readme_content = f"""# SolidWorks API Documentation - LLM-Optimized
+
+**Stats**: {len(regular_types):,} types, {len(enum_types):,} enums, {total_members:,} members, {len(examples):,} examples ({self.stats.markdown_files_generated:,} files)
+
+## Structure
+
+```
+api/types/{{TypeName}}/          # Regular types (interfaces, classes)
+  _overview.md                    # Type info: description, remarks, member counts
+  {{MethodName}}.md               # Individual method files
+  {{PropertyName}}.md             # Individual property files
+
+api/enums/{{EnumName}}/          # Enumerations
+  _overview.md                    # Enum info
+  {{MemberName}}.md               # Individual enum member files
+
+api/index/
+  by_category.md                  # Types by functional category
+  by_assembly.md                  # Types by .NET assembly
+  statistics.md                   # Stats and largest types
+
+docs/
+  examples/                       # Code examples by category
+  (programming guide content)
+```
+
+## Query Patterns
+
+**Find type overview**: Read `api/types/{{TypeName}}/_overview.md`
+**Find method/property**: Read `api/types/{{TypeName}}/{{MemberName}}.md`
+**List all members**: List files in `api/types/{{TypeName}}/`, exclude `_overview.md`
+**Find by category**: Read `api/index/by_category.md`
+**Search by keyword**: Search file contents in `api/types/` or `api/enums/`
+**Filter by metadata**: Search YAML frontmatter (e.g., `kind: method`, `category: Assembly Interfaces`)
+
+## YAML Frontmatter
+
+**Type overviews** have: `name`, `assembly`, `namespace`, `category`, `is_enum`, `property_count`, `method_count`, `enum_member_count`
+
+**Member files** have: `type`, `member`, `kind` (method|property|enum_member), `assembly`, `namespace`, `category`
+
+## Cross-References
+
+Use `[[TypeName]]` or `[[TypeName::MemberName]]` format for type references.
+
+---
+*SolidWorks API Help 2026 | For personal/educational use only*
+"""
+
+        with open(readme_path, 'w', encoding='utf-8') as f:
+            f.write(readme_content)
+
+        print(f"  Generated README.md at: {readme_path}")
+        self.stats.markdown_files_generated += 1
 
     def _generate_summary_report(self):
         """Generate a summary report of the export process."""

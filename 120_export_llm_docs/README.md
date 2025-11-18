@@ -20,6 +20,7 @@ The export generates a **grep-optimized** structure where each method, property,
 
 ```
 output/
+├── README.md                             # LLM-friendly documentation guide
 ├── api/                                  # API reference documentation
 │   ├── types/                            # Regular types (interfaces, classes)
 │   │   ├── IModelDoc2/                   # One directory per type
@@ -60,12 +61,13 @@ output/
 
 ### Key Structural Features
 
-1. **File-per-member granularity**: ~14,000 member files for easy grep/extraction
-2. **Flat type directories**: `types/TypeName/` instead of deep `Assembly/Category/TypeName/` hierarchy
-3. **Separate types and enums**: Clear distinction between regular types and enumerations
-4. **Index files**: Category/assembly organization preserved as queryable markdown
-5. **YAML frontmatter**: Every file has metadata (type, assembly, category, kind)
-6. **Simplified cross-references**: `[[IModelDoc2]]` instead of `<see cref="...">`
+1. **LLM-optimized README**: Root-level guide explaining structure and query patterns for AI consumption
+2. **File-per-member granularity**: ~14,000 member files for easy grep/extraction
+3. **Flat type directories**: `types/TypeName/` instead of deep `Assembly/Category/TypeName/` hierarchy
+4. **Separate types and enums**: Clear distinction between regular types and enumerations
+5. **Index files**: Category/assembly organization preserved as queryable markdown
+6. **YAML frontmatter**: Every file has metadata (type, assembly, category, kind)
+7. **Simplified cross-references**: `[[IModelDoc2]]` instead of `<see cref="...">`
 
 ## Markdown Format
 
