@@ -14,104 +14,149 @@ This phase consumes outputs from previous phases (20, 40, 50, 60, 80, 110) and p
 - **Phase 110** (`110_extract_docs_md/output/markdown/`) - Programming guide markdown
 - **FunctionalCategories** (`10_crawl_toc_pages/output/html/.../FunctionalCategories...html`) - Category mappings for sldworks types
 
-## Output Structure
+## Output Structure (Grep-Optimized)
+
+The export generates a **grep-optimized** structure where each method, property, and enum member gets its own file for maximum searchability:
 
 ```
 output/
-├── docs/                              # Programming guide
-│   ├── Overview.md
-│   ├── SOLIDWORKS Partner Program.md
-│   ├── Programming with the SOLIDWORKS API/
-│   └── examples/                      # Code examples organized by functional category
-│       ├── Application Interfaces/
-│       │   ├── Create_Advanced_Hole_Example_CSharp.md
-│       │   └── ...
-│       ├── Annotation Interfaces/
-│       └── ... (14 categories based on FunctionalCategories)
-└── api/                               # API reference documentation
-    ├── SolidWorks.Interop.sldworks/   # Main assembly organized by functional categories
-    │   ├── Application Interfaces/
-    │   │   ├── ISldWorks.md
-    │   │   ├── IModelDoc2.md
-    │   │   └── ...
-    │   ├── Annotation Interfaces/
-    │   ├── Assembly Interfaces/
-    │   ├── Drawing Interfaces/
-    │   ├── Feature Interfaces/
-    │   └── ... (14 categories)
-    ├── SolidWorks.Interop.swconst/    # Other assemblies organized by namespace
-    │   ├── swDocumentTypes_e.md
-    │   └── ...
-    ├── SolidWorks.Interop.swcommands/
-    └── ... (9 other assemblies)
+├── api/                                  # API reference documentation
+│   ├── types/                            # Regular types (interfaces, classes)
+│   │   ├── IModelDoc2/                   # One directory per type
+│   │   │   ├── _overview.md              # Type-level info (description, remarks, counts)
+│   │   │   ├── CreateArc.md              # Individual method files
+│   │   │   ├── CreateArc2.md
+│   │   │   ├── Save.md
+│   │   │   ├── GetPathName.md            # Individual property files
+│   │   │   └── ... (697 methods + 24 properties)
+│   │   ├── ISldWorks/
+│   │   │   ├── _overview.md
+│   │   │   └── ... (methods and properties)
+│   │   └── ... (1,563 type directories)
+│   │
+│   ├── enums/                            # Enumerations
+│   │   ├── swDocumentTypes_e/
+│   │   │   ├── _overview.md
+│   │   │   ├── swDocPART.md              # Individual enum member files
+│   │   │   ├── swDocASSEMBLY.md
+│   │   │   └── swDocDRAWING.md
+│   │   └── ... (955 enum directories)
+│   │
+│   └── index/                            # Navigation indexes
+│       ├── by_category.md                # Types organized by functional category
+│       ├── by_assembly.md                # Types organized by .NET assembly
+│       └── statistics.md                 # Quick stats and largest types
+│
+└── docs/                                 # Programming guide
+    ├── Overview.md
+    ├── SOLIDWORKS Partner Program.md
+    ├── Programming with the SOLIDWORKS API/
+    └── examples/                         # Code examples organized by category
+        ├── Other/
+        │   ├── Create_Advanced_Hole_Example_CSharp.md
+        │   └── ...
+        └── ... (examples organized by functional category)
 ```
+
+### Key Structural Features
+
+1. **File-per-member granularity**: ~14,000 member files for easy grep/extraction
+2. **Flat type directories**: `types/TypeName/` instead of deep `Assembly/Category/TypeName/` hierarchy
+3. **Separate types and enums**: Clear distinction between regular types and enumerations
+4. **Index files**: Category/assembly organization preserved as queryable markdown
+5. **YAML frontmatter**: Every file has metadata (type, assembly, category, kind)
+6. **Simplified cross-references**: `[[IModelDoc2]]` instead of `<see cref="...">`
 
 ## Markdown Format
 
-### API Documentation Files
+### Type Overview Files (`_overview.md`)
 
-Each type gets a comprehensive markdown file:
+Each type directory contains an overview file with YAML frontmatter:
 
 ```markdown
-# TypeName
+---
+name: IModelDoc2
+assembly: SolidWorks.Interop.sldworks
+namespace: SolidWorks.Interop.sldworks
+category: Application Interfaces
+is_enum: False
+property_count: 24
+method_count: 697
+enum_member_count: 0
+---
 
-**Assembly**: SolidWorks.Interop.assembly
-**Namespace**: SolidWorks.Interop.namespace
+# IModelDoc2
+
+**Assembly**: SolidWorks.Interop.sldworks
+**Namespace**: SolidWorks.Interop.sldworks
+**Category**: Application Interfaces
 
 ## Description
 
-Type description from Phase 40...
+Allows access to SOLIDWORKS documents: parts, assemblies, and drawings.
 
 ## Remarks
 
-Remarks from Phase 40...
+There are three main SOLIDWORKS document types: parts, assemblies, and drawings.
+Each document type has its own object ([[IPartDoc]], [[IAssemblyDoc]], [[IDrawingDoc]])...
 
-## Properties
+## Members
 
-### PropertyName
-
-Property description...
-
-**Parameters**: (if indexer)
-- `paramName` (Type) - description
-
-**Returns**: Type - description
-
-**Remarks**: Additional notes...
-
-## Methods
-
-### MethodName
-
-Method description...
-
-**Signature**: `MethodName(Type param1, Type param2)`
-
-**Parameters**:
-- `param1` (Type) - description
-- `param2` (Type) - description
-
-**Returns**: Type - description
-
-**Remarks**: Additional notes...
-
-## Examples
-
-### Example Title (C#)
-
-[Link to full example](../../docs/examples/Category/Example_File.md)
-
-```csharp
-// Inline example code...
+- **Properties**: 24
+- **Methods**: 697
 ```
 
-### Example Title (VBA)
+### Member Files (Methods and Properties)
 
-[Link to full example](../../docs/examples/Category/Example_File.md)
+Each method/property gets its own file with YAML frontmatter:
 
-```vba
-' Inline example code...
+```markdown
+---
+type: IModelDoc2
+member: CreateArc2
+kind: method
+assembly: SolidWorks.Interop.sldworks
+namespace: SolidWorks.Interop.sldworks
+category: Application Interfaces
+---
+
+# IModelDoc2.CreateArc2
+
+Creates a sketch arc with the specified attributes.
+
+**Signature**: `CreateArc2( double CenterX, double CenterY, double CenterZ, ... )`
+
+## Parameters
+
+- **CenterX**: X coordinate of arc center point
+- **CenterY**: Y coordinate of arc center point
+- **CenterZ**: Z coordinate of arc center point
+
+## Returns
+
+Pointer to the [[ISketchArc]] object
+
+## Remarks
+
+Use [[ISketchManager::CreateArc]] for more control over arc creation...
 ```
+
+### Enum Member Files
+
+Each enumeration member gets its own file:
+
+```markdown
+---
+type: swDocumentTypes_e
+member: swDocPART
+kind: enum_member
+assembly: SolidWorks.Interop.swconst
+namespace: SolidWorks.Interop.swconst
+---
+
+# swDocumentTypes_e.swDocPART
+
+Part document type (*.sldprt)
 ```
 
 ### Example Files
@@ -143,15 +188,15 @@ using SolidWorks.Interop.sldworks;
 
 - `functional_categories_parser.py` - Parses FunctionalCategories HTML to extract category-to-type mappings
 - `data_loader.py` - Loads and merges XML data from phases 20, 40, 50, 60, 80
-- `markdown_generator.py` - Generates markdown documentation for API types
+- `markdown_generator.py` - Generates markdown documentation (supports grep-optimized mode)
 - `example_generator.py` - Generates markdown files for code examples
+- `index_generator.py` - Generates navigation index files (by category, assembly, statistics)
 - `export_pipeline.py` - Main orchestration script
-- `validate_export.py` - Validates completeness and quality of export
+- `validate_export.py` - Validates completeness and quality of grep-optimized export
 
 ### Utility Modules
 
 - `models.py` - Data models for types, members, examples, etc.
-- `utils.py` - Shared utilities (path handling, file I/O, etc.)
 
 ## Usage
 
@@ -209,20 +254,66 @@ The data loader combines data from multiple phases:
 
 ### Markdown Generation
 
-- Clean, readable markdown optimized for LLM consumption
-- Relative links between API docs and examples
-- Code blocks with proper language tags
-- Hierarchical organization for easy navigation
-- Embedded examples in API docs + separate detailed example files
+- **Grep-optimized structure**: File-per-member for easy searching and extraction
+- **YAML frontmatter**: Metadata in every file for programmatic access
+- **Simplified cross-references**: `[[Type]]` instead of verbose XML-style links
+- **Clean, readable markdown**: Optimized for both LLM and human consumption
+- **Index files**: Preserve category/assembly organization without deep nesting
+
+## Grep Use Cases
+
+The grep-optimized structure makes it easy to:
+
+### Find specific methods quickly
+```bash
+# Find CreateArc method documentation
+grep -r "CreateArc" output/api/types/IModelDoc2/
+
+# Get just that method's file
+cat output/api/types/IModelDoc2/CreateArc2.md
+```
+
+### Extract member documentation programmatically
+```bash
+# Get all methods in IModelDoc2
+ls output/api/types/IModelDoc2/*.md | grep -v "_overview"
+
+# Extract all method signatures
+grep "^**Signature**:" output/api/types/IModelDoc2/*.md
+```
+
+### Search by metadata
+```bash
+# Find all members in "Application Interfaces" category
+grep -r "category: Application Interfaces" output/api/types/
+
+# Find all methods (not properties)
+grep -r "kind: method" output/api/types/
+
+# Find all enum members
+grep -r "kind: enum_member" output/api/enums/
+```
+
+### Navigate by category
+```bash
+# View all types in a category
+cat output/api/index/by_category.md | grep -A 20 "Application Interfaces"
+
+# View statistics
+cat output/api/index/statistics.md
+```
 
 ## Success Criteria
 
-- All types from Phase 20 have corresponding markdown files
+- All types from Phase 20 have corresponding type directories with _overview.md
+- All members have individual markdown files with YAML frontmatter
 - All examples from Phase 80 have corresponding markdown files
 - All programming guide content from Phase 110 copied successfully
 - Functional categories correctly applied to sldworks types
-- Validation script reports >95% completeness
-- Test suite has >80% coverage
+- Index files generated (by_category, by_assembly, statistics)
+- Validation script reports 100% structure compliance
+- Cross-references simplified from XML to markdown links
+- Expected ~25,000+ markdown files (vs ~3,800 in monolithic structure)
 
 ## Dependencies
 

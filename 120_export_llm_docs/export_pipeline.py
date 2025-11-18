@@ -17,6 +17,7 @@ from functional_categories_parser import FunctionalCategoriesParser
 from data_loader import DataLoader
 from markdown_generator import MarkdownGenerator, sanitize_filename
 from example_generator import ExampleGenerator
+from index_generator import IndexGenerator
 from models import TypeInfo, ExampleContent, ExportStatistics
 
 
@@ -90,19 +91,23 @@ class ExportPipeline:
                 type_info.functional_category = category_mapping_lower[fqn.lower()]
 
         # Step 3: Generate API documentation
-        print("\n[3/6] Generating API documentation...")
+        print("\n[3/7] Generating API documentation...")
         self._generate_api_docs(types, data_loader)
 
-        # Step 4: Generate example documentation
-        print("\n[4/6] Generating example documentation...")
+        # Step 4: Generate index files
+        print("\n[4/7] Generating index files...")
+        self._generate_indexes(types)
+
+        # Step 5: Generate example documentation
+        print("\n[5/7] Generating example documentation...")
         self._generate_example_docs(data_loader.examples, category_mapping, types)
 
-        # Step 5: Copy programming guide
-        print("\n[5/6] Copying programming guide...")
+        # Step 6: Copy programming guide
+        print("\n[6/7] Copying programming guide...")
         self._copy_programming_guide(phase110_path)
 
-        # Step 6: Generate summary report
-        print("\n[6/6] Generating summary report...")
+        # Step 7: Generate summary report
+        print("\n[7/7] Generating summary report...")
         self._generate_summary_report()
 
         print("\n" + "="*80)
@@ -112,51 +117,71 @@ class ExportPipeline:
         print(f"Total markdown files generated: {self.stats.markdown_files_generated}")
 
     def _generate_api_docs(self, types: Dict[str, TypeInfo], data_loader: DataLoader):
-        """Generate markdown documentation for all API types."""
+        """Generate grep-optimized markdown documentation for all API types."""
         api_path = self.output_base / "api"
 
-        # Create markdown generator
+        # Create markdown generator in grep-optimized mode
         generator = MarkdownGenerator(
             output_base_path=str(api_path),
-            examples_loader_func=data_loader.get_example_content
+            examples_loader_func=data_loader.get_example_content,
+            grep_optimized=True
         )
 
-        # Group types by assembly and category
-        by_assembly_category = self._group_types_by_assembly_category(types)
+        # Separate types from enums
+        regular_types = {fqn: t for fqn, t in types.items() if not t.is_enum}
+        enum_types = {fqn: t for fqn, t in types.items() if t.is_enum}
 
-        for assembly, categories_dict in by_assembly_category.items():
-            print(f"  Processing assembly: {assembly}")
+        # Generate regular types
+        print(f"  Generating {len(regular_types)} regular types...")
+        types_path = api_path / "types"
+        for fqn, type_info in regular_types.items():
+            # Create directory: api/types/TypeName/
+            type_dir = types_path / sanitize_filename(type_info.name)
+            files_count = generator.save_grep_optimized_documentation(type_info, type_dir)
+            self.stats.markdown_files_generated += files_count
 
-            for category, types_list in categories_dict.items():
-                # Determine output path
-                if category:
-                    # Handle hierarchical categories (e.g., "Annotation Interfaces/Table Annotations")
-                    category_parts = [sanitize_filename(part) for part in category.split('/')]
-                    output_dir = api_path / sanitize_filename(assembly) / Path(*category_parts)
-                else:
-                    output_dir = api_path / sanitize_filename(assembly)
+            # Update stats
+            self.stats.total_types += 1
+            if type_info.description:
+                self.stats.types_with_descriptions += 1
+            if type_info.remarks:
+                self.stats.types_with_remarks += 1
+            if type_info.examples:
+                self.stats.types_with_examples += 1
+            self.stats.total_properties += len(type_info.properties)
+            self.stats.total_methods += len(type_info.methods)
 
-                output_dir.mkdir(parents=True, exist_ok=True)
+        print(f"    Generated {len(regular_types)} type directories")
 
-                # Generate docs for each type
-                for type_info in types_list:
-                    output_file = output_dir / f"{sanitize_filename(type_info.name)}.md"
-                    generator.save_type_documentation(type_info, output_file)
-                    self.stats.markdown_files_generated += 1
+        # Generate enums
+        print(f"  Generating {len(enum_types)} enumerations...")
+        enums_path = api_path / "enums"
+        for fqn, enum_info in enum_types.items():
+            # Create directory: api/enums/EnumName/
+            enum_dir = enums_path / sanitize_filename(enum_info.name)
+            files_count = generator.save_grep_optimized_documentation(enum_info, enum_dir)
+            self.stats.markdown_files_generated += files_count
 
-                    # Update stats
-                    self.stats.total_types += 1
-                    if type_info.description:
-                        self.stats.types_with_descriptions += 1
-                    if type_info.remarks:
-                        self.stats.types_with_remarks += 1
-                    if type_info.examples:
-                        self.stats.types_with_examples += 1
-                    self.stats.total_properties += len(type_info.properties)
-                    self.stats.total_methods += len(type_info.methods)
-                    self.stats.total_enum_members += len(type_info.enum_members)
+            # Update stats
+            self.stats.total_types += 1
+            if enum_info.description:
+                self.stats.types_with_descriptions += 1
+            if enum_info.remarks:
+                self.stats.types_with_remarks += 1
+            self.stats.total_enum_members += len(enum_info.enum_members)
 
-                print(f"    {category if category else 'Root'}: {len(types_list)} types")
+        print(f"    Generated {len(enum_types)} enum directories")
+
+    def _generate_indexes(self, types: Dict[str, TypeInfo]):
+        """Generate index files for navigating the documentation."""
+        index_path = self.output_base / "api" / "index"
+
+        # Create index generator
+        generator = IndexGenerator(output_base_path=str(index_path))
+
+        # Generate all index files
+        generator.save_all_indexes(types)
+        self.stats.markdown_files_generated += 3  # by_category, by_assembly, statistics
 
     def _generate_example_docs(self,
                                 examples: Dict[str, ExampleContent],

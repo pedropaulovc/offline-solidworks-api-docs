@@ -2,29 +2,32 @@
 Markdown Generator for Phase 120: Export LLM-Friendly Documentation
 
 This module generates markdown documentation files for API types.
+Supports both monolithic (one file per type) and grep-optimized (file-per-member) formats.
 """
 
 import re
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 import html
 
-from models import TypeInfo, ExampleContent
+from models import TypeInfo, ExampleContent, Member, Property, Method, EnumMember
 
 
 class MarkdownGenerator:
     """Generates markdown documentation for API types."""
 
-    def __init__(self, output_base_path: str, examples_loader_func=None):
+    def __init__(self, output_base_path: str, examples_loader_func=None, grep_optimized=False):
         """
         Initialize the markdown generator.
 
         Args:
             output_base_path: Base path for output markdown files
             examples_loader_func: Function to load example content by URL
+            grep_optimized: If True, generate file-per-member structure for greppability
         """
         self.output_base_path = Path(output_base_path)
         self.examples_loader_func = examples_loader_func
+        self.grep_optimized = grep_optimized
 
     def generate_type_documentation(self, type_info: TypeInfo, category: Optional[str] = None) -> str:
         """
@@ -236,6 +239,235 @@ class MarkdownGenerator:
         else:
             # If no category, just link to docs/examples
             return f"../../docs/examples/{filename}"
+
+    def generate_type_overview(self, type_info: TypeInfo) -> str:
+        """
+        Generate type overview markdown (description, remarks, metadata) without members.
+        Used for grep-optimized _overview.md files.
+
+        Args:
+            type_info: The TypeInfo object to document
+
+        Returns:
+            Generated markdown content as a string
+        """
+        md = []
+
+        # YAML frontmatter
+        md.append("---")
+        md.append(f"name: {type_info.name}")
+        md.append(f"assembly: {type_info.assembly}")
+        md.append(f"namespace: {type_info.namespace}")
+        if type_info.functional_category:
+            md.append(f"category: {type_info.functional_category}")
+        md.append(f"is_enum: {type_info.is_enum}")
+        md.append(f"property_count: {len(type_info.properties)}")
+        md.append(f"method_count: {len(type_info.methods)}")
+        md.append(f"enum_member_count: {len(type_info.enum_members)}")
+        md.append("---\n")
+
+        # Title
+        md.append(f"# {type_info.name}\n")
+
+        # Metadata
+        md.append(f"**Assembly**: {type_info.assembly}  ")
+        md.append(f"**Namespace**: {type_info.namespace}")
+        if type_info.functional_category:
+            md.append(f"  \n**Category**: {type_info.functional_category}")
+        md.append("\n")
+
+        # Description
+        if type_info.description:
+            md.append("## Description\n")
+            md.append(f"{self._simplify_cross_references(self._clean_text(type_info.description))}\n")
+
+        # Remarks
+        if type_info.remarks:
+            md.append("## Remarks\n")
+            md.append(f"{self._simplify_cross_references(self._clean_text(type_info.remarks))}\n")
+
+        # Member counts
+        md.append("## Members\n")
+        if type_info.properties:
+            md.append(f"- **Properties**: {len(type_info.properties)}\n")
+        if type_info.methods:
+            md.append(f"- **Methods**: {len(type_info.methods)}\n")
+        if type_info.enum_members:
+            md.append(f"- **Enumeration Members**: {len(type_info.enum_members)}\n")
+
+        return "\n".join(md)
+
+    def generate_member_documentation(self, type_info: TypeInfo, member: Member, member_kind: str) -> str:
+        """
+        Generate markdown documentation for a single member (property or method).
+
+        Args:
+            type_info: The parent TypeInfo object
+            member: The member (Property or Method) to document
+            member_kind: "property" or "method"
+
+        Returns:
+            Generated markdown content as a string
+        """
+        md = []
+
+        # YAML frontmatter
+        md.append("---")
+        md.append(f"type: {type_info.name}")
+        md.append(f"member: {member.name}")
+        md.append(f"kind: {member_kind}")
+        md.append(f"assembly: {type_info.assembly}")
+        md.append(f"namespace: {type_info.namespace}")
+        if type_info.functional_category:
+            md.append(f"category: {type_info.functional_category}")
+        md.append("---\n")
+
+        # Title
+        md.append(f"# {type_info.name}.{member.name}\n")
+
+        # Description
+        if member.description:
+            md.append(f"{self._simplify_cross_references(self._clean_text(member.description))}\n")
+
+        # Signature
+        if member.signature:
+            md.append(f"**Signature**: `{member.signature}`\n")
+
+        # Parameters
+        if member.parameters:
+            md.append("## Parameters\n")
+            for param in member.parameters:
+                param_desc = self._simplify_cross_references(self._clean_text(param.description)) if param.description else "No description"
+                md.append(f"- **{param.name}**: {param_desc}\n")
+            md.append("")
+
+        # Returns
+        if member.returns:
+            md.append(f"## Returns\n")
+            md.append(f"{self._simplify_cross_references(self._clean_text(member.returns))}\n")
+
+        # Remarks
+        if member.remarks:
+            md.append(f"## Remarks\n")
+            md.append(f"{self._simplify_cross_references(self._clean_text(member.remarks))}\n")
+
+        return "\n".join(md)
+
+    def generate_enum_member_documentation(self, type_info: TypeInfo, enum_member: EnumMember) -> str:
+        """
+        Generate markdown documentation for a single enum member.
+
+        Args:
+            type_info: The parent TypeInfo object (the enum)
+            enum_member: The EnumMember to document
+
+        Returns:
+            Generated markdown content as a string
+        """
+        md = []
+
+        # YAML frontmatter
+        md.append("---")
+        md.append(f"type: {type_info.name}")
+        md.append(f"member: {enum_member.name}")
+        md.append(f"kind: enum_member")
+        md.append(f"assembly: {type_info.assembly}")
+        md.append(f"namespace: {type_info.namespace}")
+        if type_info.functional_category:
+            md.append(f"category: {type_info.functional_category}")
+        md.append("---\n")
+
+        # Title
+        md.append(f"# {type_info.name}.{enum_member.name}\n")
+
+        # Description
+        if enum_member.description:
+            md.append(f"{self._simplify_cross_references(self._clean_text(enum_member.description))}\n")
+
+        return "\n".join(md)
+
+    def _simplify_cross_references(self, text: str) -> str:
+        """
+        Simplify XML-style cross-references to markdown links.
+        Converts: <see cref="SOLIDWORKS.Interop.sldworks.IModelDoc2">IModelDoc2</see>
+        To: [[IModelDoc2]]
+
+        Args:
+            text: Text with XML-style cross-references
+
+        Returns:
+            Text with simplified markdown links
+        """
+        if not text:
+            return ""
+
+        # Pattern: <see cref="...">LinkText</see>
+        # Replace with [[LinkText]]
+        pattern = r'<see cref="[^"]+">([^<]+)</see>'
+        text = re.sub(pattern, r'[[\1]]', text)
+
+        # Also handle self-closing see tags: <see cref="..." />
+        # Extract type name from FQN and create link
+        def replace_self_closing(match):
+            fqn = match.group(1)
+            # Extract last part of FQN as link text
+            type_name = fqn.split('.')[-1]
+            return f'[[{type_name}]]'
+
+        pattern_self_closing = r'<see cref="([^"]+)"\s*/>'
+        text = re.sub(pattern_self_closing, replace_self_closing, text)
+
+        return text
+
+    def save_grep_optimized_documentation(self, type_info: TypeInfo, output_dir: Path) -> int:
+        """
+        Generate and save grep-optimized documentation for a type.
+        Creates a directory structure: types/TypeName/ with separate files for each member.
+
+        Args:
+            type_info: The TypeInfo object to document
+            output_dir: Base directory (e.g., output/api/types/TypeName/)
+
+        Returns:
+            Number of files generated
+        """
+        files_generated = 0
+
+        # Create type directory
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        # Generate type overview
+        overview_md = self.generate_type_overview(type_info)
+        overview_path = output_dir / "_overview.md"
+        with open(overview_path, 'w', encoding='utf-8') as f:
+            f.write(overview_md)
+        files_generated += 1
+
+        # Generate property files
+        for prop in type_info.properties:
+            member_md = self.generate_member_documentation(type_info, prop, "property")
+            member_path = output_dir / f"{sanitize_filename(prop.name)}.md"
+            with open(member_path, 'w', encoding='utf-8') as f:
+                f.write(member_md)
+            files_generated += 1
+
+        # Generate method files
+        for method in type_info.methods:
+            member_md = self.generate_member_documentation(type_info, method, "method")
+            member_path = output_dir / f"{sanitize_filename(method.name)}.md"
+            with open(member_path, 'w', encoding='utf-8') as f:
+                f.write(member_md)
+            files_generated += 1
+
+        # Generate enum member files
+        for enum_member in type_info.enum_members:
+            member_md = self.generate_enum_member_documentation(type_info, enum_member)
+            member_path = output_dir / f"{sanitize_filename(enum_member.name)}.md"
+            with open(member_path, 'w', encoding='utf-8') as f:
+                f.write(member_md)
+            files_generated += 1
+
+        return files_generated
 
     def save_type_documentation(self, type_info: TypeInfo, output_path: Path):
         """

@@ -85,6 +85,9 @@ class ExportValidator:
         """Validate that the expected directory structure exists."""
         expected_dirs = [
             self.output_path / "api",
+            self.output_path / "api" / "types",
+            self.output_path / "api" / "enums",
+            self.output_path / "api" / "index",
             self.output_path / "docs",
             self.output_path / "docs" / "examples",
         ]
@@ -98,39 +101,76 @@ class ExportValidator:
         print(f"  Found {len([d for d in expected_dirs if d.exists()])} / {len(expected_dirs)} expected directories")
 
     def _validate_api_docs(self):
-        """Validate API documentation files."""
+        """Validate API documentation files (grep-optimized structure)."""
         api_path = self.output_path / "api"
 
         if not api_path.exists():
             self.errors.append("API directory does not exist")
             return
 
-        # Count markdown files
-        md_files = list(api_path.rglob('*.md'))
+        # Validate types directory
+        types_path = api_path / "types"
+        enums_path = api_path / "enums"
+        index_path = api_path / "index"
 
-        if not md_files:
-            self.errors.append("No API documentation files found")
+        # Count type directories
+        type_dirs = [d for d in types_path.iterdir() if d.is_dir()] if types_path.exists() else []
+        enum_dirs = [d for d in enums_path.iterdir() if d.is_dir()] if enums_path.exists() else []
+
+        print(f"  Found {len(type_dirs)} type directories")
+        print(f"  Found {len(enum_dirs)} enum directories")
+
+        # Count all markdown files
+        md_files = list(api_path.rglob('*.md'))
+        print(f"  Found {len(md_files)} total markdown files")
+
+        # Validate sample type directories
+        sample_size = min(5, len(type_dirs))
+        for type_dir in type_dirs[:sample_size]:
+            self._validate_type_directory(type_dir, "type")
+
+        # Validate sample enum directories
+        sample_size = min(5, len(enum_dirs))
+        for enum_dir in enum_dirs[:sample_size]:
+            self._validate_type_directory(enum_dir, "enum")
+
+        # Validate index files
+        if index_path.exists():
+            expected_indexes = ["by_category.md", "by_assembly.md", "statistics.md"]
+            for index_file in expected_indexes:
+                index_file_path = index_path / index_file
+                if not index_file_path.exists():
+                    self.warnings.append(f"Missing index file: {index_file}")
+                else:
+                    self._validate_markdown_file(index_file_path, "Index")
+            print(f"  Validated {len(expected_indexes)} index files")
+        else:
+            self.warnings.append("Index directory not found")
+
+    def _validate_type_directory(self, type_dir: Path, type_kind: str):
+        """
+        Validate a type directory structure.
+
+        Args:
+            type_dir: Path to the type directory
+            type_kind: "type" or "enum"
+        """
+        # Check for _overview.md
+        overview_path = type_dir / "_overview.md"
+        if not overview_path.exists():
+            self.errors.append(f"Missing _overview.md in {type_kind}: {type_dir.name}")
             return
 
-        print(f"  Found {len(md_files)} API documentation files")
+        # Validate _overview.md has YAML frontmatter
+        self._validate_markdown_file(overview_path, f"{type_kind.capitalize()} Overview", require_yaml=True)
 
-        # Check a sample for basic content
-        sample_size = min(10, len(md_files))
-        for md_file in md_files[:sample_size]:
-            self._validate_markdown_file(md_file, "API")
+        # Count member files
+        member_files = [f for f in type_dir.iterdir() if f.is_file() and f.name != "_overview.md" and f.suffix == ".md"]
 
-        # Count assemblies and categories
-        assemblies = set()
-        categories = set()
-        for md_file in md_files:
-            parts = md_file.relative_to(api_path).parts
-            if parts:
-                assemblies.add(parts[0])
-            if len(parts) > 1:
-                categories.add(parts[1])
-
-        print(f"  Found {len(assemblies)} assemblies")
-        print(f"  Found {len(categories)} categories")
+        # Validate a few member files
+        sample_size = min(3, len(member_files))
+        for member_file in member_files[:sample_size]:
+            self._validate_markdown_file(member_file, f"{type_kind.capitalize()} Member", require_yaml=True)
 
     def _validate_example_docs(self):
         """Validate example documentation files."""
@@ -214,13 +254,14 @@ class ExportValidator:
         except Exception as e:
             self.errors.append(f"Error reading summary report: {e}")
 
-    def _validate_markdown_file(self, file_path: Path, doc_type: str):
+    def _validate_markdown_file(self, file_path: Path, doc_type: str, require_yaml: bool = False):
         """
         Validate a markdown file for basic content.
 
         Args:
             file_path: Path to the markdown file
             doc_type: Type of documentation (API or Example)
+            require_yaml: If True, check for YAML frontmatter
         """
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
@@ -231,9 +272,25 @@ class ExportValidator:
                 self.errors.append(f"Empty {doc_type} file: {file_path}")
                 return
 
-            # Check for basic markdown structure
-            if not content.startswith('#'):
-                self.warnings.append(f"{doc_type} file missing title: {file_path}")
+            # Check for YAML frontmatter if required
+            if require_yaml:
+                if not content.startswith('---\n'):
+                    self.errors.append(f"{doc_type} file missing YAML frontmatter: {file_path}")
+                else:
+                    # Validate YAML structure
+                    lines = content.split('\n')
+                    if len(lines) < 3 or '---' not in lines[1:20]:
+                        self.errors.append(f"{doc_type} file has malformed YAML frontmatter: {file_path}")
+
+            # Check for basic markdown structure (title should appear after frontmatter if present)
+            if require_yaml:
+                # Skip frontmatter and check for title
+                content_after_yaml = content.split('---', 2)[-1] if content.count('---') >= 2 else content
+                if not content_after_yaml.strip().startswith('#'):
+                    self.warnings.append(f"{doc_type} file missing title after frontmatter: {file_path}")
+            else:
+                if not content.startswith('#'):
+                    self.warnings.append(f"{doc_type} file missing title: {file_path}")
 
         except Exception as e:
             self.errors.append(f"Error reading {doc_type} file {file_path}: {e}")
