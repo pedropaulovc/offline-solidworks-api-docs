@@ -10,12 +10,14 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from functional_categories_parser import FunctionalCategoriesParser
 
+# Determine HTML file path relative to project root
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+HTML_PATH = PROJECT_ROOT / "10_crawl_toc_pages" / "output" / "html" / "sldworksapi" / "FunctionalCategories-sldworksapi_2cd1902c_2cd1902c.htmll.html"
+
 
 def test_parser_loads_categories():
     """Test that the parser can load and parse categories."""
-    html_path = "10_crawl_toc_pages/output/html/sldworksapi/FunctionalCategories-sldworksapi_2cd1902c_2cd1902c.htmll.html"
-
-    parser = FunctionalCategoriesParser(html_path)
+    parser = FunctionalCategoriesParser(str(HTML_PATH))
     categories = parser.parse()
 
     # Should have at least 35 categories (we know there are 39)
@@ -31,9 +33,7 @@ def test_parser_loads_categories():
 
 def test_category_mapping():
     """Test that the category mapping is created correctly."""
-    html_path = "10_crawl_toc_pages/output/html/sldworksapi/FunctionalCategories-sldworksapi_2cd1902c_2cd1902c.htmll.html"
-
-    parser = FunctionalCategoriesParser(html_path)
+    parser = FunctionalCategoriesParser(str(HTML_PATH))
     parser.parse()
     mapping = parser.get_category_mapping()
 
@@ -49,9 +49,7 @@ def test_category_mapping():
 
 def test_hierarchical_subcategories():
     """Test that hierarchical subcategories are parsed correctly."""
-    html_path = "10_crawl_toc_pages/output/html/sldworksapi/FunctionalCategories-sldworksapi_2cd1902c_2cd1902c.htmll.html"
-
-    parser = FunctionalCategoriesParser(html_path)
+    parser = FunctionalCategoriesParser(str(HTML_PATH))
     parser.parse()
     mapping = parser.get_category_mapping()
 
@@ -80,9 +78,7 @@ def test_hierarchical_subcategories():
 
 def test_parent_types_with_nested_subcategories():
     """Test that parent types with nested subcategories are categorized."""
-    html_path = "10_crawl_toc_pages/output/html/sldworksapi/FunctionalCategories-sldworksapi_2cd1902c_2cd1902c.htmll.html"
-
-    parser = FunctionalCategoriesParser(html_path)
+    parser = FunctionalCategoriesParser(str(HTML_PATH))
     parser.parse()
     mapping = parser.get_category_mapping()
 
@@ -102,9 +98,7 @@ def test_parent_types_with_nested_subcategories():
 
 def test_enumeration_interfaces():
     """Test that enumeration interfaces are parsed correctly."""
-    html_path = "10_crawl_toc_pages/output/html/sldworksapi/FunctionalCategories-sldworksapi_2cd1902c_2cd1902c.htmll.html"
-
-    parser = FunctionalCategoriesParser(html_path)
+    parser = FunctionalCategoriesParser(str(HTML_PATH))
     parser.parse()
     mapping = parser.get_category_mapping()
 
@@ -122,9 +116,7 @@ def test_enumeration_interfaces():
 
 def test_drawing_interfaces():
     """Test that Drawing Interfaces are parsed (header without anchor name)."""
-    html_path = "10_crawl_toc_pages/output/html/sldworksapi/FunctionalCategories-sldworksapi_2cd1902c_2cd1902c.htmll.html"
-
-    parser = FunctionalCategoriesParser(html_path)
+    parser = FunctionalCategoriesParser(str(HTML_PATH))
     parser.parse()
     mapping = parser.get_category_mapping()
 
@@ -142,9 +134,7 @@ def test_drawing_interfaces():
 
 def test_model_interfaces():
     """Test that Model Interfaces are parsed correctly."""
-    html_path = "10_crawl_toc_pages/output/html/sldworksapi/FunctionalCategories-sldworksapi_2cd1902c_2cd1902c.htmll.html"
-
-    parser = FunctionalCategoriesParser(html_path)
+    parser = FunctionalCategoriesParser(str(HTML_PATH))
     parser.parse()
     mapping = parser.get_category_mapping()
 
@@ -158,9 +148,7 @@ def test_model_interfaces():
 
 def test_type_name_extraction():
     """Test that type names are extracted correctly from hrefs."""
-    html_path = "10_crawl_toc_pages/output/html/sldworksapi/FunctionalCategories-sldworksapi_2cd1902c_2cd1902c.htmll.html"
-
-    parser = FunctionalCategoriesParser(html_path)
+    parser = FunctionalCategoriesParser(str(HTML_PATH))
 
     # Test various href formats
     test_cases = [
@@ -183,9 +171,7 @@ def test_type_name_extraction():
 
 def test_statistics():
     """Test overall statistics of parsed categories."""
-    html_path = "10_crawl_toc_pages/output/html/sldworksapi/FunctionalCategories-sldworksapi_2cd1902c_2cd1902c.htmll.html"
-
-    parser = FunctionalCategoriesParser(html_path)
+    parser = FunctionalCategoriesParser(str(HTML_PATH))
     categories = parser.parse()
     mapping = parser.get_category_mapping()
 
