@@ -78,10 +78,16 @@ class ExportPipeline:
         print(f"  Loaded {len(types)} types")
         print(f"  Loaded {len(data_loader.examples)} examples")
 
-        # Assign functional categories to types
+        # Assign functional categories to types (case-insensitive lookup)
+        # Create a lowercase version of the category mapping for case-insensitive lookup
+        category_mapping_lower = {k.lower(): v for k, v in category_mapping.items()}
+
         for fqn, type_info in types.items():
+            # Try exact match first, then case-insensitive
             if fqn in category_mapping:
                 type_info.functional_category = category_mapping[fqn]
+            elif fqn.lower() in category_mapping_lower:
+                type_info.functional_category = category_mapping_lower[fqn.lower()]
 
         # Step 3: Generate API documentation
         print("\n[3/6] Generating API documentation...")

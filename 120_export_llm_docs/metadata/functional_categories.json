@@ -122,9 +122,21 @@
     },
     {
       "name": "Enumeration Interfaces",
-      "type_count": 1,
+      "type_count": 13,
       "types": [
-        "SOLIDWORKS.Interop.sldworks.IEnumBodies2"
+        "SOLIDWORKS.Interop.sldworks.IEnumBodies2",
+        "SOLIDWORKS.Interop.sldworks.IEnumCoEdges",
+        "SOLIDWORKS.Interop.sldworks.IEnumComponents2",
+        "SOLIDWORKS.Interop.sldworks.IEnumDisplayDimensions",
+        "SOLIDWORKS.Interop.sldworks.IEnumDocuments2",
+        "SOLIDWORKS.Interop.sldworks.IEnumDrSections",
+        "SOLIDWORKS.Interop.sldworks.IEnumEdges",
+        "SOLIDWORKS.Interop.sldworks.IEnumFaces2",
+        "SOLIDWORKS.Interop.sldworks.IEnumLoops2",
+        "SOLIDWORKS.Interop.sldworks.IEnumModelViews",
+        "SOLIDWORKS.Interop.sldworks.IEnumSketchHatches",
+        "SOLIDWORKS.Interop.sldworks.IEnumSketchPoints",
+        "SOLIDWORKS.Interop.sldworks.IEnumSketchSegments"
       ]
     },
     {
@@ -431,7 +443,7 @@
     },
     {
       "name": "User-interface Interfaces",
-      "type_count": 7,
+      "type_count": 62,
       "types": [
         "SOLIDWORKS.Interop.sldworks.IAppearanceSetting",
         "SOLIDWORKS.Interop.sldworks.IDecal",
@@ -439,7 +451,62 @@
         "SOLIDWORKS.Interop.sldworks.IFaceDecalProperties",
         "SOLIDWORKS.Interop.sldworks.IRayTraceRenderer",
         "SOLIDWORKS.Interop.sldworks.IRayTraceRendererOptions",
-        "SOLIDWORKS.Interop.sldworks.IRenderMaterial"
+        "SOLIDWORKS.Interop.sldworks.IRenderMaterial",
+        "SOLIDWORKS.Interop.sldworks.ICallout",
+        "SOLIDWORKS.Interop.sldworks.ICommandGroup",
+        "SOLIDWORKS.Interop.sldworks.ICommandManager",
+        "SOLIDWORKS.Interop.sldworks.ICommandTab",
+        "SOLIDWORKS.Interop.sldworks.ICommandTabBox",
+        "SOLIDWORKS.Interop.sldworks.IFlyoutGroup",
+        "SOLIDWORKS.Interop.sldworks.IDisplayStateSetting",
+        "SOLIDWORKS.Interop.sldworks.IDragArrowManipulator",
+        "SOLIDWORKS.Interop.sldworks.IFeatMgrView",
+        "SOLIDWORKS.Interop.sldworks.IFrame",
+        "SolidWorks.Interop.sldworks.ILightDialog",
+        "SOLIDWORKS.Interop.sldworks.IMaterialVisualPropertiesData",
+        "SolidWorks.Interop.sldworks.IMessageBarDefinition",
+        "SOLIDWORKS.Interop.sldworks.IModelView",
+        "SOLIDWORKS.Interop.sldworks.IModelViewManager",
+        "SOLIDWORKS.Interop.sldworks.IModelWindow",
+        "SOLIDWORKS.Interop.sldworks.IMouse",
+        "SOLIDWORKS.Interop.sldworks.IPackAndGo",
+        "SOLIDWORKS.Interop.sldworks.IPlaneManipulator",
+        "SOLIDWORKS.Interop.sldworks.IPrint3DDialog",
+        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPage2",
+        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageActiveX",
+        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageBitmap",
+        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageBitmapButton",
+        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageButton",
+        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageCheckbox",
+        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageCombobox",
+        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageControl",
+        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageGroup",
+        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageLabel",
+        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageListbox",
+        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageNumberbox",
+        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageOption",
+        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageSelectionbox",
+        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageSlider",
+        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageTab",
+        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageTextbox",
+        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageWindowFromHandle",
+        "SolidWorks.Interop.sldworks.IRenamedDocumentReferences",
+        "SolidWorks.Interop.sldworks.ISelectionSet",
+        "SolidWorks.Interop.sldworks.ISelectionSetFolder",
+        "SolidWorks.Interop.sldworks.ISelectionSetItem",
+        "SOLIDWORKS.Interop.sldworks.IDimensionSensorData",
+        "SOLIDWORKS.Interop.sldworks.ISensor",
+        "SOLIDWORKS.Interop.sldworks.ISnapShot",
+        "SolidWorks.Interop.sldworks.IMBD3DPdfData",
+        "SolidWorks.Interop.sldworks.ITextAndCustomProperty",
+        "SOLIDWORKS.Interop.sldworks.IStatusBarPane",
+        "SOLIDWORKS.Interop.swhtmlcontrol.ISwHtmlInterface",
+        "SOLIDWORKS.Interop.sldworks.ISWPropertySheet",
+        "SOLIDWORKS.Interop.sldworks.ITaskpaneView",
+        "SOLIDWORKS.Interop.sldworks.ITreeControlItem",
+        "SOLIDWORKS.Interop.sldworks.ITriadManipulator",
+        "SolidWorks.Interop.sldworks.IUserNotificationDefinition",
+        "SOLIDWORKS.Interop.sldworks.IUserProgressBar"
       ]
     },
     {
@@ -466,5 +533,5 @@
     }
   ],
   "total_categories": 12,
-  "total_types": 392
+  "total_types": 459
 }

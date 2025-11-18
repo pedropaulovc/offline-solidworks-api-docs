@@ -50,13 +50,20 @@ class FunctionalCategoriesParser:
 
             category_name = header.get_text(strip=True)
 
-            # Find the following ul element that contains the types
-            ul_element = header.find_next_sibling('ul')
-            if not ul_element:
-                continue
+            # Find ALL following ul elements until the next h4
+            types = []
+            next_element = header.find_next_sibling()
 
-            # Extract all type names from the links
-            types = self._extract_types_from_ul(ul_element)
+            while next_element:
+                # Stop if we hit another header
+                if next_element.name == 'h4':
+                    break
+
+                # Process ul elements
+                if next_element.name == 'ul':
+                    types.extend(self._extract_types_from_ul(next_element))
+
+                next_element = next_element.find_next_sibling()
 
             if types:
                 category = FunctionalCategory(name=category_name, types=types)
