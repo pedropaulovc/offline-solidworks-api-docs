@@ -90,24 +90,29 @@ class ExportPipeline:
             elif fqn.lower() in category_mapping_lower:
                 type_info.functional_category = category_mapping_lower[fqn.lower()]
 
-        # Step 3: Generate API documentation
-        print("\n[3/7] Generating API documentation...")
-        self._generate_api_docs(types, data_loader)
+        # Step 3: Map examples to categories (needed for both API docs and example docs)
+        print("\n[3/8] Mapping examples to categories...")
+        example_categories = self._map_examples_to_categories(data_loader.examples, types)
+        print(f"  Mapped {len(example_categories)} examples to categories")
 
-        # Step 4: Generate index files
-        print("\n[4/7] Generating index files...")
+        # Step 4: Generate API documentation
+        print("\n[4/8] Generating API documentation...")
+        self._generate_api_docs(types, data_loader, example_categories)
+
+        # Step 5: Generate index files
+        print("\n[5/8] Generating index files...")
         self._generate_indexes(types)
 
-        # Step 5: Generate example documentation
-        print("\n[5/7] Generating example documentation...")
-        self._generate_example_docs(data_loader.examples, category_mapping, types)
+        # Step 6: Generate example documentation
+        print("\n[6/8] Generating example documentation...")
+        self._generate_example_docs(data_loader.examples, example_categories)
 
-        # Step 6: Copy programming guide
-        print("\n[6/7] Copying programming guide...")
+        # Step 7: Copy programming guide
+        print("\n[7/8] Copying programming guide...")
         self._copy_programming_guide(phase110_path)
 
-        # Step 7: Generate summary report
-        print("\n[7/7] Generating summary report...")
+        # Step 8: Generate summary report
+        print("\n[8/8] Generating summary report...")
         self._generate_summary_report()
 
         print("\n" + "="*80)
@@ -116,7 +121,7 @@ class ExportPipeline:
         print(f"\nOutput location: {self.output_base}")
         print(f"Total markdown files generated: {self.stats.markdown_files_generated}")
 
-    def _generate_api_docs(self, types: Dict[str, TypeInfo], data_loader: DataLoader):
+    def _generate_api_docs(self, types: Dict[str, TypeInfo], data_loader: DataLoader, example_categories: Dict[str, str]):
         """Generate grep-optimized markdown documentation for all API types."""
         api_path = self.output_base / "api"
 
@@ -124,7 +129,8 @@ class ExportPipeline:
         generator = MarkdownGenerator(
             output_base_path=str(api_path),
             examples_loader_func=data_loader.get_example_content,
-            grep_optimized=True
+            grep_optimized=True,
+            example_categories=example_categories
         )
 
         # Separate types from enums
@@ -185,16 +191,12 @@ class ExportPipeline:
 
     def _generate_example_docs(self,
                                 examples: Dict[str, ExampleContent],
-                                category_mapping: Dict[str, str],
-                                types: Dict[str, TypeInfo]):
+                                example_categories: Dict[str, str]):
         """Generate markdown documentation for all examples."""
         examples_path = self.output_base / "docs" / "examples"
 
         # Create example generator
         generator = ExampleGenerator(output_base_path=str(examples_path))
-
-        # Map examples to categories based on which types reference them
-        example_categories = self._map_examples_to_categories(examples, types)
 
         # Generate example docs
         for url, example in examples.items():
@@ -289,17 +291,21 @@ class ExportPipeline:
         example_to_category = {}
 
         # Build a mapping of URL to types that reference it
+        # Normalize URLs by removing leading slash for consistency
         url_to_types = defaultdict(list)
         for type_info in types.values():
             for example_ref in type_info.examples:
-                url_to_types[example_ref.url].append(type_info)
+                normalized_url = example_ref.url.lstrip('/')
+                url_to_types[normalized_url].append(type_info)
 
         # Assign category based on the most common category among referencing types
         for url in examples.keys():
-            if url in url_to_types:
+            # Normalize URL for lookup
+            normalized_url = url.lstrip('/')
+            if normalized_url in url_to_types:
                 # Count categories
                 category_counts = defaultdict(int)
-                for type_info in url_to_types[url]:
+                for type_info in url_to_types[normalized_url]:
                     if type_info.functional_category:
                         category_counts[type_info.functional_category] += 1
 

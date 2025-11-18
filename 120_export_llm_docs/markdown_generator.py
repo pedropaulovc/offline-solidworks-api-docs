@@ -16,7 +16,7 @@ from models import TypeInfo, ExampleContent, Member, Property, Method, EnumMembe
 class MarkdownGenerator:
     """Generates markdown documentation for API types."""
 
-    def __init__(self, output_base_path: str, examples_loader_func=None, grep_optimized=False):
+    def __init__(self, output_base_path: str, examples_loader_func=None, grep_optimized=False, example_categories=None):
         """
         Initialize the markdown generator.
 
@@ -24,10 +24,12 @@ class MarkdownGenerator:
             output_base_path: Base path for output markdown files
             examples_loader_func: Function to load example content by URL
             grep_optimized: If True, generate file-per-member structure for greppability
+            example_categories: Dict mapping example URLs to category names (for grep_optimized mode)
         """
         self.output_base_path = Path(output_base_path)
         self.examples_loader_func = examples_loader_func
         self.grep_optimized = grep_optimized
+        self.example_categories = example_categories or {}
 
     def generate_type_documentation(self, type_info: TypeInfo, category: Optional[str] = None) -> str:
         """
@@ -240,6 +242,36 @@ class MarkdownGenerator:
             # If no category, just link to docs/examples
             return f"../../docs/examples/{filename}"
 
+    def _get_example_path_for_overview(self, url: str, type_info: TypeInfo) -> str:
+        """
+        Get the relative path to the example markdown file from a type overview file.
+
+        Args:
+            url: Example URL
+            type_info: The TypeInfo object (to determine if type or enum and get category)
+
+        Returns:
+            Relative path from _overview.md to example file
+        """
+        # Convert URL to filename
+        # e.g., "sldworksapi/Traverse_Bodies_Example_CPlusPlusCLI.htm" -> "Traverse_Bodies_Example_CPlusPlusCLI.md"
+        filename = url.split('/')[-1].replace('.htm', '.md').replace('.html', '.md')
+
+        # Determine category from the mapping if available, otherwise fall back to type's category or "Other"
+        if self.example_categories and url in self.example_categories:
+            category = self.example_categories[url]
+        elif type_info.functional_category:
+            category = type_info.functional_category
+        else:
+            category = "Other"
+
+        # Sanitize category name for path
+        category = sanitize_filename(category)
+
+        # Relative path from api/types/TypeName/_overview.md or api/enums/EnumName/_overview.md
+        # to docs/examples/Category/Example.md
+        return f"../../../docs/examples/{category}/{filename}"
+
     def generate_type_overview(self, type_info: TypeInfo) -> str:
         """
         Generate type overview markdown (description, remarks, metadata) without members.
@@ -294,6 +326,15 @@ class MarkdownGenerator:
             md.append(f"- **Methods**: {len(type_info.methods)}\n")
         if type_info.enum_members:
             md.append(f"- **Enumeration Members**: {len(type_info.enum_members)}\n")
+
+        # Examples section
+        if type_info.examples:
+            md.append("\n## Examples\n")
+            for example_ref in type_info.examples:
+                # Get the relative path to the example file
+                example_path = self._get_example_path_for_overview(example_ref.url, type_info)
+                # Create a link with format: "- Example Name (Language)"
+                md.append(f"- [{example_ref.name} ({example_ref.language})]({example_path})\n")
 
         return "\n".join(md)
 
