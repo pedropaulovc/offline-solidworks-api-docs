@@ -44,9 +44,12 @@ class FunctionalCategoriesParser:
         headers = soup.find_all('h4')
 
         for header in headers:
-            # Get the category name from the anchor
+            # Get the category name - it might be in an anchor or just in the header text
             anchor = header.find('a')
-            if not anchor or not anchor.get('name'):
+
+            # Skip if anchor exists but has no name (it's a link, not a category header)
+            # But accept headers without anchors (they're still category headers)
+            if anchor and not anchor.get('name'):
                 continue
 
             category_name = header.get_text(strip=True)
@@ -99,14 +102,40 @@ class FunctionalCategoriesParser:
             nested_ul = li.find('ul', recursive=False)
 
             if nested_ul:
-                # This is a subcategory - extract the subcategory name
-                # It could be in a div or just as text before the nested ul
+                # This li has a nested ul - could be a subcategory or a type with children
+                # Check for a direct type link first (before the nested ul)
+                direct_link = None
+                for child in li.children:
+                    if child.name == 'a' and child.get('href'):
+                        direct_link = child
+                        break
+                    elif child.name == 'ul':
+                        break
+
+                # If there's a direct link, it's a type that should be categorized
+                if direct_link and '~' in direct_link.get('href', ''):
+                    type_name = self._extract_type_name_from_href(direct_link['href'])
+                    if type_name:
+                        types.append((type_name, parent_category))
+
+                # Now handle the subcategory
                 div = li.find('div', recursive=False)
                 if div:
-                    subcategory_name = div.get_text(strip=True)
+                    # Check if the div contains a type link (not a subcategory header)
+                    div_link = div.find('a', href=True)
+                    if div_link and '~' in div_link.get('href', ''):
+                        # This div contains a type link, not a subcategory name
+                        type_name = self._extract_type_name_from_href(div_link['href'])
+                        if type_name:
+                            types.append((type_name, parent_category))
+                        # Still process the nested ul (might be a true subcategory)
+                        types.extend(self._extract_types_from_ul(nested_ul, parent_category))
+                        continue
+                    else:
+                        # Plain text in div = subcategory name
+                        subcategory_name = div.get_text(strip=True)
                 else:
                     # Get the text content of the li, excluding the nested ul
-                    # Clone the li to avoid modifying the original
                     li_text = li.get_text(separator=' ', strip=True)
                     nested_text = nested_ul.get_text(separator=' ', strip=True)
                     # Remove nested ul text from li text to get just the subcategory name
@@ -117,8 +146,15 @@ class FunctionalCategoriesParser:
                 # Recursively process the nested ul
                 types.extend(self._extract_types_from_ul(nested_ul, full_category))
             else:
-                # This is a regular type link
-                links = li.find_all('a', href=True, recursive=False)
+                # This is a regular type link - could be direct link or in a div
+                div = li.find('div', recursive=False)
+                if div:
+                    # Check for links inside the div
+                    links = div.find_all('a', href=True)
+                else:
+                    # Check for direct links in li
+                    links = li.find_all('a', href=True, recursive=False)
+
                 for link in links:
                     href = link['href']
                     type_name = self._extract_type_name_from_href(href)

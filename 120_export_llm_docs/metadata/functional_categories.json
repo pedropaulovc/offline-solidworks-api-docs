@@ -14,7 +14,7 @@
     },
     {
       "name": "Annotation Interfaces",
-      "type_count": 31,
+      "type_count": 33,
       "types": [
         "SOLIDWORKS.Interop.sldworks.IAnnotation",
         "SOLIDWORKS.Interop.sldworks.IAutoBalloonOptions",
@@ -27,6 +27,7 @@
         "SOLIDWORKS.Interop.sldworks.IDatumTag",
         "SOLIDWORKS.Interop.sldworks.IDatumTargetSym",
         "SOLIDWORKS.Interop.sldworks.IDimensionTolerance",
+        "SOLIDWORKS.Interop.sldworks.IDisplayDimension",
         "SOLIDWORKS.Interop.sldworks.IDowelSymbol",
         "SOLIDWORKS.Interop.sldworks.IGtol",
         "SolidWorks.Interop.sldworks.IGtolFrame",
@@ -46,7 +47,8 @@
         "SOLIDWORKS.Interop.sldworks.IRevisionCloud",
         "SOLIDWORKS.Interop.sldworks.ISFSymbol",
         "SOLIDWORKS.Interop.sldworks.ISketchBlockDefinition",
-        "SOLIDWORKS.Interop.sldworks.ISketchBlockInstance"
+        "SOLIDWORKS.Interop.sldworks.ISketchBlockInstance",
+        "SOLIDWORKS.Interop.sldworks.IStackedBalloonOptions"
       ]
     },
     {
@@ -124,6 +126,49 @@
         "SolidWorks.Interop.sldworks.ITangentMateFeatureData",
         "SolidWorks.Interop.sldworks.IUniversalJointMateFeatureData",
         "SolidWorks.Interop.sldworks.IWidthMateFeatureData"
+      ]
+    },
+    {
+      "name": "Drawing Interfaces",
+      "type_count": 12,
+      "types": [
+        "SOLIDWORKS.Interop.sldworks.IBreakLine",
+        "SOLIDWORKS.Interop.sldworks.ICenterOfMass",
+        "SOLIDWORKS.Interop.sldworks.IDetailCircle",
+        "SOLIDWORKS.Interop.sldworks.IDrawingComponent",
+        "SOLIDWORKS.Interop.sldworks.IDrSection",
+        "SOLIDWORKS.Interop.sldworks.IFaceHatch",
+        "SOLIDWORKS.Interop.sldworks.IProjectionArrow",
+        "SOLIDWORKS.Interop.sldworks.ISheet",
+        "SOLIDWORKS.Interop.sldworks.ISilhouetteEdge",
+        "SOLIDWORKS.Interop.sldworks.ITitleBlock",
+        "SOLIDWORKS.Interop.sldworks.IView",
+        "SOLIDWORKS.Interop.sldworks.IView3D"
+      ]
+    },
+    {
+      "name": "Drawing Interfaces/Layers",
+      "type_count": 2,
+      "types": [
+        "SOLIDWORKS.Interop.sldworks.ILayer",
+        "SOLIDWORKS.Interop.sldworks.ILayerMgr"
+      ]
+    },
+    {
+      "name": "Drawing Interfaces/Tables",
+      "type_count": 11,
+      "types": [
+        "SOLIDWORKS.Interop.sldworks.IBendTable",
+        "SOLIDWORKS.Interop.sldworks.IBomFeature",
+        "SOLIDWORKS.Interop.sldworks.IBomTable",
+        "SolidWorks.Interop.sldworks.IFamilyTableFeature",
+        "SOLIDWORKS.Interop.sldworks.IGeneralTableFeature",
+        "SolidWorks.Interop.sldworks.IGeneralToleranceTableFeature",
+        "SOLIDWORKS.Interop.sldworks.IHoleTable",
+        "SOLIDWORKS.Interop.sldworks.IPunchTable",
+        "SOLIDWORKS.Interop.sldworks.IRevisionTableFeature",
+        "SOLIDWORKS.Interop.sldworks.ITitleBlockTableFeature",
+        "SOLIDWORKS.Interop.sldworks.ITableAnchor"
       ]
     },
     {
@@ -298,6 +343,13 @@
         "SolidWorks.Interop.sldworks.ISMNormalCutFeatureData2",
         "SolidWorks.Interop.sldworks.ISMNormalCutGroupData",
         "SolidWorks.Interop.sldworks.ISweptFlangeFeatureData"
+      ]
+    },
+    {
+      "name": "Feature Interfaces/Smart Components",
+      "type_count": 1,
+      "types": [
+        "SOLIDWORKS.Interop.sldworks.ISmartComponentFeatureData"
       ]
     },
     {
@@ -667,6 +719,6 @@
       ]
     }
   ],
-  "total_categories": 35,
-  "total_types": 456
+  "total_categories": 39,
+  "total_types": 484
 }
