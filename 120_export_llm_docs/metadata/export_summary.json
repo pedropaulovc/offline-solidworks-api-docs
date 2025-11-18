@@ -1,5 +1,5 @@
 {
-  "export_timestamp": "2025-11-17T19:00:16.552063",
+  "export_timestamp": "2025-11-17T22:20:17.261060",
   "statistics": {
     "total_types": 2518,
     "types_with_descriptions": 1508,
@@ -10,7 +10,7 @@
     "total_enum_members": 10428,
     "total_examples": 1198,
     "functional_categories": 39,
-    "markdown_files_generated": 25670,
+    "markdown_files_generated": 25671,
     "programming_guide_files": 125
   },
   "output_location": "120_export_llm_docs\\output"
