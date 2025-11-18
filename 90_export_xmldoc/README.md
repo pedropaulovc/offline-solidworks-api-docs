@@ -99,36 +99,36 @@ Following Microsoft's XMLDoc rules:
 
 ```bash
 # Generate all XMLDoc files
-uv run python 90_generate_xmldoc/generate_xmldoc.py
+uv run python 90_export_xmldoc/generate_xmldoc.py
 
 # Generate with verbose output
-uv run python 90_generate_xmldoc/generate_xmldoc.py --verbose
+uv run python 90_export_xmldoc/generate_xmldoc.py --verbose
 
 # Specify custom output directory
-uv run python 90_generate_xmldoc/generate_xmldoc.py --output-dir custom/path
+uv run python 90_export_xmldoc/generate_xmldoc.py --output-dir custom/path
 ```
 
 ### Validate Generated Files
 
 ```bash
 # Validate all XMLDoc files
-uv run python 90_generate_xmldoc/validate_xmldoc.py
+uv run python 90_export_xmldoc/validate_xmldoc.py
 
 # Validate with detailed output
-uv run python 90_generate_xmldoc/validate_xmldoc.py --verbose
+uv run python 90_export_xmldoc/validate_xmldoc.py --verbose
 
 # Save validation report
-uv run python 90_generate_xmldoc/validate_xmldoc.py --save-report report.json
+uv run python 90_export_xmldoc/validate_xmldoc.py --save-report report.json
 ```
 
 ### Run Tests
 
 ```bash
 # Run all tests
-uv run pytest 90_generate_xmldoc/tests/ -v
+uv run pytest 90_export_xmldoc/tests/ -v
 
 # Run with coverage
-uv run pytest 90_generate_xmldoc/tests/ --cov=07_generate_xmldoc
+uv run pytest 90_export_xmldoc/tests/ --cov=90_export_xmldoc
 ```
 
 ## Architecture
@@ -230,7 +230,7 @@ validator.print_report()
 ## Project Structure
 
 ```
-07_generate_xmldoc/
+90_export_xmldoc/
 ├── generate_xmldoc.py         # Main generation script
 ├── id_generator.py             # XMLDoc ID string generator
 ├── data_merger.py              # Data merger from phases 02-06
@@ -416,7 +416,7 @@ Use the XMLDoc files as input to generate:
     "types_with_examples": 561
   },
   "output_files": {
-    "SolidWorks.Interop.sldworks": "90_generate_xmldoc/output/SolidWorks.Interop.sldworks.xml"
+    "SolidWorks.Interop.sldworks": "90_export_xmldoc/output/SolidWorks.Interop.sldworks.xml"
   }
 }
 ```
@@ -432,7 +432,7 @@ Use the XMLDoc files as input to generate:
     "60_extract_enum_members/metadata/enum_members.xml",
     "80_parse_examples/output/examples.xml"
   ],
-  "output_directory": "90_generate_xmldoc/output",
+  "output_directory": "90_export_xmldoc/output",
   "total_assemblies": 10,
   "xmldoc_format": "Microsoft XMLDoc (VS IntelliSense)"
 }
@@ -548,7 +548,7 @@ ls 80_parse_examples/output/examples.xml  # Optional
 
 Run with `--verbose` to see all issues:
 ```bash
-uv run python 90_generate_xmldoc/validate_xmldoc.py --verbose
+uv run python 90_export_xmldoc/validate_xmldoc.py --verbose
 ```
 
 ### Empty summaries

@@ -9,8 +9,8 @@ This script validates that the XMLDoc files are:
 - Contain expected content
 
 Usage:
-    uv run python 90_generate_xmldoc/validate_xmldoc.py
-    uv run python 90_generate_xmldoc/validate_xmldoc.py --verbose
+    uv run python 90_export_xmldoc/validate_xmldoc.py
+    uv run python 90_export_xmldoc/validate_xmldoc.py --verbose
 """
 
 import argparse
@@ -357,7 +357,7 @@ def main() -> None:
     parser.add_argument(
         '--output-dir',
         type=Path,
-        default=Path('90_generate_xmldoc/output'),
+        default=Path('90_export_xmldoc/output'),
         help='Directory containing XMLDoc files'
     )
 

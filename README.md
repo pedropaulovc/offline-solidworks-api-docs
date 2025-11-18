@@ -79,7 +79,7 @@ offline-solidworks-api-docs/
 │   ├── validate_parse.py        # Validation script
 │   ├── output/                  # Output (examples.xml)
 │   └── tests/                   # Test suite
-├── 90_generate_xmldoc/          # Phase 9: Generate XMLDoc files
+├── 90_export_xmldoc/            # Phase 9: Export XMLDoc files
 │   ├── generate_xmldoc.py       # Main generation script
 │   ├── data_merger.py           # Data merging utilities
 │   ├── xmldoc_id.py             # XMLDoc ID generation
@@ -196,10 +196,10 @@ uv run python 80_parse_examples/validate_parse.py
 
 ```bash
 # Generate XMLDoc files for IntelliSense
-uv run python 90_generate_xmldoc/generate_xmldoc.py
+uv run python 90_export_xmldoc/generate_xmldoc.py
 
 # Validate XMLDoc generation
-uv run python 90_generate_xmldoc/validate_generation.py
+uv run python 90_export_xmldoc/validate_generation.py
 ```
 
 ## 📊 Expected Results
@@ -250,7 +250,7 @@ uv run python 90_generate_xmldoc/validate_generation.py
 ### Phase 9: XMLDoc Generation
 - **10 XMLDoc files** generated (one per assembly)
 - Complete IntelliSense documentation
-- Output: `90_generate_xmldoc/output/*.xml`
+- Output: `90_export_xmldoc/output/*.xml`
 
 ## 🧪 Testing
 
@@ -265,7 +265,7 @@ uv run pytest 40_extract_type_details/tests/ -v
 uv run pytest 50_extract_type_member_details/tests/ -v
 uv run pytest 60_extract_enum_members/tests/ -v
 uv run pytest 80_parse_examples/tests/ -v
-uv run pytest 90_generate_xmldoc/tests/ -v
+uv run pytest 90_export_xmldoc/tests/ -v
 
 # Run with coverage
 uv run pytest --cov --cov-report=html
@@ -456,7 +456,7 @@ Each phase has detailed documentation:
 - **60_extract_enum_members/README.md** - Enum extraction details
 - **70_crawl_examples/README.md** - Example crawling details
 - **80_parse_examples/README.md** - Example parsing details
-- **90_generate_xmldoc/README.md** - XMLDoc generation details
+- **90_export_xmldoc/README.md** - XMLDoc export details
 - **100_crawl_programming_guide/README.md** - Programming guide crawling
 - **110_extract_docs_md/README.md** - Markdown extraction details
 - **CLAUDE.md** - Project context for AI assistants

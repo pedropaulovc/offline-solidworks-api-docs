@@ -50,7 +50,7 @@ This is a multi-phase pipeline project for creating offline, searchable versions
 - XML output generation
 - Test suite complete
 
-✅ **Phase 9 (90_generate_xmldoc)**: Complete
+✅ **Phase 9 (90_export_xmldoc)**: Complete
 - XMLDoc ID generator following Microsoft's rules
 - Data merger combining phases 20, 40, 50, 60, 80
 - XMLDoc file generation (one per assembly)

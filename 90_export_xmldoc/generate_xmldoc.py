@@ -7,9 +7,9 @@ standard XMLDoc files (one per assembly) that can be used for IntelliSense
 in Visual Studio and other IDEs.
 
 Usage:
-    uv run python 90_generate_xmldoc/generate_xmldoc.py
-    uv run python 90_generate_xmldoc/generate_xmldoc.py --verbose
-    uv run python 90_generate_xmldoc/generate_xmldoc.py --output-dir custom/path
+    uv run python 90_export_xmldoc/generate_xmldoc.py
+    uv run python 90_export_xmldoc/generate_xmldoc.py --verbose
+    uv run python 90_export_xmldoc/generate_xmldoc.py --output-dir custom/path
 """
 
 import argparse
@@ -546,13 +546,13 @@ def main() -> None:
         epilog="""
 Examples:
   # Generate XMLDoc files with default paths
-  uv run python 90_generate_xmldoc/generate_xmldoc.py
+  uv run python 90_export_xmldoc/generate_xmldoc.py
 
   # Generate with verbose output
-  uv run python 90_generate_xmldoc/generate_xmldoc.py --verbose
+  uv run python 90_export_xmldoc/generate_xmldoc.py --verbose
 
   # Generate with custom output directory
-  uv run python 90_generate_xmldoc/generate_xmldoc.py --output-dir custom/path
+  uv run python 90_export_xmldoc/generate_xmldoc.py --output-dir custom/path
         """
     )
 
@@ -594,14 +594,14 @@ Examples:
     parser.add_argument(
         '--output-dir',
         type=Path,
-        default=Path('90_generate_xmldoc/output'),
+        default=Path('90_export_xmldoc/output'),
         help='Output directory for XMLDoc files'
     )
 
     parser.add_argument(
         '--metadata-dir',
         type=Path,
-        default=Path('90_generate_xmldoc/metadata'),
+        default=Path('90_export_xmldoc/metadata'),
         help='Metadata directory for generation statistics'
     )
 

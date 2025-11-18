@@ -19,7 +19,7 @@ phase_dirs = [
     "60_extract_enum_members",
     "70_crawl_examples",
     "80_parse_examples",
-    "90_generate_xmldoc",
+    "90_export_xmldoc",
     "100_crawl_programming_guide",
     "110_extract_docs_md",
     "shared",

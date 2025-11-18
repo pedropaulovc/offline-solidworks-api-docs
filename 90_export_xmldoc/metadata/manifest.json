@@ -7,7 +7,7 @@
     "60_extract_enum_members/metadata/enum_members.xml",
     "80_parse_examples/output/examples.xml"
   ],
-  "output_directory": "90_generate_xmldoc\\output",
+  "output_directory": "90_export_xmldoc\\output",
   "total_assemblies": 10,
   "xmldoc_format": "Microsoft XMLDoc (VS IntelliSense)"
 }
