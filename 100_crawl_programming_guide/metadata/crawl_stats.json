@@ -1,7 +1,7 @@
 {
-  "total_pages": 51,
-  "successful_pages": 51,
+  "total_pages": 145,
+  "successful_pages": 145,
   "failed_pages": 0,
   "skipped_pages": 0,
-  "reason": "closespider_pagecount"
+  "reason": "finished"
 }

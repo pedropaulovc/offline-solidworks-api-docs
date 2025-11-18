@@ -1,6 +1,6 @@
 {
   "parser_version": "1.0.0",
-  "input_directory": "C:\\src\\offline-solidworks-api-docs\\05_crawl_examples\\output\\html",
-  "output_file": "C:\\src\\offline-solidworks-api-docs\\06_parse_examples\\output\\examples.xml",
+  "input_directory": "C:\\src\\offline-solidworks-api-docs\\70_crawl_examples\\output\\html",
+  "output_file": "C:\\src\\offline-solidworks-api-docs\\80_parse_examples\\output\\examples.xml",
   "total_examples": 1198
 }

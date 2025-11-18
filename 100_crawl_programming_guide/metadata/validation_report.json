@@ -1,0 +1,20 @@
+{
+  "stats": {
+    "metadata_manifest.json_valid": 1,
+    "urls_crawled.jsonl_lines": 291,
+    "metadata_crawl_stats.json_valid": 1,
+    "urls_crawled": 291,
+    "unique_urls": 290,
+    "total_size_bytes": 972671,
+    "html_files": 145,
+    "duplicate_content": 1,
+    "success_rate": 100.0
+  },
+  "errors": [],
+  "warnings": [
+    "Duplicate URL in metadata: https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id=1",
+    "Found 145 metadata records without HTML files",
+    "Found 1 duplicate content hashes"
+  ],
+  "success": true
+}

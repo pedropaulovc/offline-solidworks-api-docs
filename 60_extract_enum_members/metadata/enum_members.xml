@@ -1243,7 +1243,7 @@
             </Member>
             <Member>
                 <Name>swAppFileNewNotify2</Name>
-                <Description><![CDATA[12 = <see cref="SOLIDWORKS.Interop.sldworks.DSldworksEvents_FileNewNotify2EventHandler">FileNewNotify2</see>
+                <Description><![CDATA[12 = <see cref="SOLIDWORKS.Interop.sldworks.DSldworksEvents_FileNewNotify2EventHandler">FileNewNotify2</see> 
 NOTE: Because it is possible to have a NULL active document when an add-in is notified using swAppFileOpenNotify2, use <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.IGetOpenDocumentByName2">ISldWorks::IGetOpenDocumentByName2</see> instead of <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.IActiveDoc2">ISldWorks::IActiveDoc2</see>.]]></Description>
             </Member>
             <Member>
@@ -15928,9 +15928,9 @@ DAssemblyDocEvents_ConfigurationChangeNotifyEventHandler]]></Description>
                 <Name>swCutListExclusionStatus_InvalidEntities</Name>
                 <Description><![CDATA[1 = Selected faces and features are invalid because they are not of selection type BODYFEATURE or FACE. Other examples of face and features that are invalid for exclusion:
 
-Chamfers that remove an entire face.
-Suppressed features.
-Features that create new bodies from sketches, such as boss-extrude, revolve, and sweep.
+Chamfers that remove an entire face. 
+Suppressed features. 
+Features that create new bodies from sketches, such as boss-extrude, revolve, and sweep. 
 Certain sheet metal features.]]></Description>
             </Member>
             <Member>
@@ -19848,14 +19848,14 @@ Certain sheet metal features.]]></Description>
             </Member>
             <Member>
                 <Name>swFeatureErrorMateIlldefined</Name>
-                <Description><![CDATA[47 = This mate cannot be solved. Consider:
+                <Description><![CDATA[47 = This mate cannot be solved. Consider: 
 
 
-Deleting this mate.
+Deleting this mate. 
 
 Moving the assembly closer to the desired solution with dragging. 
 
-Adding more mates to further define the assembly.
+Adding more mates to further define the assembly. 
 
 Changing the mating scheme]]></Description>
             </Member>
@@ -21081,7 +21081,7 @@ Changing the mating scheme]]></Description>
                 <Name>swFileSaveAsNotSupported</Name>
                 <Description><![CDATA[4096 or 0x1000 = Save As operation:
 
-is not supported
+is not supported 
 was executed is such a way that the resulting file might not be complete, possibly because SOLIDWORKS is hidden; if the error persists after <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.Visible">setting SOLIDWORKS to visible</see> and re-attempting the Save As operation, contact SOLIDWORKS API support.]]></Description>
             </Member>
             <Member>
@@ -22161,7 +22161,7 @@ was executed is such a way that the resulting file might not be complete, possib
                 <Name>swHingeMateEntityType_Coincident</Name>
                 <Description><![CDATA[1 = Select two coincident entities:
 
-a plane or planar face
+a plane or planar face 
 another plane, planar face, edge, or point]]></Description>
             </Member>
             <Member>
@@ -23732,42 +23732,42 @@ another plane, planar face, edge, or point]]></Description>
                 <Name>swAlwaysAttachToBalloon</Name>
                 <Description><![CDATA[0x1004 or 4100 = <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>; applies only to balloon annotations; specifies that the balloon's Always Attach to Balloon leader option is enabled and the leader is always attached to the balloon when quantity is specified, and the balloon's Break Around leader option is disabled; if not specified, then the balloon's Always Attach to Balloon leader option is disabled, and the balloon's Break Around leader option is enabled and the balloon's leader is set to break around quantity; AND with one of the following options:
 
-swBENT
-swSTRAIGHT
-swUNDERLINED (parts only)
-swSPLINE (drawings only)
+swBENT 
+swSTRAIGHT 
+swUNDERLINED (parts only) 
+swSPLINE (drawings only) 
 swVDA]]></Description>
             </Member>
             <Member>
                 <Name>swAttachLeaderBottom</Name>
                 <Description><![CDATA[0x400 or 1024 = Bitmask; in part's multiline note, attaches leader to bottom of note; AND with one of the following options:
 
-swBENT
-swSTRAIGHT
+swBENT 
+swSTRAIGHT 
 swUNDERLINED]]></Description>
             </Member>
             <Member>
                 <Name>swAttachLeaderCenter</Name>
                 <Description><![CDATA[0x200 or 512 = Bitmask; in a part's multiline note, attaches leader to center of note; AND with one of the following options:
 
-swBENT
-swSTRAIGHT
+swBENT 
+swSTRAIGHT 
 swUNDERLINED]]></Description>
             </Member>
             <Member>
                 <Name>swAttachLeaderNearest</Name>
                 <Description><![CDATA[0x800 or 2048 = Bitmask; in a part's multiline note, left leader attaches to the top of note and right leader attaches to the bottom of note; AND with one of the following options:
 
-swBENT
-swSTRAIGHT
+swBENT 
+swSTRAIGHT 
 swUNDERLINED]]></Description>
             </Member>
             <Member>
                 <Name>swAttachLeaderTop</Name>
                 <Description><![CDATA[0x100 or 256 = Bitmask; in a part's multiline note, attaches leader to top of note; AND with one of the following options:
 
-swBENT
-swSTRAIGHT
+swBENT 
+swSTRAIGHT 
 swUNDERLINED]]></Description>
             </Member>
             <Member>
@@ -29119,7 +29119,7 @@ NOTE: The default for whether an assembly document is opened lightweight is base
                 <Name>swSaveVirtualComponentExternally</Name>
                 <Description><![CDATA[18 = For use with the ISldWorks <see cref="SOLIDWORKS.Interop.sldworks.DSldWorksEvents_PromptForMultipleFileNamesNotifyEventHandler">PromptForMultipleFilenamesNotify</see> event handler and <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.SetMultipleFilenamesPrompt">ISldWorks::SetMultipleFilenamesPrompt</see> to:
 
-Supply path names for virtual components to be saved externally.
+Supply path names for virtual components to be saved externally. 
 Suppress dialogs prompting user to select paths for virtual components.]]></Description>
             </Member>
             <Member>
@@ -29927,7 +29927,7 @@ PropertyManager page of the add-in changes the visibility of numerous controls o
                 <Name>swPropertyManagerOptions_SupportsChainSelection</Name>
                 <Description><![CDATA[131072 or 0x20000; If set, then show Select Chain:
 
-on the shortcut menu if a sketch entity is currently selected. - or -
+on the shortcut menu if a sketch entity is currently selected. - or - 
 if nothing is selected, but the cursor is over a sketch entity when the right-mouse button was clicked.]]></Description>
             </Member>
             <Member>
@@ -34552,7 +34552,7 @@ if nothing is selected, but the cursor is over a sketch entity when the right-
             </Member>
             <Member>
                 <Name>swSketchTrimEntities</Name>
-                <Description><![CDATA[4 = Power trim. Before calling ISketchManager::SketchTrim using this option, use <see cref="SolidWorks.Interop.sldworks.IModelDocExtension.SelectByID2">IModelDocExtension::SelectByID2</see> with Mark = 2 to select 1 or more sketch segments (up to total number of sketch segments in the model), specifying their pick points. The sketch segments are trimmed to the sketch segments nearest their pick points.
+                <Description><![CDATA[4 = Power trim. Before calling ISketchManager::SketchTrim using this option, use <see cref="SolidWorks.Interop.sldworks.IModelDocExtension.SelectByID2">IModelDocExtension::SelectByID2</see> with Mark = 2 to select 1 or more sketch segments (up to total number of sketch segments in the model), specifying their pick points. The sketch segments are trimmed to the sketch segments nearest their pick points. 
 When you trim sketch segments using Power trim in the user interface, you drag your cursor across sketch segments, and the point at which the cursor crosses a sketch segment is where that sketch segment is trimmed. The API simulates this functionality by requiring you to select sketch segments by pick points, which are used as references when trimming the selected sketch segments.]]></Description>
             </Member>
             <Member>
