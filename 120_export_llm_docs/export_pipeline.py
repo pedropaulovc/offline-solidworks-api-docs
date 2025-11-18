@@ -130,7 +130,9 @@ class ExportPipeline:
             for category, types_list in categories_dict.items():
                 # Determine output path
                 if category:
-                    output_dir = api_path / sanitize_filename(assembly) / sanitize_filename(category)
+                    # Handle hierarchical categories (e.g., "Annotation Interfaces/Table Annotations")
+                    category_parts = [sanitize_filename(part) for part in category.split('/')]
+                    output_dir = api_path / sanitize_filename(assembly) / Path(*category_parts)
                 else:
                     output_dir = api_path / sanitize_filename(assembly)
 

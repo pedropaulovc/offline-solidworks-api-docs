@@ -1,5 +1,5 @@
 {
-  "export_timestamp": "2025-11-17T18:06:50.454090",
+  "export_timestamp": "2025-11-17T18:11:18.187910",
   "statistics": {
     "total_types": 2518,
     "types_with_descriptions": 1508,
@@ -9,7 +9,7 @@
     "total_methods": 8131,
     "total_enum_members": 10428,
     "total_examples": 1198,
-    "functional_categories": 12,
+    "functional_categories": 35,
     "markdown_files_generated": 3716,
     "programming_guide_files": 125
   },

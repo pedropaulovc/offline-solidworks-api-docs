@@ -14,7 +14,7 @@
     },
     {
       "name": "Annotation Interfaces",
-      "type_count": 50,
+      "type_count": 31,
       "types": [
         "SOLIDWORKS.Interop.sldworks.IAnnotation",
         "SOLIDWORKS.Interop.sldworks.IAutoBalloonOptions",
@@ -27,11 +27,6 @@
         "SOLIDWORKS.Interop.sldworks.IDatumTag",
         "SOLIDWORKS.Interop.sldworks.IDatumTargetSym",
         "SOLIDWORKS.Interop.sldworks.IDimensionTolerance",
-        "SOLIDWORKS.Interop.sldworks.IDisplayDimension",
-        "SolidWorks.Interop.sldworks.ICalloutAngleVariable",
-        "SolidWorks.Interop.sldworks.ICalloutLengthVariable",
-        "SolidWorks.Interop.sldworks.ICalloutStringVariable",
-        "SolidWorks.Interop.sldworks.ICalloutVariable",
         "SOLIDWORKS.Interop.sldworks.IDowelSymbol",
         "SOLIDWORKS.Interop.sldworks.IGtol",
         "SolidWorks.Interop.sldworks.IGtolFrame",
@@ -51,8 +46,23 @@
         "SOLIDWORKS.Interop.sldworks.IRevisionCloud",
         "SOLIDWORKS.Interop.sldworks.ISFSymbol",
         "SOLIDWORKS.Interop.sldworks.ISketchBlockDefinition",
-        "SOLIDWORKS.Interop.sldworks.ISketchBlockInstance",
-        "SOLIDWORKS.Interop.sldworks.IStackedBalloonOptions",
+        "SOLIDWORKS.Interop.sldworks.ISketchBlockInstance"
+      ]
+    },
+    {
+      "name": "Annotation Interfaces/IDisplayDimension",
+      "type_count": 4,
+      "types": [
+        "SolidWorks.Interop.sldworks.ICalloutAngleVariable",
+        "SolidWorks.Interop.sldworks.ICalloutLengthVariable",
+        "SolidWorks.Interop.sldworks.ICalloutStringVariable",
+        "SolidWorks.Interop.sldworks.ICalloutVariable"
+      ]
+    },
+    {
+      "name": "Annotation Interfaces/Table Annotations",
+      "type_count": 13,
+      "types": [
         "SOLIDWORKS.Interop.sldworks.IBendTableAnnotation",
         "SOLIDWORKS.Interop.sldworks.IBomTableAnnotation",
         "SolidWorks.Interop.sldworks.IFamilyTableAnnotation",
@@ -70,7 +80,7 @@
     },
     {
       "name": "Assembly Interfaces",
-      "type_count": 36,
+      "type_count": 11,
       "types": [
         "SOLIDWORKS.Interop.sldworks.IAdvancedSelectionCriteria",
         "SolidWorks.Interop.sldworks.ICollision",
@@ -82,7 +92,13 @@
         "SolidWorks.Interop.sldworks.IGroundPlaneFeatureData",
         "SOLIDWORKS.Interop.sldworks.IInterference",
         "SOLIDWORKS.Interop.sldworks.IInterferenceDetectionMgr",
-        "SolidWorks.Interop.sldworks.IMirrorComponentFeatureData",
+        "SolidWorks.Interop.sldworks.IMirrorComponentFeatureData"
+      ]
+    },
+    {
+      "name": "Assembly Interfaces/Mates",
+      "type_count": 25,
+      "types": [
         "SolidWorks.Interop.sldworks.IAngleMateFeatureData",
         "SolidWorks.Interop.sldworks.ICamFollowerMateFeatureData",
         "SolidWorks.Interop.sldworks.ICoincidentMateFeatureData",
@@ -141,22 +157,40 @@
     },
     {
       "name": "Feature Interfaces",
-      "type_count": 168,
+      "type_count": 3,
       "types": [
         "SolidWorks.Interop.sldworks.IBeltChainFeatureData",
         "SOLIDWORKS.Interop.sldworks.IFeature",
-        "SOLIDWORKS.Interop.sldworks.IFeatureManager",
+        "SOLIDWORKS.Interop.sldworks.IFeatureManager"
+      ]
+    },
+    {
+      "name": "Feature Interfaces/Fillets",
+      "type_count": 4,
+      "types": [
         "SOLIDWORKS.Interop.sldworks.IChamferFeatureData2",
         "SolidWorks.Interop.sldworks.IPartialEdgeFilletData",
         "SOLIDWORKS.Interop.sldworks.ISimpleFilletFeatureData2",
-        "SOLIDWORKS.Interop.sldworks.IVariableFilletFeatureData2",
+        "SOLIDWORKS.Interop.sldworks.IVariableFilletFeatureData2"
+      ]
+    },
+    {
+      "name": "Feature Interfaces/Folders",
+      "type_count": 7,
+      "types": [
         "SOLIDWORKS.Interop.sldworks.IBodyFolder",
         "SOLIDWORKS.Interop.sldworks.IComment",
         "SOLIDWORKS.Interop.sldworks.ICommentFolder",
         "SOLIDWORKS.Interop.sldworks.ICosmeticWeldBeadFolder",
         "SOLIDWORKS.Interop.sldworks.IFeatureFolder",
         "SOLIDWORKS.Interop.sldworks.IFlatPatternFolder",
-        "SOLIDWORKS.Interop.sldworks.ISheetMetalFolder",
+        "SOLIDWORKS.Interop.sldworks.ISheetMetalFolder"
+      ]
+    },
+    {
+      "name": "Feature Interfaces/Holes",
+      "type_count": 10,
+      "types": [
         "SolidWorks.Interop.sldworks.IAdvancedHoleElementData",
         "SolidWorks.Interop.sldworks.IAdvancedHoleFeatureData",
         "SolidWorks.Interop.sldworks.ICounterboreElementData",
@@ -166,9 +200,21 @@
         "SolidWorks.Interop.sldworks.IStraightElementData",
         "SolidWorks.Interop.sldworks.IStraightTapElementData",
         "SolidWorks.Interop.sldworks.ITaperedTapElementData",
-        "SOLIDWORKS.Interop.sldworks.IWizardHoleFeatureData2",
+        "SOLIDWORKS.Interop.sldworks.IWizardHoleFeatureData2"
+      ]
+    },
+    {
+      "name": "Feature Interfaces/Lights and Cameras",
+      "type_count": 2,
+      "types": [
         "SOLIDWORKS.Interop.sldworks.ICamera",
-        "SOLIDWORKS.Interop.sldworks.ILight",
+        "SOLIDWORKS.Interop.sldworks.ILight"
+      ]
+    },
+    {
+      "name": "Feature Interfaces/Mold Tools",
+      "type_count": 8,
+      "types": [
         "SOLIDWORKS.Interop.sldworks.ICavityFeatureData",
         "SOLIDWORKS.Interop.sldworks.ICoreFeatureData",
         "SOLIDWORKS.Interop.sldworks.IMoveFaceFeatureData",
@@ -176,7 +222,13 @@
         "SOLIDWORKS.Interop.sldworks.IPartingSurfaceFeatureData",
         "SOLIDWORKS.Interop.sldworks.IRuledSurfaceFeatureData",
         "SOLIDWORKS.Interop.sldworks.IShutOffSurfaceFeatureData",
-        "SOLIDWORKS.Interop.sldworks.IToolingSplitFeatureData",
+        "SOLIDWORKS.Interop.sldworks.IToolingSplitFeatureData"
+      ]
+    },
+    {
+      "name": "Feature Interfaces/Patterns and Mirroring",
+      "type_count": 17,
+      "types": [
         "SolidWorks.Interop.sldworks.IChainPatternFeatureData",
         "SOLIDWORKS.Interop.sldworks.ICircularPatternFeatureData",
         "SOLIDWORKS.Interop.sldworks.ICurveDrivenPatternFeatureData",
@@ -193,7 +245,13 @@
         "SOLIDWORKS.Interop.sldworks.IMirrorPatternFeatureData",
         "SOLIDWORKS.Interop.sldworks.IMirrorSolidFeatureData",
         "SOLIDWORKS.Interop.sldworks.ISketchPatternFeatureData",
-        "SOLIDWORKS.Interop.sldworks.ITablePatternFeatureData",
+        "SOLIDWORKS.Interop.sldworks.ITablePatternFeatureData"
+      ]
+    },
+    {
+      "name": "Feature Interfaces/Reference Geometry",
+      "type_count": 15,
+      "types": [
         "SolidWorks.Interop.sldworks.IBoundingBoxFeatureData",
         "SOLIDWORKS.Interop.sldworks.ICompositeCurveFeatureData",
         "SOLIDWORKS.Interop.sldworks.IFreePointCurveFeatureData",
@@ -208,7 +266,13 @@
         "SOLIDWORKS.Interop.sldworks.IRefPlaneFeatureData",
         "SOLIDWORKS.Interop.sldworks.IRefPoint",
         "SOLIDWORKS.Interop.sldworks.IRefPointFeatureData",
-        "SOLIDWORKS.Interop.sldworks.ISplitLineFeatureData",
+        "SOLIDWORKS.Interop.sldworks.ISplitLineFeatureData"
+      ]
+    },
+    {
+      "name": "Feature Interfaces/Sheet Metal",
+      "type_count": 25,
+      "types": [
         "SOLIDWORKS.Interop.sldworks.IBaseFlangeFeatureData",
         "SOLIDWORKS.Interop.sldworks.IBendsFeatureData",
         "SOLIDWORKS.Interop.sldworks.IBreakCornerFeatureData",
@@ -233,8 +297,13 @@
         "SOLIDWORKS.Interop.sldworks.ISMGussetFeatureData",
         "SolidWorks.Interop.sldworks.ISMNormalCutFeatureData2",
         "SolidWorks.Interop.sldworks.ISMNormalCutGroupData",
-        "SolidWorks.Interop.sldworks.ISweptFlangeFeatureData",
-        "SOLIDWORKS.Interop.sldworks.ISmartComponentFeatureData",
+        "SolidWorks.Interop.sldworks.ISweptFlangeFeatureData"
+      ]
+    },
+    {
+      "name": "Feature Interfaces/Structure Systems",
+      "type_count": 21,
+      "types": [
         "SolidWorks.Interop.sldworks.IComplexCornerTreatmentFeatureData",
         "SolidWorks.Interop.sldworks.ICornerManagementFolder",
         "SolidWorks.Interop.sldworks.ICornerMember",
@@ -255,7 +324,13 @@
         "SolidWorks.Interop.sldworks.IStructureSystemMemberFeatureData",
         "SolidWorks.Interop.sldworks.IStructureSystemMemberProfile",
         "SolidWorks.Interop.sldworks.IStructureSystemSplitMember",
-        "SolidWorks.Interop.sldworks.ITwoMemberCornerTreatmentFeatureData",
+        "SolidWorks.Interop.sldworks.ITwoMemberCornerTreatmentFeatureData"
+      ]
+    },
+    {
+      "name": "Feature Interfaces/Surfaces",
+      "type_count": 14,
+      "types": [
         "SOLIDWORKS.Interop.sldworks.IDeleteFaceFeatureData",
         "SOLIDWORKS.Interop.sldworks.IFillSurfaceFeatureData",
         "SOLIDWORKS.Interop.sldworks.IReplaceFaceFeatureData",
@@ -269,16 +344,40 @@
         "SOLIDWORKS.Interop.sldworks.ISurfaceTrimFeatureData",
         "SOLIDWORKS.Interop.sldworks.ISurfExtrudeFeatureData",
         "SOLIDWORKS.Interop.sldworks.ISurfRevolveFeatureData",
-        "SOLIDWORKS.Interop.sldworks.IThickenFeatureData",
-        "SolidWorks.Interop.sldworks.IThreadFeatureData",
-        "SOLIDWORKS.Interop.sldworks.IBrokenOutSectionFeatureData",
+        "SOLIDWORKS.Interop.sldworks.IThickenFeatureData"
+      ]
+    },
+    {
+      "name": "Feature Interfaces/Threads",
+      "type_count": 1,
+      "types": [
+        "SolidWorks.Interop.sldworks.IThreadFeatureData"
+      ]
+    },
+    {
+      "name": "Feature Interfaces/Views",
+      "type_count": 1,
+      "types": [
+        "SOLIDWORKS.Interop.sldworks.IBrokenOutSectionFeatureData"
+      ]
+    },
+    {
+      "name": "Feature Interfaces/Weldments",
+      "type_count": 7,
+      "types": [
         "SOLIDWORKS.Interop.sldworks.IEndCapFeatureData",
         "SOLIDWORKS.Interop.sldworks.IGussetFeatureData",
         "SOLIDWORKS.Interop.sldworks.IStructuralMemberFeatureData",
         "SOLIDWORKS.Interop.sldworks.IStructuralMemberGroup",
         "SOLIDWORKS.Interop.sldworks.IWeldmentBeadFeatureData",
         "SOLIDWORKS.Interop.sldworks.IWeldmentCutListFeature",
-        "SOLIDWORKS.Interop.sldworks.IWeldmentTrimExtendFeatureData",
+        "SOLIDWORKS.Interop.sldworks.IWeldmentTrimExtendFeatureData"
+      ]
+    },
+    {
+      "name": "Feature Interfaces/Others",
+      "type_count": 32,
+      "types": [
         "SolidWorks.Interop.sldworks.IBoundaryBossFeatureData",
         "SOLIDWORKS.Interop.sldworks.ICombineBodiesFeatureData",
         "SolidWorks.Interop.sldworks.ICoordinateSystemElement",
@@ -442,8 +541,8 @@
       ]
     },
     {
-      "name": "User-interface Interfaces",
-      "type_count": 62,
+      "name": "User-interface Interfaces/Appearances and Decals",
+      "type_count": 7,
       "types": [
         "SOLIDWORKS.Interop.sldworks.IAppearanceSetting",
         "SOLIDWORKS.Interop.sldworks.IDecal",
@@ -451,13 +550,14 @@
         "SOLIDWORKS.Interop.sldworks.IFaceDecalProperties",
         "SOLIDWORKS.Interop.sldworks.IRayTraceRenderer",
         "SOLIDWORKS.Interop.sldworks.IRayTraceRendererOptions",
-        "SOLIDWORKS.Interop.sldworks.IRenderMaterial",
+        "SOLIDWORKS.Interop.sldworks.IRenderMaterial"
+      ]
+    },
+    {
+      "name": "User-interface Interfaces",
+      "type_count": 25,
+      "types": [
         "SOLIDWORKS.Interop.sldworks.ICallout",
-        "SOLIDWORKS.Interop.sldworks.ICommandGroup",
-        "SOLIDWORKS.Interop.sldworks.ICommandManager",
-        "SOLIDWORKS.Interop.sldworks.ICommandTab",
-        "SOLIDWORKS.Interop.sldworks.ICommandTabBox",
-        "SOLIDWORKS.Interop.sldworks.IFlyoutGroup",
         "SOLIDWORKS.Interop.sldworks.IDisplayStateSetting",
         "SOLIDWORKS.Interop.sldworks.IDragArrowManipulator",
         "SOLIDWORKS.Interop.sldworks.IFeatMgrView",
@@ -472,6 +572,33 @@
         "SOLIDWORKS.Interop.sldworks.IPackAndGo",
         "SOLIDWORKS.Interop.sldworks.IPlaneManipulator",
         "SOLIDWORKS.Interop.sldworks.IPrint3DDialog",
+        "SolidWorks.Interop.sldworks.IRenamedDocumentReferences",
+        "SOLIDWORKS.Interop.sldworks.ISnapShot",
+        "SOLIDWORKS.Interop.sldworks.IStatusBarPane",
+        "SOLIDWORKS.Interop.swhtmlcontrol.ISwHtmlInterface",
+        "SOLIDWORKS.Interop.sldworks.ISWPropertySheet",
+        "SOLIDWORKS.Interop.sldworks.ITaskpaneView",
+        "SOLIDWORKS.Interop.sldworks.ITreeControlItem",
+        "SOLIDWORKS.Interop.sldworks.ITriadManipulator",
+        "SolidWorks.Interop.sldworks.IUserNotificationDefinition",
+        "SOLIDWORKS.Interop.sldworks.IUserProgressBar"
+      ]
+    },
+    {
+      "name": "User-interface Interfaces/CommandManager",
+      "type_count": 5,
+      "types": [
+        "SOLIDWORKS.Interop.sldworks.ICommandGroup",
+        "SOLIDWORKS.Interop.sldworks.ICommandManager",
+        "SOLIDWORKS.Interop.sldworks.ICommandTab",
+        "SOLIDWORKS.Interop.sldworks.ICommandTabBox",
+        "SOLIDWORKS.Interop.sldworks.IFlyoutGroup"
+      ]
+    },
+    {
+      "name": "User-interface Interfaces/PropertyManager",
+      "type_count": 18,
+      "types": [
         "SOLIDWORKS.Interop.sldworks.IPropertyManagerPage2",
         "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageActiveX",
         "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageBitmap",
@@ -489,24 +616,32 @@
         "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageSlider",
         "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageTab",
         "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageTextbox",
-        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageWindowFromHandle",
-        "SolidWorks.Interop.sldworks.IRenamedDocumentReferences",
+        "SOLIDWORKS.Interop.sldworks.IPropertyManagerPageWindowFromHandle"
+      ]
+    },
+    {
+      "name": "User-interface Interfaces/Selection Sets",
+      "type_count": 3,
+      "types": [
         "SolidWorks.Interop.sldworks.ISelectionSet",
         "SolidWorks.Interop.sldworks.ISelectionSetFolder",
-        "SolidWorks.Interop.sldworks.ISelectionSetItem",
+        "SolidWorks.Interop.sldworks.ISelectionSetItem"
+      ]
+    },
+    {
+      "name": "User-interface Interfaces/Sensors",
+      "type_count": 2,
+      "types": [
         "SOLIDWORKS.Interop.sldworks.IDimensionSensorData",
-        "SOLIDWORKS.Interop.sldworks.ISensor",
-        "SOLIDWORKS.Interop.sldworks.ISnapShot",
+        "SOLIDWORKS.Interop.sldworks.ISensor"
+      ]
+    },
+    {
+      "name": "User-interface Interfaces/SOLIDWORKS MBD 3D PDF",
+      "type_count": 2,
+      "types": [
         "SolidWorks.Interop.sldworks.IMBD3DPdfData",
-        "SolidWorks.Interop.sldworks.ITextAndCustomProperty",
-        "SOLIDWORKS.Interop.sldworks.IStatusBarPane",
-        "SOLIDWORKS.Interop.swhtmlcontrol.ISwHtmlInterface",
-        "SOLIDWORKS.Interop.sldworks.ISWPropertySheet",
-        "SOLIDWORKS.Interop.sldworks.ITaskpaneView",
-        "SOLIDWORKS.Interop.sldworks.ITreeControlItem",
-        "SOLIDWORKS.Interop.sldworks.ITriadManipulator",
-        "SolidWorks.Interop.sldworks.IUserNotificationDefinition",
-        "SOLIDWORKS.Interop.sldworks.IUserProgressBar"
+        "SolidWorks.Interop.sldworks.ITextAndCustomProperty"
       ]
     },
     {
@@ -532,6 +667,6 @@
       ]
     }
   ],
-  "total_categories": 12,
-  "total_types": 459
+  "total_categories": 35,
+  "total_types": 456
 }

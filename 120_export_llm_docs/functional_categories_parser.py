@@ -8,6 +8,7 @@ of types to their functional categories.
 import re
 from pathlib import Path
 from typing import Dict, List
+from collections import defaultdict
 from bs4 import BeautifulSoup
 import json
 
@@ -51,7 +52,7 @@ class FunctionalCategoriesParser:
             category_name = header.get_text(strip=True)
 
             # Find ALL following ul elements until the next h4
-            types = []
+            type_tuples = []
             next_element = header.find_next_sibling()
 
             while next_element:
@@ -61,39 +62,69 @@ class FunctionalCategoriesParser:
 
                 # Process ul elements
                 if next_element.name == 'ul':
-                    types.extend(self._extract_types_from_ul(next_element))
+                    type_tuples.extend(self._extract_types_from_ul(next_element, category_name))
 
                 next_element = next_element.find_next_sibling()
 
-            if types:
-                category = FunctionalCategory(name=category_name, types=types)
-                self.categories.append(category)
+            if type_tuples:
+                # Group types by their full category path
+                categories_dict = defaultdict(list)
+                for type_name, subcategory in type_tuples:
+                    categories_dict[subcategory].append(type_name)
+
+                # Create FunctionalCategory objects for each category/subcategory
+                for cat_path, types_list in categories_dict.items():
+                    category = FunctionalCategory(name=cat_path, types=types_list)
+                    self.categories.append(category)
 
         return self.categories
 
-    def _extract_types_from_ul(self, ul_element) -> List[str]:
+    def _extract_types_from_ul(self, ul_element, parent_category: str = "") -> List[tuple]:
         """
-        Recursively extract type names from a ul element and nested uls.
+        Recursively extract type names from a ul element and nested uls,
+        preserving subcategory structure.
 
         Args:
             ul_element: BeautifulSoup ul element
+            parent_category: Parent category path for nested subcategories
 
         Returns:
-            List of type names
+            List of tuples (type_name, category_path)
         """
         types = []
 
-        # Find all 'a' tags in this ul and nested uls
-        for link in ul_element.find_all('a', href=True):
-            href = link['href']
+        # Process each li element
+        for li in ul_element.find_all('li', recursive=False):
+            # Check if this li contains a nested ul (subcategory)
+            nested_ul = li.find('ul', recursive=False)
 
-            # Extract type name from href
-            # Pattern: SOLIDWORKS.Interop.assembly~SOLIDWORKS.Interop.namespace.TypeName.html
-            # or: relative path like ../swmotionstudyapi/...
-            type_name = self._extract_type_name_from_href(href)
+            if nested_ul:
+                # This is a subcategory - extract the subcategory name
+                # It could be in a div or just as text before the nested ul
+                div = li.find('div', recursive=False)
+                if div:
+                    subcategory_name = div.get_text(strip=True)
+                else:
+                    # Get the text content of the li, excluding the nested ul
+                    # Clone the li to avoid modifying the original
+                    li_text = li.get_text(separator=' ', strip=True)
+                    nested_text = nested_ul.get_text(separator=' ', strip=True)
+                    # Remove nested ul text from li text to get just the subcategory name
+                    subcategory_name = li_text.replace(nested_text, '').strip()
 
-            if type_name:
-                types.append(type_name)
+                full_category = f"{parent_category}/{subcategory_name}" if parent_category else subcategory_name
+
+                # Recursively process the nested ul
+                types.extend(self._extract_types_from_ul(nested_ul, full_category))
+            else:
+                # This is a regular type link
+                links = li.find_all('a', href=True, recursive=False)
+                for link in links:
+                    href = link['href']
+                    type_name = self._extract_type_name_from_href(href)
+
+                    if type_name:
+                        types.append((type_name, parent_category))
 
         return types
 
