@@ -17,11 +17,16 @@ Options:
 import argparse
 import hashlib
 import json
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 import jsonlines
+
+# Set UTF-8 encoding for stdout on Windows
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8")
 
 
 class CrawlValidator:
@@ -32,11 +37,15 @@ class CrawlValidator:
         self.output_dir = output_dir
         self.verbose = verbose
 
+        # Get project root (parent of 70_crawl_examples)
+        project_root = Path(__file__).parent.parent
+
         # Files to check
         self.urls_file = metadata_dir / "urls_crawled.jsonl"
         self.errors_file = metadata_dir / "errors.jsonl"
         self.stats_file = metadata_dir / "crawl_stats.json"
-        self.source_xml_file = Path("40_extract_type_details/metadata/api_types.xml")
+        self.type_xml_file = project_root / "40_extract_type_details" / "metadata" / "api_types.xml"
+        self.member_xml_file = project_root / "50_extract_type_member_details" / "metadata" / "api_member_details.xml"
         self.html_dir = output_dir / "html"
 
         # Validation results
@@ -73,7 +82,8 @@ class CrawlValidator:
         required_files = {
             "URLs file": self.urls_file,
             "Statistics file": self.stats_file,
-            "Source XML": self.source_xml_file,
+            "Type XML (Phase 4)": self.type_xml_file,
+            "Member XML (Phase 5)": self.member_xml_file,
             "HTML directory": self.html_dir,
         }
 
@@ -96,29 +106,54 @@ class CrawlValidator:
             print("  [PASS] All required files exist")
 
     def check_url_coverage(self) -> None:
-        """Check URL coverage against source XML file"""
+        """Check URL coverage against source XML files"""
         print("\n2. Checking URL coverage...")
 
-        if not self.source_xml_file.exists():
-            print("  [SKIP] Source XML file not found")
+        if not self.type_xml_file.exists() and not self.member_xml_file.exists():
+            print("  [SKIP] Source XML files not found")
             return
 
-        # Load source URLs from XML
+        # Load source URLs from both XML files
         import xml.etree.ElementTree as ET
         source_urls = set()
+        urls_from_types = set()
+        urls_from_members = set()
 
-        try:
-            tree = ET.parse(self.source_xml_file)
-            root = tree.getroot()
+        # Load from type XML (Phase 4)
+        if self.type_xml_file.exists():
+            try:
+                tree = ET.parse(self.type_xml_file)
+                root = tree.getroot()
 
-            for example in root.findall(".//Example/Url"):
-                url = example.text
-                if url and url.strip():
-                    source_urls.add(url.strip())
+                for example in root.findall(".//Example/Url"):
+                    url = example.text
+                    if url and url.strip():
+                        url = url.strip()
+                        source_urls.add(url)
+                        urls_from_types.add(url)
 
-        except Exception as e:
-            print(f"  [ERROR] Failed to parse XML: {e}")
-            return
+            except Exception as e:
+                print(f"  [ERROR] Failed to parse type XML: {e}")
+
+        # Load from member XML (Phase 5)
+        if self.member_xml_file.exists():
+            try:
+                tree = ET.parse(self.member_xml_file)
+                root = tree.getroot()
+
+                for example in root.findall(".//Example/Url"):
+                    url = example.text
+                    if url and url.strip():
+                        url = url.strip()
+                        source_urls.add(url)
+                        urls_from_members.add(url)
+
+            except Exception as e:
+                print(f"  [ERROR] Failed to parse member XML: {e}")
+
+        print(f"  Source URLs from types: {len(urls_from_types)}")
+        print(f"  Source URLs from members: {len(urls_from_members)}")
+        print(f"  Total unique URLs: {len(source_urls)}")
 
         # Load crawled URLs
         crawled_urls = set()
@@ -166,7 +201,8 @@ class CrawlValidator:
             self.results["validation_passed"] = False
             return
 
-        html_files = list(self.html_dir.rglob("*.html"))
+        # Check for both .html and .htm files
+        html_files = list(self.html_dir.rglob("*.html")) + list(self.html_dir.rglob("*.htm"))
         total_size = sum(f.stat().st_size for f in html_files)
 
         print(f"  HTML files: {len(html_files)}")
@@ -298,13 +334,15 @@ class CrawlValidator:
             if not file_path or not stored_hash:
                 continue
 
-            full_path = Path(file_path)
-            if not full_path.exists():
-                full_path = Path(__file__).parent.parent / file_path
+            # The file_path in metadata is relative to the phase directory (70_crawl_examples)
+            phase_dir = Path(__file__).parent
+            full_path = phase_dir / file_path
 
             if full_path.exists():
-                with open(full_path, "rb") as f:
-                    actual_hash = hashlib.sha256(f.read()).hexdigest()
+                # Read as text (UTF-8) to match how the content was hashed originally
+                with open(full_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                actual_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
 
                 if actual_hash != stored_hash:
                     mismatches += 1

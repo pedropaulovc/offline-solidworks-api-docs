@@ -2,10 +2,11 @@
 SolidWorks API Examples Spider
 
 This spider crawls example pages from the SolidWorks API documentation by:
-1. Reading example URLs directly from api_types.xml
-2. Converting relative URLs to absolute URLs
-3. Downloading each example page
-4. Extracting clean HTML content from the __NEXT_DATA__ JSON
+1. Reading example URLs from both api_types.xml (Phase 4) and api_member_details.xml (Phase 5)
+2. Deduplicating URLs from both sources
+3. Converting relative URLs to absolute URLs
+4. Downloading each example page
+5. Extracting clean HTML content from the __NEXT_DATA__ JSON
 """
 
 import hashlib
@@ -42,22 +43,46 @@ class ExamplesSpider(scrapy.Spider):
             "successful_pages": 0,
             "failed_pages": 0,
             "skipped_pages": 0,
+            "urls_from_types": 0,
+            "urls_from_members": 0,
         }
 
-        # XML source file from Phase 3
-        self.xml_file = Path(__file__).parent.parent.parent.parent / "40_extract_type_details" / "metadata" / "api_types.xml"
+        # XML source files from Phase 4 (type details) and Phase 5 (member details)
+        self.type_xml_file = Path(__file__).parent.parent.parent.parent / "40_extract_type_details" / "metadata" / "api_types.xml"
+        self.member_xml_file = Path(__file__).parent.parent.parent.parent / "50_extract_type_member_details" / "metadata" / "api_member_details.xml"
         self.example_urls = self._load_urls()
 
     def _load_urls(self) -> list[str]:
-        """Load example URLs directly from the XML file"""
+        """Load example URLs from both type details and member details XML files"""
+        all_urls = set()
+
+        # Load URLs from type details (Phase 4)
+        type_urls = self._load_urls_from_file(self.type_xml_file, "type details")
+        all_urls.update(type_urls)
+        self.stats["urls_from_types"] = len(type_urls)
+
+        # Load URLs from member details (Phase 5)
+        member_urls = self._load_urls_from_file(self.member_xml_file, "member details")
+        all_urls.update(member_urls)
+        self.stats["urls_from_members"] = len(member_urls)
+
+        self.logger.info(f"Loaded {len(all_urls)} unique example URLs total")
+        self.logger.info(f"  - {len(type_urls)} from type details (Phase 4)")
+        self.logger.info(f"  - {len(member_urls)} from member details (Phase 5)")
+        self.logger.info(f"  - {len(type_urls) + len(member_urls) - len(all_urls)} duplicates removed")
+
+        return sorted(all_urls)
+
+    def _load_urls_from_file(self, xml_file: Path, source_name: str) -> set[str]:
+        """Load example URLs from a single XML file"""
         urls = set()
 
-        if not self.xml_file.exists():
-            self.logger.error(f"XML file not found: {self.xml_file}")
-            return []
+        if not xml_file.exists():
+            self.logger.warning(f"XML file not found: {xml_file} ({source_name})")
+            return urls
 
         try:
-            tree = ET.parse(self.xml_file)
+            tree = ET.parse(xml_file)
             root = tree.getroot()
 
             # Find all <Url> elements within <Example> elements
@@ -72,12 +97,12 @@ class ExamplesSpider(scrapy.Spider):
                         full_url = url
                     urls.add(full_url)
 
-            self.logger.info(f"Loaded {len(urls)} unique example URLs from {self.xml_file}")
-            return sorted(urls)
+            self.logger.debug(f"Loaded {len(urls)} URLs from {xml_file}")
+            return urls
 
         except Exception as e:
-            self.logger.error(f"Failed to parse XML file {self.xml_file}: {e}")
-            return []
+            self.logger.error(f"Failed to parse XML file {xml_file}: {e}")
+            return urls
 
     def start_requests(self) -> Generator[scrapy.Request, None, None]:
         """Generate initial requests for all example URLs"""

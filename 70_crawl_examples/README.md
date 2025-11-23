@@ -1,6 +1,10 @@
 # Phase 7: Crawl Example Pages
 
-This directory contains the Scrapy-based crawler for downloading SolidWorks API example pages referenced in the `api_types.xml` file from Phase 4. The crawler extracts clean HTML content from the `__NEXT_DATA__` JSON embedded in each page.
+This directory contains the Scrapy-based crawler for downloading SolidWorks API example pages referenced in both:
+- `api_types.xml` from Phase 4 (type-level examples)
+- `api_member_details.xml` from Phase 5 (member-level examples)
+
+The crawler extracts clean HTML content from the `__NEXT_DATA__` JSON embedded in each page.
 
 ## 📁 Directory Structure
 
@@ -31,8 +35,9 @@ This directory contains the Scrapy-based crawler for downloading SolidWorks API 
 
 ### Prerequisites
 
-Make sure you have completed **Phase 3** (extract_type_info) first, as this phase reads directly from:
-- `03_extract_type_info/metadata/api_types.xml`
+Make sure you have completed **Phase 4** (extract_type_details) and **Phase 5** (extract_type_member_details) first, as this phase reads directly from:
+- `40_extract_type_details/metadata/api_types.xml`
+- `50_extract_type_member_details/metadata/api_member_details.xml`
 
 ### Step 1: Test Crawl
 
@@ -58,10 +63,10 @@ uv run python 05_crawl_examples/run_crawler.py
 ```
 
 **Note**: A full crawl will:
-- Take 20-30 minutes to complete
-- Download ~50-100 MB of HTML
+- Take 30-45 minutes to complete
+- Download ~100-150 MB of HTML
 - Respect a 0.1-second delay between requests
-- Capture ~1,198 example pages
+- Capture ~10,000-11,000 example pages (unique URLs from both type and member examples)
 
 ### Step 3: Validate Results
 
@@ -191,9 +196,9 @@ uv run pytest 05_crawl_examples/tests/ --cov=05_crawl_examples --cov-report=term
 ### 1. URL Loading
 
 The `examples_spider.py`:
-1. Reads directly from `03_extract_type_info/metadata/api_types.xml`
-2. Finds all `<Example><Url>` elements
-3. Extracts and deduplicates URLs
+1. Reads from both `40_extract_type_details/metadata/api_types.xml` and `50_extract_type_member_details/metadata/api_member_details.xml`
+2. Finds all `<Example><Url>` elements in both files
+3. Combines and deduplicates URLs from both sources
 4. Converts relative URLs to absolute
 5. Makes HTTP requests to each URL
 6. Extracts `__NEXT_DATA__` JSON from page
@@ -223,10 +228,13 @@ The `validate_crawl.py` script checks:
 
 For a complete crawl:
 
-- **Example URLs**: ~1,198 unique URLs
+- **Example URLs**: ~10,000-11,000 unique URLs
+  - ~1,200 from type details (Phase 4)
+  - ~9,900 from member details (Phase 5)
+  - Some overlap between sources (automatically deduplicated)
 - **Success Rate**: >95%
-- **Total Size**: 50-100 MB
-- **Duration**: 20-30 minutes
+- **Total Size**: 100-150 MB
+- **Duration**: 30-45 minutes
 - **Error Rate**: <5%
 
 ## 🐛 Troubleshooting
@@ -236,11 +244,13 @@ For a complete crawl:
 If the spider can't find URLs:
 
 ```bash
-# Check that Phase 3 XML exists
-ls 03_extract_type_info/metadata/api_types.xml
+# Check that Phase 4 and Phase 5 XML files exist
+ls 40_extract_type_details/metadata/api_types.xml
+ls 50_extract_type_member_details/metadata/api_member_details.xml
 
-# Verify XML has Example/Url elements
-grep -c "<Url>" 03_extract_type_info/metadata/api_types.xml
+# Verify XML files have Example/Url elements
+grep -c "<Url>" 40_extract_type_details/metadata/api_types.xml
+grep -c "<Url>" 50_extract_type_member_details/metadata/api_member_details.xml
 ```
 
 ### High Error Rate
@@ -272,12 +282,13 @@ If content integrity checks fail:
 
 ### Input
 
-- `03_extract_type_info/metadata/api_types.xml` - Source of example URLs
+- `40_extract_type_details/metadata/api_types.xml` - Type-level example URLs
+- `50_extract_type_member_details/metadata/api_member_details.xml` - Member-level example URLs
 
 ### Output
 
-- `05_crawl_examples/output/html/` - Example page HTML
-- `05_crawl_examples/metadata/urls_crawled.jsonl` - Metadata
+- `70_crawl_examples/output/html/` - Example page HTML
+- `70_crawl_examples/metadata/urls_crawled.jsonl` - Metadata
 
 ### Next Phase
 
@@ -317,7 +328,8 @@ Each example page typically contains:
 
 A successful crawl should meet these criteria:
 
-- ✅ All example URLs extracted (1,198)
+- ✅ All example URLs extracted (~10,000-11,000)
+- ✅ URLs from both type details and member details included
 - ✅ >95% crawl success rate
 - ✅ All HTML files saved with correct structure
 - ✅ Metadata complete and consistent

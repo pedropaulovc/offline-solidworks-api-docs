@@ -1,7 +1,9 @@
 {
-  "total_pages": 1198,
-  "successful_pages": 1198,
+  "total_pages": 2828,
+  "successful_pages": 2828,
   "failed_pages": 0,
   "skipped_pages": 0,
+  "urls_from_types": 1198,
+  "urls_from_members": 2665,
   "reason": "finished"
 }

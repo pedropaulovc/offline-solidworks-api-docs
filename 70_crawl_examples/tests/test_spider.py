@@ -61,7 +61,8 @@ def test_load_urls_converts_relative_to_absolute():
 
     try:
         spider = ExamplesSpider()
-        spider.xml_file = temp_path
+        spider.type_xml_file = temp_path
+        spider.member_xml_file = Path("nonexistent.xml")  # Won't exist
         urls = spider._load_urls()
 
         assert len(urls) == 1
@@ -72,7 +73,7 @@ def test_load_urls_converts_relative_to_absolute():
 
 
 def test_load_urls_removes_duplicates():
-    """Test that duplicate URLs are removed"""
+    """Test that duplicate URLs are removed within a single file"""
     xml_content = """<?xml version="1.0" ?>
 <Types>
     <Type>
@@ -103,7 +104,8 @@ def test_load_urls_removes_duplicates():
 
     try:
         spider = ExamplesSpider()
-        spider.xml_file = temp_path
+        spider.type_xml_file = temp_path
+        spider.member_xml_file = Path("nonexistent.xml")  # Won't exist
         urls = spider._load_urls()
 
         assert len(urls) == 2
@@ -111,6 +113,66 @@ def test_load_urls_removes_duplicates():
 
     finally:
         temp_path.unlink()
+
+
+def test_load_urls_from_both_files():
+    """Test that URLs are loaded from both type and member XML files and deduplicated"""
+    type_xml_content = """<?xml version="1.0" ?>
+<Types>
+    <Type>
+        <Name>TestType</Name>
+        <Examples>
+            <Example>
+                <Url>/sldworksapi/test1.htm</Url>
+            </Example>
+            <Example>
+                <Url>/sldworksapi/test2.htm</Url>
+            </Example>
+        </Examples>
+    </Type>
+</Types>
+"""
+
+    member_xml_content = """<?xml version="1.0" ?>
+<Members>
+    <Member>
+        <Name>TestMember</Name>
+        <Examples>
+            <Example>
+                <Url>/sldworksapi/test2.htm</Url>
+            </Example>
+            <Example>
+                <Url>/sldworksapi/test3.htm</Url>
+            </Example>
+        </Examples>
+    </Member>
+</Members>
+"""
+
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".xml", encoding="utf-8") as f:
+        f.write(type_xml_content)
+        type_path = Path(f.name)
+
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".xml", encoding="utf-8") as f:
+        f.write(member_xml_content)
+        member_path = Path(f.name)
+
+    try:
+        spider = ExamplesSpider()
+        spider.type_xml_file = type_path
+        spider.member_xml_file = member_path
+        urls = spider._load_urls()
+
+        # Should have 3 unique URLs (test1, test2, test3)
+        # test2 appears in both files but should be deduplicated
+        assert len(urls) == 3
+        assert spider.stats["urls_from_types"] == 2
+        assert spider.stats["urls_from_members"] == 2
+        assert all("test" in url for url in urls)
+
+    finally:
+        type_path.unlink()
+        member_path.unlink()
 
 
 def test_parse_page_extracts_title(spider):
