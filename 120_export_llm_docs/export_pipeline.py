@@ -195,30 +195,23 @@ class ExportPipeline:
     def _generate_example_docs(self,
                                 examples: Dict[str, ExampleContent],
                                 example_categories: Dict[str, str]):
-        """Generate markdown documentation for all examples."""
+        """Generate markdown documentation for all examples in a flat folder structure."""
         examples_path = self.output_base / "docs" / "examples"
 
         # Create example generator
         generator = ExampleGenerator(output_base_path=str(examples_path))
 
-        # Generate example docs
+        # Generate example docs (all in flat folder, category passed for API compatibility only)
         for url, example in examples.items():
-            # Determine category for this example
+            # Category is still computed but not used for folder organization
             category = example_categories.get(url, "Other")
 
-            # Generate and save
+            # Generate and save (category parameter is ignored, kept for API compatibility)
             generator.save_example_documentation(example, category)
             self.stats.markdown_files_generated += 1
             self.stats.total_examples += 1
 
-        # Print stats by category
-        category_counts = defaultdict(int)
-        for category in example_categories.values():
-            category_counts[category] += 1
-
-        print(f"  Generated {len(examples)} example files")
-        for category, count in sorted(category_counts.items()):
-            print(f"    {category}: {count} examples")
+        print(f"  Generated {len(examples)} example files in flat folder structure")
 
     def _copy_programming_guide(self, phase110_path: str):
         """Copy programming guide markdown from Phase 110."""
@@ -280,7 +273,7 @@ api/index/
   statistics.md                   # Stats and largest types
 
 docs/
-  examples/                       # Code examples by category
+  examples/                       # Code examples (flat folder, all in one directory)
   (programming guide content)
 ```
 

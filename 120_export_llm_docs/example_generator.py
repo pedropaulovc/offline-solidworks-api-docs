@@ -171,20 +171,19 @@ class ExampleGenerator:
 
         Args:
             example: The ExampleContent object to document
-            category: Functional category for organization
+            category: Functional category for organization (unused, kept for API compatibility)
         """
         # Generate filename from URL
         filename = self._url_to_filename(example.url)
 
-        # Create category folder
-        category_path = self.output_base_path / self._sanitize_path(category)
-        category_path.mkdir(parents=True, exist_ok=True)
+        # Create flat folder (no category subfolders)
+        self.output_base_path.mkdir(parents=True, exist_ok=True)
 
         # Generate markdown
         markdown = self.generate_example_documentation(example)
 
-        # Write to file
-        output_path = category_path / filename
+        # Write to file directly in base path (flat structure)
+        output_path = self.output_base_path / filename
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(markdown)
 

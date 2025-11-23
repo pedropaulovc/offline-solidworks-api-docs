@@ -52,11 +52,10 @@ output/
     ├── Overview.md
     ├── SOLIDWORKS Partner Program.md
     ├── Programming with the SOLIDWORKS API/
-    └── examples/                         # Code examples organized by category
-        ├── Other/
-        │   ├── Create_Advanced_Hole_Example_CSharp.md
-        │   └── ...
-        └── ... (examples organized by functional category)
+    └── examples/                         # Code examples (flat folder structure)
+        ├── Create_Advanced_Hole_Example_CSharp.md
+        ├── Create_Assembly_Example_CSharp.md
+        └── ... (all examples in single folder)
 ```
 
 ### Key Structural Features

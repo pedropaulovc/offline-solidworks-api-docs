@@ -226,7 +226,7 @@ class MarkdownGenerator:
 
         Args:
             url: Example URL
-            category: Functional category
+            category: Functional category (unused with flat folder structure, kept for API compatibility)
 
         Returns:
             Relative path from API doc to example file
@@ -235,12 +235,9 @@ class MarkdownGenerator:
         # e.g., "sldworksapi/Create_Advanced_Hole_Example_CSharp.htm" -> "Create_Advanced_Hole_Example_CSharp.md"
         filename = url.split('/')[-1].replace('.htm', '.md').replace('.html', '.md')
 
-        if category:
-            # Relative path from api/Assembly/Category/Type.md to docs/examples/Category/Example.md
-            return f"../../../docs/examples/{category}/{filename}"
-        else:
-            # If no category, just link to docs/examples
-            return f"../../docs/examples/{filename}"
+        # Relative path from API doc to docs/examples/Example.md (flat folder structure)
+        # Assuming API doc is at api/assembly/Type.md, need to go up 2 levels
+        return f"../../docs/examples/{filename}"
 
     def _get_example_path_for_overview(self, url: str, type_info: TypeInfo) -> str:
         """
@@ -248,7 +245,7 @@ class MarkdownGenerator:
 
         Args:
             url: Example URL
-            type_info: The TypeInfo object (to determine if type or enum and get category)
+            type_info: The TypeInfo object (to determine if type or enum)
 
         Returns:
             Relative path from _overview.md to example file
@@ -257,20 +254,9 @@ class MarkdownGenerator:
         # e.g., "sldworksapi/Traverse_Bodies_Example_CPlusPlusCLI.htm" -> "Traverse_Bodies_Example_CPlusPlusCLI.md"
         filename = url.split('/')[-1].replace('.htm', '.md').replace('.html', '.md')
 
-        # Determine category from the mapping if available, otherwise fall back to type's category or "Other"
-        if self.example_categories and url in self.example_categories:
-            category = self.example_categories[url]
-        elif type_info.functional_category:
-            category = type_info.functional_category
-        else:
-            category = "Other"
-
-        # Sanitize category name for path
-        category = sanitize_filename(category)
-
         # Relative path from api/types/TypeName/_overview.md or api/enums/EnumName/_overview.md
-        # to docs/examples/Category/Example.md
-        return f"../../../docs/examples/{category}/{filename}"
+        # to docs/examples/Example.md (flat folder structure)
+        return f"../../../docs/examples/{filename}"
 
     def _get_example_path_for_member(self, url: str, type_info: TypeInfo) -> str:
         """
