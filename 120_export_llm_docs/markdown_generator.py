@@ -254,9 +254,9 @@ class MarkdownGenerator:
         # e.g., "sldworksapi/Traverse_Bodies_Example_CPlusPlusCLI.htm" -> "Traverse_Bodies_Example_CPlusPlusCLI.md"
         filename = url.split('/')[-1].replace('.htm', '.md').replace('.html', '.md')
 
-        # Relative path from api/types/TypeName/_overview.md or api/enums/EnumName/_overview.md
-        # to docs/examples/Example.md (flat folder structure)
-        return f"../../../docs/examples/{filename}"
+        # Relative path from types/TypeName/_overview.md or enums/EnumName/_overview.md
+        # to examples/Example.md (flat folder structure)
+        return f"../../examples/{filename}"
 
     def _get_example_path_for_member(self, url: str, type_info: TypeInfo) -> str:
         """

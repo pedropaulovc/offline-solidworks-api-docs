@@ -37,17 +37,17 @@ def temp_project():
         # Create Phase 120 output directory with sample markdown files
         llm_docs_dir = project_root / "120_export_llm_docs" / "output"
 
-        # Create api/ structure
-        api_dir = llm_docs_dir / "api"
-        api_types_dir = api_dir / "types" / "IModelDoc2"
-        api_types_dir.mkdir(parents=True)
+        # Create types/ structure
+        types_dir = llm_docs_dir / "types" / "IModelDoc2"
+        types_dir.mkdir(parents=True)
 
-        (api_types_dir / "_overview.md").write_text("# IModelDoc2\n\nOverview content")
-        (api_types_dir / "Save.md").write_text("# IModelDoc2.Save\n\nSave method")
+        (types_dir / "_overview.md").write_text("# IModelDoc2\n\nOverview content")
+        (types_dir / "Save.md").write_text("# IModelDoc2.Save\n\nSave method")
 
-        api_index_dir = api_dir / "index"
-        api_index_dir.mkdir(parents=True)
-        (api_index_dir / "by_category.md").write_text("# By Category\n\nIndex")
+        # Create index/ structure
+        index_dir = llm_docs_dir / "index"
+        index_dir.mkdir(parents=True)
+        (index_dir / "by_category.md").write_text("# By Category\n\nIndex")
 
         # Create docs/ structure
         docs_dir = llm_docs_dir / "docs"
@@ -186,13 +186,13 @@ class TestReleaseExporter:
             assert len(file_list) == 5
 
             # Check directory structure
-            assert any(f.startswith("api/") for f in file_list)
+            assert any(f.startswith("types/") for f in file_list)
             assert any(f.startswith("docs/") for f in file_list)
 
             # Check specific files
-            assert "api/types/IModelDoc2/_overview.md" in file_list
-            assert "api/types/IModelDoc2/Save.md" in file_list
-            assert "api/index/by_category.md" in file_list
+            assert "types/IModelDoc2/_overview.md" in file_list
+            assert "types/IModelDoc2/Save.md" in file_list
+            assert "index/by_category.md" in file_list
             assert "docs/Overview.md" in file_list
             assert "README.md" in file_list
 
@@ -334,11 +334,11 @@ class TestZipContentValidation:
         with zipfile.ZipFile(zip_path, "r") as zipf:
             file_list = zipf.namelist()
 
-            # Check that we have both api/ and docs/
-            has_api = any(f.startswith("api/") for f in file_list)
+            # Check that we have types/, enums/, index/, and docs/
+            has_types = any(f.startswith("types/") for f in file_list)
             has_docs = any(f.startswith("docs/") for f in file_list)
 
-            assert has_api, "Missing api/ directory in package"
+            assert has_types, "Missing types/ directory in package"
             assert has_docs, "Missing docs/ directory in package"
 
             # Check markdown files are valid

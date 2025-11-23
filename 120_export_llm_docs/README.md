@@ -21,32 +21,31 @@ The export generates a **grep-optimized** structure where each method, property,
 ```
 output/
 ├── README.md                             # LLM-friendly documentation guide
-├── api/                                  # API reference documentation
-│   ├── types/                            # Regular types (interfaces, classes)
-│   │   ├── IModelDoc2/                   # One directory per type
-│   │   │   ├── _overview.md              # Type-level info (description, remarks, counts)
-│   │   │   ├── CreateArc.md              # Individual method files
-│   │   │   ├── CreateArc2.md
-│   │   │   ├── Save.md
-│   │   │   ├── GetPathName.md            # Individual property files
-│   │   │   └── ... (697 methods + 24 properties)
-│   │   ├── ISldWorks/
-│   │   │   ├── _overview.md
-│   │   │   └── ... (methods and properties)
-│   │   └── ... (1,563 type directories)
-│   │
-│   ├── enums/                            # Enumerations
-│   │   ├── swDocumentTypes_e/
-│   │   │   ├── _overview.md
-│   │   │   ├── swDocPART.md              # Individual enum member files
-│   │   │   ├── swDocASSEMBLY.md
-│   │   │   └── swDocDRAWING.md
-│   │   └── ... (955 enum directories)
-│   │
-│   └── index/                            # Navigation indexes
-│       ├── by_category.md                # Types organized by functional category
-│       ├── by_assembly.md                # Types organized by .NET assembly
-│       └── statistics.md                 # Quick stats and largest types
+├── types/                                # Regular types (interfaces, classes)
+│   ├── IModelDoc2/                       # One directory per type
+│   │   ├── _overview.md                  # Type-level info (description, remarks, counts)
+│   │   ├── CreateArc.md                  # Individual method files
+│   │   ├── CreateArc2.md
+│   │   ├── Save.md
+│   │   ├── GetPathName.md                # Individual property files
+│   │   └── ... (697 methods + 24 properties)
+│   ├── ISldWorks/
+│   │   ├── _overview.md
+│   │   └── ... (methods and properties)
+│   └── ... (1,563 type directories)
+│
+├── enums/                                # Enumerations
+│   ├── swDocumentTypes_e/
+│   │   ├── _overview.md
+│   │   ├── swDocPART.md                  # Individual enum member files
+│   │   ├── swDocASSEMBLY.md
+│   │   └── swDocDRAWING.md
+│   └── ... (955 enum directories)
+│
+├── index/                                # Navigation indexes
+│   ├── by_category.md                    # Types organized by functional category
+│   ├── by_assembly.md                    # Types organized by .NET assembly
+│   └── statistics.md                     # Quick stats and largest types
 │
 ├── examples/                             # Code examples (flat folder structure)
 │   ├── Create_Advanced_Hole_Example_CSharp.md
@@ -269,40 +268,40 @@ The grep-optimized structure makes it easy to:
 ### Find specific methods quickly
 ```bash
 # Find CreateArc method documentation
-grep -r "CreateArc" output/api/types/IModelDoc2/
+grep -r "CreateArc" output/types/IModelDoc2/
 
 # Get just that method's file
-cat output/api/types/IModelDoc2/CreateArc2.md
+cat output/types/IModelDoc2/CreateArc2.md
 ```
 
 ### Extract member documentation programmatically
 ```bash
 # Get all methods in IModelDoc2
-ls output/api/types/IModelDoc2/*.md | grep -v "_overview"
+ls output/types/IModelDoc2/*.md | grep -v "_overview"
 
 # Extract all method signatures
-grep "^**Signature**:" output/api/types/IModelDoc2/*.md
+grep "^**Signature**:" output/types/IModelDoc2/*.md
 ```
 
 ### Search by metadata
 ```bash
 # Find all members in "Application Interfaces" category
-grep -r "category: Application Interfaces" output/api/types/
+grep -r "category: Application Interfaces" output/types/
 
 # Find all methods (not properties)
-grep -r "kind: method" output/api/types/
+grep -r "kind: method" output/types/
 
 # Find all enum members
-grep -r "kind: enum_member" output/api/enums/
+grep -r "kind: enum_member" output/enums/
 ```
 
 ### Navigate by category
 ```bash
 # View all types in a category
-cat output/api/index/by_category.md | grep -A 20 "Application Interfaces"
+cat output/index/by_category.md | grep -A 20 "Application Interfaces"
 
 # View statistics
-cat output/api/index/statistics.md
+cat output/index/statistics.md
 ```
 
 ## Success Criteria

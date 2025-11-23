@@ -182,13 +182,37 @@ class ReleaseExporter:
         total_files = 0
 
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
-            # Add api/ directory
-            api_dir = self.llm_docs_source / "api"
-            if api_dir.exists():
-                self._log("  Adding api/ directory...")
-                api_files = self._add_directory_to_zip(zipf, api_dir, "api")
-                total_files += api_files
-                self._log(f"    Added {api_files} files from api/")
+            # Add types/ directory
+            types_dir = self.llm_docs_source / "types"
+            if types_dir.exists():
+                self._log("  Adding types/ directory...")
+                types_files = self._add_directory_to_zip(zipf, types_dir, "types")
+                total_files += types_files
+                self._log(f"    Added {types_files} files from types/")
+
+            # Add enums/ directory
+            enums_dir = self.llm_docs_source / "enums"
+            if enums_dir.exists():
+                self._log("  Adding enums/ directory...")
+                enums_files = self._add_directory_to_zip(zipf, enums_dir, "enums")
+                total_files += enums_files
+                self._log(f"    Added {enums_files} files from enums/")
+
+            # Add index/ directory
+            index_dir = self.llm_docs_source / "index"
+            if index_dir.exists():
+                self._log("  Adding index/ directory...")
+                index_files = self._add_directory_to_zip(zipf, index_dir, "index")
+                total_files += index_files
+                self._log(f"    Added {index_files} files from index/")
+
+            # Add examples/ directory
+            examples_dir = self.llm_docs_source / "examples"
+            if examples_dir.exists():
+                self._log("  Adding examples/ directory...")
+                examples_files = self._add_directory_to_zip(zipf, examples_dir, "examples")
+                total_files += examples_files
+                self._log(f"    Added {examples_files} files from examples/")
 
             # Add docs/ directory
             docs_dir = self.llm_docs_source / "docs"

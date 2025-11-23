@@ -84,10 +84,9 @@ class ExportValidator:
     def _validate_directory_structure(self):
         """Validate that the expected directory structure exists."""
         expected_dirs = [
-            self.output_path / "api",
-            self.output_path / "api" / "types",
-            self.output_path / "api" / "enums",
-            self.output_path / "api" / "index",
+            self.output_path / "types",
+            self.output_path / "enums",
+            self.output_path / "index",
             self.output_path / "docs",
             self.output_path / "examples",
         ]
@@ -111,16 +110,10 @@ class ExportValidator:
 
     def _validate_api_docs(self):
         """Validate API documentation files (grep-optimized structure)."""
-        api_path = self.output_path / "api"
-
-        if not api_path.exists():
-            self.errors.append("API directory does not exist")
-            return
-
         # Validate types directory
-        types_path = api_path / "types"
-        enums_path = api_path / "enums"
-        index_path = api_path / "index"
+        types_path = self.output_path / "types"
+        enums_path = self.output_path / "enums"
+        index_path = self.output_path / "index"
 
         # Count type directories
         type_dirs = [d for d in types_path.iterdir() if d.is_dir()] if types_path.exists() else []
@@ -129,8 +122,12 @@ class ExportValidator:
         print(f"  Found {len(type_dirs)} type directories")
         print(f"  Found {len(enum_dirs)} enum directories")
 
-        # Count all markdown files
-        md_files = list(api_path.rglob('*.md'))
+        # Count all markdown files in types and enums
+        md_files = []
+        if types_path.exists():
+            md_files.extend(list(types_path.rglob('*.md')))
+        if enums_path.exists():
+            md_files.extend(list(enums_path.rglob('*.md')))
         print(f"  Found {len(md_files)} total markdown files")
 
         # Validate sample type directories

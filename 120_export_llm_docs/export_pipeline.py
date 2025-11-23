@@ -126,11 +126,9 @@ class ExportPipeline:
 
     def _generate_api_docs(self, types: Dict[str, TypeInfo], data_loader: DataLoader, example_categories: Dict[str, str]):
         """Generate grep-optimized markdown documentation for all API types."""
-        api_path = self.output_base / "api"
-
         # Create markdown generator in grep-optimized mode
         generator = MarkdownGenerator(
-            output_base_path=str(api_path),
+            output_base_path=str(self.output_base),
             examples_loader_func=data_loader.get_example_content,
             grep_optimized=True,
             example_categories=example_categories
@@ -142,9 +140,9 @@ class ExportPipeline:
 
         # Generate regular types
         print(f"  Generating {len(regular_types)} regular types...")
-        types_path = api_path / "types"
+        types_path = self.output_base / "types"
         for fqn, type_info in regular_types.items():
-            # Create directory: api/types/TypeName/
+            # Create directory: types/TypeName/
             type_dir = types_path / sanitize_filename(type_info.name)
             files_count = generator.save_grep_optimized_documentation(type_info, type_dir)
             self.stats.markdown_files_generated += files_count
@@ -164,9 +162,9 @@ class ExportPipeline:
 
         # Generate enums
         print(f"  Generating {len(enum_types)} enumerations...")
-        enums_path = api_path / "enums"
+        enums_path = self.output_base / "enums"
         for fqn, enum_info in enum_types.items():
-            # Create directory: api/enums/EnumName/
+            # Create directory: enums/EnumName/
             enum_dir = enums_path / sanitize_filename(enum_info.name)
             files_count = generator.save_grep_optimized_documentation(enum_info, enum_dir)
             self.stats.markdown_files_generated += files_count
@@ -183,7 +181,7 @@ class ExportPipeline:
 
     def _generate_indexes(self, types: Dict[str, TypeInfo]):
         """Generate index files for navigating the documentation."""
-        index_path = self.output_base / "api" / "index"
+        index_path = self.output_base / "index"
 
         # Create index generator
         generator = IndexGenerator(output_base_path=str(index_path))
@@ -258,16 +256,16 @@ class ExportPipeline:
 ## Structure
 
 ```
-api/types/{{TypeName}}/          # Regular types (interfaces, classes)
+types/{{TypeName}}/               # Regular types (interfaces, classes)
   _overview.md                    # Type info: description, remarks, member counts
   {{MethodName}}.md               # Individual method files
   {{PropertyName}}.md             # Individual property files
 
-api/enums/{{EnumName}}/          # Enumerations
+enums/{{EnumName}}/               # Enumerations
   _overview.md                    # Enum info
   {{MemberName}}.md               # Individual enum member files
 
-api/index/
+index/
   by_category.md                  # Types by functional category
   by_assembly.md                  # Types by .NET assembly
   statistics.md                   # Stats and largest types
@@ -279,11 +277,11 @@ docs/                             # Programming guide content
 
 ## Query Patterns
 
-**Find type overview**: Read `api/types/{{TypeName}}/_overview.md`
-**Find method/property**: Read `api/types/{{TypeName}}/{{MemberName}}.md`
-**List all members**: List files in `api/types/{{TypeName}}/`, exclude `_overview.md`
-**Find by category**: Read `api/index/by_category.md`
-**Search by keyword**: Search file contents in `api/types/` or `api/enums/`
+**Find type overview**: Read `types/{{TypeName}}/_overview.md`
+**Find method/property**: Read `types/{{TypeName}}/{{MemberName}}.md`
+**List all members**: List files in `types/{{TypeName}}/`, exclude `_overview.md`
+**Find by category**: Read `index/by_category.md`
+**Search by keyword**: Search file contents in `types/` or `enums/`
 **Filter by metadata**: Search YAML frontmatter (e.g., `kind: method`, `category: Assembly Interfaces`)
 
 ## YAML Frontmatter

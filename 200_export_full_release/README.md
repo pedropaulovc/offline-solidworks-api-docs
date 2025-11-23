@@ -312,10 +312,10 @@ Extract LLM docs package and point your AI assistant to it:
 unzip SolidWorks.Interop.llms.v1.0.0.zip -d solidworks-docs/
 
 # Search for specific API
-grep -r "CreateArc" solidworks-docs/api/types/IModelDoc2/
+grep -r "CreateArc" solidworks-docs/types/IModelDoc2/
 
 # Feed to LLM for code generation
-cat solidworks-docs/api/types/IModelDoc2/_overview.md
+cat solidworks-docs/types/IModelDoc2/_overview.md
 ```
 
 ### 3. Offline Documentation Website

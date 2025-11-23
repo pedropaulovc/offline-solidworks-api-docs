@@ -187,14 +187,14 @@ class ReleaseValidator:
                 self._log(f"Contains {len(md_files)} markdown files", "success")
 
                 # Check for expected directories
-                has_api = any(f.startswith("api/") for f in file_list)
+                has_types = any(f.startswith("types/") for f in file_list)
                 has_docs = any(f.startswith("docs/") for f in file_list)
 
-                if has_api:
-                    api_files = [f for f in file_list if f.startswith("api/")]
-                    self._log(f"  api/ directory: {len(api_files)} files", "success")
+                if has_types:
+                    types_files = [f for f in file_list if f.startswith("types/")]
+                    self._log(f"  types/ directory: {len(types_files)} files", "success")
                 else:
-                    self._log("  Missing: api/ directory", "error")
+                    self._log("  Missing: types/ directory", "error")
 
                 if has_docs:
                     docs_files = [f for f in file_list if f.startswith("docs/")]
@@ -204,9 +204,9 @@ class ReleaseValidator:
 
                 # Check for key index files
                 expected_indexes = [
-                    "api/index/by_category.md",
-                    "api/index/by_assembly.md",
-                    "api/index/statistics.md",
+                    "index/by_category.md",
+                    "index/by_assembly.md",
+                    "index/statistics.md",
                 ]
 
                 for index_file in expected_indexes:

@@ -343,7 +343,7 @@ def test_readme_generation():
         assert "Find method/property" in readme_content
         assert "List all members" in readme_content
         assert "Find by category" in readme_content
-        assert "api/types/{TypeName}/_overview.md" in readme_content
+        assert "types/{TypeName}/_overview.md" in readme_content
 
         # Check that statistics are populated
         assert "Stats" in readme_content
