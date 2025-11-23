@@ -30,10 +30,10 @@
       "description": "LLM-friendly markdown documentation (grep-optimized)",
       "source_phase": "120_export_llm_docs",
       "source_directory": "120_export_llm_docs\\output",
-      "file_count": 26463,
-      "archive_size_bytes": 15401702
+      "file_count": 26464,
+      "archive_size_bytes": 15402556
     }
   ],
   "total_packages": 2,
-  "total_size_bytes": 17410117
+  "total_size_bytes": 17410971
 }
