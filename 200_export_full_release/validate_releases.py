@@ -337,11 +337,6 @@ class ReleaseValidator:
         """Save validation report to JSON file."""
         report = {
             "version": version,
-            "timestamp": Path(self.metadata_dir / "export_manifest.json")
-            .stat()
-            .st_mtime
-            if (self.metadata_dir / "export_manifest.json").exists()
-            else None,
             "errors": self.errors,
             "warnings": self.warnings,
             "info": self.info,

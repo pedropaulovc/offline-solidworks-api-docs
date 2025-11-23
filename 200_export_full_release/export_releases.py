@@ -228,7 +228,6 @@ class ReleaseExporter:
 
         # Create manifest
         manifest = {
-            "export_timestamp": datetime.now().isoformat(),
             "version": metadata_list[0]["version"] if metadata_list else "unknown",
             "packages": metadata_list,
             "total_packages": len(metadata_list),
