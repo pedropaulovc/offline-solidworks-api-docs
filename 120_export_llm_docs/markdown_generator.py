@@ -570,9 +570,7 @@ def sanitize_filename(name: str) -> str:
     for char in invalid_chars:
         name = name.replace(char, '_')
 
-    # Replace spaces with underscores
-    name = name.replace(' ', '_')
-
+    # Keep spaces as-is to match directory structure created by example_generator.py
     return name
 
 
