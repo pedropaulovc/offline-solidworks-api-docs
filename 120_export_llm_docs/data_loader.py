@@ -180,6 +180,23 @@ class DataLoader:
                         description=param_desc
                     ))
 
+            # Parse examples
+            examples = []
+            examples_elem = member_elem.find('Examples')
+            if examples_elem is not None:
+                for example_elem in examples_elem.findall('Example'):
+                    name_elem = example_elem.find('Name')
+                    lang_elem = example_elem.find('Language')
+                    url_elem = example_elem.find('Url')
+
+                    if all([name_elem is not None, lang_elem is not None, url_elem is not None]):
+                        example_ref = ExampleReference(
+                            name=name_elem.text.strip(),
+                            language=lang_elem.text.strip(),
+                            url=url_elem.text.strip()
+                        )
+                        examples.append(example_ref)
+
             # Determine if this is a property or method based on signature
             is_property = '(' not in signature
 
@@ -190,7 +207,8 @@ class DataLoader:
                     parameters=parameters,
                     returns=returns,
                     remarks=remarks,
-                    signature=signature
+                    signature=signature,
+                    examples=examples
                 )
                 type_info.properties.append(prop)
             else:
@@ -200,7 +218,8 @@ class DataLoader:
                     parameters=parameters,
                     returns=returns,
                     remarks=remarks,
-                    signature=signature
+                    signature=signature,
+                    examples=examples
                 )
                 type_info.methods.append(method)
 

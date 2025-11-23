@@ -272,6 +272,20 @@ class MarkdownGenerator:
         # to docs/examples/Category/Example.md
         return f"../../../docs/examples/{category}/{filename}"
 
+    def _get_example_path_for_member(self, url: str, type_info: TypeInfo) -> str:
+        """
+        Get the relative path to the example markdown file from a member file.
+
+        Args:
+            url: Example URL
+            type_info: The TypeInfo object (to determine category)
+
+        Returns:
+            Relative path from member.md to example file
+        """
+        # Member files are at the same level as _overview.md, so use the same logic
+        return self._get_example_path_for_overview(url, type_info)
+
     def generate_type_overview(self, type_info: TypeInfo) -> str:
         """
         Generate type overview markdown (description, remarks, metadata) without members.
@@ -391,6 +405,15 @@ class MarkdownGenerator:
         if member.remarks:
             md.append(f"## Remarks\n")
             md.append(f"{self._simplify_cross_references(self._clean_text(member.remarks))}\n")
+
+        # Examples section
+        if member.examples:
+            md.append("\n## Examples\n")
+            for example_ref in member.examples:
+                # Get the relative path to the example file
+                example_path = self._get_example_path_for_member(example_ref.url, type_info)
+                # Create a link with format: "- Example Name (Language)"
+                md.append(f"- [{example_ref.name} ({example_ref.language})]({example_path})\n")
 
         return "\n".join(md)
 

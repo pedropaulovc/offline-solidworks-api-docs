@@ -41,6 +41,7 @@ class Member:
     returns: str = ""
     remarks: str = ""
     signature: str = ""
+    examples: List[ExampleReference] = field(default_factory=list)
 
 
 @dataclass
