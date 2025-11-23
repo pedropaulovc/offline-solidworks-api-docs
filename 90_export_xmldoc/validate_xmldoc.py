@@ -241,8 +241,10 @@ class XMLDocValidator:
         if summary is not None:
             stats['members_with_summary'] += 1
 
-            # Check if summary is not empty
-            if not (summary.text or '').strip():
+            # Check if summary is not empty (including child elements like <see cref>)
+            # Get all text content, including from child elements
+            summary_text = ''.join(summary.itertext()).strip()
+            if not summary_text:
                 self.add_issue('warning', 'content',
                              f"Empty summary for {member_id}",
                              filename)
@@ -339,11 +341,11 @@ class XMLDocValidator:
         # Print overall result
         print("\n" + "=" * 50)
         if self.result.passed:
-            print("✓ VALIDATION PASSED")
+            print("[PASS] VALIDATION PASSED")
             if warnings:
                 print(f"  (with {len(warnings)} warnings)")
         else:
-            print("✗ VALIDATION FAILED")
+            print("[FAIL] VALIDATION FAILED")
             print(f"  Found {len(errors)} errors")
 
 
