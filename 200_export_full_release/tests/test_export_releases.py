@@ -54,6 +54,9 @@ def temp_project():
         docs_dir.mkdir(parents=True)
         (docs_dir / "Overview.md").write_text("# Programming Guide\n\nOverview")
 
+        # Create README.md
+        (llm_docs_dir / "README.md").write_text("# SolidWorks API Documentation\n\nREADME content")
+
         # Create output directories
         output_dir = project_root / "200_export_full_release" / "output"
         output_dir.mkdir(parents=True)
@@ -171,7 +174,7 @@ class TestReleaseExporter:
         assert metadata is not None
         assert metadata["version"] == version
         assert metadata["package_type"] == "llm_docs"
-        assert metadata["file_count"] == 4  # 4 markdown files
+        assert metadata["file_count"] == 5  # 4 markdown files + README.md
 
         # Check zip file was created
         zip_path = temp_project["output_dir"] / f"SolidWorks.Interop.llms.{version}.zip"
@@ -180,7 +183,7 @@ class TestReleaseExporter:
         # Check zip contents
         with zipfile.ZipFile(zip_path, "r") as zipf:
             file_list = zipf.namelist()
-            assert len(file_list) == 4
+            assert len(file_list) == 5
 
             # Check directory structure
             assert any(f.startswith("api/") for f in file_list)
@@ -191,6 +194,7 @@ class TestReleaseExporter:
             assert "api/types/IModelDoc2/Save.md" in file_list
             assert "api/index/by_category.md" in file_list
             assert "docs/Overview.md" in file_list
+            assert "README.md" in file_list
 
     def test_export_llm_docs_package_missing_source(self, exporter, temp_project):
         """Test exporting LLM docs package when source directory doesn't exist."""

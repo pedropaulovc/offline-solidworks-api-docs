@@ -102,6 +102,7 @@ Contains the entire markdown documentation tree from `120_export_llm_docs/output
 
 ```
 SolidWorks.Interop.llms.v1.0.0.zip
+├── README.md                      # Usage guide and structure overview
 ├── api/                           # API reference
 │   ├── types/                     # Regular types (interfaces, classes)
 │   │   ├── IModelDoc2/

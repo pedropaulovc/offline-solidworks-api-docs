@@ -198,6 +198,14 @@ class ReleaseExporter:
                 total_files += docs_files
                 self._log(f"    Added {docs_files} files from docs/")
 
+            # Add README.md
+            readme_file = self.llm_docs_source / "README.md"
+            if readme_file.exists():
+                self._log("  Adding README.md...")
+                zipf.write(readme_file, arcname="README.md")
+                total_files += 1
+                self._log(f"    Added README.md")
+
         # Get zip file size
         zip_size = zip_path.stat().st_size
 
