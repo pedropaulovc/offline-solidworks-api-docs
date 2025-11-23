@@ -260,12 +260,12 @@ class MemberDetailsExtractor(HTMLParser):
                 self.in_remarks_section = False
                 self.current_section = None
 
-        # Detect "Parameters" and "Return Value" headers (h4 tags)
+        # Detect "Parameters", "Return Value", and "Property Value" headers (h4 tags)
         if self.in_h4:
             if text == "Parameters":
                 self.in_parameters_section = True
                 self.in_return_section = False
-            elif text == "Return Value":
+            elif text == "Return Value" or text == "Property Value":
                 self.in_parameters_section = False
                 self.in_return_section = True
                 self.return_depth = 0

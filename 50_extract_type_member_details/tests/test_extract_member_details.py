@@ -189,6 +189,21 @@ class TestMemberDetailsExtractor:
         assert "True if" in parser.get_return_value()
         assert "false if not" in parser.get_return_value()
 
+    def test_extract_property_value(self):
+        """Test extraction of property value description (for properties)."""
+        html = """
+        <h4>Property Value</h4>
+        <div>Error as defined by <a href="../swconst/swFaultEntityErrorCode_e.html">swFaultEntityErrorCode_e</a>; -1 indicates an unknown error</div>
+        """
+        parser = MemberDetailsExtractor()
+        parser.in_return_section = True
+        parser.return_depth = 0
+        parser.feed(html)
+
+        result = parser.get_return_value()
+        assert "Error as defined by" in result
+        assert "-1 indicates an unknown error" in result
+
     def test_extract_remarks(self):
         """Test extraction of remarks section."""
         html = """
@@ -340,3 +355,67 @@ class TestIntegration:
         assert "document title" in member_info["Description"].lower()
         assert "string" in member_info["Returns"].lower()
         assert "returns the title" in member_info["Remarks"].lower()
+
+    @pytest.fixture
+    def sample_property_html(self, tmp_path):
+        """Create a sample property HTML file with Property Value section."""
+        html_content = dedent(
+            """
+            <xml>
+            <mshelp:keyword index="F" term="Test.Property">
+            </mshelp:keyword></xml>
+
+            <div id="pagetop">
+                <span id="pagetitle">ErrorCode Property (IFaultEntity)</span>
+            </div>
+
+            <div id="pagebody">
+                <br> Gets the error for the fault for the specified entity.
+
+                <h1>.NET Syntax</h1>
+                <div id="syntaxSection">
+                    <div id="Syntax_CS">
+                        <table class="syntaxtable">
+                            <tbody>
+                                <tr><td><pre>System.int ErrorCode( System.int Index) {get;}</pre></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <h4>Parameters</h4>
+                <dl>
+                    <dt><i>Index</i></dt>
+                    <dd>0-based index number indicating the entity with the fault</dd>
+                </dl>
+
+                <h4>Property Value</h4>
+                <div>Error as defined by <a href="../swconst/swFaultEntityErrorCode_e.html">swFaultEntityErrorCode_e</a>; -1 indicates an unknown error</div>
+
+                <h1>Remarks</h1>
+                <div id="remarksSection">
+                    <p>To determine the value for index, call IFaultEntity::Count before calling this property.</p>
+                </div>
+            </div>
+            """
+        )
+
+        html_file = tmp_path / "SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFaultEntity~ErrorCode.html"
+        html_file.write_text(html_content)
+        return html_file
+
+    def test_extract_property_from_file(self, sample_property_html):
+        """Test extracting property details with Property Value section."""
+        member_info = extract_member_details_from_file(sample_property_html)
+
+        assert member_info is not None
+        assert member_info["Assembly"] == "SolidWorks.Interop.sldworks"
+        assert member_info["Type"] == "SolidWorks.Interop.sldworks.IFaultEntity"
+        assert member_info["Name"] == "ErrorCode"
+        assert "ErrorCode" in member_info["Signature"]
+        assert "error for the fault" in member_info["Description"].lower()
+        assert len(member_info["Parameters"]) == 1
+        assert member_info["Parameters"][0]["Name"] == "Index"
+        assert "Error as defined by" in member_info["Returns"]
+        assert "-1 indicates an unknown error" in member_info["Returns"]
+        assert "IFaultEntity::Count" in member_info["Remarks"]

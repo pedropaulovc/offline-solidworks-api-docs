@@ -29,7 +29,8 @@ This is a multi-phase pipeline project for creating offline, searchable versions
 - Validation and test suite complete
 
 ✅ **Phase 5 (50_extract_type_member_details)**: Complete
-- Member detail extraction (parameters, return values, remarks)
+- Member detail extraction (parameters, return values, property values, remarks)
+- Supports both "Return Value" (methods) and "Property Value" (properties) sections
 - XML output generation
 - Shared utilities refactored for code reuse
 - Validation and test suite complete

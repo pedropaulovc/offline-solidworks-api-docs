@@ -18,7 +18,7 @@ This phase processes **member files** (format: `Assembly~Namespace.Type~Member.h
 4. **Signature**: C# method/property signature without return type (e.g., `AccessSelections(System.object TopDoc, System.object Component)`)
 5. **Description**: Brief description of what the member does
 6. **Parameters**: List of parameters with descriptions (for methods)
-7. **Returns**: Description of the return value
+7. **Returns**: Description of the return value (from "Return Value" or "Property Value" sections)
 8. **Remarks**: Additional notes and cross-references
 
 ## Output Format
@@ -118,7 +118,7 @@ The parser uses Python's `HTMLParser` to:
 2. **Extract description** from text between title and first `<h1>`
 3. **Parse C# signature** from the `.NET Syntax` section
 4. **Collect parameters** from the `Parameters` section (dl/dt/dd structure)
-5. **Extract return value** from the `Return Value` section
+5. **Extract return value** from the `Return Value` or `Property Value` section
 6. **Parse remarks** while preserving HTML structure and cross-references
 
 ## Expected Results
