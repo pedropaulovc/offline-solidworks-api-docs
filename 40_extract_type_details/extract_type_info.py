@@ -157,8 +157,8 @@ class TypeInfoExtractor(HTMLParser):
 
         # Capture type name from pagetitle
         if self.in_pagetitle and text:
-            # Remove " Interface" or " Class" suffix if present
-            self.type_name = text.replace(" Interface", "").replace(" Class", "").strip()
+            # Remove " Interface", " Class", or " Enumeration" suffix if present
+            self.type_name = text.replace(" Interface", "").replace(" Class", "").replace(" Enumeration", "").strip()
 
         # Capture description (text between pagetitle and first h1)
         # Use original data (not stripped) to preserve spacing

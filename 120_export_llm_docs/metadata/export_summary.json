@@ -1,6 +1,6 @@
 {
   "statistics": {
-    "total_types": 2518,
+    "total_types": 1563,
     "types_with_descriptions": 1508,
     "types_with_remarks": 389,
     "types_with_examples": 457,
@@ -9,7 +9,7 @@
     "total_enum_members": 10428,
     "total_examples": 1198,
     "functional_categories": 39,
-    "markdown_files_generated": 25671,
+    "markdown_files_generated": 24716,
     "programming_guide_files": 125
   },
   "output_location": "120_export_llm_docs\\output"
