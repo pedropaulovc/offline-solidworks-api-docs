@@ -1,9 +1,9 @@
 {
-  "version": "v2.2.0",
+  "version": "v2.3.0",
   "packages": [
     {
-      "package_name": "SolidWorks.Interop.xmldoc.v2.2.0.zip",
-      "version": "v2.2.0",
+      "package_name": "SolidWorks.Interop.xmldoc.v2.3.0.zip",
+      "version": "v2.3.0",
       "package_type": "xmldoc",
       "description": "Microsoft XMLDoc files for Visual Studio IntelliSense",
       "source_phase": "90_export_xmldoc",
@@ -24,8 +24,8 @@
       ]
     },
     {
-      "package_name": "SolidWorks.Interop.llms.v2.2.0.zip",
-      "version": "v2.2.0",
+      "package_name": "SolidWorks.Interop.llms.v2.3.0.zip",
+      "version": "v2.3.0",
       "package_type": "llm_docs",
       "description": "LLM-friendly markdown documentation (grep-optimized)",
       "source_phase": "120_export_llm_docs",
