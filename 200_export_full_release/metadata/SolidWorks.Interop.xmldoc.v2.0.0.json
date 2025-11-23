@@ -1,0 +1,22 @@
+{
+  "package_name": "SolidWorks.Interop.xmldoc.v2.0.0.zip",
+  "version": "v2.0.0",
+  "package_type": "xmldoc",
+  "description": "Microsoft XMLDoc files for Visual Studio IntelliSense",
+  "source_phase": "90_export_xmldoc",
+  "source_directory": "90_export_xmldoc\\output",
+  "file_count": 10,
+  "archive_size_bytes": 2008415,
+  "files": [
+    "SolidWorks.Interop.dsgnchk.xml",
+    "SolidWorks.Interop.sldworks.xml",
+    "SolidWorks.Interop.sw3dprinter.xml",
+    "SolidWorks.Interop.swcommands.xml",
+    "SolidWorks.Interop.swconst.xml",
+    "SolidWorks.Interop.swdimxpert.xml",
+    "SolidWorks.Interop.swhtmlcontrol.xml",
+    "SolidWorks.Interop.swmotionstudy.xml",
+    "SolidWorks.Interop.swpublished.xml",
+    "SolidWorks.Interop.swscanto3d.xml"
+  ]
+}

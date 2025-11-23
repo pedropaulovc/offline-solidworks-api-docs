@@ -169,7 +169,6 @@ Each package gets its own metadata file (e.g., `SolidWorks.Interop.xmldoc.v1.0.0
   "description": "Microsoft XMLDoc files for Visual Studio IntelliSense",
   "source_phase": "90_export_xmldoc",
   "source_directory": "90_export_xmldoc/output",
-  "created_at": "2025-01-15T14:30:00",
   "file_count": 10,
   "archive_size_bytes": 15728640,
   "files": [

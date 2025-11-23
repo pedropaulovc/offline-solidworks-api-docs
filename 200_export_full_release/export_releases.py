@@ -147,7 +147,6 @@ class ReleaseExporter:
             "description": "Microsoft XMLDoc files for Visual Studio IntelliSense",
             "source_phase": "90_export_xmldoc",
             "source_directory": str(self.xmldoc_source.relative_to(self.project_root)),
-            "created_at": datetime.now().isoformat(),
             "file_count": file_count,
             "archive_size_bytes": zip_size,
             "files": xml_files,
@@ -213,7 +212,6 @@ class ReleaseExporter:
             "description": "LLM-friendly markdown documentation (grep-optimized)",
             "source_phase": "120_export_llm_docs",
             "source_directory": str(self.llm_docs_source.relative_to(self.project_root)),
-            "created_at": datetime.now().isoformat(),
             "file_count": total_files,
             "archive_size_bytes": zip_size,
         }

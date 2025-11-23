@@ -1,0 +1,10 @@
+{
+  "package_name": "SolidWorks.Interop.llms.v2.0.0.zip",
+  "version": "v2.0.0",
+  "package_type": "llm_docs",
+  "description": "LLM-friendly markdown documentation (grep-optimized)",
+  "source_phase": "120_export_llm_docs",
+  "source_directory": "120_export_llm_docs\\output",
+  "file_count": 24834,
+  "archive_size_bytes": 13110976
+}
