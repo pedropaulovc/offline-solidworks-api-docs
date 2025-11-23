@@ -16,7 +16,6 @@ import argparse
 import html
 import json
 import re
-import time
 import xml.dom.minidom as minidom
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -509,7 +508,6 @@ class XMLDocGenerator:
         """
         # Generate summary
         summary = {
-            'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
             'statistics': self.stats,
             'output_files': {name: str(path) for name, path in output_files.items()},
         }
