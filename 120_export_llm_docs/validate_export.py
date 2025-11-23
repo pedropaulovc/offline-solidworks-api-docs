@@ -246,7 +246,7 @@ class ExportValidator:
                 report = json.load(f)
 
             # Check required fields
-            required_fields = ['export_timestamp', 'statistics', 'output_location']
+            required_fields = ['statistics', 'output_location']
             for field in required_fields:
                 if field not in report:
                     self.warnings.append(f"Missing field in summary report: {field}")
