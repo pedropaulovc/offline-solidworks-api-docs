@@ -390,48 +390,52 @@ Use `[[TypeName]]` or `[[TypeName::MemberName]]` format for type references.
 
 def main():
     """Main entry point for the export pipeline."""
+    # Determine project root (script is in 120_export_llm_docs/)
+    script_dir = Path(__file__).resolve().parent
+    project_root = script_dir.parent
+
     parser = argparse.ArgumentParser(
         description='Export LLM-friendly markdown documentation from SolidWorks API data'
     )
 
     parser.add_argument(
         '--phase20',
-        default='20_extract_types/metadata/api_members.xml',
+        default=str(project_root / '20_extract_types/metadata/api_members.xml'),
         help='Path to Phase 20 XML (type listings)'
     )
     parser.add_argument(
         '--phase40',
-        default='40_extract_type_details/metadata/api_types.xml',
+        default=str(project_root / '40_extract_type_details/metadata/api_types.xml'),
         help='Path to Phase 40 XML (type details)'
     )
     parser.add_argument(
         '--phase50',
-        default='50_extract_type_member_details/metadata/api_member_details.xml',
+        default=str(project_root / '50_extract_type_member_details/metadata/api_member_details.xml'),
         help='Path to Phase 50 XML (member details)'
     )
     parser.add_argument(
         '--phase60',
-        default='60_extract_enum_members/metadata/enum_members.xml',
+        default=str(project_root / '60_extract_enum_members/metadata/enum_members.xml'),
         help='Path to Phase 60 XML (enum members)'
     )
     parser.add_argument(
         '--phase80',
-        default='80_parse_examples/output/examples.xml',
+        default=str(project_root / '80_parse_examples/output/examples.xml'),
         help='Path to Phase 80 XML (examples)'
     )
     parser.add_argument(
         '--phase110',
-        default='110_extract_docs_md/output/markdown',
+        default=str(project_root / '110_extract_docs_md/output/markdown'),
         help='Path to Phase 110 markdown directory'
     )
     parser.add_argument(
         '--functional-categories',
-        default='10_crawl_toc_pages/output/html/sldworksapi/FunctionalCategories-sldworksapi_2cd1902c_2cd1902c.htmll.html',
+        default=str(project_root / '10_crawl_toc_pages/output/html/sldworksapi/FunctionalCategories-sldworksapi_2cd1902c_2cd1902c.htmll.html'),
         help='Path to FunctionalCategories HTML file'
     )
     parser.add_argument(
         '--output',
-        default='120_export_llm_docs/output',
+        default=str(project_root / '120_export_llm_docs/output'),
         help='Output directory for generated markdown'
     )
 
