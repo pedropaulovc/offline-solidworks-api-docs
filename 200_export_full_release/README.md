@@ -117,10 +117,10 @@ SolidWorks.Interop.llms.v1.0.0.zip
 │       ├── by_category.md
 │       ├── by_assembly.md
 │       └── statistics.md
+├── examples/                      # Code examples (flat folder)
 └── docs/                          # Programming guide
     ├── Overview.md
-    ├── Programming with the SOLIDWORKS API/
-    └── examples/
+    └── Programming with the SOLIDWORKS API/
 ```
 
 **Use Case**:

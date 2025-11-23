@@ -196,7 +196,7 @@ class ExportPipeline:
                                 examples: Dict[str, ExampleContent],
                                 example_categories: Dict[str, str]):
         """Generate markdown documentation for all examples in a flat folder structure."""
-        examples_path = self.output_base / "docs" / "examples"
+        examples_path = self.output_base / "examples"
 
         # Create example generator
         generator = ExampleGenerator(output_base_path=str(examples_path))
@@ -272,9 +272,9 @@ api/index/
   by_assembly.md                  # Types by .NET assembly
   statistics.md                   # Stats and largest types
 
-docs/
-  examples/                       # Code examples (flat folder, all in one directory)
-  (programming guide content)
+examples/                         # Code examples (flat folder, all in one directory)
+
+docs/                             # Programming guide content
 ```
 
 ## Query Patterns

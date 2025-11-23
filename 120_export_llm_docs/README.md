@@ -48,14 +48,15 @@ output/
 │       ├── by_assembly.md                # Types organized by .NET assembly
 │       └── statistics.md                 # Quick stats and largest types
 │
+├── examples/                             # Code examples (flat folder structure)
+│   ├── Create_Advanced_Hole_Example_CSharp.md
+│   ├── Create_Assembly_Example_CSharp.md
+│   └── ... (all examples in single folder)
+│
 └── docs/                                 # Programming guide
     ├── Overview.md
     ├── SOLIDWORKS Partner Program.md
-    ├── Programming with the SOLIDWORKS API/
-    └── examples/                         # Code examples (flat folder structure)
-        ├── Create_Advanced_Hole_Example_CSharp.md
-        ├── Create_Assembly_Example_CSharp.md
-        └── ... (all examples in single folder)
+    └── Programming with the SOLIDWORKS API/
 ```
 
 ### Key Structural Features

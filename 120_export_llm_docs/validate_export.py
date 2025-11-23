@@ -89,7 +89,7 @@ class ExportValidator:
             self.output_path / "api" / "enums",
             self.output_path / "api" / "index",
             self.output_path / "docs",
-            self.output_path / "docs" / "examples",
+            self.output_path / "examples",
         ]
 
         for dir_path in expected_dirs:
@@ -183,7 +183,7 @@ class ExportValidator:
 
     def _validate_example_docs(self):
         """Validate example documentation files."""
-        examples_path = self.output_path / "docs" / "examples"
+        examples_path = self.output_path / "examples"
 
         if not examples_path.exists():
             self.errors.append("Examples directory does not exist")
