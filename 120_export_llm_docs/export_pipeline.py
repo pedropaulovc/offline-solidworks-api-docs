@@ -9,7 +9,6 @@ import argparse
 import json
 import shutil
 from pathlib import Path
-from datetime import datetime
 from typing import Dict, List
 from collections import defaultdict
 
@@ -320,7 +319,6 @@ Use `[[TypeName]]` or `[[TypeName::MemberName]]` format for type references.
         report_path.parent.mkdir(parents=True, exist_ok=True)
 
         report = {
-            'export_timestamp': datetime.now().isoformat(),
             'statistics': self.stats.to_dict(),
             'output_location': str(self.output_base),
         }
