@@ -114,8 +114,8 @@ class ReleaseExporter:
             self._log(f"Error: XMLDoc source directory not found: {self.xmldoc_source}")
             return None
 
-        # Create zip filename
-        zip_name = f"SolidWorks.Interop.xmldoc.{version}.zip"
+        # Create zip filename (without version number)
+        zip_name = "SolidWorks.Interop.xmldoc.zip"
         zip_path = self.output_dir / zip_name
 
         self._log(f"\nCreating XMLDoc package: {zip_name}")
@@ -170,8 +170,8 @@ class ReleaseExporter:
             )
             return None
 
-        # Create zip filename
-        zip_name = f"SolidWorks.Interop.llms.{version}.zip"
+        # Create zip filename (without version number)
+        zip_name = "SolidWorks.Interop.llms.zip"
         zip_path = self.output_dir / zip_name
 
         self._log(f"\nCreating LLM docs package: {zip_name}")

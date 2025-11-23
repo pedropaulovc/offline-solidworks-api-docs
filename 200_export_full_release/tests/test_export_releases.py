@@ -138,8 +138,8 @@ class TestReleaseExporter:
         assert "SolidWorks.Interop.sldworks.xml" in metadata["files"]
         assert "SolidWorks.Interop.swconst.xml" in metadata["files"]
 
-        # Check zip file was created
-        zip_path = temp_project["output_dir"] / f"SolidWorks.Interop.xmldoc.{version}.zip"
+        # Check zip file was created (without version in filename)
+        zip_path = temp_project["output_dir"] / "SolidWorks.Interop.xmldoc.zip"
         assert zip_path.exists()
 
         # Check zip contents
@@ -176,8 +176,8 @@ class TestReleaseExporter:
         assert metadata["package_type"] == "llm_docs"
         assert metadata["file_count"] == 5  # 4 markdown files + README.md
 
-        # Check zip file was created
-        zip_path = temp_project["output_dir"] / f"SolidWorks.Interop.llms.{version}.zip"
+        # Check zip file was created (without version in filename)
+        zip_path = temp_project["output_dir"] / "SolidWorks.Interop.llms.zip"
         assert zip_path.exists()
 
         # Check zip contents
@@ -212,14 +212,14 @@ class TestReleaseExporter:
         """Test saving metadata files."""
         metadata_list = [
             {
-                "package_name": "SolidWorks.Interop.xmldoc.v1.0.0.zip",
+                "package_name": "SolidWorks.Interop.xmldoc.zip",
                 "version": "v1.0.0",
                 "package_type": "xmldoc",
                 "file_count": 2,
                 "archive_size_bytes": 1024,
             },
             {
-                "package_name": "SolidWorks.Interop.llms.v1.0.0.zip",
+                "package_name": "SolidWorks.Interop.llms.zip",
                 "version": "v1.0.0",
                 "package_type": "llm_docs",
                 "file_count": 4,
@@ -241,14 +241,14 @@ class TestReleaseExporter:
         assert manifest["total_size_bytes"] == 3072  # 1024 + 2048
         assert len(manifest["packages"]) == 2
 
-        # Check individual metadata files
+        # Check individual metadata files (still versioned)
         xmldoc_metadata_path = (
-            temp_project["metadata_dir"] / "SolidWorks.Interop.xmldoc.v1.0.0.json"
+            temp_project["metadata_dir"] / "SolidWorks.Interop.xmldoc.json"
         )
         assert xmldoc_metadata_path.exists()
 
         llm_metadata_path = (
-            temp_project["metadata_dir"] / "SolidWorks.Interop.llms.v1.0.0.json"
+            temp_project["metadata_dir"] / "SolidWorks.Interop.llms.json"
         )
         assert llm_metadata_path.exists()
 
@@ -259,11 +259,9 @@ class TestReleaseExporter:
 
         assert success is True
 
-        # Check both packages were created
-        xmldoc_zip = (
-            temp_project["output_dir"] / "SolidWorks.Interop.xmldoc.v1.0.0.zip"
-        )
-        llm_zip = temp_project["output_dir"] / "SolidWorks.Interop.llms.v1.0.0.zip"
+        # Check both packages were created (without version in filename)
+        xmldoc_zip = temp_project["output_dir"] / "SolidWorks.Interop.xmldoc.zip"
+        llm_zip = temp_project["output_dir"] / "SolidWorks.Interop.llms.zip"
 
         assert xmldoc_zip.exists()
         assert llm_zip.exists()

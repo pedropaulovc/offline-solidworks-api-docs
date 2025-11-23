@@ -97,7 +97,7 @@ class ReleaseValidator:
 
     def validate_xmldoc_package(self, version: str) -> bool:
         """Validate the XMLDoc package."""
-        package_name = f"SolidWorks.Interop.xmldoc.{version}.zip"
+        package_name = "SolidWorks.Interop.xmldoc.zip"
         zip_path = self.output_dir / package_name
 
         print(f"\n=== Validating XMLDoc Package ===")
@@ -167,7 +167,7 @@ class ReleaseValidator:
 
     def validate_llm_docs_package(self, version: str) -> bool:
         """Validate the LLM docs package."""
-        package_name = f"SolidWorks.Interop.llms.{version}.zip"
+        package_name = "SolidWorks.Interop.llms.zip"
         zip_path = self.output_dir / package_name
 
         print(f"\n=== Validating LLM Docs Package ===")
