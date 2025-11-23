@@ -30,7 +30,7 @@ from shared.xmldoc_links import convert_links_to_see_refs
 class MemberDetailsExtractor(HTMLParser):
     """HTML parser to extract member details from SolidWorks API documentation."""
 
-    def __init__(self) -> None:
+    def __init__(self, url_prefix: str = "") -> None:
         super().__init__()
         self.member_name: str | None = None
         self.type_name: str | None = None
@@ -38,6 +38,7 @@ class MemberDetailsExtractor(HTMLParser):
         self.signature: str = ""
         self.parameters: list[dict[str, str]] = []
         self.return_value: str = ""
+        self.examples: list[dict[str, str]] = []
         self.remarks: str = ""
 
         # State tracking
@@ -49,7 +50,12 @@ class MemberDetailsExtractor(HTMLParser):
         self.in_syntax_section: bool = False
         self.in_parameters_section: bool = False
         self.in_return_section: bool = False
+        self.in_example_section: bool = False
         self.in_remarks_section: bool = False
+        self.in_link: bool = False
+        self.current_link_href: str | None = None
+        self.current_link_text: str = ""
+        self.url_prefix: str = url_prefix
 
         # For collecting description text after pagetitle
         self.seen_pagetitle: bool = False
@@ -120,6 +126,18 @@ class MemberDetailsExtractor(HTMLParser):
                 attrs_str = " " + " ".join([f'{k}="{v}"' for k, v in attrs])
             self.description_parts.append(f"<{tag}{attrs_str}>")
 
+        # Detect links in example section
+        # Only collect links to example files (not references to other types)
+        if self.in_example_section and tag == "a":
+            href = attrs_dict.get("href", "")
+            # Example links contain "Example" or "_Example_" in the filename
+            # and typically end with .htm (not .html for type pages)
+            is_example_link = href and ("Example" in href or "_Example_" in href) and href.endswith(".htm")
+            if href and not href.startswith("#") and is_example_link:
+                self.in_link = True
+                self.current_link_href = href
+                self.current_link_text = ""
+
         # Detect parameters section (dl/dt/dd structure)
         if self.in_parameters_section:
             if tag == "dt":
@@ -168,6 +186,19 @@ class MemberDetailsExtractor(HTMLParser):
         # Track closing tags in description section
         if self.in_description and not self.in_pagetitle:
             self.description_parts.append(f"</{tag}>")
+
+        # Handle end of link in example section
+        if tag == "a" and self.in_link:
+            self.in_link = False
+            if self.current_link_href and self.current_link_text:
+                # Parse example info from link text
+                # Format: "Create Advanced Hole Feature (VBA)"
+                example_info = self._parse_example_link(self.current_link_text, self.current_link_href)
+                if example_info:
+                    self.examples.append(example_info)
+
+            self.current_link_href = None
+            self.current_link_text = ""
 
         # Close h1 tag - might signal end of section header
         if tag == "h1":
@@ -245,18 +276,28 @@ class MemberDetailsExtractor(HTMLParser):
                 self.in_syntax_section = True
                 self.in_parameters_section = False
                 self.in_return_section = False
+                self.in_example_section = False
+                self.in_remarks_section = False
+            elif text == "Example" or text == "Examples":
+                self.current_section = "example"
+                self.in_syntax_section = False
+                self.in_parameters_section = False
+                self.in_return_section = False
+                self.in_example_section = True
                 self.in_remarks_section = False
             elif text == "Remarks":
                 self.current_section = "remarks"
                 self.in_syntax_section = False
                 self.in_parameters_section = False
                 self.in_return_section = False
+                self.in_example_section = False
                 self.in_remarks_section = True
-            elif text in ["Example", "Examples", "See Also", "Availability"]:
+            elif text in ["See Also", "Availability"]:
                 # End current section - turn off all section flags
                 self.in_syntax_section = False
                 self.in_parameters_section = False
                 self.in_return_section = False
+                self.in_example_section = False
                 self.in_remarks_section = False
                 self.current_section = None
 
@@ -281,6 +322,10 @@ class MemberDetailsExtractor(HTMLParser):
         # Collect parameter description (from dd tag)
         if self.in_param_dd and data:
             self.current_param_desc_parts.append(data)
+
+        # Collect link text in example section
+        if self.in_link and data:
+            self.current_link_text += data
 
         # Collect return value content
         if self.in_return_section and data and not self.in_h4:
@@ -328,10 +373,42 @@ class MemberDetailsExtractor(HTMLParser):
         remarks_html = convert_links_to_see_refs(remarks_html)
         return remarks_html
 
+    def _parse_example_link(self, link_text: str, href: str) -> dict | None:
+        """
+        Parse example link text to extract name and language.
+
+        Expected format: "Create Advanced Hole Feature (VBA)"
+        or "Create Advanced Hole Feature Example"
+        """
+        # Match pattern: "Name (Language)" or just "Name"
+        match = re.match(r"(.+?)\s*\(([^)]+)\)\s*$", link_text)
+
+        if match:
+            name = match.group(1).strip()
+            language = match.group(2).strip()
+        else:
+            # No language in parentheses, try to infer from filename
+            name = link_text.strip()
+            language = self._infer_language_from_filename(href)
+
+        # Prepend URL prefix
+        full_url = f"{self.url_prefix}{href}"
+
+        return {"Name": name, "Language": language, "Url": full_url}
+
+    def _infer_language_from_filename(self, filename: str) -> str:
+        """Infer language from filename patterns."""
+        from shared.extraction_utils import infer_language_from_filename
+        return infer_language_from_filename(filename)
+
 
 def extract_member_details_from_file(html_file: Path) -> dict[str, Any] | None:
     """Extract member details from a single HTML file."""
-    parser = MemberDetailsExtractor()
+    # Get URL prefix from parent directory
+    parent_dir = html_file.parent.name
+    url_prefix = f"/{parent_dir}/"
+
+    parser = MemberDetailsExtractor(url_prefix=url_prefix)
 
     try:
         with open(html_file, encoding="utf-8") as f:
@@ -359,6 +436,7 @@ def extract_member_details_from_file(html_file: Path) -> dict[str, Any] | None:
         "Description": parser.get_description(),
         "Parameters": parser.parameters,
         "Returns": parser.get_return_value(),
+        "Examples": parser.examples,
         "Remarks": parser.get_remarks(),
         "SourceFile": str(html_file),
     }
@@ -415,6 +493,21 @@ def create_xml_output(members: list[dict[str, Any]]) -> str:
             returns_elem = ET.SubElement(member_elem, "Returns")
             returns_elem.text = member_info["Returns"]
             returns_elem.set("__cdata__", "true")
+
+        # Add examples
+        if member_info.get("Examples"):
+            examples_elem = ET.SubElement(member_elem, "Examples")
+            for example in member_info["Examples"]:
+                example_elem = ET.SubElement(examples_elem, "Example")
+
+                ex_name = ET.SubElement(example_elem, "Name")
+                ex_name.text = example["Name"]
+
+                ex_lang = ET.SubElement(example_elem, "Language")
+                ex_lang.text = example["Language"]
+
+                ex_url = ET.SubElement(example_elem, "Url")
+                ex_url.text = example["Url"]
 
         # Add remarks (wrap in CDATA to preserve any XMLDoc markup)
         if member_info.get("Remarks"):
@@ -490,6 +583,7 @@ def main() -> int:
     # Calculate statistics
     members_with_params = sum(1 for m in members if m.get("Parameters"))
     members_with_returns = sum(1 for m in members if m.get("Returns"))
+    members_with_examples = sum(1 for m in members if m.get("Examples"))
     members_with_remarks = sum(1 for m in members if m.get("Remarks"))
 
     # Save summary metadata
@@ -498,6 +592,7 @@ def main() -> int:
         "members_extracted": len(members),
         "members_with_parameters": members_with_params,
         "members_with_return_values": members_with_returns,
+        "members_with_examples": members_with_examples,
         "members_with_remarks": members_with_remarks,
         "errors": len(errors),
         "output_file": str(xml_file),
@@ -510,6 +605,7 @@ def main() -> int:
 
     print(f"  Members with parameters: {members_with_params}")
     print(f"  Members with return values: {members_with_returns}")
+    print(f"  Members with examples: {members_with_examples}")
     print(f"  Members with remarks: {members_with_remarks}")
     print(f"  Summary saved to: {summary_file}")
 
