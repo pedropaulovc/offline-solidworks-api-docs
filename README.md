@@ -73,44 +73,44 @@ Contains 26,902 markdown files optimized for AI consumption:
 #### Folder Structure
 
 ```
-SolidWorks.LLM.Docs/
-├── README.md                    # Guide for using with LLMs
+📁 SolidWorks.LLM.Docs/
+├── 📄 README.md                    # Guide for using with LLMs
 │
-├── types/                       # API Types (1,563 types)
-│   ├── IModelDoc2/              # One folder per type
+├── 📁 types/                       # API Types (1,563 types)
+│   ├── 📁 IModelDoc2/              # One folder per type
 │   │   ├── _overview.md            # Type description, remarks, counts
 │   │   ├── CreateArc.md            # Individual method documentation
 │   │   ├── CreateArc2.md
 │   │   ├── Save.md
 │   │   ├── GetPathName.md          # Individual property documentation
 │   │   └── ... (721 members)
-│   ├── ISldWorks/
+│   ├── 📁 ISldWorks/
 │   │   ├── _overview.md
 │   │   └── ... (methods and properties)
 │   └── ... (1,563 type folders)
 │
-├── enums/                       # Enumerations (955 enums)
-│   ├── swDocumentTypes_e/
+├── 📁 enums/                       # Enumerations (955 enums)
+│   ├── 📁 swDocumentTypes_e/
 │   │   ├── _overview.md
 │   │   ├── swDocPART.md            # Part document type
 │   │   ├── swDocASSEMBLY.md        # Assembly document type
 │   │   └── swDocDRAWING.md         # Drawing document type
 │   └── ... (955 enum folders)
 │
-├── index/                       # Navigation & Discovery
+├── 📁 index/                       # Navigation & Discovery
 │   ├── by_category.md              # Types by functional category
 │   ├── by_assembly.md              # Types by .NET assembly
 │   └── statistics.md               # Quick stats and largest types
 │
-├── examples/                    # Code Examples (3,708 examples)
+├── 📁 examples/                    # Code Examples (3,708 examples)
 │   ├── Create_Advanced_Hole_Example_CSharp.md
 │   ├── Create_Assembly_Example_VBA.md
 │   └── ... (all examples, flat structure)
 │
-└── docs/                        # Programming Guide (125 pages)
+└── 📁 docs/                        # Programming Guide (125 pages)
     ├── Overview.md
     ├── SOLIDWORKS Partner Program.md
-    └── Programming with the SOLIDWORKS API/
+    └── 📁 Programming with the SOLIDWORKS API/
         ├── Getting Started.md
         ├── Object Model.md
         └── ... (hierarchical structure)
