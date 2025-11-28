@@ -7,9 +7,24 @@ This project provides two comprehensive documentation packages for the SolidWork
 1. **XMLDoc Package** - Visual Studio IntelliSense support with tooltips, parameter info, and examples
 2. **LLM Documentation Package** - AI-optimized markdown documentation for use with Claude, ChatGPT, and other LLMs
 
-## 🚀 Quick Start
+## Quick Start
 
-### Option 1: XMLDoc for Visual Studio IntelliSense
+### Option 1: LLM Documentation for AI-Assisted Development
+
+**Use with Claude, ChatGPT, Cursor, or other AI coding assistants:**
+
+1. **Download** the latest LLM docs package from [releases](https://github.com/pedropaulovc/offline-solidworks-api-docs/releases/latest)
+   - File: `SolidWorks.LLM.Docs.v{version}.zip`
+
+2. **Extract** the ZIP file to your preferred location
+
+3. **Use with your AI assistant**:
+   - **Claude Code**: Point to the extracted folder as context
+   - **Cursor**: Add to workspace and use `@docs` to reference
+   - **ChatGPT**: Upload relevant markdown files for context
+   - **Manual search**: Use grep/ripgrep to find specific APIs
+
+### Option 2: XMLDoc for Visual Studio IntelliSense
 
 **Get IntelliSense tooltips and documentation in Visual Studio:**
 
@@ -38,22 +53,7 @@ This project provides two comprehensive documentation packages for the SolidWork
 
 5. **Enjoy!** Hover over any SolidWorks API type or method to see full documentation
 
-### Option 2: LLM Documentation for AI-Assisted Development
-
-**Use with Claude, ChatGPT, Cursor, or other AI coding assistants:**
-
-1. **Download** the latest LLM docs package from [releases](https://github.com/pedropaulovc/offline-solidworks-api-docs/releases/latest)
-   - File: `SolidWorks.LLM.Docs.v{version}.zip`
-
-2. **Extract** the ZIP file to your preferred location
-
-3. **Use with your AI assistant**:
-   - **Claude Code**: Point to the extracted folder as context
-   - **Cursor**: Add to workspace and use `@docs` to reference
-   - **ChatGPT**: Upload relevant markdown files for context
-   - **Manual search**: Use grep/ripgrep to find specific APIs
-
-## 📦 What's Included
+## What's Included
 
 ### XMLDoc Package (~2 MB compressed, ~15 MB uncompressed)
 
@@ -126,26 +126,7 @@ Contains 26,902 markdown files optimized for AI consumption:
 - **Full examples**: Complete code samples with syntax highlighting
 - **Programming guide**: Comprehensive tutorials and best practices
 
-## 💡 Usage Examples
-
-### Using XMLDoc in Visual Studio
-
-Once installed, you'll see documentation when:
-
-- **Hovering** over types and members
-  ```csharp
-  ISldWorks swApp = ...;  // Hover shows: "Allows access to top-level SolidWorks functionality"
-  ```
-
-- **Writing code** with IntelliSense
-  ```csharp
-  IModelDoc2 model = swApp.  // IntelliSense shows all methods with descriptions
-  ```
-
-- **Viewing parameters**
-  ```csharp
-  model.CreateArc2(  // Parameter tooltip shows each parameter's purpose
-  ```
+## Usage Examples
 
 ### Using LLM Docs with AI Assistants
 
@@ -184,7 +165,26 @@ grep -r "advanced hole" examples/
 grep -r "Returns.*ISketchArc" types/
 ```
 
-## 🎯 Common Use Cases
+### Using XMLDoc in Visual Studio
+
+Once installed, you'll see documentation when:
+
+- **Hovering** over types and members
+  ```csharp
+  ISldWorks swApp = ...;  // Hover shows: "Allows access to top-level SolidWorks functionality"
+  ```
+
+- **Writing code** with IntelliSense
+  ```csharp
+  IModelDoc2 model = swApp.  // IntelliSense shows all methods with descriptions
+  ```
+
+- **Viewing parameters**
+  ```csharp
+  model.CreateArc2(  // Parameter tooltip shows each parameter's purpose
+  ```
+
+## Common Use Cases
 
 ### Finding the Right API
 
@@ -215,7 +215,7 @@ grep -r "Returns.*ISketchArc" types/
 2. Look at multiple language examples (C#, VBA, VB.NET)
 3. Check `docs/Getting Started.md` for tutorials
 
-## 🔍 Documentation Quality
+## Documentation Quality
 
 ### Coverage Statistics
 
@@ -240,7 +240,7 @@ grep -r "Returns.*ISketchArc" types/
   - Best practices
   - Architecture documentation
 
-## 🛠️ Building From Source
+## Building From Source
 
 Want to regenerate the documentation yourself or contribute improvements?
 
@@ -251,23 +251,23 @@ See **[DEVELOPING.md](DEVELOPING.md)** for:
 - Testing and validation
 - Contributing guidelines
 
-## ⚠️ Legal Notice
+## Legal Notice
 
 **IMPORTANT**: This tool is for personal, educational, and fair use only.
 
-- ✅ **You may**: Use these packages for personal development with SolidWorks API
-- ✅ **You may**: Share these generated packages (XMLDoc and LLM docs)
-- ❌ **You must not**: Use for commercial redistribution
-- ❌ **You must not**: Claim ownership of SolidWorks documentation
+- **You may**: Use these packages for personal development with SolidWorks API
+- **You may**: Share these generated packages (XMLDoc and LLM docs)
+- **You must not**: Use for commercial redistribution
+- **You must not**: Claim ownership of SolidWorks documentation
 
 The SolidWorks API documentation content is copyrighted by **Dassault Systèmes SolidWorks Corporation**. These packages are generated under fair use for educational purposes.
 
-## 📄 License
+## License
 
 - **Pipeline code**: MIT License (see LICENSE file)
 - **Documentation content**: Copyright Dassault Systèmes SolidWorks Corporation
 
-## 🤝 Contributing
+## Contributing
 
 Contributions welcome! See [DEVELOPING.md](DEVELOPING.md) for:
 - How to set up the development environment
@@ -275,13 +275,13 @@ Contributions welcome! See [DEVELOPING.md](DEVELOPING.md) for:
 - Adding new features
 - Submitting improvements
 
-## 📚 Additional Resources
+## Additional Resources
 
 - **SolidWorks API Help**: https://help.solidworks.com/2026/english/api/
 - **Issues & Feedback**: https://github.com/pedropaulovc/offline-solidworks-api-docs/issues
 - **Developer Guide**: [DEVELOPING.md](DEVELOPING.md)
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 This project makes SolidWorks API development easier by providing:
 - Offline documentation access
