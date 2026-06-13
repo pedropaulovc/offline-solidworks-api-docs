@@ -44,6 +44,13 @@ This is a multi-phase pipeline project for creating offline, searchable versions
 - Example page crawling implemented
 - HTML storage with proper structure
 - Metadata tracking complete
+- **Orphan-example recovery** (`harvest_legacy_examples.py`): example pages are
+  discovered only via cross-reference links in type/member help-text, and they
+  are not TOC nodes. Newer doc versions sometimes drop links to example pages
+  that still exist on the server (e.g. `Modify_Chain_Pattern_Feature_Example`,
+  linked in 2017 but not 2026). The harvester re-harvests example links from
+  legacy versions (default 2017) of each type page, normalizes them to the
+  current version, verifies HTTP 200, and feeds the recovered URLs to the spider.
 
 ✅ **Phase 8 (80_parse_examples)**: Complete
 - Example content extraction with CDATA wrapping
@@ -72,8 +79,9 @@ This is a multi-phase pipeline project for creating offline, searchable versions
 
 ✅ **Phase 12 (120_export_llm_docs)**: Complete
 - LLM-friendly markdown documentation export
-- Grep-optimized structure (file-per-member)
-- 26,902 markdown files generated
+- Grep-optimized structure (file-per-member for types; one flat file per enum)
+- Enums are emitted as a single `enums/{EnumName}.md` with all members inline
+  (not a per-enum directory with one file per member)
 - Functional categories integration
 - Validation script and test suite complete
 

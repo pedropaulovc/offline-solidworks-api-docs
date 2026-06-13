@@ -45,11 +45,15 @@ class ExamplesSpider(scrapy.Spider):
             "skipped_pages": 0,
             "urls_from_types": 0,
             "urls_from_members": 0,
+            "urls_from_legacy": 0,
         }
 
         # XML source files from Phase 4 (type details) and Phase 5 (member details)
         self.type_xml_file = Path(__file__).parent.parent.parent.parent / "40_extract_type_details" / "metadata" / "api_types.xml"
         self.member_xml_file = Path(__file__).parent.parent.parent.parent / "50_extract_type_member_details" / "metadata" / "api_member_details.xml"
+        # Recovered orphan examples harvested from legacy doc versions (see
+        # harvest_legacy_examples.py). Optional: present only after the harvester runs.
+        self.legacy_urls_file = Path(__file__).parent.parent.parent / "metadata" / "legacy_example_urls.txt"
         self.example_urls = self._load_urls()
 
     def _load_urls(self) -> list[str]:
@@ -66,12 +70,31 @@ class ExamplesSpider(scrapy.Spider):
         all_urls.update(member_urls)
         self.stats["urls_from_members"] = len(member_urls)
 
+        # Load recovered orphan examples harvested from legacy doc versions (Phase 7 pre-step)
+        legacy_urls = self._load_legacy_urls()
+        all_urls.update(legacy_urls)
+        self.stats["urls_from_legacy"] = len(legacy_urls)
+
         self.logger.info(f"Loaded {len(all_urls)} unique example URLs total")
         self.logger.info(f"  - {len(type_urls)} from type details (Phase 4)")
         self.logger.info(f"  - {len(member_urls)} from member details (Phase 5)")
-        self.logger.info(f"  - {len(type_urls) + len(member_urls) - len(all_urls)} duplicates removed")
+        self.logger.info(f"  - {len(legacy_urls)} from legacy harvest (orphan recovery)")
 
         return sorted(all_urls)
+
+    def _load_legacy_urls(self) -> set[str]:
+        """Load already-absolute example URLs recovered by harvest_legacy_examples.py."""
+        urls: set[str] = set()
+        if not self.legacy_urls_file.exists():
+            self.logger.info(f"No legacy example URL file at {self.legacy_urls_file} (skipping orphan recovery)")
+            return urls
+
+        with open(self.legacy_urls_file, encoding="utf-8") as f:
+            for line in f:
+                url = line.strip()
+                if url and not url.startswith("#"):
+                    urls.add(url)
+        return urls
 
     def _load_urls_from_file(self, xml_file: Path, source_name: str) -> set[str]:
         """Load example URLs from a single XML file"""

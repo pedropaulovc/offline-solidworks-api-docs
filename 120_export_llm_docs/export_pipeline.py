@@ -160,13 +160,12 @@ class ExportPipeline:
 
         print(f"    Generated {len(regular_types)} type directories")
 
-        # Generate enums
+        # Generate enums (one flat file per enum: enums/EnumName.md with all members inline)
         print(f"  Generating {len(enum_types)} enumerations...")
         enums_path = self.output_base / "enums"
         for fqn, enum_info in enum_types.items():
-            # Create directory: enums/EnumName/
-            enum_dir = enums_path / sanitize_filename(enum_info.name)
-            files_count = generator.save_grep_optimized_documentation(enum_info, enum_dir)
+            enum_file = enums_path / f"{sanitize_filename(enum_info.name)}.md"
+            files_count = generator.save_enum_documentation(enum_info, enum_file)
             self.stats.markdown_files_generated += files_count
 
             # Update stats
@@ -177,7 +176,7 @@ class ExportPipeline:
                 self.stats.types_with_remarks += 1
             self.stats.total_enum_members += len(enum_info.enum_members)
 
-        print(f"    Generated {len(enum_types)} enum directories")
+        print(f"    Generated {len(enum_types)} enum files")
 
     def _generate_indexes(self, types: Dict[str, TypeInfo]):
         """Generate index files for navigating the documentation."""
@@ -261,9 +260,7 @@ types/{{TypeName}}/               # Regular types (interfaces, classes)
   {{MethodName}}.md               # Individual method files
   {{PropertyName}}.md             # Individual property files
 
-enums/{{EnumName}}/               # Enumerations
-  _overview.md                    # Enum info
-  {{MemberName}}.md               # Individual enum member files
+enums/{{EnumName}}.md             # One file per enumeration (all members inline)
 
 index/
   by_category.md                  # Types by functional category
@@ -280,6 +277,7 @@ docs/                             # Programming guide content
 **Find type overview**: Read `types/{{TypeName}}/_overview.md`
 **Find method/property**: Read `types/{{TypeName}}/{{MemberName}}.md`
 **List all members**: List files in `types/{{TypeName}}/`, exclude `_overview.md`
+**Find an enum (with all members)**: Read `enums/{{EnumName}}.md`
 **Find by category**: Read `index/by_category.md`
 **Search by keyword**: Search file contents in `types/` or `enums/`
 **Filter by metadata**: Search YAML frontmatter (e.g., `kind: method`, `category: Assembly Interfaces`)
@@ -288,7 +286,9 @@ docs/                             # Programming guide content
 
 **Type overviews** have: `name`, `assembly`, `namespace`, `category`, `is_enum`, `property_count`, `method_count`, `enum_member_count`
 
-**Member files** have: `type`, `member`, `kind` (method|property|enum_member), `assembly`, `namespace`, `category`
+**Enum files** have: `name`, `kind: enum`, `assembly`, `namespace`, `category`, `is_enum`, `enum_member_count`
+
+**Member files** have: `type`, `member`, `kind` (method|property), `assembly`, `namespace`, `category`
 
 ## Cross-References
 

@@ -16,7 +16,7 @@ This phase consumes outputs from previous phases (20, 40, 50, 60, 80, 110) and p
 
 ## Output Structure (Grep-Optimized)
 
-The export generates a **grep-optimized** structure where each method, property, and enum member gets its own file for maximum searchability:
+The export generates a **grep-optimized** structure where each method and property gets its own file for maximum searchability. Enumerations are kept as a single file per enum (all members inline):
 
 ```
 output/
@@ -34,13 +34,10 @@ output/
 │   │   └── ... (methods and properties)
 │   └── ... (1,563 type directories)
 │
-├── enums/                                # Enumerations
-│   ├── swDocumentTypes_e/
-│   │   ├── _overview.md
-│   │   ├── swDocPART.md                  # Individual enum member files
-│   │   ├── swDocASSEMBLY.md
-│   │   └── swDocDRAWING.md
-│   └── ... (955 enum directories)
+├── enums/                                # Enumerations (one flat file per enum)
+│   ├── swDocumentTypes_e.md              # All members inline in a single file
+│   ├── swSelectType_e.md
+│   └── ... (one .md per enum)
 │
 ├── index/                                # Navigation indexes
 │   ├── by_category.md                    # Types organized by functional category
@@ -142,22 +139,32 @@ Pointer to the [[ISketchArc]] object
 Use [[ISketchManager::CreateArc]] for more control over arc creation...
 ```
 
-### Enum Member Files
+### Enum Files
 
-Each enumeration member gets its own file:
+Each enumeration is a single self-contained file (`enums/{EnumName}.md`) with all
+members inline under a `## Enumeration Members` section:
 
 ```markdown
 ---
-type: swDocumentTypes_e
-member: swDocPART
-kind: enum_member
+name: swDocumentTypes_e
+kind: enum
 assembly: SolidWorks.Interop.swconst
 namespace: SolidWorks.Interop.swconst
+is_enum: True
+enum_member_count: 3
 ---
 
-# swDocumentTypes_e.swDocPART
+# swDocumentTypes_e
+
+## Enumeration Members
+
+### swDocPART
 
 Part document type (*.sldprt)
+
+### swDocASSEMBLY
+
+Assembly document type (*.sldasm)
 ```
 
 ### Example Files
@@ -291,8 +298,11 @@ grep -r "category: Application Interfaces" output/types/
 # Find all methods (not properties)
 grep -r "kind: method" output/types/
 
-# Find all enum members
-grep -r "kind: enum_member" output/enums/
+# Find all enumerations
+grep -rl "kind: enum" output/enums/
+
+# Find a specific enum member (members are inline in the enum file)
+grep -rn "### swDocPART" output/enums/
 ```
 
 ### Navigate by category

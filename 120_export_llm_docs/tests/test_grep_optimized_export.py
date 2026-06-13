@@ -108,36 +108,38 @@ def test_member_documentation_generation():
     print("[PASS] Member documentation generation with YAML frontmatter")
 
 
-def test_enum_member_documentation_generation():
-    """Test that enum member files are generated with YAML frontmatter."""
+def test_enum_documentation_generation():
+    """Test that a single enum file is generated with all members inline."""
     # Create a sample enum type
     type_info = TypeInfo(
         name="swTestEnum_e",
         assembly="SolidWorks.Interop.swconst",
-        namespace="SolidWorks.Interop.swconst"
+        namespace="SolidWorks.Interop.swconst",
+        description="Test enum description",
     )
+    type_info.enum_members.append(EnumMember(name="swValueA", description="Value A description"))
+    type_info.enum_members.append(EnumMember(name="swValueB", description="Value B description"))
 
-    enum_member = EnumMember(
-        name="swTestValue",
-        description="Test enum value description"
-    )
-
-    # Generate enum member documentation
+    # Generate single-file enum documentation
     generator = MarkdownGenerator(output_base_path="test", grep_optimized=True)
-    member_md = generator.generate_enum_member_documentation(type_info, enum_member)
+    enum_md = generator.generate_enum_documentation(type_info)
 
     # Check YAML frontmatter
-    assert member_md.startswith('---\n'), "Should start with YAML frontmatter"
-    assert 'type: swTestEnum_e' in member_md
-    assert 'member: swTestValue' in member_md
-    assert 'kind: enum_member' in member_md
-    assert 'assembly: SolidWorks.Interop.swconst' in member_md
+    assert enum_md.startswith('---\n'), "Should start with YAML frontmatter"
+    assert 'name: swTestEnum_e' in enum_md
+    assert 'kind: enum' in enum_md
+    assert 'is_enum: True' in enum_md
+    assert 'enum_member_count: 2' in enum_md
+    assert 'assembly: SolidWorks.Interop.swconst' in enum_md
 
-    # Check content
-    assert '# swTestEnum_e.swTestValue' in member_md
-    assert 'Test enum value description' in member_md
+    # Check that ALL members are inline in the single file
+    assert '## Enumeration Members' in enum_md
+    assert '### swValueA' in enum_md
+    assert 'Value A description' in enum_md
+    assert '### swValueB' in enum_md
+    assert 'Value B description' in enum_md
 
-    print("[PASS] Enum member documentation generation with YAML frontmatter")
+    print("[PASS] Single-file enum documentation generation with members inline")
 
 
 def test_cross_reference_simplification():
@@ -215,10 +217,10 @@ def test_grep_optimized_file_structure():
 
 
 def test_enum_file_structure():
-    """Test that enum types generate correct file structure."""
+    """Test that enums are written as a single flat file with all members inline."""
     # Create a temporary directory
     with tempfile.TemporaryDirectory() as temp_dir:
-        output_dir = Path(temp_dir) / "test_enum"
+        enums_dir = Path(temp_dir) / "enums"
 
         # Create a sample enum type
         type_info = TypeInfo(
@@ -231,25 +233,28 @@ def test_enum_file_structure():
         type_info.enum_members.append(EnumMember(name="swValue2", description="Value 2"))
         type_info.enum_members.append(EnumMember(name="swValue3", description="Value 3"))
 
-        # Generate grep-optimized documentation
-        generator = MarkdownGenerator(output_base_path=str(output_dir.parent), grep_optimized=True)
-        files_count = generator.save_grep_optimized_documentation(type_info, output_dir)
+        # Write the single flat enum file: enums/swTestEnum_e.md
+        generator = MarkdownGenerator(output_base_path=str(temp_dir), grep_optimized=True)
+        enum_file = enums_dir / "swTestEnum_e.md"
+        files_count = generator.save_enum_documentation(type_info, enum_file)
 
-        # Check file count: 1 overview + 3 enum members = 4
-        assert files_count == 4, f"Expected 4 files, got {files_count}"
+        # Exactly one file is written, and there is NO per-enum subdirectory
+        assert files_count == 1, f"Expected 1 file, got {files_count}"
+        assert enum_file.exists(), "Flat enum file should exist"
+        assert not (enums_dir / "swTestEnum_e").exists(), "No per-enum subdirectory should be created"
+        assert not (enums_dir / "swValue1.md").exists(), "No per-member files should be created"
 
-        # Check that files exist
-        assert (output_dir / "_overview.md").exists(), "Overview file should exist"
-        assert (output_dir / "swValue1.md").exists(), "swValue1 file should exist"
-        assert (output_dir / "swValue2.md").exists(), "swValue2 file should exist"
-        assert (output_dir / "swValue3.md").exists(), "swValue3 file should exist"
+        # Check content: identifies as enum and contains all members inline
+        content = enum_file.read_text(encoding='utf-8')
+        assert 'kind: enum' in content
+        assert 'is_enum: True' in content
+        assert 'enum_member_count: 3' in content
+        assert '## Enumeration Members' in content
+        assert '### swValue1' in content
+        assert '### swValue2' in content
+        assert '### swValue3' in content
 
-        # Check that overview identifies as enum
-        overview_content = (output_dir / "_overview.md").read_text(encoding='utf-8')
-        assert 'is_enum: True' in overview_content
-        assert 'enum_member_count: 3' in overview_content
-
-    print("[PASS] Enum file structure generation")
+    print("[PASS] Flat single-file enum structure generation")
 
 
 def test_yaml_frontmatter_format():
@@ -357,7 +362,7 @@ def test_readme_generation():
 if __name__ == '__main__':
     test_type_overview_generation()
     test_member_documentation_generation()
-    test_enum_member_documentation_generation()
+    test_enum_documentation_generation()
     test_cross_reference_simplification()
     test_grep_optimized_file_structure()
     test_enum_file_structure()

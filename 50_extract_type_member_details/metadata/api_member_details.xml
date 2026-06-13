@@ -178,7 +178,7 @@ NOTE: A filename extension of .dxp is automatically appended to the specified fi
                 <Url>/dsgnchkapi/Run_SOLIDWORKS_Design_Checker_Example_VB.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[The date and time are automatically appended to the name of the folder specified for ReportFolderName. For example, if you specified "c: est\Food Processor" for ReportFolderName and you ran your macro on July 28, 2009 at 8:30 a.m., then c: est\Food Processor_7_28_2009_8:30 is the name of the folder created. Post-Correction Result and Pre-Correction Result subfolders are also created, depending on the value specified for AutoCorrect. The post- and pre-condition reports are created in these subfolders.
+        <Remarks><![CDATA[The date and time are automatically appended to the name of the folder specified for ReportFolderName. For example, if you specified "c:\test\Food Processor" for ReportFolderName and you ran your macro on July 28, 2009 at 8:30 a.m., then c:\test\Food Processor_7_28_2009_8:30 is the name of the folder created. Post-Correction Result and Pre-Correction Result subfolders are also created, depending on the value specified for AutoCorrect. The post- and pre-condition reports are created in these subfolders.
 
 
 
@@ -21036,6 +21036,16 @@ This method puts the model into a rollback state to allow access to the selectio
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
         <Type>SolidWorks.Interop.sldworks.IBoundingBoxFeatureData</Type>
+        <Name>CoordinateSystem</Name>
+        <Signature>CoordinateSystem {get; set;}</Signature>
+        <Description><![CDATA[Gets or sets the coordinate system reference for this bounding box feature.]]></Description>
+        <Returns><![CDATA[<see cref="SolidWorks.Interop.sldworks.IFeature">Feature</see>]]></Returns>
+        <Remarks><![CDATA[This property is valid only if <see cref="SolidWorks.Interop.sldworks.IBoundingBoxFeatureData.ReferenceFaceOrPlane">IBoundingBoxFeatureData::ReferenceFaceOrPlane</see> is set to <see cref="SolidWorks.Interop.swconst.swGlobalBoundingBoxFitOptions_e">swGlobalBoundingBoxFitOptions_e</see>.swBoundingBoxType_CustomCoordSys.
+Set this property and <see cref="SolidWorks.Interop.sldworks.IBoundingBoxFeatureData.lwtaDirectionType">IBoundingBoxFeatureData::lwtaDirectionType</see> to define a custom coordinate system for this rectangular or cylindrical bounding box feature.]]></Remarks>
+    </Member>
+    <Member>
+        <Assembly>SolidWorks.Interop.sldworks</Assembly>
+        <Type>SolidWorks.Interop.sldworks.IBoundingBoxFeatureData</Type>
         <Name>IncludeEnvelopeComponents</Name>
         <Signature>IncludeEnvelopeComponents {get; set;}</Signature>
         <Description><![CDATA[Gets or sets whether to include envelope components in this bounding box feature.]]></Description>
@@ -21081,7 +21091,11 @@ This method puts the model into a rollback state to allow access to the selectio
         <Signature>ReferenceFaceOrPlane {get; set;}</Signature>
         <Description><![CDATA[Gets or sets how to create the bounding box.]]></Description>
         <Returns><![CDATA[Fit type as defined in <see cref="SolidWorks.Interop.swconst.swGlobalBoundingBoxFitOptions_e">swGlobalBoundingBoxFitOptions_e</see>]]></Returns>
-        <Remarks><![CDATA[If this property is set to swGlobalBoundingBoxFitOptions_e.swBoundingBoxType_CustomPlane, then select a face or plane using <see cref="SolidWorks.Interop.sldworks.IModelDocExtension.SelectByRay">IModelDocExtension::SelectByRay</see> with TypeWanted set to <see cref="SolidWorks.Interop.swconst.swSelectType_e">swSelectType_e</see>.swSelFACES before calling this method.]]></Remarks>
+        <Remarks><![CDATA[If this property is set to:
+
+swGlobalBoundingBoxFitOptions_e.swBoundingBoxType_CustomPlane, then select a face or plane using <see cref="SolidWorks.Interop.sldworks.IModelDocExtension.SelectByRay">IModelDocExtension::SelectByRay</see> with TypeWanted set to <see cref="SolidWorks.Interop.swconst.swSelectType_e">swSelectType_e</see>.swSelFACES before calling this method.
+
+swGlobalBoundingBoxFitOptions_e.swBoundingBoxType_CustomCoordSys, then use <see cref="SolidWorks.Interop.sldworks.IBoundingBoxFeatureData.CoordinateSystem">IBoundingBoxFeatureData::CoordinateSystem</see> to specify the reference coordinate system and use <see cref="SolidWorks.Interop.sldworks.IBoundingBoxFeatureData.lwtaDirectionType">IBoundingBoxFeatureData::lwtaDirectionType</see> to specify the length, width, thickness, or axis direction mapping with respect to the reference coordinate system.]]></Remarks>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
@@ -21091,6 +21105,16 @@ This method puts the model into a rollback state to allow access to the selectio
         <Description><![CDATA[Releases access to the selections for this bounding box feature.]]></Description>
         <Remarks><![CDATA[<see cref="SolidWorks.Interop.sldworks.IBoundingBoxFeatureData.AccessSelections">IBoundingBoxFeatureData::AccessSelections</see> puts the model into a rollback state to allow access to the selections that define this feature.
 Use this method to restore the rollback state if you did not modify the feature or use <see cref="SOLIDWORKS.Interop.sldworks.IFeature.ModifyDefinition">IFeature::ModifyDefinition</see> if you did.]]></Remarks>
+    </Member>
+    <Member>
+        <Assembly>SolidWorks.Interop.sldworks</Assembly>
+        <Type>SolidWorks.Interop.sldworks.IBoundingBoxFeatureData</Type>
+        <Name>lwtaDirectionType</Name>
+        <Signature>lwtaDirectionType {get; set;}</Signature>
+        <Description><![CDATA[Gets or sets the length, width, or thickness direction with respect to a specified coordinate system of the rectangular bounding box feature. Gets or sets the axis direction with respect to a specified coordinate system of the cylindrical bounding box feature.]]></Description>
+        <Returns><![CDATA[Direction mapping as defined by <see cref="SolidWorks.Interop.swconst.swGlobalBBoxLWTADirectionType_e">swGlobalBBoxLWTADirectionType_e</see>]]></Returns>
+        <Remarks><![CDATA[This property is valid only if <see cref="SolidWorks.Interop.sldworks.IBoundingBoxFeatureData.ReferenceFaceOrPlane">IBoundingBoxFeatureData::ReferenceFaceOrPlane</see> is set to <see cref="SolidWorks.Interop.swconst.swGlobalBoundingBoxFitOptions_e">swGlobalBoundingBoxFitOptions_e</see>.swBoundingBoxType_CustomCoordSys.
+Set this property and <see cref="SolidWorks.Interop.sldworks.IBoundingBoxFeatureData.CoordinateSystem">IBoundingBoxFeatureData::CoordinateSystem</see> to define a custom coordinate system for this rectangular or cylindrical bounding box feature.]]></Remarks>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
@@ -31052,6 +31076,20 @@ To get whether a component has hidden or suppressed children components, call <
         <Name>GetXform</Name>
         <Signature>GetXform()</Signature>
         <Description><![CDATA[Obsolete. Superseded by <see cref="SOLIDWORKS.Interop.sldworks.IComponent2.Transform2">IComponent2::Transform2</see>.]]></Description>
+    </Member>
+    <Member>
+        <Assembly>SolidWorks.Interop.sldworks</Assembly>
+        <Type>SolidWorks.Interop.sldworks.IComponent2</Type>
+        <Name>HasAssemblyFeatures</Name>
+        <Signature>HasAssemblyFeatures( out System.string ConfigurationName )</Signature>
+        <Description><![CDATA[Gets whether this component has assembly features in the specified configuration.]]></Description>
+        <Parameters>
+            <Parameter>
+                <Name>ConfigurationName</Name>
+                <Description><![CDATA[Configuration name]]></Description>
+            </Parameter>
+        </Parameters>
+        <Returns><![CDATA[True if has assembly features, false if not]]></Returns>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
@@ -43184,6 +43222,14 @@ Search for "clearcoat" on the web.]]></Remarks>
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
         <Type>SolidWorks.Interop.sldworks.IDSPBRMaterial</Type>
+        <Name>ClearcoatNormalStrength</Name>
+        <Signature>ClearcoatNormalStrength {get; set;}</Signature>
+        <Description><![CDATA[Gets or sets the clearcoat normal strength of this material.]]></Description>
+        <Returns><![CDATA[Clearcoat normal strength]]></Returns>
+    </Member>
+    <Member>
+        <Assembly>SolidWorks.Interop.sldworks</Assembly>
+        <Type>SolidWorks.Interop.sldworks.IDSPBRMaterial</Type>
         <Name>ClearcoatNormalTexture</Name>
         <Signature>ClearcoatNormalTexture {get; set;}</Signature>
         <Description><![CDATA[Gets or sets the clear coat normal texture map of this material.]]></Description>
@@ -43267,6 +43313,14 @@ For more information about this property:
 Open https://dassaultsystemes-technology.github.io/EnterprisePBRShadingModel/spec-2025x.md.html in an internet browser, click CTRL-F and type "Emission color" in the pop up. Click Next result repeatedly.
 
 Search for "emission color" on the web.]]></Remarks>
+    </Member>
+    <Member>
+        <Assembly>SolidWorks.Interop.sldworks</Assembly>
+        <Type>SolidWorks.Interop.sldworks.IDSPBRMaterial</Type>
+        <Name>EmissionColorTexture</Name>
+        <Signature>EmissionColorTexture {get; set;}</Signature>
+        <Description><![CDATA[Gets or sets the emission color texture map for this material.]]></Description>
+        <Returns><![CDATA[Name of the emission color texture map]]></Returns>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
@@ -43431,6 +43485,22 @@ Search for "Refractive index" on the web.]]></Remarks>
 Open https://dassaultsystemes-technology.github.io/EnterprisePBRShadingModel/spec-2025x.md.html in an internet browser, click CTRL-F and type "Metallic" in the pop up. Click Next result repeatedly.
 
 Search for "Metallic vs metal" on the web.]]></Remarks>
+    </Member>
+    <Member>
+        <Assembly>SolidWorks.Interop.sldworks</Assembly>
+        <Type>SolidWorks.Interop.sldworks.IDSPBRMaterial</Type>
+        <Name>MetallicTexture</Name>
+        <Signature>MetallicTexture {get; set;}</Signature>
+        <Description><![CDATA[Gets or sets the metallic texture of this material.]]></Description>
+        <Returns><![CDATA[Name of the metallic texture map]]></Returns>
+    </Member>
+    <Member>
+        <Assembly>SolidWorks.Interop.sldworks</Assembly>
+        <Type>SolidWorks.Interop.sldworks.IDSPBRMaterial</Type>
+        <Name>NormalStrength</Name>
+        <Signature>NormalStrength {get; set;}</Signature>
+        <Description><![CDATA[Gets or sets the normal strength for this material.]]></Description>
+        <Returns><![CDATA[Normal strength]]></Returns>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
@@ -43685,6 +43755,14 @@ Search for "Translucency color in materials science" on the web.]]></Remarks>
 Open https://dassaultsystemes-technology.github.io/EnterprisePBRShadingModel/spec-2025x.md.html in an internet browser, click CTRL-F and type "Transparency" in the pop up. Click Next result repeatedly.
 
 Search for "Transparency in materials science" on the web.]]></Remarks>
+    </Member>
+    <Member>
+        <Assembly>SolidWorks.Interop.sldworks</Assembly>
+        <Type>SolidWorks.Interop.sldworks.IDSPBRMaterial</Type>
+        <Name>TransparencyTexture</Name>
+        <Signature>TransparencyTexture {get; set;}</Signature>
+        <Description><![CDATA[Gets or sets the transparency texture of this material.]]></Description>
+        <Returns><![CDATA[Name of the transparency texture map]]></Returns>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
@@ -49079,10 +49157,10 @@ Use <see cref="SOLIDWORKS.Interop.sldworks.IDimension.SetArcEndCondition">IDimen
             </Parameter>
             <Parameter>
                 <Name>Config_names</Name>
-                <Description><![CDATA[Names of the configuration (see Remarks)]]></Description>
+                <Description><![CDATA[Names of the configurations (see Remarks)]]></Description>
             </Parameter>
         </Parameters>
-        <Returns><![CDATA[Value in system units]]></Returns>
+        <Returns><![CDATA[Array of doubles of the dimension values in system units]]></Returns>
         <Examples>
             <Example>
                 <Name>Change Dimensions of Gear Mate</Name>
@@ -49130,7 +49208,7 @@ Use <see cref="SOLIDWORKS.Interop.sldworks.IDimension.SetArcEndCondition">IDimen
                 <Url>/sldworksapi/Get_Depth_of_Extrusion_Example_CSharp.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[The Config_names argument is only used if whichConfigurations is set to swSpecifyConfiguration. 
+        <Remarks><![CDATA[The Config_names argument is only used if WhichConfigurations is set to swSpecifyConfiguration.
 In OLE, Config_names can be either a BSTR array or a single BSTR.]]></Remarks>
     </Member>
     <Member>
@@ -78885,6 +78963,10 @@ WeldmentTableAnchor
 WeldTableAnchor
 <see cref="SolidWorks.Interop.sldworks.ITableAnchor">ITableAnchor</see>
 
+
+FamilyTableFeat
+<see cref="SolidWorks.Interop.sldworks.IFamilyTableFeature">IFamilyTableFeature</see>
+
 Folder
 BlockFolder
 Obsolete
@@ -79915,6 +79997,10 @@ RevisionTableAnchor
 
 WeldmentTableAnchor
 <see cref="SolidWorks.Interop.sldworks.ITableAnchor">ITableAnchor</see>
+
+
+FamilyTableFeat
+<see cref="SolidWorks.Interop.sldworks.IFamilyTableFeature">IFamilyTableFeature</see>
 
 
 WeldTableAnchor
@@ -92366,6 +92452,39 @@ After calling this method, use <see cref="SolidWorks.Interop.sldworks.IModelDoc
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
         <Type>SolidWorks.Interop.sldworks.IFeatureManager</Type>
+        <Name>InsertGlobalBoundingBox2</Name>
+        <Signature>InsertGlobalBoundingBox2( System.int BBoxType, System.int lwtaDirectionType, System.bool IncludeHiddenBodies, System.bool IncludeSurfaceBodies, out System.int Status )</Signature>
+        <Description><![CDATA[Inserts the specified global bounding box using a custom coordinate system. See <see cref="SolidWorks.Interop.sldworks.IFeatureManager.CreateDefinition">IFeatureManager::CreateDefinition</see> and <see cref="SolidWorks.Interop.sldworks.IBoundingBoxFeatureData">IBoundingBoxFeatureData</see>.]]></Description>
+        <Parameters>
+            <Parameter>
+                <Name>BBoxType</Name>
+                <Description><![CDATA[Bounding Box fit type as defined in <see cref="SolidWorks.Interop.swconst.swGlobalBoundingBoxFitOptions_e">swGlobalBoundingBoxFitOptions_e</see> (see Remarks)]]></Description>
+            </Parameter>
+            <Parameter>
+                <Name>lwtaDirectionType</Name>
+                <Description><![CDATA[Direction type as defined by <see cref="SolidWorks.Interop.swconst.swGlobalBBoxLWTADirectionType_e">swGlobalBBoxLWTADirectionType_e</see>]]></Description>
+            </Parameter>
+            <Parameter>
+                <Name>IncludeHiddenBodies</Name>
+                <Description><![CDATA[True to include hidden bodies, false to not]]></Description>
+            </Parameter>
+            <Parameter>
+                <Name>IncludeSurfaceBodies</Name>
+                <Description><![CDATA[True to include surfaces, false to not]]></Description>
+            </Parameter>
+            <Parameter>
+                <Name>Status</Name>
+                <Description><![CDATA[Status as defined by <see cref="SolidWorks.Interop.swconst.swGlobalBoundingBoxResult_e">swGlobalBoundingBoxResult_e</see>]]></Description>
+            </Parameter>
+        </Parameters>
+        <Returns><![CDATA[<see cref="SolidWorks.Interop.sldworks.IFeature">IFeature</see>]]></Returns>
+        <Remarks><![CDATA[If BBoxType is set to swGlobalBoundingBoxFitOptions_e.swBoundingBoxType_CustomPlane, then select a face or plane using <see cref="SolidWorks.Interop.sldworks.IModelDocExtension.SelectByRay">IModelDocExtension::SelectByRay</see> with TypeWanted set to <see cref="SolidWorks.Interop.swconst.swSelectType_e">swSelectType_e</see>.swSelFACES before calling this method.
+To display or hide the Bounding Box sketch, call <see cref="SolidWorks.Interop.sldworks.IModelDoc2.SetUserPreferenceToggle">IModelDoc2::SetUserPreferenceToggle</see> to set <see cref="SolidWorks.Interop.swconst.swUserPreferenceToggle_e">swUserPreferenceToggle_e</see>.swViewDispGlobalBBox to true or false, respectively.
+After calling this method, use <see cref="SolidWorks.Interop.sldworks.IModelDoc2.ClearSelection2">IModelDoc2::ClearSelection2</see> to clear the selection made when the Bounding Box is created.]]></Remarks>
+    </Member>
+    <Member>
+        <Assembly>SolidWorks.Interop.sldworks</Assembly>
+        <Type>SolidWorks.Interop.sldworks.IFeatureManager</Type>
         <Name>InsertGridFeature</Name>
         <Signature>InsertGridFeature( System.object HeightDoubles )</Signature>
         <Description><![CDATA[Inserts a Grid System feature.]]></Description>
@@ -102695,6 +102814,21 @@ Use:
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
         <Type>SolidWorks.Interop.sldworks.IGtol</Type>
+        <Name>GetAllOver</Name>
+        <Signature>GetAllOver()</Signature>
+        <Description><![CDATA[Gets whether this GTol uses an All Over leader.]]></Description>
+        <Returns><![CDATA[True if this GTol uses an All Over leader, false if not]]></Returns>
+        <Remarks><![CDATA[This property is valid only for bent, perpendicular, and multi-jog leaders. Call <see cref="SolidWorks.Interop.sldworks.IGtol.GetLeaderAtIndex2">IGtol::GetLeaderAtIndex2</see> to determine which type of leader is set for this GTol.
+Use:
+
+<see cref="SOLIDWORKS.Interop.sldworks.IGtol.IsAttached">IGtol::IsAttached</see> to determine whether this symbol is currently using a leader. 
+<see cref="SOLIDWORKS.Interop.sldworks.IGtol.HasExtraLeader">IGtol::HasExtraLeader</see> to determine whether this symbol is using a bent leader. 
+<see cref="SOLIDWORKS.Interop.sldworks.IGtol.GetLeaderSide">IGtol::GetLeaderSide</see> to determine where the leader is attached to the symbol. 
+<see cref="SOLIDWORKS.Interop.sldworks.IGtol.SetLeader">IGtol::SetLeader</see> to set the characteristics of the leader on this symbol.]]></Remarks>
+    </Member>
+    <Member>
+        <Assembly>SolidWorks.Interop.sldworks</Assembly>
+        <Type>SolidWorks.Interop.sldworks.IGtol</Type>
         <Name>GetAllOverThisSide</Name>
         <Signature>GetAllOverThisSide()</Signature>
         <Description><![CDATA[Gets whether this GTol uses an All Over This Side leader.]]></Description>
@@ -104424,6 +104558,26 @@ endPt[3] = x,y,z end point coordinates of the witness line]]></Remarks>
             </Parameter>
         </Parameters>
         <Remarks><![CDATA[This property is valid only for bent, perpendicular, and multi-jog leaders. To create bent, perpendicular, and multi-jog leaders, use <see cref="SolidWorks.Interop.sldworks.IAnnotation.SetLeader3">IAnnotation::SetLeader3</see>.
+Use:
+
+<see cref="SOLIDWORKS.Interop.sldworks.IGtol.IsAttached">IGtol::IsAttached</see> to determine whether this symbol is currently using a leader. 
+<see cref="SOLIDWORKS.Interop.sldworks.IGtol.HasExtraLeader">IGtol::HasExtraLeader</see> to determine whether this symbol is using a bent leader. 
+<see cref="SOLIDWORKS.Interop.sldworks.IGtol.GetLeaderSide">IGtol::GetLeaderSide</see> to determine where the leader is attached to the symbol. 
+<see cref="SOLIDWORKS.Interop.sldworks.IGtol.SetLeader">IGtol::SetLeader</see> to set the characteristics of the leader on this symbol.]]></Remarks>
+    </Member>
+    <Member>
+        <Assembly>SolidWorks.Interop.sldworks</Assembly>
+        <Type>SolidWorks.Interop.sldworks.IGtol</Type>
+        <Name>SetAllOver</Name>
+        <Signature>SetAllOver( System.bool AllOver )</Signature>
+        <Description><![CDATA[Sets whether this Gtol uses an All Over leader.]]></Description>
+        <Parameters>
+            <Parameter>
+                <Name>AllOver</Name>
+                <Description><![CDATA[True to use an All Over leader, false to not]]></Description>
+            </Parameter>
+        </Parameters>
+        <Remarks><![CDATA[This property is valid only for bent, perpendicular, and multi-jog leaders.
 Use:
 
 <see cref="SOLIDWORKS.Interop.sldworks.IGtol.IsAttached">IGtol::IsAttached</see> to determine whether this symbol is currently using a leader. 
@@ -125499,9 +125653,13 @@ When you use this method, you might also want to use <see cref="SolidWorks.Inte
             </Parameter>
         </Parameters>
         <Returns><![CDATA[True if the FeatureManager design tree view tab is added successfully, false if not]]></Returns>
-        <Remarks><![CDATA[This method is not valid in the context of the Microsoft .NET Framework; it is only valid for old-style add-ins, which are now obsolete. Instead, use <see cref="SOLIDWORKS.Interop.sldworks.IModelViewManager.CreateFeatureMgrControl3">IModelViewManager::CreateFeatureMgrControl3</see>, which allows you to provide the ProgID or CLSID of an ActiveX control to use in the new tab for the FeatureManager design tree.
-This method is identical to the earlier version, IModelDoc2::AddFeatureMgrView2, except that this method provides the ability to place the new tab on either the top or bottom pane. The pane may or may not be visible. However, the tab is added to the specified pane. Only the values swFeatMgrPaneTop and swFeatMgrPaneBottom from swFeatMgrPane_e should be used as inputs in the whichPane argument.
- 
+        <Remarks><![CDATA[This method:
+
+is valid only for x86 applications.
+
+is not valid in the context of the Microsoft .NET Framework; it is only valid for old-style add-ins, which are now obsolete. Instead, use <see cref="SOLIDWORKS.Interop.sldworks.IModelViewManager.CreateFeatureMgrControl3">IModelViewManager::CreateFeatureMgrControl3</see>, which allows you to provide the ProgID or CLSID of an ActiveX control to use in the new tab for the FeatureManager design tree.
+
+is identical to the earlier version, IModelDoc2::AddFeatureMgrView2, except that this method provides the ability to place the new tab on either the top or bottom pane. The pane may or may not be visible. However, the tab is added to the specified pane. Only the values swFeatMgrPaneTop and swFeatMgrPaneBottom from swFeatMgrPane_e should be used as inputs in the whichPane argument.
 Under certain conditions, for example while the Surface, Extend command is active in the user interface, SOLIDWORKS locks the bottom pane and does not allow the activation of any other tab. If your application needs the ability to activate your new tab at all times, consider adding it either to the top pane or to both panes. If you add it to the top pane only, it may not be apparent to the user until the top pane is made visible.
  
 If you have an existing CView, this method adds that view as a new FeatureManager design tree view. This method also provides a parameter for adding a tab, which the user clicks to activate your view.
@@ -128041,6 +128199,7 @@ To create 3D splines, see <see cref="SOLIDWORKS.Interop.sldworks.IModelDoc2.Inse
             </Parameter>
         </Parameters>
         <Returns><![CDATA[True if deactivated, false if not]]></Returns>
+        <Remarks><![CDATA[This method is valid only for x86 applications.]]></Remarks>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
@@ -131642,10 +131801,10 @@ NOTE: This combination repeats itself for each dependent file found for this IMo
 Because a derived mirror part is generated from another part, the list of model dependencies returned by this method would include the original part used to generate the derived mirror part.
 Library features are completely unassociated. They do not require the library nor do they update when changes are made to the library feature. Therefore, this method does not return library features.
 If you use this method with an assembly that contains two documents, Part1 and SubAssem1, an example of what might be returned is:
- [ "Part1", "C: emp\Part1.SLDPRT", "SubAssem1", "c: emp\SubAssem1.SLDASM" ]
+ [ "Part1", "C:\temp\Part1.SLDPRT", "SubAssem1", "c:\temp\SubAssem1.SLDASM" ]
 If Traverseflag is set to True, then all the documents contained in SubAssem1.ASM are returned. Also, suppressed components are recognized and returned by this method as a dependent file.
 If AddReadOnlyInfo is set to True, then a string of True or false is added to the list of strings. If Part1 is read-only, then the resulting set of strings would be:
- [ "Part1", "C: emp\Part1.SLDPRT", "True", "SubAssem1", "c: emp\SubAssem1.SLDASM", "" ]
+ [ "Part1", "C:\temp\Part1.SLDPRT", "True", "SubAssem1", "c:\temp\SubAssem1.SLDASM", "" ]
 NOTE: For assemblies containing suppressed or lightweight components, file references (return value from this method) point to the as-saved component reference because the actual component has not been loaded into memory. Because the suppressed and lightweight components have not actually been loaded, the current search criteria has not been applied to update the file references. Setting Searchflag to True vs. false, causes this method to apply the current search criteria rules to locate the particular reference and may result in a different return value. Likewise, unsuppressing or resolving these components causes the current search criteria to be applied and updates the assembly's component references in memory, if necessary.
 When calling this method with Seachflag set to True, you can explicitly set the search folders first. This is important because this method uses the current SOLIDWORKS directory as its second search criteria. Because the user may have interactively opened files from some random directory, you cannot be certain the current SOLIDWORKS directory is pointing to the desired location. You may want to consider setting the search folders to that of the document being used in this method.]]></Remarks>
     </Member>
@@ -135045,10 +135204,10 @@ See <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide
 Because a derived mirror part is generated from another part, the list of model dependencies returned by this method would include the original part used to generate the derived mirror part.
 Library features are completely unassociated. They do not require the library nor do they update when changes are made to the library feature. Therefore, this method does not return library features.
 If you use this method with an assembly that contains two documents, Part1 and SubAssem1, an example of what might be returned is:
- [ "Part1", "C: emp\Part1.SLDPRT", "SubAssem1", "c: emp\SubAssem1.SLDASM" ]
+ [ "Part1", "C:\temp\Part1.SLDPRT", "SubAssem1", "c:\temp\SubAssem1.SLDASM" ]
 If Traverseflag is set to True, then all the documents contained in SubAssem1.ASM are returned. Also, suppressed components are recognized and returned by this method as a dependent file.
 If AddReadOnlyInfo is set to True, then a string of True or false is added to the list of strings. If Part1 is read-only, then the resulting set of strings would be:
- [ "Part1", "C: emp\Part1.SLDPRT", "True", "SubAssem1", "c: emp\SubAssem1.SLDASM", "" ]
+ [ "Part1", "C:\temp\Part1.SLDPRT", "True", "SubAssem1", "c:\temp\SubAssem1.SLDASM", "" ]
 NOTE: For assemblies containing suppressed or lightweight components, file references (return value from this method) point to the as-saved component reference because the actual component has not been loaded into memory. Because the suppressed and lightweight components have not actually been loaded, the current search criteria has not been applied to update the file references. Setting Searchflag to True vs. false, causes this method to apply the current search criteria rules to locate the particular reference and may result in a different return value. Likewise, unsuppressing or resolving these components causes the current search criteria to be applied and updates the assembly's component references in memory, if necessary.
 When calling this method with Seachflag set to True, you can explicitly set the search folders first. This is important because this method uses the current SOLIDWORKS directory as its second search criteria. Because the user may have interactively opened files from some random directory, you cannot be certain the current SOLIDWORKS directory is pointing to the desired location. You may want to consider setting the search folders to that of the document being used in this method. For example:
 // Get the current search folder settings so that you can reset them later
@@ -144006,6 +144165,21 @@ Instead of setting this property to false to hide a document, consider calling 
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
         <Type>SolidWorks.Interop.sldworks.IModelDocExtension</Type>
+        <Name>ActivateFeatureMgrViewx64</Name>
+        <Signature>ActivateFeatureMgrViewx64( ref System.long AppView )</Signature>
+        <Description><![CDATA[Activates the specified FeatureManager view in x64 applications.]]></Description>
+        <Parameters>
+            <Parameter>
+                <Name>AppView</Name>
+                <Description><![CDATA[Pointer to a FeatureManager design tree view]]></Description>
+            </Parameter>
+        </Parameters>
+        <Returns><![CDATA[Pane as defined by <see cref="SOLIDWORKS.Interop.swconst.swFeatMgrPane_e">swFeatMgrPane_e</see> where the view resides]]></Returns>
+        <Remarks><![CDATA[See <see cref="SolidWorks.Interop.sldworks.IFeatMgrView.ActivateView">IFeatMgrView::ActivateView</see> for examples you can tailor to use this method in x64 applications.]]></Remarks>
+    </Member>
+    <Member>
+        <Assembly>SolidWorks.Interop.sldworks</Assembly>
+        <Type>SolidWorks.Interop.sldworks.IModelDocExtension</Type>
         <Name>ActiveCommandTab</Name>
         <Signature>ActiveCommandTab {get; set;}</Signature>
         <Description><![CDATA[Gets and sets the active SOLIDWORKS CommandManager tab.]]></Description>
@@ -144338,6 +144512,33 @@ Before calling this method, you might want to call <see cref="SolidWorks.Inter
                 <Url>/sldworksapi/Add_and_Delete_Materials_from_Specific_Display_States_Example_VB.htm</Url>
             </Example>
         </Examples>
+    </Member>
+    <Member>
+        <Assembly>SolidWorks.Interop.sldworks</Assembly>
+        <Type>SolidWorks.Interop.sldworks.IModelDocExtension</Type>
+        <Name>AddFeatureMgrView3x64</Name>
+        <Signature>AddFeatureMgrView3x64( ref System.long Bitmap, ref System.long AppView, System.string ToolTip, System.int WhichPane )</Signature>
+        <Description><![CDATA[Adds the specified tab to the FeatureManager design tree view in x64 applications.]]></Description>
+        <Parameters>
+            <Parameter>
+                <Name>Bitmap</Name>
+                <Description><![CDATA[Pointer to the bitmap that you want to use for the FeatureManager design tree tab; the bitmap should be no larger than 16x18; this standard pointer is created by performing a New on Cbitmap]]></Description>
+            </Parameter>
+            <Parameter>
+                <Name>AppView</Name>
+                <Description><![CDATA[Pointer to an existing view that you want to use as your FeatureManager design tree view. If you do not have an existing view, then use <see cref="SOLIDWORKS.Interop.sldworks.IModelViewManager.CreateFeatureMgrView2">IModelViewMgr::CreateFeatureMgrView2</see>, which returns a view handle]]></Description>
+            </Parameter>
+            <Parameter>
+                <Name>ToolTip</Name>
+                <Description><![CDATA[Tooltip string]]></Description>
+            </Parameter>
+            <Parameter>
+                <Name>WhichPane</Name>
+                <Description><![CDATA[Pane in which to add the view as defined in <see cref="SOLIDWORKS.Interop.swconst.swFeatMgrPane_e">swFeatMgrPane_e</see>]]></Description>
+            </Parameter>
+        </Parameters>
+        <Returns><![CDATA[True if the FeatureManager design tree view tab is added successfully, false if not]]></Returns>
+        <Remarks><![CDATA[See the Remarks in <see cref="SolidWorks.Interop.sldworks.IModelDoc2.AddFeatureMgrView3">IModelDoc2::AddFeatureMgrView3</see> for more information about using this x64 method.]]></Remarks>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
@@ -145570,6 +145771,20 @@ To access a general custom information value, set the configuration argument to 
 As per Microsoft recommendations for OLE support, the file summary information for SOLIDWORKS documents is written as an OLE property set into a stream named "\005Summary Information" off the root storage of the SOLIDWORKS document's compound file.
  
 NOTE: MFC does not currently provide classes that manage summary information. However, the DRAWCLI application shipped with Visual C++ includes a sample implementation, in the form of the class CSummInfo, that you can use as an example when implementing your own. This class is used by the document class CDrawDoc. DRAWCLI also includes property pages for displaying and modifying Summary Information.]]></Remarks>
+    </Member>
+    <Member>
+        <Assembly>SolidWorks.Interop.sldworks</Assembly>
+        <Type>SolidWorks.Interop.sldworks.IModelDocExtension</Type>
+        <Name>DeActivateFeatureMgrViewx64</Name>
+        <Signature>DeActivateFeatureMgrViewx64( ref System.long AppView )</Signature>
+        <Description><![CDATA[Deactivates a tab in the FeatureManager design tree view in x64 applications.]]></Description>
+        <Parameters>
+            <Parameter>
+                <Name>AppView</Name>
+                <Description><![CDATA[Pointer to the FeatureManager design tree view to deactivate]]></Description>
+            </Parameter>
+        </Parameters>
+        <Returns><![CDATA[True if view deactivated, false if not]]></Returns>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
@@ -147146,11 +147361,11 @@ To get the drawing view entity corresponding to a given part or assembly enti
 Because a derived mirror part is generated from another part, the list of model dependencies returned by this method would include the original part used to generate the derived mirror part.
 Library features are completely unassociated. They do not require the library nor do they update when changes are made to the library feature. Therefore, this method does not return library features.
 If you use this method with an assembly that contains two documents, Part1 and SubAssem1, an example of what might be returned is:
- [ "Part1", "C: emp\Part1.SLDPRT", "SubAssem1", "c: emp\SubAssem1.SLDASM" ]
+ [ "Part1", "C:\temp\Part1.SLDPRT", "SubAssem1", "c:\temp\SubAssem1.SLDASM" ]
 If Traverseflag is set to true, then all the documents contained in SubAssem1.ASM are returned. Also, suppressed components are recognized and returned by this method as a dependent file.
 If AddReadOnlyInfo is set to true, then a string of "TRUE" or "FALSE" is added to the list of strings. If Part1 and SubAssem1 are read-only, then the resulting set of strings would be:
- [ "Part1", "C: emp\Part1.SLDPRT", "TRUE", "SubAssem1", "c: emp\SubAssem1.SLDASM", "FALSE" ]If AppendImportedPaths is set to true, and Part1 was imported, "|imported_file_path" is appended to the Part1 path. The resulting set of strings would be: 
-[ "Part1", "C: emp\Part1.SLDPRT|c: emp\Creo - Copy able_wf2.asm.1", "TRUE", "SubAssem1", "c: emp\SubAssem1.SLDASM", "FALSE" ]
+ [ "Part1", "C:\temp\Part1.SLDPRT", "TRUE", "SubAssem1", "c:\temp\SubAssem1.SLDASM", "FALSE" ]If AppendImportedPaths is set to true, and Part1 was imported, "|imported_file_path" is appended to the Part1 path. The resulting set of strings would be: 
+[ "Part1", "C:\temp\Part1.SLDPRT|c:\temp\Creo - Copy\table_wf2.asm.1", "TRUE", "SubAssem1", "c:\temp\SubAssem1.SLDASM", "FALSE" ]
 NOTE: For assemblies containing suppressed or lightweight components, file references (return value from this method) point to the as-saved component reference because the actual component has not been loaded into memory. Because the suppressed and lightweight components have not actually been loaded, the current search criteria has not been applied to update the file references. Setting Searchflag to true causes this method to apply the current search criteria rules to locate the particular reference and may result in a different return value. Likewise, unsuppressing or resolving these components causes the current search criteria to be applied and updates the assembly's component references in memory, if necessary.
 When calling this method with Searchflag set to true, you can explicitly set the search folders first. This is important because this method uses the current SOLIDWORKS directory as its second search criteria. Because the user may have interactively opened files from some random directory, you cannot be certain the current SOLIDWORKS directory is pointing to the desired location. You may want to consider setting the search folders to that of the document being used in this method.]]></Remarks>
     </Member>
@@ -147632,7 +147847,7 @@ Valid values are from 0 to 1 for all variables. If material_values is all -1 val
         <Name>GetModelViewCount</Name>
         <Signature>GetModelViewCount()</Signature>
         <Description><![CDATA[Gets the number of model views in this document.]]></Description>
-        <Returns><![CDATA[Number of model views]]></Returns>
+        <Returns><![CDATA[Number of model views (see Remarks)]]></Returns>
         <Examples>
             <Example>
                 <Name>Get Scale Factor of Each Model View</Name>
@@ -147655,7 +147870,8 @@ Valid values are from 0 to 1 for all variables. If material_values is all -1 val
                 <Url>/sldworksapi/Get_Scale_of_Each_Model_View_Example_VB.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[Call this method before calling <see cref="SOLIDWORKS.Interop.sldworks.IModelDocExtension.IGetModelViews">IModelDocExtension::IGetModelViews</see> to determine the size of the array for that method.]]></Remarks>
+        <Remarks><![CDATA[Call this method before calling <see cref="SOLIDWORKS.Interop.sldworks.IModelDocExtension.IGetModelViews">IModelDocExtension::IGetModelViews</see> to determine the size of the array for that method.
+This method returns the number of model views set using either SOLIDWORKS menu > Window > Viewport or <see cref="SolidWorks.Interop.sldworks.IModelViewManager.ViewportDisplay">IModelViewManager::ViewportDisplay</see>.]]></Remarks>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
@@ -147663,7 +147879,7 @@ Valid values are from 0 to 1 for all variables. If material_values is all -1 val
         <Name>GetModelViews</Name>
         <Signature>GetModelViews()</Signature>
         <Description><![CDATA[Gets the model views in this document.]]></Description>
-        <Returns><![CDATA[Array of <see cref="SOLIDWORKS.Interop.sldworks.IModelView">model views</see>]]></Returns>
+        <Returns><![CDATA[Array of <see cref="SOLIDWORKS.Interop.sldworks.IModelView">model views</see> (see Remarks)]]></Returns>
         <Examples>
             <Example>
                 <Name>Get Scale Factor of Each Model View</Name>
@@ -147686,6 +147902,7 @@ Valid values are from 0 to 1 for all variables. If material_values is all -1 val
                 <Url>/sldworksapi/Get_Scale_of_Each_Model_View_Example_VB.htm</Url>
             </Example>
         </Examples>
+        <Remarks><![CDATA[The model views are set using either SOLIDWORKS menu > Window > Viewport or <see cref="SolidWorks.Interop.sldworks.IModelViewManager.ViewportDisplay">IModelViewManager::ViewportDisplay</see>.]]></Remarks>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
@@ -148635,7 +148852,7 @@ Set stream = docext.GetStream(1, stat)
 xmldoc.Load (stream)
 docext.ReleaseStream (1)
  
-xmldoc.Save ("C: emp\xmlmat.xml")
+xmldoc.Save ("C:\temp\xmlmat.xml")
  
 End Sub
 C++ Example
@@ -152688,7 +152905,7 @@ Set stream = docext.GetStream(1, stat)
 xmldoc.Load (stream)
 docext.ReleaseStream (1)
  
-xmldoc.Save ("C: emp\xmlmat.xml")
+xmldoc.Save ("C:\temp\xmlmat.xml")
  
 End Sub
 C++ Example
@@ -156394,6 +156611,8 @@ Also, check the vectors by looking at the triad in the model view.]]></Remarks>
         <Type>SolidWorks.Interop.sldworks.IModelView</Type>
         <Name>UpAxisFlyout</Name>
         <Signature>UpAxisFlyout {get; set;}</Signature>
+        <Description><![CDATA[Gets or sets the up axis flyout flag.]]></Description>
+        <Returns><![CDATA[Up axis flyout option as defined by <see cref="SOLIDWORKS.Interop.swconst.swViewOrientationUpAxisFlyout_e">swViewOrientationUpAxisFlyout_e</see>]]></Returns>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
@@ -214005,6 +214224,9 @@ Before using this method, call <see cref="SolidWorks.Interop.sldworks.ISldWorks
                 <Url>/sldworksapi/Get_Build_Numbers_Example_CSharp.htm</Url>
             </Example>
         </Examples>
+        <Remarks><![CDATA[Example outputs:
+SOLIDWORKS major revision number: SW2009_a1
+SOLIDWORKS build number: d080407.062]]></Remarks>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
@@ -214426,10 +214648,10 @@ Filename with the complete pathname; this combination repeats itself for each de
 Another example would be calling this method with a derived mirror part. Because a derived mirror part is generated from another part, the list of model dependencies returned by this method would include the original part used to generate the derived mirror part.
 Be aware that Library features are completely unassociated. They do not require the library nor do they update when changes are made to the Library feature. Therefore, this method would not return Library features.
 If you use this method with an assembly that contains two documents, Part1 and SubAssem1, an example of what might be returned is:
- [ "Part1", "C: emp\Part1.SLDPRT", "SubAssem1", "c: emp\SubAssem1.SLDASM" ]
+ [ "Part1", "C:\temp\Part1.SLDPRT", "SubAssem1", "c:\temp\SubAssem1.SLDASM" ]
 If Traverseflag is set to True, then all of the documents contained in SubAssem1.ASM are also returned. Suppressed components are recognized and returned by this method as a dependent file.
 If the AddReadOnlyInfo flag is set to True, then a string of "Read-Only" is added to the list of strings. If Part1 from were read-only, then the resulting set of strings would be:
- [ "Part1", "C: emp\Part1.SLDPRT", "Read-Only", "SubAssem1", "c: emp\SubAssem1.SLDASM", "" ]
+ [ "Part1", "C:\temp\Part1.SLDPRT", "Read-Only", "SubAssem1", "c:\temp\SubAssem1.SLDASM", "" ]
 NOTE: If the SearchFlag is set to True, then the current directory is set to the directory of the document file. This replicates the interactive behavior of the References button in the File Open dialog window.]]></Remarks>
     </Member>
     <Member>
@@ -216789,10 +217011,10 @@ As an example, calling this method on a drawing document returns a list of all t
 Another example would be calling this method with a derived mirror part. Because a derived mirror part is generated from another part, the list of model dependencies returned by this method would include the original part used to generate the derived mirror part.
 Be aware that Library features are completely unassociated. They do not require the library nor do they update when changes are made to the Library feature. Therefore, this method would not return Library features.
 If you use this method with an assembly that contains two documents, Part1 and SubAssem1, an example of what might be returned is:
- [ "Part1", "C: emp\Part1.SLDPRT", "SubAssem1", "c: emp\SubAssem1.SLDASM" ]
+ [ "Part1", "C:\temp\Part1.SLDPRT", "SubAssem1", "c:\temp\SubAssem1.SLDASM" ]
 If Traverseflag is set to True, then all of the documents contained in SubAssem1.ASM are also returned. Suppressed components are recognized and returned by this method as a dependent file.
 If the AddReadOnlyInfo flag is set to True, then a string of "Read-Only" is added to the list of strings. If Part1 from were read-only, then the resulting set of strings would be:
- [ "Part1", "C: emp\Part1.SLDPRT", "Read-Only", "SubAssem1", "c: emp\SubAssem1.SLDASM", "" ]
+ [ "Part1", "C:\temp\Part1.SLDPRT", "Read-Only", "SubAssem1", "c:\temp\SubAssem1.SLDASM", "" ]
 NOTE: If the SearchFlag is set to True, then the current directory is set to the directory of the document file. This replicates the interactive behavior of the References button in the File Open dialog window.]]></Remarks>
     </Member>
     <Member>
@@ -220471,7 +220693,7 @@ See <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide
                 <Description><![CDATA[Value of UserPreference]]></Description>
             </Parameter>
         </Parameters>
-        <Remarks><![CDATA[Multiple strings in the value argument must be separated by new line characters (vbNewLine" or "VbLf in Visual Basic,  in Visual C or Visual C++).
+        <Remarks><![CDATA[Multiple strings in the value argument must be separated by new line characters (vbNewLine" or "VbLf in Visual Basic, \n in Visual C or Visual C++).
  
 This method is equivalent to interactively setting system options in the SOLIDWORKS Design software.
  
@@ -238284,7 +238506,7 @@ True]]></Remarks>
         <Returns><![CDATA[Name of texture as it appears in the Texture PropertyManager (see Remarks)]]></Returns>
         <Remarks><![CDATA[This method only supports SOLIDWORKS-supplied textures.
  
-Call <see cref="SOLIDWORKS.Interop.sldworks.ITexture.MaterialName">ITexture::MaterialName</see> to get the value for FileNameIn before calling this method. ITexture::MaterialName returns an abbreviated path and the name of the texture as it appears in the Texture PropertyManager. For example, if ITexture::MaterialName returns install_dir\data\images extures\plastic\brushed\bred.jpg, then this method returns Plastic\Brushed\Red.]]></Remarks>
+Call <see cref="SOLIDWORKS.Interop.sldworks.ITexture.MaterialName">ITexture::MaterialName</see> to get the value for FileNameIn before calling this method. ITexture::MaterialName returns an abbreviated path and the name of the texture as it appears in the Texture PropertyManager. For example, if ITexture::MaterialName returns install_dir\data\images\textures\plastic\brushed\bred.jpg, then this method returns Plastic\Brushed\Red.]]></Remarks>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
@@ -238312,7 +238534,7 @@ Call <see cref="SOLIDWORKS.Interop.sldworks.ITexture.MaterialName">ITexture::Mat
  
      install_dir\data\Images\textures\texture_library\texture_type\texture_image_file
  
-For example, install_dir\data\Images extures\plastic\brushed\bred.jpg.
+For example, install_dir\data\Images\textures\plastic\brushed\bred.jpg.
  
 If the texture is user-defined texture, then the path returned is:
  
@@ -250901,7 +251123,7 @@ To move a drawing view independently of its child views, use <see cref="SolidWo
         <Type>SolidWorks.Interop.sldworks.IView</Type>
         <Name>RootDrawingComponent</Name>
         <Signature>RootDrawingComponent {get;}</Signature>
-        <Description><![CDATA[Gets the root component for this drawing view.]]></Description>
+        <Description><![CDATA[Obsolete. Superseded by <see cref="SolidWorks.Interop.sldworks.IView.RootDrawingComponent2">IView::RootDrawingComponent2</see>.]]></Description>
         <Returns><![CDATA[<see cref="SOLIDWORKS.Interop.sldworks.IDrawingComponent">Drawing component</see>]]></Returns>
         <Examples>
             <Example>
@@ -250940,6 +251162,21 @@ To move a drawing view independently of its child views, use <see cref="SolidWo
                 <Url>/sldworksapi/Get_Components_in_Drawing_View_Example_VB.htm</Url>
             </Example>
         </Examples>
+    </Member>
+    <Member>
+        <Assembly>SolidWorks.Interop.sldworks</Assembly>
+        <Type>SolidWorks.Interop.sldworks.IView</Type>
+        <Name>RootDrawingComponent2</Name>
+        <Signature>RootDrawingComponent2( System.bool InChildContext ) {get;}</Signature>
+        <Description><![CDATA[Gets the root component of this drawing view.]]></Description>
+        <Parameters>
+            <Parameter>
+                <Name>InChildContext</Name>
+                <Description><![CDATA[True to return the temporary root component of this section view, false to return the root drawing component of this view's parent view (see Remarks)]]></Description>
+            </Parameter>
+        </Parameters>
+        <Returns><![CDATA[<see cref="SOLIDWORKS.Interop.sldworks.IDrawingComponent">Drawing component</see>]]></Returns>
+        <Remarks><![CDATA[For all drawing views except section views, this property returns the root drawing component of the drawing view's parent view. For section views only, this property returns the root drawing component of the temporary assembly that is created specifically for the section view. To access the real root drawing component of the section view, first call <see cref="SolidWorks.Interop.sldworks.IView.GetBaseView">IView::GetBaseView</see> to get the section view's base view. Then use this property to get the root drawing drawing component.]]></Remarks>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
@@ -255403,52 +255640,68 @@ When the user selects a printer from the list, that printer’s driver populates
         <Type>SolidWorks.Interop.swdimxpert.IDimXpertAngleBetweenCircularDimTol</Type>
         <Name>CenterFeature</Name>
         <Signature>CenterFeature {get;}</Signature>
+        <Description><![CDATA[Gets the DimXpert center feature for this DimXpert angle-between circular dimension tolerance.]]></Description>
+        <Returns><![CDATA[<see cref="SOLIDWORKS.Interop.swdimxpert.IDimXpertFeature">IDimXpertFeature</see>]]></Returns>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
         <Type>SolidWorks.Interop.swdimxpert.IDimXpertAngleBetweenCircularDimTol</Type>
         <Name>GetActPlaneVector</Name>
         <Signature>GetActPlaneVector( out System.double I, out System.double J, out System.double K )</Signature>
+        <Description><![CDATA[Gets the actual plane vector for computing the angle of this DimXpert angle-between circular dimension tolerance.]]></Description>
         <Parameters>
             <Parameter>
                 <Name>I</Name>
+                <Description><![CDATA[I component of the direction vector]]></Description>
             </Parameter>
             <Parameter>
                 <Name>J</Name>
+                <Description><![CDATA[J component of the direction vector]]></Description>
             </Parameter>
             <Parameter>
                 <Name>K</Name>
+                <Description><![CDATA[K component of the direction vector]]></Description>
             </Parameter>
         </Parameters>
+        <Returns><![CDATA[True if the method call is successful; false otherwise]]></Returns>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
         <Type>SolidWorks.Interop.swdimxpert.IDimXpertAngleBetweenCircularDimTol</Type>
         <Name>GetNomPlaneVector</Name>
         <Signature>GetNomPlaneVector( out System.double I, out System.double J, out System.double K )</Signature>
+        <Description><![CDATA[Gets the nominal plane vector for computing the angle of this DimXpert angle-between circular dimension tolerance.]]></Description>
         <Parameters>
             <Parameter>
                 <Name>I</Name>
+                <Description><![CDATA[I component of the direction vector]]></Description>
             </Parameter>
             <Parameter>
                 <Name>J</Name>
+                <Description><![CDATA[J component of the direction vector]]></Description>
             </Parameter>
             <Parameter>
                 <Name>K</Name>
+                <Description><![CDATA[K component of the direction vector]]></Description>
             </Parameter>
         </Parameters>
+        <Returns><![CDATA[True if the method call is successful; false otherwise]]></Returns>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
         <Type>SolidWorks.Interop.swdimxpert.IDimXpertAngleBetweenCircularDimTol</Type>
         <Name>OriginFeature</Name>
         <Signature>OriginFeature {get;}</Signature>
+        <Description><![CDATA[Gets the DimXpert origin feature for this DimXpert angle-between circular dimension tolerance.]]></Description>
+        <Returns><![CDATA[<see cref="SOLIDWORKS.Interop.swdimxpert.IDimXpertFeature">IDimXpertFeature</see>]]></Returns>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
         <Type>SolidWorks.Interop.swdimxpert.IDimXpertAngleBetweenCircularDimTol</Type>
         <Name>Supplement</Name>
         <Signature>Supplement {get;}</Signature>
+        <Description><![CDATA[Gets whether to evaluate the supplement angle for this DimXpert angle-between circular dimension tolerance.]]></Description>
+        <Returns><![CDATA[True to evaluate the supplement angle (default); false otherwisev]]></Returns>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
@@ -259595,11 +259848,14 @@ Before calling this method, call <see cref="SOLIDWORKS.Interop.swdimxpert.IDimXp
         <Type>SolidWorks.Interop.swdimxpert.IDimXpertPart</Type>
         <Name>InsertAngleDimension</Name>
         <Signature>InsertAngleDimension( DimXpertDimensionOption Option )</Signature>
+        <Description><![CDATA[Inserts an angle dimension.]]></Description>
         <Parameters>
             <Parameter>
                 <Name>Option</Name>
+                <Description><![CDATA[<see cref="SOLIDWORKS.Interop.swdimxpert.IDimXpertDimensionOption">IDimXpertDimensionOption</see>]]></Description>
             </Parameter>
         </Parameters>
+        <Returns><![CDATA[True if the angle dimension is created, false if not]]></Returns>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
@@ -260181,6 +260437,40 @@ Before calling this method, call <see cref="SOLIDWORKS.Interop.swdimxpert.IDimXp
                 <Url>/swdimxpertapi/Get_DimXpert_Features_and_Annotations_in_a_Model_Example_CSharp.htm</Url>
             </Example>
         </Examples>
+    </Member>
+    <Member>
+        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
+        <Type>SolidWorks.Interop.swdimxpert.IDimXpertRefPlaneFeature</Type>
+        <Name>GetNominalPlane</Name>
+        <Signature>GetNominalPlane( out System.double X, out System.double Y, out System.double Z, out System.double I, out System.double J, out System.double K )</Signature>
+        <Description><![CDATA[Gets the coordinates and vector for this DimXpert reference plane.]]></Description>
+        <Parameters>
+            <Parameter>
+                <Name>X</Name>
+                <Description><![CDATA[X-coordinate of the planev]]></Description>
+            </Parameter>
+            <Parameter>
+                <Name>Y</Name>
+                <Description><![CDATA[Y-coordinate of the plane]]></Description>
+            </Parameter>
+            <Parameter>
+                <Name>Z</Name>
+                <Description><![CDATA[Z-coordinate of the plane]]></Description>
+            </Parameter>
+            <Parameter>
+                <Name>I</Name>
+                <Description><![CDATA[I component of the direction vector of the plane]]></Description>
+            </Parameter>
+            <Parameter>
+                <Name>J</Name>
+                <Description><![CDATA[J component of the direction vector of the plane]]></Description>
+            </Parameter>
+            <Parameter>
+                <Name>K</Name>
+                <Description><![CDATA[K component of the direction vector of the plane]]></Description>
+            </Parameter>
+        </Parameters>
+        <Returns><![CDATA[True if method call is successful; false otherwise]]></Returns>
     </Member>
     <Member>
         <Assembly>SolidWorks.Interop.swdimxpert</Assembly>

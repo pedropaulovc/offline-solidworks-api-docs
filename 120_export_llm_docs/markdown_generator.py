@@ -403,13 +403,18 @@ class MarkdownGenerator:
 
         return "\n".join(md)
 
-    def generate_enum_member_documentation(self, type_info: TypeInfo, enum_member: EnumMember) -> str:
+    def _get_example_path_for_enum_file(self, url: str) -> str:
+        """Relative path to an example file from a flat ``enums/{Enum}.md`` file (up one level)."""
+        filename = url.split('/')[-1].replace('.htm', '.md').replace('.html', '.md')
+        return f"../examples/{filename}"
+
+    def generate_enum_documentation(self, type_info: TypeInfo) -> str:
         """
-        Generate markdown documentation for a single enum member.
+        Generate a single self-contained markdown file for an enumeration, with all
+        members inline (replaces the per-member file-per-enum-member layout).
 
         Args:
-            type_info: The parent TypeInfo object (the enum)
-            enum_member: The EnumMember to document
+            type_info: The enum TypeInfo object to document
 
         Returns:
             Generated markdown content as a string
@@ -418,23 +423,56 @@ class MarkdownGenerator:
 
         # YAML frontmatter
         md.append("---")
-        md.append(f"type: {type_info.name}")
-        md.append(f"member: {enum_member.name}")
-        md.append(f"kind: enum_member")
+        md.append(f"name: {type_info.name}")
+        md.append("kind: enum")
         md.append(f"assembly: {type_info.assembly}")
         md.append(f"namespace: {type_info.namespace}")
         if type_info.functional_category:
             md.append(f"category: {type_info.functional_category}")
+        md.append("is_enum: True")
+        md.append(f"enum_member_count: {len(type_info.enum_members)}")
         md.append("---\n")
 
-        # Title
-        md.append(f"# {type_info.name}.{enum_member.name}\n")
+        # Title and metadata
+        md.append(f"# {type_info.name}\n")
+        md.append(f"**Assembly**: {type_info.assembly}  ")
+        md.append(f"**Namespace**: {type_info.namespace}")
+        if type_info.functional_category:
+            md.append(f"  \n**Category**: {type_info.functional_category}")
+        md.append("\n")
 
         # Description
-        if enum_member.description:
-            md.append(f"{self._simplify_cross_references(self._clean_text(enum_member.description))}\n")
+        if type_info.description:
+            md.append("## Description\n")
+            md.append(f"{self._simplify_cross_references(self._clean_text(type_info.description))}\n")
+
+        # Remarks
+        if type_info.remarks:
+            md.append("## Remarks\n")
+            md.append(f"{self._simplify_cross_references(self._clean_text(type_info.remarks))}\n")
+
+        # All enumeration members inline
+        md.append("## Enumeration Members\n")
+        for enum_member in type_info.enum_members:
+            md.append(f"### {enum_member.name}\n")
+            if enum_member.description:
+                md.append(f"{self._simplify_cross_references(self._clean_text(enum_member.description))}\n")
+
+        # Examples (enum-level, if any)
+        if type_info.examples:
+            md.append("## Examples\n")
+            for example_ref in type_info.examples:
+                example_path = self._get_example_path_for_enum_file(example_ref.url)
+                md.append(f"- [{example_ref.name} ({example_ref.language})]({example_path})\n")
 
         return "\n".join(md)
+
+    def save_enum_documentation(self, type_info: TypeInfo, output_path: Path) -> int:
+        """Write a single flat ``enums/{Enum}.md`` file. Returns number of files written (1)."""
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(self.generate_enum_documentation(type_info))
+        return 1
 
     def _simplify_cross_references(self, text: str) -> str:
         """
@@ -509,13 +547,8 @@ class MarkdownGenerator:
                 f.write(member_md)
             files_generated += 1
 
-        # Generate enum member files
-        for enum_member in type_info.enum_members:
-            member_md = self.generate_enum_member_documentation(type_info, enum_member)
-            member_path = output_dir / f"{sanitize_filename(enum_member.name)}.md"
-            with open(member_path, 'w', encoding='utf-8') as f:
-                f.write(member_md)
-            files_generated += 1
+        # NOTE: Enums are not exported here. They are written as a single flat
+        # enums/{Enum}.md file via save_enum_documentation() (see export_pipeline).
 
         return files_generated
 

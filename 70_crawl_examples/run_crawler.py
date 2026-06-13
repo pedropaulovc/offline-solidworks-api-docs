@@ -53,11 +53,14 @@ def clear_previous_crawl(metadata_dir: Path, output_dir: Path) -> None:
     """Clear metadata and HTML files from previous crawl"""
     import shutil
 
-    # Clear metadata files (except example_urls.txt which is source data)
+    # Clear metadata files, but keep source-data files: example_urls.txt and
+    # legacy_example_urls.txt (the latter is produced by harvest_legacy_examples.py,
+    # which runs before the crawl).
+    preserve = {"example_urls.txt", "legacy_example_urls.txt"}
     metadata_path = Path(metadata_dir)
     if metadata_path.exists():
         for file in metadata_path.glob("*"):
-            if file.is_file() and file.name != "example_urls.txt":
+            if file.is_file() and file.name not in preserve:
                 file.unlink()
         print(f"Cleared metadata files from {metadata_dir}")
 

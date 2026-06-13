@@ -1,0 +1,11 @@
+https://help.solidworks.com/2026/english/api/sldworksapi/Create_Edge_Flange_Example_VB.htm
+https://help.solidworks.com/2026/english/api/sldworksapi/Create_PropertyManager_Page_Example_CSharp.htm
+https://help.solidworks.com/2026/english/api/sldworksapi/Create_PropertyManager_Page_Example_VBNET.htm
+https://help.solidworks.com/2026/english/api/sldworksapi/Get_Properties_of_Sweep_Feature_Example_VB.htm
+https://help.solidworks.com/2026/english/api/sldworksapi/Modify_Chain_Pattern_Feature_Example_CSharp.htm
+https://help.solidworks.com/2026/english/api/sldworksapi/Modify_Chain_Pattern_Feature_Example_VB.htm
+https://help.solidworks.com/2026/english/api/sldworksapi/Modify_Chain_Pattern_Feature_Example_VBNET.htm
+https://help.solidworks.com/2026/english/api/sldworksapi/Show_Bubble_ToolTip_for_PropertyManager_Page_Control_Example_CSharp.htm
+https://help.solidworks.com/2026/english/api/sldworksapi/Show_Bubble_ToolTip_for_PropertyManager_Page_Control_Example_VBNET.htm
+https://help.solidworks.com/2026/english/api/swpublishedapi/Create_PropertyManager_Page_Example_CSharp.htm
+https://help.solidworks.com/2026/english/api/swpublishedapi/Create_PropertyManager_Page_Example_VBNET.htm
