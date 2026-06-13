@@ -60,7 +60,7 @@ class IndexGenerator:
             for type_info in types_list:
                 # Create relative link to type overview
                 if type_info.is_enum:
-                    link = f"../enums/{type_info.name}/_overview.md"
+                    link = f"../enums/{type_info.name}.md"
                 else:
                     link = f"../types/{type_info.name}/_overview.md"
 
@@ -80,7 +80,7 @@ class IndexGenerator:
 
             for type_info in uncategorized:
                 if type_info.is_enum:
-                    link = f"../enums/{type_info.name}/_overview.md"
+                    link = f"../enums/{type_info.name}.md"
                 else:
                     link = f"../types/{type_info.name}/_overview.md"
 
@@ -128,7 +128,7 @@ class IndexGenerator:
             for type_info in types_list:
                 # Create relative link to type overview
                 if type_info.is_enum:
-                    link = f"../enums/{type_info.name}/_overview.md"
+                    link = f"../enums/{type_info.name}.md"
                     type_kind = "(enum)"
                 else:
                     link = f"../types/{type_info.name}/_overview.md"

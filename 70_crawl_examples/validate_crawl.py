@@ -46,6 +46,7 @@ class CrawlValidator:
         self.stats_file = metadata_dir / "crawl_stats.json"
         self.type_xml_file = project_root / "40_extract_type_details" / "metadata" / "api_types.xml"
         self.member_xml_file = project_root / "50_extract_type_member_details" / "metadata" / "api_member_details.xml"
+        self.legacy_urls_file = metadata_dir / "legacy_example_urls.txt"
         self.html_dir = output_dir / "html"
 
         # Validation results
@@ -69,6 +70,7 @@ class CrawlValidator:
         self.check_metadata_consistency()
         self.check_success_rate()
         self.check_content_integrity()
+        self.check_orphan_recovery()
 
         # Print summary
         self.print_summary()
@@ -362,6 +364,53 @@ class CrawlValidator:
             print("  [WARN] Hash mismatches detected")
         else:
             print("  [PASS] All sampled files have correct hashes")
+
+    def check_orphan_recovery(self) -> None:
+        """Report on orphan examples recovered from legacy doc versions.
+
+        Surfaces any recovered (or otherwise referenced) example URL that did not
+        end up crawled, so gaps stay visible instead of silently disappearing.
+        """
+        print("\n7. Checking orphan-example recovery...")
+
+        if not self.legacy_urls_file.exists():
+            print("  [SKIP] No legacy_example_urls.txt (harvester did not run)")
+            return
+
+        with open(self.legacy_urls_file, encoding="utf-8") as f:
+            legacy_urls = {line.strip() for line in f if line.strip() and not line.startswith("#")}
+
+        # Crawled absolute URLs.
+        crawled_urls: set[str] = set()
+        if self.urls_file.exists():
+            with jsonlines.open(self.urls_file) as reader:
+                for obj in reader:
+                    if obj.get("url"):
+                        crawled_urls.add(obj["url"])
+
+        recovered = legacy_urls & crawled_urls
+        missing = sorted(legacy_urls - crawled_urls)
+
+        print(f"  Legacy-harvested examples: {len(legacy_urls)}")
+        print(f"  Successfully crawled: {len(recovered)}")
+        print(f"  Not crawled (gaps): {len(missing)}")
+
+        self.results["checks"]["orphan_recovery"] = {
+            "harvested": len(legacy_urls),
+            "crawled": len(recovered),
+            "missing": len(missing),
+            "missing_urls": missing,
+        }
+
+        if missing:
+            self.results["warnings"].append(f"{len(missing)} legacy-harvested examples not crawled")
+            print("  [WARN] Some harvested examples were not crawled:")
+            for url in missing[:20]:
+                print(f"    - {url}")
+            if len(missing) > 20:
+                print(f"    ... and {len(missing) - 20} more")
+        else:
+            print("  [PASS] All harvested orphan examples were crawled")
 
     def print_summary(self) -> None:
         """Print validation summary"""

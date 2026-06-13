@@ -1,506 +1,6 @@
 <?xml version="1.0" ?>
 <Types>
     <Type>
-        <Name>DimXpertAngleBetweenCircularDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertAngleBetweenCircularDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertAngleBetweenDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertAngleBetweenDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertAnnotation</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertAnnotation</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertAutoDimSchemeOption</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertAutoDimSchemeOption</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertBestfitPlaneFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertBestfitPlaneFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertBlockTolerances</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertBlockTolerances</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertChamferDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertChamferDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertChamferFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertChamferFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCompositeDistanceBetweenDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCompositeDistanceBetweenDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCompositeLineProfileTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCompositeLineProfileTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCompositePositionTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCompositePositionTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCompositeSurfaceProfileTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCompositeSurfaceProfileTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCompoundClosedSlot3DFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCompoundClosedSlot3DFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCompoundHoleFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCompoundHoleFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCompoundNotchFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCompoundNotchFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCompoundWidthFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCompoundWidthFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertConcentricityTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertConcentricityTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertConeFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertConeFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCounterBoreDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCounterBoreDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCounterSinkAngleDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCounterSinkAngleDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCounterSinkDiameterDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCounterSinkDiameterDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCylinderFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertCylinderFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertDatum</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertDatum</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertDepthDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertDepthDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertDiameterDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertDiameterDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertDimensionOption</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertDimensionOption</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertDimensionTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertDimensionTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertDistanceBetweenDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertDistanceBetweenDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertExtrudeFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertExtrudeFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertFilletFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertFilletFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertFlatnessTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertFlatnessTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertGtol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertGtol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertIntersectCircleFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertIntersectCircleFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertIntersectLineFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertIntersectLineFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertIntersectPlaneFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertIntersectPlaneFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertIntersectPointFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertIntersectPointFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertLineProfileTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertLineProfileTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertOrientationTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertOrientationTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertPart</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertPart</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertPatternFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertPatternFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertPlaneFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertPlaneFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertPositionTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertPositionTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertRadiusDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertRadiusDimTol</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertSphereFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertSphereFeature</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertStraightnessTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertStraightnessTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertSurfaceProfileTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertSurfaceProfileTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertSymmetryTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertSymmetryTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertTangencyTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertTangencyTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
-        <Name>DimXpertTolerance</Name>
-        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
-        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
-    </Type>
-    <Type>
         <Name>IAVIParameter</Name>
         <Assembly>SolidWorks.Interop.swmotionstudy</Assembly>
         <Namespace>SolidWorks.Interop.swmotionstudy</Namespace>
@@ -1415,7 +915,8 @@ IMPORTANT: You can no longer insert IBomTable objects; you can now only insert <
             </Example>
         </Examples>
         <Remarks><![CDATA[Use <see cref="SolidWorks.Interop.sldworks.IModelDoc2.ClearSelection2">IModelDoc2::ClearSelection2</see> to clear the selection made when the bounding box feature is created.
-To display or hide the bounding box sketch, call <see cref="SolidWorks.Interop.sldworks.IModelDoc2.SetUserPreferenceToggle">IModelDoc2::SetUserPreferenceToggle</see> to set <see cref="SolidWorks.Interop.swconst.swUserPreferenceToggle_e">swUserPreferenceToggle_e</see>.swViewDispGlobalBBox to true or false, respectively.]]></Remarks>
+To display or hide the bounding box sketch, call <see cref="SolidWorks.Interop.sldworks.IModelDoc2.SetUserPreferenceToggle">IModelDoc2::SetUserPreferenceToggle</see> to set <see cref="SolidWorks.Interop.swconst.swUserPreferenceToggle_e">swUserPreferenceToggle_e</see>.swViewDispGlobalBBox to true or false, respectively.
+For more information about the properties of this feature, see SOLIDWORKS web help > Parts and Features > Reference Geometry > Bounding Boxes > Bounding Box PropertyManager.]]></Remarks>
     </Type>
     <Type>
         <Name>IBreakCornerFeatureData</Name>
@@ -3682,11 +3183,13 @@ You must call <see cref="SolidWorks.Interop.sldworks.IFeatureManager.CreateFeat
         <Name>IDimXpertAngleBetweenCircularDimTol</Name>
         <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
         <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
+        <Description><![CDATA[Allows you to access DimXpert angle-between circular dimension tolerances.]]></Description>
     </Type>
     <Type>
         <Name>IDimXpertAngleBetweenCircularDimTol</Name>
         <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
         <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
+        <Description><![CDATA[Allows you to access DimXpert angle-between circular dimension tolerances.]]></Description>
     </Type>
     <Type>
         <Name>IDimXpertAngleBetweenDimTol</Name>
@@ -6053,6 +5556,20 @@ You can access more general dimension tolerance information using <see cref="SOL
         </Examples>
         <Remarks><![CDATA[Use the Dimension Size icon on the DimXpert toolbar to create radius dimensions on non-closed curved faces. 
 You can access more general dimension tolerance information using <see cref="SOLIDWORKS.Interop.swdimxpert.IDimXpertDimensionTolerance">IDimXpertDimensionTolerance</see>.]]></Remarks>
+    </Type>
+    <Type>
+        <Name>IDimXpertRefPlaneFeature</Name>
+        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
+        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
+        <Description><![CDATA[Allows you to access specific information about DimXpert reference planes on the DimXpertManager tab of the Management Panel.]]></Description>
+        <Remarks><![CDATA[You can access more general DimXpert feature information using <see cref="SOLIDWORKS.Interop.swdimxpert.IDimXpertFeature">IDimXpertFeature</see>.]]></Remarks>
+    </Type>
+    <Type>
+        <Name>IDimXpertRefPlaneFeature</Name>
+        <Assembly>SolidWorks.Interop.swdimxpert</Assembly>
+        <Namespace>SolidWorks.Interop.swdimxpert</Namespace>
+        <Description><![CDATA[Allows you to access specific information about DimXpert reference planes on the DimXpertManager tab of the Management Panel.]]></Description>
+        <Remarks><![CDATA[You can access more general DimXpert feature information using <see cref="SOLIDWORKS.Interop.swdimxpert.IDimXpertFeature">IDimXpertFeature</see>.]]></Remarks>
     </Type>
     <Type>
         <Name>IDimXpertSphereFeature</Name>
@@ -17706,7 +17223,7 @@ To delete a width mate, use <see cref="SolidWorks.Interop.sldworks.IModelDocExt
             </Example>
         </Examples>
         <Remarks><![CDATA[Valid types of slots are counterbore, countersink, or straight.
-See <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/OVERVIEW/Hole_Wizard_Features_and_WizardHoleFeatureData2_Objects.htm">Hole Wizard Features and WizardHoleFeatureData2 Objects</see>.]]></Remarks>
+See <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/Hole_Wizard_Features_and_WizardHoleFeatureData2_Objects.htm">Hole Wizard Features and WizardHoleFeatureData2 Objects</see>.]]></Remarks>
     </Type>
     <Type>
         <Name>IWrapSketchFeatureData</Name>
@@ -17782,7 +17299,7 @@ See <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguid
         <Name>sw3DExperienceState_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[SOLIDWORKS Design connected to the 3DEXPERIENCE platform states. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[SOLIDWORKS Design connected to the 3DEXPERIENCE platform states. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>sw3DInterconnectImportErrors_e</Name>
@@ -17800,7 +17317,7 @@ See <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguid
         <Name>sw3DPMISaveOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[3D PMI (Product and Manufacturing Information) save options when comparing two different versions of the same model. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[3D PMI (Product and Manufacturing Information) save options when comparing two different versions of the same model. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swASMSLDPRTCompPref_e</Name>
@@ -17824,7 +17341,7 @@ See <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguid
         <Name>swActivateDocError_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Document activation errors. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Document activation errors. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[Bitmask]]></Remarks>
     </Type>
     <Type>
@@ -17837,14 +17354,14 @@ See <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguid
         <Name>swAddControlOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for PropertyManager page, group box, and tab controls. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for PropertyManager page, group box, and tab controls. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[Bitmask]]></Remarks>
     </Type>
     <Type>
         <Name>swAddGroupBoxOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[PropertyManager page group box and tab controls. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[PropertyManager page group box and tab controls. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[Bitmask]]></Remarks>
     </Type>
     <Type>
@@ -17875,7 +17392,7 @@ See <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguid
         <Name>swAddinBrokerBBoxOption_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Bounding box options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Bounding box options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[Bitmask]]></Remarks>
     </Type>
     <Type>
@@ -17888,7 +17405,7 @@ See <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguid
         <Name>swAdvSelectType_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Conditions of criteria for advanced component selection list. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Conditions of criteria for advanced component selection list. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swAdvWzdGeneralHoleTypes_e</Name>
@@ -18026,7 +17543,7 @@ SINK_ENTRY_EX(ID_SLDWORKS_EVENTS, DIID_DSldWorksEvents, swAppActiveDocChangeNoti
 SINK_ENTRY_EX(ID_SLDWORKS_EVENTS, DIID_DSldWorksEvents, swAppActiveModelDocChangeNotify, ActiveModelDocChangeNotify)
 END_SINK_MAP()
  
-If developing a C++ application, use the enumerators to <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks">ISldWorks</see> events.]]></Remarks>
+If developing a C++ application, use the enumerators to <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks">ISldWorks</see> events.]]></Remarks>
     </Type>
     <Type>
         <Name>swAppearanceSurfaceFinishShaderTypes_e</Name>
@@ -18141,7 +17658,7 @@ BEGIN_SINK_MAP(CSwAssembly)
 SINK_ENTRY_EX(ID_ASSEMBLYDOC_EVENTS, DIID_DAssemblyDocEvents, swAssemblyDestroyNotify, DestroyNotify)
 SINK_ENTRY_EX(ID_ASSEMBLYDOC_EVENTS, DIID_DAssemblyDocEvents, swAssemblyNewSelectionNotify, NewSelectionNotify)
 END_SINK_MAP()
-If developing a C++ application, use the enumerators to <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.IAssemblyDoc">IAssemblyDoc</see> events (see the Members list in this topic).]]></Remarks>
+If developing a C++ application, use the enumerators to <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.IAssemblyDoc">IAssemblyDoc</see> events (see the Members list in this topic).]]></Remarks>
     </Type>
     <Type>
         <Name>swAssemblyUpdateToolboxComponentStatus_e</Name>
@@ -18171,7 +17688,7 @@ If developing a C++ application, use the enumerators to <see href="https://help.
         <Name>swAutoInsertCenterMarkTypes_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Types for which to insert center marks. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Types for which to insert center marks. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swAutoMateRepairErrors_e</Name>
@@ -18202,7 +17719,7 @@ If developing a C++ application, use the enumerators to <see href="https://help.
         <Name>swAutodimMark_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Selection mark values. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Selection mark values. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[These values are passed by <see cref="Solidworks.Interop.sldworks.IModelDocExtension.SelectByID2">IModelDocExtension::SelectByID2</see>.]]></Remarks>
     </Type>
     <Type>
@@ -18264,7 +17781,7 @@ If developing a C++ application, use the enumerators to <see href="https://help.
         <Name>swBOMPartNumberSource_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Sources from numbers in BOM tables. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Sources from numbers in BOM tables. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swBOMTableObjectType_e</Name>
@@ -18288,7 +17805,7 @@ If developing a C++ application, use the enumerators to <see href="https://help.
         <Name>swBalloonItemNumbersOrder_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Balloon item ordering options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Balloon item ordering options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swBalloonLayoutType_e</Name>
@@ -18476,7 +17993,7 @@ For example, when you set IBomTableSortData::ItemGroups to the following array, 
         <Name>swBoundaryBossCurveInfluenceType_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Boundary feature curve influence types. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Boundary feature curve influence types. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swBoundaryBossDirection_e</Name>
@@ -18494,7 +18011,7 @@ For example, when you set IBomTableSortData::ItemGroups to the following array, 
         <Name>swBoundingBoxOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Bounding box options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Bounding box options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swBreakCornerTypes_e</Name>
@@ -18524,7 +18041,7 @@ For example, when you set IBomTableSortData::ItemGroups to the following array, 
         <Name>swCADFamilyCfgOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[SOLIDWORKS Design connected to the 3DEXPERIENCE platform family configuration options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[SOLIDWORKS Design connected to the 3DEXPERIENCE platform family configuration options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swCalloutTargetStyle_e</Name>
@@ -18584,7 +18101,7 @@ For example, when you set IBomTableSortData::ItemGroups to the following array, 
         <Name>swCenterMarkConnectionLine_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Visibility options for connection lines of center marks. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Visibility options for connection lines of center marks. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swCenterMarkHandle_e</Name>
@@ -18633,7 +18150,7 @@ For example, when you set IBomTableSortData::ItemGroups to the following array, 
         <Name>swCheckInterferenceOption_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Check interference options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Check interference options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swCheckOutOfDate_e</Name>
@@ -18645,7 +18162,7 @@ For example, when you set IBomTableSortData::ItemGroups to the following array, 
         <Name>swCheckSpellingOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Spell check options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Spell check options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swChildComponentInBOMOption_e</Name>
@@ -18675,7 +18192,7 @@ For example, when you set IBomTableSortData::ItemGroups to the following array, 
         <Name>swCloseReopenOption_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[File close and reopen options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[File close and reopen options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swClosedCornerTypes_e</Name>
@@ -18750,19 +18267,19 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Name>swCommandItemType_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Types of command items. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Types of command items. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swCommandTabButtonFlyoutStyle_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[CommandManager tab button flyout styles. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[CommandManager tab button flyout styles. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swCommandTabButtonTextDisplay_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[CommandManager tab button text display. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[CommandManager tab button text display. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swCommand_e</Name>
@@ -18780,7 +18297,7 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Name>swComponentIdentifier_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Component display options for the FeatureManager design tree. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Component display options for the FeatureManager design tree. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swComponentLoadStatus_e</Name>
@@ -18852,13 +18369,13 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Name>swConfigurationOptions2_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Option bits used when setting configuration options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Option bits used when setting configuration options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swConfigurationOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Option bits used when setting configuration options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Option bits used when setting configuration options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swConfigurationType_e</Name>
@@ -19051,7 +18568,7 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Name>swCreateFeatureBodyOpts_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for creating bodies. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for creating bodies. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swCreateFeatureError_e</Name>
@@ -19075,7 +18592,7 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Name>swCreateSectionViewAtOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options that affect the section view that is created. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options that affect the section view that is created. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swCreateSeedCutType_e</Name>
@@ -19087,7 +18604,7 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Name>swCreateWireBodyOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for creating wire bodies. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for creating wire bodies. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swCropViewErrors_e</Name>
@@ -19219,7 +18736,7 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Name>swDeleteSelectionOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for deleting features. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for deleting features. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swDesignTableErrors_e</Name>
@@ -19593,7 +19110,7 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Name>swDocTemplateTypes_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Document template types. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Document template types. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[These values can be OR'd together to indicate on which toolbar the document types should reside.]]></Remarks>
     </Type>
     <Type>
@@ -19619,13 +19136,13 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Name>swDraftAnalysisOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Draft analysis options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Draft analysis options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swDraftAnalysisShow_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Show draft analsyis options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Show draft analsyis options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swDraftFacePropagationType_e</Name>
@@ -19674,7 +19191,7 @@ BEGIN_SINK_MAP(CSwDrawing)
 SINK_ENTRY_EX(ID_DRAWINGDOC_EVENTS, DIID_DDrawingDocEvents, swDrawingDestroyNotify, DestroyNotify)
 SINK_ENTRY_EX(ID_DRAWINGDOC_EVENTS, DIID_DDrawingDocEvents, swDrawingNewSelectionNotify, NewSelectionNotify)
 END_SINK_MAP()
-If developing a C++ application, use the enumerators to <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/events.htm">register for notifications</see> for <see cref="SOLIDWORKS.Interop.sldworks.IDrawingDoc">IDrawingDoc</see> events.]]></Remarks>
+If developing a C++ application, use the enumerators to <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/events.htm">register for notifications</see> for <see cref="SOLIDWORKS.Interop.sldworks.IDrawingDoc">IDrawingDoc</see> events.]]></Remarks>
     </Type>
     <Type>
         <Name>swDrawingProjectionType_e</Name>
@@ -19870,6 +19387,12 @@ If developing a C++ application, use the enumerators to <see href="https://help.
         <Description><![CDATA[Flat-pattern view options.]]></Description>
     </Type>
     <Type>
+        <Name>swExportGeomOptions_e</Name>
+        <Assembly>SolidWorks.Interop.swconst</Assembly>
+        <Namespace>SolidWorks.Interop.swconst</Namespace>
+        <Description><![CDATA[DXF/DWG geometry export options.]]></Description>
+    </Type>
+    <Type>
         <Name>swExportSVPJFileFormatGroupType_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
@@ -19924,7 +19447,7 @@ SINK_ENTRY_EX(ID_FEATMGRVIEW_EVENTS, DIID_DFeatMgrViewEvents, swFMViewDestroyNot
 SINK_ENTRY_EX(ID_FEATMGRVIEW_EVENTS, DIID_DFeatMgrViewEvents, swFMViewActivateNotify, ActivateNotify)
 SINK_ENTRY_EX(ID_FEATMGRVIEW_EVENTS, DIID_DFeatMgrViewEvents, swFMViewDeactivateNotify , DeActivateNotify)
 END_SINK_MAP()
-If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/events.htm">register for notifications</see> for <see cref="SOLIDWORKS.Interop.sldworks.IFeatMgrView">IFeatMgrView</see> events.]]></Remarks>
+If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/events.htm">register for notifications</see> for <see cref="SOLIDWORKS.Interop.sldworks.IFeatMgrView">IFeatMgrView</see> events.]]></Remarks>
     </Type>
     <Type>
         <Name>swFaceCoincidentResult_e</Name>
@@ -19978,7 +19501,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swFeatureChamferOption_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Chamfer feature options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Chamfer feature options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swFeatureDimensionParameter_e</Name>
@@ -19990,7 +19513,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swFeatureEditStatus_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Editing status of feature. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Editing status of feature. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[Although swFeatureEditStatus_e is a bitmask, you currently cannot combine its mutually exclusive enumerators.]]></Remarks>
     </Type>
     <Type>
@@ -20003,14 +19526,14 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swFeatureFillSurfaceOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Feature fill surface options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Feature fill surface options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[Some options might not work because the topology of the surface fill to be created might not permit them. In these cases, the options are ignored.]]></Remarks>
     </Type>
     <Type>
         <Name>swFeatureFilletOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Fillet/chamfer options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Fillet/chamfer options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swFeatureFilletProfileType_e</Name>
@@ -20094,19 +19617,19 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swFileLoadError_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[File load errors. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[File load errors. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swFileLoadWarning_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[File load warnings for <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.OpenDoc6">ISldWorks::OpenDoc6</see>. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[File load warnings for <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.OpenDoc6">ISldWorks::OpenDoc6</see>. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swFileSaveError_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[File save errors. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[File save errors. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[Not all of these return codes are fatal errors. The return code is a bitmask of different conditions that can occur during the operation, some of which are fatal and some are informational or warnings.]]></Remarks>
     </Type>
     <Type>
@@ -20125,7 +19648,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swFileSaveWarning_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Values for File, Save warnings that can be returned from the <see cref="SOLIDWORKS.Interop.sldworks.IModelDoc2">IModelDoc2</see> Save methods. These warnings do not cause the File, Save operation to fail. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Values for File, Save warnings that can be returned from the <see cref="SOLIDWORKS.Interop.sldworks.IModelDoc2">IModelDoc2</see> Save methods. These warnings do not cause the File, Save operation to fail. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swFilletOverFlowType_e</Name>
@@ -20215,7 +19738,13 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swGetOpenFileNameOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for opening a file returned by <see cref="SolidWorks.Interop.sldworks.ISldWorks.GetOpenFileName2">ISldWorks::GetOpenFileName2</see>. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for opening a file returned by <see cref="SolidWorks.Interop.sldworks.ISldWorks.GetOpenFileName2">ISldWorks::GetOpenFileName2</see>. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+    </Type>
+    <Type>
+        <Name>swGlobalBBoxLWTADirectionType_e</Name>
+        <Assembly>SolidWorks.Interop.swconst</Assembly>
+        <Namespace>SolidWorks.Interop.swconst</Namespace>
+        <Description><![CDATA[Length, width, and thickness directions for a rectangular bounding box and axis directions for a cylindrical bounding box.]]></Description>
     </Type>
     <Type>
         <Name>swGlobalBoundingBoxFitOptions_e</Name>
@@ -20503,7 +20032,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swImprintingFacesOpts_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Imprinting faces options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Imprinting faces options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swInConfigurationOpts_e</Name>
@@ -20527,19 +20056,19 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swInsertAnnotation_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Annotation types. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Annotation types. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swInsertAssyOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Insert assembly into part options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Insert assembly into part options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swInsertEdgeFlangeOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Sheet metal edge flange options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Sheet metal edge flange options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swInsertNewAssemblyErrorCode_e</Name>
@@ -20563,13 +20092,13 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swInsertPartOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Part insertion options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Part insertion options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swInsertSlicingError_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Error codes for slicing insertion. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Error codes for slicing insertion. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swInsertTableColumnWidthStyle_e</Name>
@@ -20660,7 +20189,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swLayerOverride_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Layer override types. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Layer override types. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swLeaderLineVisibility_e</Name>
@@ -20824,7 +20353,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swMacroFeatureOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Placement of the macro feature in the FeatureManager design tree options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Placement of the macro feature in the FeatureManager design tree options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swMacroFeatureParamType_e</Name>
@@ -20836,7 +20365,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swMacroFeatureSecurityOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Macro feature security options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Macro feature security options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swMacroMethods_e</Name>
@@ -20854,7 +20383,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swManipulatorOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Manipulator options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Manipulator options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swManipulatorRepresentation_e</Name>
@@ -21017,7 +20546,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swMirrorPartOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for creating a mirror part. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for creating a mirror part. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swMirrorPlaneType_e</Name>
@@ -21041,7 +20570,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swModelRebuildStatus_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Rebuild status of model. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Rebuild status of model. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swModelRouteType_e</Name>
@@ -21106,7 +20635,7 @@ SINK_ENTRY_EX(ID_MOUSE_EVENTS, DIID_DMouseEvents, swMouseSelectNotify, MouseSele
 SINK_ENTRY_EX(ID_MOUSE_EVENTS, DIID_DMouseEvents, swMouseLBtnDownNotify, MouseLBtnDownNotify)
 END_SINK_MAP()
  
-If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.IMouse">IMouse</see> events.]]></Remarks>
+If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.IMouse">IMouse</see> events.]]></Remarks>
     </Type>
     <Type>
         <Name>swMouse_e</Name>
@@ -21130,7 +20659,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swMoveCopyOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Move/copy options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Move/copy options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swMoveFaceType_e</Name>
@@ -21172,7 +20701,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swNameType_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Names of types of entities. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Names of types of entities. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swNonInterferingComponentDisplay_e</Name>
@@ -21256,7 +20785,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swOpenDocOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[How to open documents using <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.OpenDoc6">ISldWorks::OpenDoc6</see>. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[How to open documents using <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.OpenDoc6">ISldWorks::OpenDoc6</see>. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swOrdDimEndSymbol_e</Name>
@@ -21451,7 +20980,7 @@ SINK_ENTRY_EX(ID_PARTDOC_EVENTS, DIID_DPartDocEvents, swPartDestroyNotify, Destr
 SINK_ENTRY_EX(ID_PARTDOC_EVENTS, DIID_DPartDocEvents, swPartNewSelectionNotify, NewSelectionNotify)
 END_SINK_MAP()
  
-If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/events.htm">register for notifications</see> for <see cref="SOLIDWORKS.Interop.sldworks.IPartDoc">IPartDoc</see> events.]]></Remarks>
+If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/events.htm">register for notifications</see> for <see cref="SOLIDWORKS.Interop.sldworks.IPartDoc">IPartDoc</see> events.]]></Remarks>
     </Type>
     <Type>
         <Name>swPartingLineFeatureStatus_e</Name>
@@ -21523,7 +21052,7 @@ If developing a C++ application, use these enumerators to <see href="https://he
         <Name>swPersistReferencedObjectStates_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Object codes for objects' persistent reference IDs. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Object codes for objects' persistent reference IDs. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swPipingPenetrationStatus_e</Name>
@@ -21535,7 +21064,7 @@ If developing a C++ application, use these enumerators to <see href="https://he
         <Name>swPointInferenceBrokerOption_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Inference points options from add-ins. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Inference points options from add-ins. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swPointStyle_e</Name>
@@ -21547,7 +21076,7 @@ If developing a C++ application, use these enumerators to <see href="https://he
         <Name>swPresentationOpts_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[SOLIDWORKS Presentation options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[SOLIDWORKS Presentation options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swPrimaryMemberPointLengthEndCondition_e</Name>
@@ -21589,13 +21118,13 @@ If developing a C++ application, use these enumerators to <see href="https://he
         <Name>swPropMgrPageControlOnResizeOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[PropertyManager page control resize options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[PropertyManager page control resize options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swPropMgrPageLabelStyle_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[ProperyManager page control label styles. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[ProperyManager page control label styles. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swPropMgrPageLabelUnderlineStyle_e</Name>
@@ -21607,13 +21136,13 @@ If developing a C++ application, use these enumerators to <see href="https://he
         <Name>swPropMgrPageListBoxStyle_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[PropertyManager page list box styles. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[PropertyManager page list box styles. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swPropMgrPageNumberBoxStyle_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[PropertyManager page number box styles. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[PropertyManager page number box styles. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[When the user selects an item in the attached drop-down list, SOLIDWORKS attempts to use that item as a value in the number box. Thus, the items in the attached drop-down list should be numeric values and optionally include their units. The add-in then gets a callback via IPropertyManagerPage2Handler9::OnNumberboxChanged as if the user had typed a value in the number box or clicked the up-arrow or down-arrow buttons to increment or decrement the value.
 If you do not want your add-in to directly use items in the attached drop-down list in the number box, but instead want it to react to the user selecting a computed or linked value in the number box, then use swPropMgrPageNumberBoxStyle_AvoidSelectionText.]]></Remarks>
     </Type>
@@ -21621,25 +21150,25 @@ If you do not want your add-in to directly use items in the attached drop-down l
         <Name>swPropMgrPageOptionStyle_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[PropertyManage page group option styles. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[PropertyManage page group option styles. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swPropMgrPageSelectionBoxStyle_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[PropertyManager page selection box styles. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[PropertyManager page selection box styles. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swPropMgrPageSliderStyle_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[PropertyManager page slider styles. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[PropertyManager page slider styles. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swPropMgrPageTextBoxStyle_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[PropertyManager page textbox styles. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[PropertyManager page textbox styles. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swPropSheetType_e</Name>
@@ -21653,7 +21182,7 @@ An example of a property sheet is the dialog that is displayed when you click To
         <Name>swPropertyManagerButtonTypes_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[PropertyManager button types. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[PropertyManager button types. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swPropertyManagerCheckboxState_e</Name>
@@ -21721,13 +21250,13 @@ An example of a property sheet is the dialog that is displayed when you click To
         <Name>swPropertyManagerPageOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for PropertyManager pages. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for PropertyManager pages. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swPropertyManagerPageShowOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for showing PropertyManager pages. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for showing PropertyManager pages. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swPropertyManagerPageStatus_e</Name>
@@ -21753,7 +21282,7 @@ BEGIN_SINK_MAP(CSwPropertySheet)
 SINK_ENTRY_EX(ID_SWPROPERTYSHEET_EVENTS, DIID_DSwPropertySheetEvents, swPropertySheetCreateControlNotify, CreateControlNotify)
 SINK_ENTRY_EX(ID_SWPROPERTYSHEET_EVENTS, DIID_DSwPropertySheetEvents, swPropertySheetDestroyNotify, DestroyNotify)
 END_SINK_MAP()
-If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/events.htm">register for notifications</see> for <see cref="SOLIDWORKS.Interop.sldworks.ISWPropertySheet">ISWPropertySheet</see> events.]]></Remarks>
+If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/events.htm">register for notifications</see> for <see cref="SOLIDWORKS.Interop.sldworks.ISWPropertySheet">ISWPropertySheet</see> events.]]></Remarks>
     </Type>
     <Type>
         <Name>swPublishStepOpts_e</Name>
@@ -21795,13 +21324,13 @@ If developing a C++ application, use these enumerators to <see href="https://he
         <Name>swRayPtsOpts_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Ray points options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Ray points options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swRayPtsResults_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Types of intersections and whether the rays are entering or exiting the body when they hit. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Types of intersections and whether the rays are entering or exiting the body when they hit. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swRayTraceRenderImageFormat_e</Name>
@@ -21837,7 +21366,7 @@ If developing a C++ application, use these enumerators to <see href="https://he
         <Name>swRebuildOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Rebuild options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Rebuild options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swRefAxisType_e</Name>
@@ -21855,7 +21384,7 @@ If developing a C++ application, use these enumerators to <see href="https://he
         <Name>swRefPlaneReferenceConstraints_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Reference plane constraints. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Reference plane constraints. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swRefPlaneReferenceIndex_e</Name>
@@ -21981,7 +21510,7 @@ If developing a C++ application, use these enumerators to <see href="https://he
         <Name>swRepairSketchOption_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for repairing sketches. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for repairing sketches. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swReplaceComponentError_e</Name>
@@ -22029,7 +21558,7 @@ If developing a C++ application, use these enumerators to <see href="https://he
         <Name>swRevolveOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Revolve feature options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Revolve feature options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swRevolveType_e</Name>
@@ -22075,7 +21604,7 @@ Edit revolve
         <Name>swRoutingComponentGroupingOption_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Routing components grouping options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Routing components grouping options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swRoutingFlattenConnectorOptions_e</Name>
@@ -22197,7 +21726,7 @@ Edit revolve
         <Name>swSaveAsOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Save As options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Save As options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[These options only apply to saving to native SOLIDWORKS file formats. For example, to export a SOLIDWORKS file to a VRML file format, use <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.GetUserPreferenceToggle">ISldWorks::GetUserPreferenceToggle</see> and <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.SetUserPreferenceToggle">ISldWorks::SetUserPreferenceToggle</see> with swExportVrmlAllComponentsInSingleFile.]]></Remarks>
     </Type>
     <Type>
@@ -22234,7 +21763,7 @@ Edit revolve
         <Name>swSaveWithReferencesOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for saving references while getting the <see cref="SolidWorks.Interop.sldworks.IAdvancedSaveAsOptions">IAdvancedSaveAsOptions</see> object; used by the Options parameter of <see cref="SolidWorks.Interop.sldworks.IModelDocExtension.GetAdvancedSaveAsOptions">IModelDocExtension::GetAdvancedSaveAsOptions</see>. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for saving references while getting the <see cref="SolidWorks.Interop.sldworks.IAdvancedSaveAsOptions">IAdvancedSaveAsOptions</see> object; used by the Options parameter of <see cref="SolidWorks.Interop.sldworks.IModelDocExtension.GetAdvancedSaveAsOptions">IModelDocExtension::GetAdvancedSaveAsOptions</see>. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swScaleType_e</Name>
@@ -22300,7 +21829,7 @@ Edit revolve
         <Name>swSelectOption_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Selection options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Selection options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swSelectType_e</Name>
@@ -22854,7 +22383,7 @@ swSelSKETCHBITMAP
 
 
 swSelDOWELSYMS
-"DOWLELSYM"
+"DOWELSYM"
 
 <see cref="SOLIDWORKS.Interop.sldworks.IDowelSymbol">IDowelSymbol</see>
 
@@ -23110,7 +22639,7 @@ swSelCOSMETICWELDS
 
 
 swSelMAGNETICLINES
-"MAGNETICLINES"
+"MAGNETICLINE"
 
 
 
@@ -23170,6 +22699,16 @@ swSelADVSTRUCTMEMBER
 "ADVSTRUCTMEMBER"
 
 
+
+swSelFAMILYTABLEFEAT
+"FamilyTableFeat"
+
+
+
+swSelFAMILYTABLE
+"FamilyTable"
+
+
 1 Use Feature::GetSpecificFeature2 to get the interface shown in the fourth column.
 2 Use QueryInterface to get the interface shown in the fourth column.
 3 Use swSelWELDBEADS to select caterpillar or end-treatment weld beads in drawings. To select fillet bead features, use "BODYFEATURE" with <see cref="SOLIDWORKS.Interop.sldworks.IModelDocExtension.SelectByID2">IModelDocExtension::SelectByID2</see>.  
@@ -23215,7 +22754,7 @@ IDs returned for members in this enumeration:  
   SwSelMAGNETICLINES = 225,   // "MagneticLine"  swSelPUNCHTABLEFEATS = 234,  //PUNCH TABLES  swSelREVISIONCLOUDS = 240,   // "REVISIONCLOUD"  swSelBorder = 254,
   swSelSELECTIONSETFOLDER = 258,  swSelSELECTIONSETNODE = 259,
   swSelGRAPHICSBODY = 262,  //"MESH BODY FEATURE"  swSelFACETS = 268,    //"MESHFACETREF"  swSelMESHFACETEDGES = 269,  //"MESHFINREF"  swSelMESHFACETVERTICES = 270, //"MESHVERTEXREF"
-  swSelMESHSOLIDBODIES = 274,  //"MSOLIDBODY"    swSelADVSTRUCTMEMBER = 295,  // "ADVSTRUCTMEMBER"
+  swSelMESHSOLIDBODIES = 274,  //"MSOLIDBODY"    swSelADVSTRUCTMEMBER = 295,  // "ADVSTRUCTMEMBER"  swSelFAMILYTABLEFEAT = 316, //FamilyTableFeat  swSelFAMILYTABLE = 317, //FamilyTable
   swSelEVERYTHING     = 4294967293,  swSelLOCATIONS  = 4294967294,  swSelUNSUPPORTED = 4294967295]]></Remarks>
     </Type>
     <Type>
@@ -23247,7 +22786,7 @@ IDs returned for members in this enumeration:  
         <Name>swSetComponentIdentifierResult_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Set component identifier status. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Set component identifier status. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swSetComponentsAndTransformsStatus_e</Name>
@@ -23505,7 +23044,7 @@ IDs returned for members in this enumeration:  
         <Name>swSketchFullyDefineRelationType_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Fully defined sketch relations. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Fully defined sketch relations. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swSketchPictureTransparencyStyle_e</Name>
@@ -23566,7 +23105,7 @@ IDs returned for members in this enumeration:  
         <Name>swSlicingTypes_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Types of slicing. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Types of slicing. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swSlotMateConstraintOptions_e</Name>
@@ -23857,7 +23396,7 @@ In drawings that have Rapid dimensioning turned on, this enumerator may be used�
         <Name>swSweptFlangeError_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Swept flange creation errors. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Swept flange creation errors. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swSweptFlangePositionTypes_e</Name>
@@ -24022,7 +23561,7 @@ SINK_ENTRY_EX(ID_TASKPANE_EVENTS, DIID_DTaskpaneViewEvents, swAppTaskPaneDestroy
 SINK_ENTRY_EX(ID_TASKPANE_EVENTS, DIID_DTaskpaneViewEvents, swAppTaskPaneActivateNotify, ActivateNotify)
 SINK_ENTRY_EX(ID_TASKPANE_EVENTS, DIID_DTaskpaneViewEvents, swAppTaskPaneDeactivateNotify, DeActivateNotify)
 END_SINK_MAP()
-If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.ITaskpaneView">ITaskpaneView</see> events.]]></Remarks>
+If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.ITaskpaneView">ITaskpaneView</see> events.]]></Remarks>
     </Type>
     <Type>
         <Name>swTaskPaneTab_e</Name>
@@ -24154,7 +23693,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swToolBoxPartType_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Toolbox part types. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Toolbox part types. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swToolBoxPropertyName_e</Name>
@@ -24214,7 +23753,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swTranslationNotifyOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Translation notification options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Translation notification options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swTransparencyState_e</Name>
@@ -24238,7 +23777,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swTriadManipulatorDoNotShow_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Triad manipulator visibility options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Triad manipulator visibility options. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
     </Type>
     <Type>
         <Name>swTrimToolMemberObjectType_e</Name>
@@ -24466,13 +24005,13 @@ SINK_ENTRY_EX(ID_MODELVIEW_EVENTS, DIID_DModelViewEvents, swViewDestroyNotify, D
 SINK_ENTRY_EX(ID_MODELVIEW_EVENTS, DIID_DModelViewEvents, swViewRepaintNotify, RepaintNotify)
 END_SINK_MAP()
  
-If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.IModelView">IModelView</see> events.]]></Remarks>
+If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.IModelView">IModelView</see> events.]]></Remarks>
     </Type>
     <Type>
         <Name>swViewOrientationUpAxisFlyout_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[View orientation]]></Description>
+        <Description><![CDATA[View orientation up axis flyout options.]]></Description>
     </Type>
     <Type>
         <Name>swViewportDisplay_e</Name>
@@ -24532,7 +24071,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swWeldmentTrimExtendOptionType_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for weldment trim extensions. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>]]></Description>
+        <Description><![CDATA[Options for weldment trim extensions. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>]]></Description>
     </Type>
     <Type>
         <Name>swWindowState_e</Name>
@@ -24623,7 +24162,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swZonalSectionViewZones_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Intersection zones for section views. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>]]></Description>
+        <Description><![CDATA[Intersection zones for section views. <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>]]></Description>
         <Remarks><![CDATA[Descriptions of the intersection zones in relation to the number of sectioning planes appear in <see cref="SolidWorks.Interop.sldworks.ISectionViewData.SectionedZones">ISectionViewData::SectionedZones</see>.]]></Remarks>
     </Type>
     <Type>

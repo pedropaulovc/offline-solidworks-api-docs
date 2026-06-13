@@ -1,22 +1,22 @@
 {
   "statistics": {
     "total_assemblies": 10,
-    "total_types": 1563,
-    "total_properties": 3621,
-    "total_methods": 8281,
-    "total_enum_members": 10428,
-    "types_with_descriptions": 1508,
-    "types_with_remarks": 389,
+    "total_types": 1516,
+    "total_properties": 3629,
+    "total_methods": 8290,
+    "total_enum_members": 10454,
+    "types_with_descriptions": 1512,
+    "types_with_remarks": 390,
     "types_with_examples": 457,
     "examples_added": 623,
-    "properties_with_params": 105,
-    "methods_with_params": 5104,
-    "total_parameters_documented": 15492
+    "properties_with_params": 106,
+    "methods_with_params": 5112,
+    "total_parameters_documented": 15518
   },
   "output_files": {
-    "SolidWorks.Interop.swdimxpert": "90_export_xmldoc\\output\\SolidWorks.Interop.swdimxpert.xml",
     "SolidWorks.Interop.swmotionstudy": "90_export_xmldoc\\output\\SolidWorks.Interop.swmotionstudy.xml",
     "SolidWorks.Interop.sldworks": "90_export_xmldoc\\output\\SolidWorks.Interop.sldworks.xml",
+    "SolidWorks.Interop.swdimxpert": "90_export_xmldoc\\output\\SolidWorks.Interop.swdimxpert.xml",
     "SolidWorks.Interop.swpublished": "90_export_xmldoc\\output\\SolidWorks.Interop.swpublished.xml",
     "SolidWorks.Interop.dsgnchk": "90_export_xmldoc\\output\\SolidWorks.Interop.dsgnchk.xml",
     "SolidWorks.Interop.swscanto3d": "90_export_xmldoc\\output\\SolidWorks.Interop.swscanto3d.xml",

@@ -32,14 +32,16 @@ def test_html_save_pipeline_url_to_file_path():
     """Test URL to file path conversion"""
     pipeline = HtmlSavePipeline()
 
-    # Test simple URL
+    # Simple URL (no query params): the original .htm extension is preserved.
+    # This is required by phase 80 (parse_examples.py), which reads example files
+    # via rglob('*.htm'); rewriting to .html would make it find zero examples.
     url = "https://help.solidworks.com/2026/english/api/sldworksapi/test.htm"
     path = pipeline.url_to_file_path(url)
-    # The .htm should be replaced with .html
     assert "sldworksapi" in str(path)
-    assert str(path).endswith(".html")
+    assert str(path).endswith("test.htm")
 
-    # Test URL with query parameters
+    # URL with query parameters: a deterministic hash is appended for uniqueness
+    # and the filename is normalized to .html.
     url_with_query = "https://help.solidworks.com/2026/english/api/sldworksapi/test.htm?id=123"
     path_with_query = pipeline.url_to_file_path(url_with_query)
     path_str = str(path_with_query)

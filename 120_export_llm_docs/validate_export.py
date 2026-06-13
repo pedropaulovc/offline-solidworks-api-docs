@@ -115,12 +115,19 @@ class ExportValidator:
         enums_path = self.output_path / "enums"
         index_path = self.output_path / "index"
 
-        # Count type directories
+        # Count type directories and enum files (enums are flat: enums/{Enum}.md)
         type_dirs = [d for d in types_path.iterdir() if d.is_dir()] if types_path.exists() else []
-        enum_dirs = [d for d in enums_path.iterdir() if d.is_dir()] if enums_path.exists() else []
+        enum_files = [f for f in enums_path.iterdir() if f.is_file() and f.suffix == ".md"] if enums_path.exists() else []
 
         print(f"  Found {len(type_dirs)} type directories")
-        print(f"  Found {len(enum_dirs)} enum directories")
+        print(f"  Found {len(enum_files)} enum files")
+
+        # Enums must be flat single files, not per-enum subdirectories
+        stray_enum_dirs = [d for d in enums_path.iterdir() if d.is_dir()] if enums_path.exists() else []
+        if stray_enum_dirs:
+            self.errors.append(
+                f"Found {len(stray_enum_dirs)} enum subdirectories; enums must be flat enums/{{Enum}}.md files"
+            )
 
         # Count all markdown files in types and enums
         md_files = []
@@ -135,10 +142,10 @@ class ExportValidator:
         for type_dir in type_dirs[:sample_size]:
             self._validate_type_directory(type_dir, "type")
 
-        # Validate sample enum directories
-        sample_size = min(5, len(enum_dirs))
-        for enum_dir in enum_dirs[:sample_size]:
-            self._validate_type_directory(enum_dir, "enum")
+        # Validate sample enum files (single self-contained file with all members inline)
+        sample_size = min(5, len(enum_files))
+        for enum_file in enum_files[:sample_size]:
+            self._validate_enum_file(enum_file)
 
         # Validate index files
         if index_path.exists():
@@ -177,6 +184,17 @@ class ExportValidator:
         sample_size = min(3, len(member_files))
         for member_file in member_files[:sample_size]:
             self._validate_markdown_file(member_file, f"{type_kind.capitalize()} Member", require_yaml=True)
+
+    def _validate_enum_file(self, enum_file: Path):
+        """Validate a flat enum file: YAML frontmatter + an inline members section."""
+        self._validate_markdown_file(enum_file, "Enum", require_yaml=True)
+        try:
+            content = enum_file.read_text(encoding="utf-8")
+        except OSError as e:
+            self.errors.append(f"Could not read enum file {enum_file.name}: {e}")
+            return
+        if "## Enumeration Members" not in content:
+            self.warnings.append(f"Enum file missing '## Enumeration Members' section: {enum_file.name}")
 
     def _validate_example_docs(self):
         """Validate example documentation files."""

@@ -154,15 +154,15 @@ class CrawlValidator:
                     url_count += 1
 
                     # Check required fields
-                    required_fields = ["print_url", "file_path", "content_hash"]
+                    required_fields = ["url", "file_path", "content_hash"]
                     for field in required_fields:
                         if field not in obj:
                             self.warnings.append(
-                                f"Missing field '{field}' in URL record: {obj.get('print_url', 'Unknown')}"
+                                f"Missing field '{field}' in URL record: {obj.get('url', 'Unknown')}"
                             )
 
                     # Check for duplicate URLs
-                    url = obj.get("print_url")
+                    url = obj.get("url")
                     if url in urls_seen:
                         self.warnings.append(f"Duplicate URL in metadata: {url}")
                     urls_seen.add(url)
@@ -175,8 +175,13 @@ class CrawlValidator:
                     if "content_length" in obj:
                         total_size += obj["content_length"]
 
-                    # Check URL is within boundary
-                    if url and "/2026/english/api/" not in url:
+                    # Check URL is within boundary. Two in-boundary forms exist:
+                    # the path form (.../2026/english/api/...) for content pages and
+                    # the expandToc API form (?version=2026&...&product=api) the
+                    # crawler uses to discover the TOC tree.
+                    in_path_boundary = "/2026/english/api/" in (url or "")
+                    in_expandtoc_api = "/expandToc?" in (url or "") and "version=2026" in (url or "")
+                    if url and not (in_path_boundary or in_expandtoc_api):
                         self.warnings.append(f"URL outside boundary: {url}")
 
             self.stats["urls_crawled"] = url_count
@@ -219,9 +224,13 @@ class CrawlValidator:
         if urls_file.exists():
             with jsonlines.open(urls_file) as reader:
                 for obj in reader:
-                    if "file_path" in obj:
+                    # Only HTML records have a corresponding file under html/.
+                    # expandToc API responses are saved as .json and are not HTML
+                    # pages, so excluding them avoids false "missing HTML" reports.
+                    file_path_str = obj.get("file_path", "")
+                    if file_path_str.lower().endswith((".htm", ".html")):
                         # Convert relative path in metadata to absolute
-                        file_path = self.output_dir.parent / obj["file_path"]
+                        file_path = self.output_dir.parent / file_path_str
                         metadata_files.add(file_path)
 
             # Check for orphaned files
@@ -277,8 +286,8 @@ class CrawlValidator:
 
         with jsonlines.open(urls_file) as reader:
             for obj in reader:
-                if "content_hash" in obj and "print_url" in obj:
-                    hash_to_urls[obj["content_hash"]].append(obj["print_url"])
+                if "content_hash" in obj and "url" in obj:
+                    hash_to_urls[obj["content_hash"]].append(obj["url"])
 
         duplicates = {h: urls for h, urls in hash_to_urls.items() if len(urls) > 1}
 
@@ -383,8 +392,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Validate SolidWorks API documentation crawl")
     parser.add_argument(
         "--output-dir",
-        default="01-crawl-raw/output",
-        help="Output directory to validate (default: 01-crawl-raw/output)",
+        default="output",
+        help="Output directory to validate (default: output)",
     )
     parser.add_argument("--verbose", action="store_true", help="Show detailed validation information")
 
