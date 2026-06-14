@@ -1,15 +1,15 @@
 {
-  "version": "v3.1.0",
+  "version": "v3.2.0",
   "packages": [
     {
       "package_name": "SolidWorks.Interop.xmldoc.zip",
-      "version": "v3.1.0",
+      "version": "v3.2.0",
       "package_type": "xmldoc",
       "description": "Microsoft XMLDoc files for Visual Studio IntelliSense",
       "source_phase": "90_export_xmldoc",
       "source_directory": "90_export_xmldoc\\output",
       "file_count": 10,
-      "archive_size_bytes": 2010779,
+      "archive_size_bytes": 2353537,
       "files": [
         "SolidWorks.Interop.dsgnchk.xml",
         "SolidWorks.Interop.sldworks.xml",
@@ -25,15 +25,15 @@
     },
     {
       "package_name": "SolidWorks.Interop.llms.zip",
-      "version": "v3.1.0",
+      "version": "v3.2.0",
       "package_type": "llm_docs",
       "description": "LLM-friendly markdown documentation (grep-optimized)",
       "source_phase": "120_export_llm_docs",
       "source_directory": "120_export_llm_docs\\output",
-      "file_count": 15992,
-      "archive_size_bytes": 11362645
+      "file_count": 15994,
+      "archive_size_bytes": 12563829
     }
   ],
   "total_packages": 2,
-  "total_size_bytes": 13373424
+  "total_size_bytes": 14917366
 }
