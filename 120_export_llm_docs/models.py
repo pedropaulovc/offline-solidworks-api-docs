@@ -16,6 +16,14 @@ class Parameter:
 
 
 @dataclass
+class CrossRef:
+    """A 'See Also' cross-reference (cref to an API member, or href to a page)."""
+    attr: str  # "cref" or "href"
+    value: str
+    label: str
+
+
+@dataclass
 class ExampleReference:
     """Reference to an example with language and URL."""
     name: str
@@ -41,7 +49,9 @@ class Member:
     returns: str = ""
     remarks: str = ""
     signature: str = ""
+    return_type: str = ""
     examples: List[ExampleReference] = field(default_factory=list)
+    see_also: List[CrossRef] = field(default_factory=list)
 
 
 @dataclass
@@ -76,6 +86,7 @@ class TypeInfo:
     methods: List[Method] = field(default_factory=list)
     enum_members: List[EnumMember] = field(default_factory=list)
     functional_category: Optional[str] = None
+    see_also: List[CrossRef] = field(default_factory=list)
 
     @property
     def fully_qualified_name(self) -> str:

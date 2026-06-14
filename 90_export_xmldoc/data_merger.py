@@ -28,6 +28,14 @@ class Parameter:
 
 
 @dataclass
+class SeeAlsoRef:
+    """A 'See Also' cross-reference (cref to an API member, or href to a page)."""
+    attr: str  # "cref" or "href"
+    value: str
+    label: str
+
+
+@dataclass
 class Property:
     """Represents a property member."""
     name: str
@@ -38,6 +46,7 @@ class Property:
     availability: Optional[str] = None
     parameter_types: Optional[list[str]] = None  # For indexed properties (just types for signature)
     parameters: Optional[list[Parameter]] = None  # Full parameter info with descriptions
+    see_also: list[SeeAlsoRef] = field(default_factory=list)
 
 
 @dataclass
@@ -51,6 +60,7 @@ class Method:
     availability: Optional[str] = None
     parameter_types: Optional[list[str]] = None  # Parameter types for signature
     parameters: Optional[list[Parameter]] = None  # Full parameter info with descriptions
+    see_also: list[SeeAlsoRef] = field(default_factory=list)
 
 
 @dataclass
@@ -80,6 +90,7 @@ class TypeInfo:
     methods: list[Method] = field(default_factory=list)
     enum_members: list[EnumMember] = field(default_factory=list)
     examples: list[ExampleReference] = field(default_factory=list)
+    see_also: list[SeeAlsoRef] = field(default_factory=list)
     is_enum: bool = False
 
 
@@ -88,6 +99,27 @@ class ExampleContent:
     """Represents example code content."""
     url: str
     content: str
+
+
+def parse_see_also(parent_elem: ET.Element) -> list[SeeAlsoRef]:
+    """
+    Parse a ``<SeeAlso>`` child of ``parent_elem`` into a list of SeeAlsoRef.
+
+    Returns an empty list when there is no ``<SeeAlso>`` element.
+    """
+    see_also_elem = parent_elem.find('SeeAlso')
+    if see_also_elem is None:
+        return []
+
+    refs = []
+    for see_elem in see_also_elem.findall('See'):
+        label = (see_elem.text or '').strip()
+        if 'cref' in see_elem.attrib:
+            refs.append(SeeAlsoRef(attr='cref', value=see_elem.attrib['cref'], label=label))
+        elif 'href' in see_elem.attrib:
+            refs.append(SeeAlsoRef(attr='href', value=see_elem.attrib['href'], label=label))
+
+    return refs
 
 
 def parse_signature_parameters(signature: str) -> Optional[list[str]]:
@@ -386,6 +418,11 @@ class DataMerger:
                             url=example_url
                         ))
 
+            # Load See Also cross-references
+            see_also = parse_see_also(type_elem)
+            if see_also:
+                type_info.see_also = see_also
+
         self.log(f"Loaded descriptions for {types_with_info} types")
 
     def load_member_details(self, member_details_file: Path) -> None:
@@ -458,6 +495,9 @@ class DataMerger:
             if signature:
                 parameter_types = parse_signature_parameters(signature)
 
+            # Parse See Also cross-references
+            see_also = parse_see_also(member_elem)
+
             # Parse <Parameters> element to get full parameter info
             parameters = []
             params_elem = member_elem.find('Parameters')
@@ -502,6 +542,8 @@ class DataMerger:
                         prop.parameter_types = parameter_types
                     if parameters:
                         prop.parameters = parameters
+                    if see_also:
+                        prop.see_also = see_also
                     found = True
                     # Note: Don't break - enrich ALL properties with this name
 
@@ -520,6 +562,8 @@ class DataMerger:
                             method.parameter_types = parameter_types
                         if parameters:
                             method.parameters = parameters
+                        if see_also:
+                            method.see_also = see_also
                         found = True
                         # Note: Don't break - enrich ALL methods with this name
 

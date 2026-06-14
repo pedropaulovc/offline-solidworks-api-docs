@@ -12,8 +12,25 @@ from collections import defaultdict
 
 from models import (
     TypeInfo, Property, Method, EnumMember, Parameter,
-    ExampleReference, ExampleContent
+    ExampleReference, ExampleContent, CrossRef
 )
+
+
+def parse_see_also(parent_elem) -> List[CrossRef]:
+    """Parse a ``<SeeAlso>`` child of ``parent_elem`` into a list of CrossRef."""
+    see_also_elem = parent_elem.find('SeeAlso')
+    if see_also_elem is None:
+        return []
+
+    refs = []
+    for see_elem in see_also_elem.findall('See'):
+        label = (see_elem.text or '').strip()
+        if 'cref' in see_elem.attrib:
+            refs.append(CrossRef(attr='cref', value=see_elem.attrib['cref'], label=label))
+        elif 'href' in see_elem.attrib:
+            refs.append(CrossRef(attr='href', value=see_elem.attrib['href'], label=label))
+
+    return refs
 
 
 class DataLoader:
@@ -135,6 +152,11 @@ class DataLoader:
                         )
                         type_info.examples.append(example_ref)
 
+            # Add See Also cross-references
+            see_also = parse_see_also(type_elem)
+            if see_also:
+                type_info.see_also = see_also
+
     def _load_phase50(self, xml_path: str):
         """
         Load member details from Phase 50.
@@ -156,6 +178,8 @@ class DataLoader:
             # Extract member information
             name = member_elem.find('Name').text
             signature = member_elem.find('Signature').text if member_elem.find('Signature') is not None else ""
+            return_type_elem = member_elem.find('ReturnType')
+            return_type = return_type_elem.text.strip() if return_type_elem is not None and return_type_elem.text else ""
 
             desc_elem = member_elem.find('Description')
             description = desc_elem.text.strip() if desc_elem is not None and desc_elem.text else ""
@@ -197,6 +221,9 @@ class DataLoader:
                         )
                         examples.append(example_ref)
 
+            # Parse See Also cross-references
+            see_also = parse_see_also(member_elem)
+
             # Determine if this is a property or method based on signature
             is_property = '(' not in signature
 
@@ -208,7 +235,9 @@ class DataLoader:
                     returns=returns,
                     remarks=remarks,
                     signature=signature,
-                    examples=examples
+                    return_type=return_type,
+                    examples=examples,
+                    see_also=see_also
                 )
                 type_info.properties.append(prop)
             else:
@@ -219,7 +248,9 @@ class DataLoader:
                     returns=returns,
                     remarks=remarks,
                     signature=signature,
-                    examples=examples
+                    return_type=return_type,
+                    examples=examples,
+                    see_also=see_also
                 )
                 type_info.methods.append(method)
 
@@ -261,6 +292,11 @@ class DataLoader:
                         description=member_desc
                     )
                     type_info.enum_members.append(enum_member)
+
+            # Add See Also cross-references (don't overwrite phase 40 refs if present)
+            see_also = parse_see_also(enum_elem)
+            if see_also and not type_info.see_also:
+                type_info.see_also = see_also
 
     def _load_phase80(self, xml_path: str):
         """

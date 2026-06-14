@@ -10,7 +10,10 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from shared.xmldoc_links import convert_links_to_see_refs, convert_to_full_url, parse_href_to_cref
+import xml.etree.ElementTree as ET
+
+from shared.extraction_utils import add_see_also_element
+from shared.xmldoc_links import convert_links_to_see_refs, convert_to_full_url, href_to_see_ref, parse_href_to_cref
 
 
 class TestParseHrefToCref(unittest.TestCase):
@@ -123,6 +126,43 @@ class TestConvertLinksToSeeRefs(unittest.TestCase):
         self.assertNotIn("<p>", result)
         self.assertNotIn("</p>", result)
         self.assertIn("<see cref=", result)
+
+
+class TestHrefToSeeRef(unittest.TestCase):
+    """Test resolving See Also hrefs to (attr, value) tuples."""
+
+    def test_api_member_becomes_cref(self):
+        attr, value = href_to_see_ref(
+            "SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IComponent2~GetCorresponding.html"
+        )
+        self.assertEqual(attr, "cref")
+        self.assertEqual(value, "SolidWorks.Interop.sldworks.IComponent2.GetCorresponding")
+
+    def test_guide_page_becomes_href(self):
+        attr, value = href_to_see_ref("../sldworksapiprogguide//Overview/Welcome.htm")
+        self.assertEqual(attr, "href")
+        self.assertTrue(value.startswith("https://help.solidworks.com/"))
+
+
+class TestAddSeeAlsoElement(unittest.TestCase):
+    """Test building the <SeeAlso> XML element."""
+
+    def test_builds_see_elements(self):
+        parent = ET.Element("Member")
+        add_see_also_element(parent, [
+            {"attr": "cref", "value": "A.B.C", "label": "C Method"},
+            {"attr": "href", "value": "https://example.com", "label": "Guide"},
+        ])
+        sees = parent.findall("./SeeAlso/See")
+        self.assertEqual(len(sees), 2)
+        self.assertEqual(sees[0].get("cref"), "A.B.C")
+        self.assertEqual(sees[0].text, "C Method")
+        self.assertEqual(sees[1].get("href"), "https://example.com")
+
+    def test_empty_list_is_noop(self):
+        parent = ET.Element("Member")
+        add_see_also_element(parent, [])
+        self.assertIsNone(parent.find("SeeAlso"))
 
 
 if __name__ == "__main__":

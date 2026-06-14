@@ -187,7 +187,8 @@ class ExportPipeline:
 
         # Generate all index files
         generator.save_all_indexes(types)
-        self.stats.markdown_files_generated += 3  # by_category, by_assembly, statistics
+        # by_category, by_assembly, statistics, members_by_type, by_member_name
+        self.stats.markdown_files_generated += 5
 
     def _generate_example_docs(self,
                                 examples: Dict[str, ExampleContent],
@@ -266,6 +267,8 @@ index/
   by_category.md                  # Types by functional category
   by_assembly.md                  # Types by .NET assembly
   statistics.md                   # Stats and largest types
+  members_by_type.md              # Every member of every type (grep a type for its full surface)
+  by_member_name.md               # All members sorted by name (siblings cluster adjacently)
 
 examples/                         # Code examples (flat folder, all in one directory)
 
@@ -276,7 +279,8 @@ docs/                             # Programming guide content
 
 **Find type overview**: Read `types/{{TypeName}}/_overview.md`
 **Find method/property**: Read `types/{{TypeName}}/{{MemberName}}.md`
-**List all members**: List files in `types/{{TypeName}}/`, exclude `_overview.md`
+**List all members**: List files in `types/{{TypeName}}/`, or grep `index/members_by_type.md`
+**Find related/sibling members**: A member's `## See Also` section links related members; or grep `index/by_member_name.md` where near-identical names (e.g. `GetCorresponding` vs `GetCorrespondingEntity`) appear adjacent. Absence of a name there means it is not in the API — not merely undocumented.
 **Find an enum (with all members)**: Read `enums/{{EnumName}}.md`
 **Find by category**: Read `index/by_category.md`
 **Search by keyword**: Search file contents in `types/` or `enums/`

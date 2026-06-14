@@ -19,7 +19,8 @@ from typing import Any
 # Add parent directory to path for shared module imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from shared.xmldoc_links import convert_links_to_see_refs
+from shared.extraction_utils import add_see_also_element
+from shared.xmldoc_links import convert_links_to_see_refs, href_to_see_ref
 
 
 class EnumMemberExtractor(HTMLParser):
@@ -29,9 +30,14 @@ class EnumMemberExtractor(HTMLParser):
         super().__init__()
         self.type_name: str | None = None
         self.enum_members: list[dict[str, str]] = []
+        self.see_also: list[dict[str, str]] = []
 
         # State tracking
         self.in_pagetitle: bool = False
+        self.in_see_also_section: bool = False
+        self.in_see_also_link: bool = False
+        self.current_seealso_href: str | None = None
+        self.current_seealso_text: str = ""
         self.in_members_section: bool = False
         self.in_members_table: bool = False
         self.in_member_row: bool = False
@@ -47,6 +53,15 @@ class EnumMemberExtractor(HTMLParser):
         # Detect page title
         if tag == "span" and attrs_dict.get("id") == "pagetitle":
             self.in_pagetitle = True
+            return
+
+        # Detect links in See Also section (collect every cross-reference link)
+        if self.in_see_also_section and tag == "a":
+            href = attrs_dict.get("href", "")
+            if href and not href.startswith("#"):
+                self.in_see_also_link = True
+                self.current_seealso_href = href
+                self.current_seealso_text = ""
             return
 
         # Detect members table (enum members)
@@ -83,6 +98,18 @@ class EnumMemberExtractor(HTMLParser):
     def handle_endtag(self, tag: str) -> None:
         if tag == "span" and self.in_pagetitle:
             self.in_pagetitle = False
+            return
+
+        # Handle end of link in See Also section
+        if tag == "a" and self.in_see_also_link:
+            self.in_see_also_link = False
+            if self.current_seealso_href and self.current_seealso_text.strip():
+                attr, value = href_to_see_ref(self.current_seealso_href)
+                self.see_also.append(
+                    {"attr": attr, "value": value, "label": self.current_seealso_text.strip()}
+                )
+            self.current_seealso_href = None
+            self.current_seealso_text = ""
             return
 
         # Handle end of member description cell
@@ -130,6 +157,15 @@ class EnumMemberExtractor(HTMLParser):
         # Detect Members section header (only in h1 tags - but we simplify here)
         if text == "Members":
             self.in_members_section = True
+
+        # Detect See Also section header (appears after the members table)
+        if text == "See Also":
+            self.in_see_also_section = True
+            self.in_members_section = False
+
+        # Collect link text in See Also section
+        if self.in_see_also_link and data:
+            self.current_seealso_text += data
 
         # Collect member name (appears in <strong> tag within MemberNameCell)
         # Member names are in <strong> tags, so just collect the text
@@ -243,6 +279,7 @@ def extract_enum_members_from_file(html_file: Path) -> dict | None:
         "Assembly": assembly,
         "Namespace": namespace,
         "Members": parser.enum_members,
+        "SeeAlso": parser.see_also,
         "SourceFile": str(html_file),
     }
 
@@ -300,6 +337,9 @@ def create_xml_output(enums: list[dict[str, Any]]) -> str:
                 mem_desc = ET.SubElement(member_elem, "Description")
                 mem_desc.text = member["Description"]
                 mem_desc.set("__cdata__", "true")
+
+        # Add See Also cross-references
+        add_see_also_element(enum_elem, enum_info.get("SeeAlso", []))
 
     # Pretty print the XML
     xml_str = ET.tostring(root, encoding="unicode")

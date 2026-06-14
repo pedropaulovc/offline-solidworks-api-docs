@@ -66,6 +66,25 @@ def convert_links_to_see_refs(html: str) -> str:
     return result.strip()
 
 
+def href_to_see_ref(href: str) -> tuple[str, str]:
+    """
+    Resolve a "See Also" link href to an XML reference attribute.
+
+    Returns a (attr, value) tuple where ``attr`` is either ``"cref"`` (for API
+    type/member references) or ``"href"`` (for guide pages / external URLs).
+
+    Examples:
+    - "SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IComponent2~GetCorresponding.html"
+      -> ("cref", "SolidWorks.Interop.sldworks.IComponent2.GetCorresponding")
+    - "../sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm"
+      -> ("href", "https://help.solidworks.com/2026/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm")
+    """
+    cref = parse_href_to_cref(href)
+    if cref:
+        return ("cref", cref)
+    return ("href", convert_to_full_url(href))
+
+
 def parse_href_to_cref(href: str) -> str | None:
     """
     Parse an href to extract the cref value for type references only.

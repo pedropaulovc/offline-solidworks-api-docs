@@ -284,6 +284,20 @@ class XMLDocGenerator:
 
         return xml_str
 
+    def add_see_also(self, member: ET.Element, see_also: list) -> None:
+        """
+        Add ``<seealso>`` cross-reference elements to a member element.
+
+        Args:
+            member: The <member> XML element
+            see_also: List of SeeAlsoRef objects (attr is "cref" or "href")
+        """
+        for ref in see_also or []:
+            seealso_elem = ET.SubElement(member, 'seealso')
+            seealso_elem.set(ref.attr, ref.value)
+            if ref.label:
+                seealso_elem.text = ref.label
+
     def add_type_to_members(self, members_elem: ET.Element, type_info: TypeInfo) -> None:
         """
         Add a type and all its members to the members element.
@@ -334,6 +348,9 @@ class XMLDocGenerator:
 
                         self.stats['examples_added'] += 1
                         self.log(f"  Added C# example: {example_ref.name}")
+
+        # Add See Also cross-references
+        self.add_see_also(type_member, type_info.see_also)
 
         # Add properties
         for prop in type_info.properties:
@@ -407,6 +424,9 @@ class XMLDocGenerator:
             avail = ET.SubElement(member, 'availability')
             avail.text = prop.availability
 
+        # Add See Also cross-references
+        self.add_see_also(member, getattr(prop, 'see_also', []))
+
     def add_method_to_members(self, members_elem: ET.Element, type_info: TypeInfo,
                               method: Any) -> None:
         """
@@ -465,6 +485,9 @@ class XMLDocGenerator:
         if hasattr(method, 'availability') and method.availability:
             avail = ET.SubElement(member, 'availability')
             avail.text = method.availability
+
+        # Add See Also cross-references
+        self.add_see_also(member, getattr(method, 'see_also', []))
 
     def add_enum_member_to_members(self, members_elem: ET.Element, type_info: TypeInfo,
                                    enum_member: Any) -> None:

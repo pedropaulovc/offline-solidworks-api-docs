@@ -19,12 +19,13 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from shared.extraction_utils import (
+    add_see_also_element,
     extract_member_name_from_filename,
     extract_namespace_from_filename,
     is_member_file,
     prettify_xml,
 )
-from shared.xmldoc_links import convert_links_to_see_refs
+from shared.xmldoc_links import convert_links_to_see_refs, href_to_see_ref
 
 
 class MemberDetailsExtractor(HTMLParser):
@@ -40,6 +41,7 @@ class MemberDetailsExtractor(HTMLParser):
         self.return_value: str = ""
         self.examples: list[dict[str, str]] = []
         self.remarks: str = ""
+        self.see_also: list[dict[str, str]] = []
 
         # State tracking
         self.in_pagetitle: bool = False
@@ -52,6 +54,10 @@ class MemberDetailsExtractor(HTMLParser):
         self.in_return_section: bool = False
         self.in_example_section: bool = False
         self.in_remarks_section: bool = False
+        self.in_see_also_section: bool = False
+        self.in_see_also_link: bool = False
+        self.current_seealso_href: str | None = None
+        self.current_seealso_text: str = ""
         self.in_link: bool = False
         self.current_link_href: str | None = None
         self.current_link_text: str = ""
@@ -138,6 +144,14 @@ class MemberDetailsExtractor(HTMLParser):
                 self.current_link_href = href
                 self.current_link_text = ""
 
+        # Detect links in See Also section (collect every link, not just examples)
+        if self.in_see_also_section and tag == "a":
+            href = attrs_dict.get("href", "")
+            if href and not href.startswith("#"):
+                self.in_see_also_link = True
+                self.current_seealso_href = href
+                self.current_seealso_text = ""
+
         # Detect parameters section (dl/dt/dd structure)
         if self.in_parameters_section:
             if tag == "dt":
@@ -199,6 +213,17 @@ class MemberDetailsExtractor(HTMLParser):
 
             self.current_link_href = None
             self.current_link_text = ""
+
+        # Handle end of link in See Also section
+        if tag == "a" and self.in_see_also_link:
+            self.in_see_also_link = False
+            if self.current_seealso_href and self.current_seealso_text.strip():
+                attr, value = href_to_see_ref(self.current_seealso_href)
+                self.see_also.append(
+                    {"attr": attr, "value": value, "label": self.current_seealso_text.strip()}
+                )
+            self.current_seealso_href = None
+            self.current_seealso_text = ""
 
         # Close h1 tag - might signal end of section header
         if tag == "h1":
@@ -292,13 +317,24 @@ class MemberDetailsExtractor(HTMLParser):
                 self.in_return_section = False
                 self.in_example_section = False
                 self.in_remarks_section = True
-            elif text in ["See Also", "Availability"]:
+                self.in_see_also_section = False
+            elif text == "See Also":
+                # Collect the cross-reference links in this section
+                self.current_section = "see_also"
+                self.in_syntax_section = False
+                self.in_parameters_section = False
+                self.in_return_section = False
+                self.in_example_section = False
+                self.in_remarks_section = False
+                self.in_see_also_section = True
+            elif text == "Availability":
                 # End current section - turn off all section flags
                 self.in_syntax_section = False
                 self.in_parameters_section = False
                 self.in_return_section = False
                 self.in_example_section = False
                 self.in_remarks_section = False
+                self.in_see_also_section = False
                 self.current_section = None
 
         # Detect "Parameters", "Return Value", and "Property Value" headers (h4 tags)
@@ -327,6 +363,10 @@ class MemberDetailsExtractor(HTMLParser):
         if self.in_link and data:
             self.current_link_text += data
 
+        # Collect link text in See Also section
+        if self.in_see_also_link and data:
+            self.current_seealso_text += data
+
         # Collect return value content
         if self.in_return_section and data and not self.in_h4:
             self.return_parts.append(data)
@@ -348,18 +388,38 @@ class MemberDetailsExtractor(HTMLParser):
         Converts: "System.bool AccessSelections(System.object TopDoc, System.object Component)"
         To: "AccessSelections(System.object TopDoc, System.object Component)"
         """
+        _, signature = self._split_signature()
+        return signature
+
+    def get_return_type(self) -> str:
+        """
+        Get the return type (leading type token) from the C# syntax signature.
+
+        Converts: "System.bool AccessSelections(System.object TopDoc, ...)"
+        To: "System.bool"
+
+        Returns an empty string when the signature has no separable return type.
+        """
+        return_type, _ = self._split_signature()
+        return return_type
+
+    def _split_signature(self) -> tuple[str, str]:
+        """
+        Split the raw C# syntax into (return_type, name_with_params).
+
+        Returns ("", full_signature) when a return type cannot be separated.
+        """
         signature = "".join(self.signature_parts).strip()
         # Clean up extra whitespace
         signature = re.sub(r"\s+", " ", signature)
 
-        # Remove return type from the signature
-        # Pattern: "ReturnType MethodName(...)" -> "MethodName(...)"
+        # Pattern: "ReturnType MethodName(...)" -> ("ReturnType", "MethodName(...)")
         # Match everything up to and including the first space before the method name
-        match = re.match(r"^[\w\.\[\]<>,\s]+?\s+(.+)$", signature)
+        match = re.match(r"^([\w\.\[\]<>,\s]+?)\s+(.+)$", signature)
         if match:
-            signature = match.group(1)
+            return match.group(1).strip(), match.group(2).strip()
 
-        return signature
+        return "", signature
 
     def get_return_value(self) -> str:
         """Get the cleaned return value description."""
@@ -433,11 +493,13 @@ def extract_member_details_from_file(html_file: Path) -> dict[str, Any] | None:
         "Type": f"{namespace}.{type_name}" if namespace and type_name else None,
         "Name": parser.member_name,
         "Signature": parser.get_signature(),
+        "ReturnType": parser.get_return_type(),
         "Description": parser.get_description(),
         "Parameters": parser.parameters,
         "Returns": parser.get_return_value(),
         "Examples": parser.examples,
         "Remarks": parser.get_remarks(),
+        "SeeAlso": parser.see_also,
         "SourceFile": str(html_file),
     }
 
@@ -467,6 +529,11 @@ def create_xml_output(members: list[dict[str, Any]]) -> str:
         if member_info.get("Signature"):
             sig_elem = ET.SubElement(member_elem, "Signature")
             sig_elem.text = member_info["Signature"]
+
+        # Add return type
+        if member_info.get("ReturnType"):
+            return_type_elem = ET.SubElement(member_elem, "ReturnType")
+            return_type_elem.text = member_info["ReturnType"]
 
         # Add description (wrap in CDATA to preserve any XMLDoc markup)
         if member_info.get("Description"):
@@ -514,6 +581,9 @@ def create_xml_output(members: list[dict[str, Any]]) -> str:
             remarks_elem = ET.SubElement(member_elem, "Remarks")
             remarks_elem.text = member_info["Remarks"]
             remarks_elem.set("__cdata__", "true")
+
+        # Add See Also cross-references
+        add_see_also_element(member_elem, member_info.get("SeeAlso", []))
 
     # Pretty print the XML with CDATA sections
     return prettify_xml(root)

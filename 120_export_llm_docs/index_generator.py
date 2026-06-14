@@ -9,6 +9,14 @@ from typing import Dict, List
 from collections import defaultdict
 
 from models import TypeInfo
+from markdown_generator import sanitize_filename
+
+
+def _format_signature(member) -> str:
+    """Return a member's signature prefixed with its return type when known."""
+    if getattr(member, 'return_type', '') and member.signature:
+        return f"{member.return_type} {member.signature}"
+    return member.signature or member.name
 
 
 class IndexGenerator:
@@ -204,6 +212,76 @@ class IndexGenerator:
 
         return "\n".join(md)
 
+    def generate_members_by_type_index(self, types: Dict[str, TypeInfo]) -> str:
+        """
+        Generate an index listing every member of every interface/class.
+
+        This lets a consumer answer "what methods/properties exist on type X?"
+        from a single grep instead of having to list a directory.
+        """
+        md = []
+        md.append("# API Members by Type\n")
+        md.append("Every property and method of each interface/class, with signatures. "
+                  "Grep for a type name to see its complete member list.\n")
+
+        regular_types = sorted(
+            (t for t in types.values() if not t.is_enum),
+            key=lambda t: t.fully_qualified_name,
+        )
+
+        for type_info in regular_types:
+            if not type_info.properties and not type_info.methods:
+                continue
+
+            md.append(f"## {type_info.fully_qualified_name}\n")
+
+            for prop in sorted(type_info.properties, key=lambda m: m.name):
+                link = f"../types/{type_info.name}/{sanitize_filename(prop.name)}.md"
+                md.append(f"- [property] [{prop.name}]({link}) — `{_format_signature(prop)}`\n")
+
+            for method in sorted(type_info.methods, key=lambda m: m.name):
+                link = f"../types/{type_info.name}/{sanitize_filename(method.name)}.md"
+                md.append(f"- [method] [{method.name}]({link}) — `{_format_signature(method)}`\n")
+
+            md.append("")
+
+        return "\n".join(md)
+
+    def generate_by_member_name_index(self, types: Dict[str, TypeInfo]) -> str:
+        """
+        Generate an index of all members sorted by member name.
+
+        Sorting by name clusters near-identical sibling members across different
+        interfaces together (e.g. ``GetCorresponding`` and
+        ``GetCorrespondingEntity``), so a reader who found one easily discovers
+        the others and can compare their contracts.
+        """
+        md = []
+        md.append("# API Members by Name\n")
+        md.append("All properties and methods across every type, sorted by member name. "
+                  "Near-identically named siblings (e.g. `GetCorresponding` vs "
+                  "`GetCorrespondingEntity`) appear adjacent so you can compare contracts.\n")
+
+        # Collect (name, kind, type_info, member) for all non-enum members
+        entries = []
+        for type_info in types.values():
+            if type_info.is_enum:
+                continue
+            for prop in type_info.properties:
+                entries.append((prop.name, "property", type_info, prop))
+            for method in type_info.methods:
+                entries.append((method.name, "method", type_info, method))
+
+        # Sort by member name (case-insensitive), then by type for stability
+        entries.sort(key=lambda e: (e[0].lower(), e[2].fully_qualified_name))
+
+        for name, kind, type_info, member in entries:
+            link = f"../types/{type_info.name}/{sanitize_filename(member.name)}.md"
+            md.append(f"- `{name}` [{kind}] on **{type_info.name}** — "
+                      f"[doc]({link}) `{_format_signature(member)}`\n")
+
+        return "\n".join(md)
+
     def save_all_indexes(self, types: Dict[str, TypeInfo]):
         """
         Generate and save all index files.
@@ -225,5 +303,15 @@ class IndexGenerator:
         statistics_md = self.generate_type_statistics_index(types)
         with open(self.output_base_path / "statistics.md", 'w', encoding='utf-8') as f:
             f.write(statistics_md)
+
+        # Generate members-by-type index (complete member list per interface)
+        members_by_type_md = self.generate_members_by_type_index(types)
+        with open(self.output_base_path / "members_by_type.md", 'w', encoding='utf-8') as f:
+            f.write(members_by_type_md)
+
+        # Generate by-member-name index (clusters sibling members across types)
+        by_member_name_md = self.generate_by_member_name_index(types)
+        with open(self.output_base_path / "by_member_name.md", 'w', encoding='utf-8') as f:
+            f.write(by_member_name_md)
 
         print(f"  Generated index files in {self.output_base_path}")

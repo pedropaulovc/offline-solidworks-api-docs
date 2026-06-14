@@ -154,6 +154,71 @@ class TestMemberDetailsExtractor:
 
         assert parser.get_signature() == "AccessSelections(System.object TopDoc, System.object Component)"
 
+    def test_extract_return_type(self):
+        """The return type is captured separately (P3), not discarded."""
+        html = """
+        <h1>.NET Syntax</h1>
+        <div id="syntaxSection">
+            <div id="Syntax_CS">
+                <table class="syntaxtable">
+                    <tbody>
+                        <tr><td><pre>System.object GetCorresponding( System.object InputObject )</pre></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        """
+        parser = MemberDetailsExtractor()
+        parser.feed(html)
+
+        assert parser.get_return_type() == "System.object"
+        assert parser.get_signature() == "GetCorresponding( System.object InputObject )"
+
+    def test_extract_see_also(self):
+        """The 'See Also' section is captured as cross-references (P0), not dropped."""
+        html = """
+        <h1>See Also</h1>
+        <div id="seealsoSection" class="section">
+            <h4 class="dxh4"></h4>
+            <a href="SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IComponent2~GetCorresponding.html">IComponent2::GetCorresponding Method</a>
+            <a href="../sldworksapiprogguide//Overview/Welcome.htm">Welcome Guide</a>
+        </div>
+        """
+        parser = MemberDetailsExtractor()
+        parser.feed(html)
+
+        assert len(parser.see_also) == 2
+        cref = parser.see_also[0]
+        assert cref["attr"] == "cref"
+        assert cref["value"] == "SolidWorks.Interop.sldworks.IComponent2.GetCorresponding"
+        assert cref["label"] == "IComponent2::GetCorresponding Method"
+
+        href = parser.see_also[1]
+        assert href["attr"] == "href"
+        assert href["value"].startswith("https://help.solidworks.com/")
+        assert href["label"] == "Welcome Guide"
+
+    def test_see_also_emitted_in_xml(self):
+        """See Also and ReturnType survive into the XML output."""
+        member = {
+            "Assembly": "SolidWorks.Interop.sldworks",
+            "Type": "SolidWorks.Interop.sldworks.IComponent2",
+            "Name": "GetCorrespondingEntity",
+            "Signature": "GetCorrespondingEntity( System.object Entity )",
+            "ReturnType": "System.object",
+            "Parameters": [],
+            "SeeAlso": [
+                {"attr": "cref", "value": "SolidWorks.Interop.sldworks.IComponent2.GetCorresponding",
+                 "label": "IComponent2::GetCorresponding Method"},
+            ],
+        }
+        xml = create_xml_output([member])
+        root = ET.fromstring(xml)
+        assert root.find("./Member/ReturnType").text == "System.object"
+        see = root.find("./Member/SeeAlso/See")
+        assert see.get("cref") == "SolidWorks.Interop.sldworks.IComponent2.GetCorresponding"
+        assert see.text == "IComponent2::GetCorresponding Method"
+
     def test_extract_parameters(self):
         """Test extraction of parameter information."""
         html = """

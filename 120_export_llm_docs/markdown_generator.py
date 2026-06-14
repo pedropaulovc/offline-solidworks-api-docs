@@ -336,6 +336,11 @@ class MarkdownGenerator:
                 # Create a link with format: "- Example Name (Language)"
                 md.append(f"- [{example_ref.name} ({example_ref.language})]({example_path})\n")
 
+        # See Also cross-references
+        if type_info.see_also:
+            md.append("")
+            md.extend(self._render_see_also(type_info.see_also))
+
         return "\n".join(md)
 
     def generate_member_documentation(self, type_info: TypeInfo, member: Member, member_kind: str) -> str:
@@ -370,9 +375,14 @@ class MarkdownGenerator:
         if member.description:
             md.append(f"{self._simplify_cross_references(self._clean_text(member.description))}\n")
 
-        # Signature
+        # Signature (prefixed with the return type when known)
         if member.signature:
-            md.append(f"**Signature**: `{member.signature}`\n")
+            full_signature = f"{member.return_type} {member.signature}".strip() if member.return_type else member.signature
+            md.append(f"**Signature**: `{full_signature}`\n")
+
+        # Return type (called out separately for greppability)
+        if member.return_type:
+            md.append(f"**Return type**: `{member.return_type}`\n")
 
         # Parameters
         if member.parameters:
@@ -400,6 +410,11 @@ class MarkdownGenerator:
                 example_path = self._get_example_path_for_member(example_ref.url, type_info)
                 # Create a link with format: "- Example Name (Language)"
                 md.append(f"- [{example_ref.name} ({example_ref.language})]({example_path})\n")
+
+        # See Also cross-references
+        if member.see_also:
+            md.append("")
+            md.extend(self._render_see_also(member.see_also))
 
         return "\n".join(md)
 
@@ -465,6 +480,10 @@ class MarkdownGenerator:
                 example_path = self._get_example_path_for_enum_file(example_ref.url)
                 md.append(f"- [{example_ref.name} ({example_ref.language})]({example_path})\n")
 
+        # See Also cross-references
+        if type_info.see_also:
+            md.extend(self._render_see_also(type_info.see_also))
+
         return "\n".join(md)
 
     def save_enum_documentation(self, type_info: TypeInfo, output_path: Path) -> int:
@@ -473,6 +492,27 @@ class MarkdownGenerator:
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(self.generate_enum_documentation(type_info))
         return 1
+
+    def _render_see_also(self, see_also: List) -> List[str]:
+        """
+        Render a ``## See Also`` markdown block from a list of CrossRef objects.
+
+        API references (cref) become ``[[Label]]`` wiki-links so they stay
+        greppable and consistent with inline cross-references; guide/external
+        references (href) become standard markdown links.
+
+        Returns an empty list when there are no cross-references.
+        """
+        if not see_also:
+            return []
+
+        md = ["## See Also\n"]
+        for ref in see_also:
+            if ref.attr == "cref":
+                md.append(f"- [[{ref.label}]]\n")
+            else:
+                md.append(f"- [{ref.label}]({ref.value})\n")
+        return md
 
     def _simplify_cross_references(self, text: str) -> str:
         """

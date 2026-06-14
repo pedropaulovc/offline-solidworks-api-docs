@@ -20,12 +20,13 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from shared.extraction_utils import (
+    add_see_also_element,
     extract_namespace_from_filename,
     infer_language_from_filename,
     is_type_file,
     prettify_xml,
 )
-from shared.xmldoc_links import convert_links_to_see_refs
+from shared.xmldoc_links import convert_links_to_see_refs, href_to_see_ref
 
 
 class TypeInfoExtractor(HTMLParser):
@@ -37,6 +38,7 @@ class TypeInfoExtractor(HTMLParser):
         self.description: str = ""
         self.examples: list[dict[str, str]] = []
         self.remarks: str = ""
+        self.see_also: list[dict[str, str]] = []
 
         # State tracking
         self.in_pagetitle: bool = False
@@ -45,6 +47,10 @@ class TypeInfoExtractor(HTMLParser):
         self.current_section: str | None = None
         self.in_example_section: bool = False
         self.in_remarks_section: bool = False
+        self.in_see_also_section: bool = False
+        self.in_see_also_link: bool = False
+        self.current_seealso_href: str | None = None
+        self.current_seealso_text: str = ""
         self.in_link: bool = False
         self.current_link_href: str | None = None
         self.current_link_text: str = ""
@@ -104,6 +110,14 @@ class TypeInfoExtractor(HTMLParser):
                 self.current_link_href = href
                 self.current_link_text = ""
 
+        # Detect links in See Also section (collect every link, not just examples)
+        if self.in_see_also_section and tag == "a":
+            href = attrs_dict.get("href", "")
+            if href and not href.startswith("#"):
+                self.in_see_also_link = True
+                self.current_seealso_href = href
+                self.current_seealso_text = ""
+
         # Collect all HTML tags in remarks section
         if self.in_remarks_section:
             self.remarks_depth += 1
@@ -139,6 +153,17 @@ class TypeInfoExtractor(HTMLParser):
             self.current_link_href = None
             self.current_link_text = ""
 
+        # Handle end of link in See Also section
+        if tag == "a" and self.in_see_also_link:
+            self.in_see_also_link = False
+            if self.current_seealso_href and self.current_seealso_text.strip():
+                attr, value = href_to_see_ref(self.current_seealso_href)
+                self.see_also.append(
+                    {"attr": attr, "value": value, "label": self.current_seealso_text.strip()}
+                )
+            self.current_seealso_href = None
+            self.current_seealso_text = ""
+
         # Close h1 tag - might signal end of section header
         if tag == "h1":
             self.in_h1 = False
@@ -171,19 +196,32 @@ class TypeInfoExtractor(HTMLParser):
                 self.current_section = "example"
                 self.in_example_section = True
                 self.in_remarks_section = False
+                self.in_see_also_section = False
             elif text == "Remarks":
                 self.current_section = "remarks"
                 self.in_example_section = False
                 self.in_remarks_section = True
-            elif text in ["See Also", "Accessors", "Access Diagram", ".NET Syntax", "Members"]:
+                self.in_see_also_section = False
+            elif text == "See Also":
+                # Collect the cross-reference links in this section
+                self.current_section = "see_also"
+                self.in_example_section = False
+                self.in_remarks_section = False
+                self.in_see_also_section = True
+            elif text in ["Accessors", "Access Diagram", ".NET Syntax", "Members"]:
                 # End current section - turn off all section flags
                 self.in_example_section = False
                 self.in_remarks_section = False
+                self.in_see_also_section = False
                 self.current_section = None
 
         # Collect link text in example section
         if self.in_link and data:
             self.current_link_text += data
+
+        # Collect link text in See Also section
+        if self.in_see_also_link and data:
+            self.current_seealso_text += data
 
         # Collect remarks content with proper spacing
         # Use original data (not stripped) to preserve spacing
@@ -267,6 +305,7 @@ def extract_type_info_from_file(html_file: Path) -> dict[str, Any] | None:
         "Description": parser.get_description(),
         "Examples": parser.examples,
         "Remarks": parser.get_remarks(),
+        "SeeAlso": parser.see_also,
         "SourceFile": str(html_file),
     }
 
@@ -318,6 +357,9 @@ def create_xml_output(types: list[dict[str, Any]]) -> str:
             remarks_elem = ET.SubElement(type_elem, "Remarks")
             remarks_elem.text = type_info["Remarks"]
             remarks_elem.set("__cdata__", "true")
+
+        # Add See Also cross-references
+        add_see_also_element(type_elem, type_info.get("SeeAlso", []))
 
     # Pretty print the XML with CDATA sections
     return prettify_xml(root)

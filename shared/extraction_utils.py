@@ -116,6 +116,24 @@ def wrap_cdata_sections(xml_str: str) -> str:
     return re.sub(pattern, replace_with_cdata, xml_str, flags=re.DOTALL)
 
 
+def add_see_also_element(parent: ET.Element, see_also: list[dict[str, str]]) -> None:
+    """
+    Append a ``<SeeAlso>`` element to ``parent`` from a list of cross-references.
+
+    Each entry is a dict with keys ``attr`` ("cref" or "href"), ``value`` (the
+    reference target) and ``label`` (the human-readable link text). No-op when
+    the list is empty.
+    """
+    if not see_also:
+        return
+
+    see_also_elem = ET.SubElement(parent, "SeeAlso")
+    for ref in see_also:
+        see_elem = ET.SubElement(see_also_elem, "See")
+        see_elem.set(ref["attr"], ref["value"])
+        see_elem.text = ref["label"]
+
+
 def prettify_xml(root: ET.Element) -> str:
     """
     Convert an ElementTree to a pretty-printed XML string.
