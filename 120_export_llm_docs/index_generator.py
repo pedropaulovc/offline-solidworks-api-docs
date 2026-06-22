@@ -9,7 +9,7 @@ from typing import Dict, List
 from collections import defaultdict
 
 from models import TypeInfo
-from markdown_generator import sanitize_filename
+from markdown_generator import sanitize_filename, _block, clean_text, simplify_cross_references
 
 
 def _format_signature(member) -> str:
@@ -64,39 +64,37 @@ class IndexGenerator:
 
             md.append(f"## {category}\n")
             md.append(f"**{len(types_list)} types**\n")
-
-            for type_info in types_list:
-                # Create relative link to type overview
-                if type_info.is_enum:
-                    link = f"../enums/{type_info.name}.md"
-                else:
-                    link = f"../types/{type_info.name}/_overview.md"
-
-                description = type_info.description[:100] + "..." if len(type_info.description) > 100 else type_info.description
-                md.append(f"- [{type_info.name}]({link})")
-                if description:
-                    md.append(f" - {description}")
-                md.append("\n")
-
-            md.append("")
+            md.append(_block([self._type_entry(t) for t in types_list]))
 
         # Uncategorized types
         if uncategorized:
             md.append("## Uncategorized\n")
             md.append(f"**{len(uncategorized)} types**\n")
             uncategorized.sort(key=lambda t: t.name)
-
-            for type_info in uncategorized:
-                if type_info.is_enum:
-                    link = f"../enums/{type_info.name}.md"
-                else:
-                    link = f"../types/{type_info.name}/_overview.md"
-
-                md.append(f"- [{type_info.name}]({link})\n")
-
-            md.append("")
+            md.append(_block([self._type_entry(t, with_description=False) for t in uncategorized]))
 
         return "\n".join(md)
+
+    def _type_entry(self, type_info: TypeInfo, with_description: bool = True) -> str:
+        """Render a single ``- [Name](link) - description`` index entry on one line."""
+        if type_info.is_enum:
+            link = f"../enums/{type_info.name}.md"
+        else:
+            link = f"../types/{type_info.name}/_overview.md"
+
+        entry = f"- [{type_info.name}]({link})"
+        if not with_description:
+            return entry
+
+        # Clean cross-reference tags and flatten to a single line before truncating
+        # so we never cut through a ``<see cref=...>`` tag mid-string.
+        description = simplify_cross_references(clean_text(type_info.description))
+        description = " ".join(description.split())
+        if len(description) > 100:
+            description = description[:100] + "..."
+        if description:
+            entry += f" - {description}"
+        return entry
 
     def generate_by_assembly_index(self, types: Dict[str, TypeInfo]) -> str:
         """
@@ -130,21 +128,21 @@ class IndexGenerator:
             # Count types vs enums
             regular = sum(1 for t in types_list if not t.is_enum)
             enums = sum(1 for t in types_list if t.is_enum)
-            md.append(f"- **Regular Types**: {regular}\n")
-            md.append(f"- **Enumerations**: {enums}\n\n")
+            md.append(_block([
+                f"- **Regular Types**: {regular}",
+                f"- **Enumerations**: {enums}",
+            ]))
 
+            entries = []
             for type_info in types_list:
-                # Create relative link to type overview
                 if type_info.is_enum:
                     link = f"../enums/{type_info.name}.md"
                     type_kind = "(enum)"
                 else:
                     link = f"../types/{type_info.name}/_overview.md"
                     type_kind = f"({len(type_info.properties)} props, {len(type_info.methods)} methods)"
-
-                md.append(f"- [{type_info.name}]({link}) {type_kind}\n")
-
-            md.append("")
+                entries.append(f"- [{type_info.name}]({link}) {type_kind}")
+            md.append(_block(entries))
 
         return "\n".join(md)
 
@@ -170,12 +168,14 @@ class IndexGenerator:
         total_enum_members = sum(len(t.enum_members) for t in types.values())
 
         md.append("## Overview\n")
-        md.append(f"- **Total Types**: {total_types}\n")
-        md.append(f"  - Regular Types (Interfaces/Classes): {total_regular}\n")
-        md.append(f"  - Enumerations: {total_enums}\n")
-        md.append(f"- **Total Properties**: {total_properties}\n")
-        md.append(f"- **Total Methods**: {total_methods}\n")
-        md.append(f"- **Total Enumeration Members**: {total_enum_members}\n\n")
+        md.append(_block([
+            f"- **Total Types**: {total_types}",
+            f"  - Regular Types (Interfaces/Classes): {total_regular}",
+            f"  - Enumerations: {total_enums}",
+            f"- **Total Properties**: {total_properties}",
+            f"- **Total Methods**: {total_methods}",
+            f"- **Total Enumeration Members**: {total_enum_members}",
+        ]))
 
         # Largest types by member count
         md.append("## Largest Types by Member Count\n")
@@ -185,14 +185,12 @@ class IndexGenerator:
             reverse=True
         )[:20]
 
-        md.append("| Type | Properties | Methods | Total |\n")
-        md.append("|------|-----------|---------|-------|\n")
+        rows = ["| Type | Properties | Methods | Total |", "|------|-----------|---------|-------|"]
         for type_info in types_by_size:
             total_members = len(type_info.properties) + len(type_info.methods)
             link = f"../types/{type_info.name}/_overview.md"
-            md.append(f"| [{type_info.name}]({link}) | {len(type_info.properties)} | {len(type_info.methods)} | {total_members} |\n")
-
-        md.append("\n")
+            rows.append(f"| [{type_info.name}]({link}) | {len(type_info.properties)} | {len(type_info.methods)} | {total_members} |")
+        md.append(_block(rows))
 
         # Categories with most types
         md.append("## Functional Categories by Type Count\n")
@@ -203,12 +201,10 @@ class IndexGenerator:
 
         category_counts = sorted(by_category.items(), key=lambda x: x[1], reverse=True)
 
-        md.append("| Category | Type Count |\n")
-        md.append("|----------|------------|\n")
+        rows = ["| Category | Type Count |", "|----------|------------|"]
         for category, count in category_counts:
-            md.append(f"| {category} | {count} |\n")
-
-        md.append("\n")
+            rows.append(f"| {category} | {count} |")
+        md.append(_block(rows))
 
         return "\n".join(md)
 
@@ -235,15 +231,14 @@ class IndexGenerator:
 
             md.append(f"## {type_info.fully_qualified_name}\n")
 
+            entries = []
             for prop in sorted(type_info.properties, key=lambda m: m.name):
                 link = f"../types/{type_info.name}/{sanitize_filename(prop.name)}.md"
-                md.append(f"- [property] [{prop.name}]({link}) — `{_format_signature(prop)}`\n")
-
+                entries.append(f"- [property] [{prop.name}]({link}) — `{_format_signature(prop)}`")
             for method in sorted(type_info.methods, key=lambda m: m.name):
                 link = f"../types/{type_info.name}/{sanitize_filename(method.name)}.md"
-                md.append(f"- [method] [{method.name}]({link}) — `{_format_signature(method)}`\n")
-
-            md.append("")
+                entries.append(f"- [method] [{method.name}]({link}) — `{_format_signature(method)}`")
+            md.append(_block(entries))
 
         return "\n".join(md)
 
@@ -275,10 +270,12 @@ class IndexGenerator:
         # Sort by member name (case-insensitive), then by type for stability
         entries.sort(key=lambda e: (e[0].lower(), e[2].fully_qualified_name))
 
+        items = []
         for name, kind, type_info, member in entries:
             link = f"../types/{type_info.name}/{sanitize_filename(member.name)}.md"
-            md.append(f"- `{name}` [{kind}] on **{type_info.name}** — "
-                      f"[doc]({link}) `{_format_signature(member)}`\n")
+            items.append(f"- `{name}` [{kind}] on **{type_info.name}** — "
+                         f"[doc]({link}) `{_format_signature(member)}`")
+        md.append(_block(items))
 
         return "\n".join(md)
 

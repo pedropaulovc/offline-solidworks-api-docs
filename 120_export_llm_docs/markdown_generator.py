@@ -13,6 +13,48 @@ import html
 from models import TypeInfo, ExampleContent, Member, Property, Method, EnumMember
 
 
+def _block(lines: List[str]) -> str:
+    """Join already-formatted markdown lines into one tight block (no blank lines between).
+
+    Used for list items and table rows, which must render adjacent. The block is
+    appended as a single element so the surrounding ``"\\n".join(md)`` only ever
+    inserts one blank line before and after it.
+    """
+    if not lines:
+        return ""
+    return "\n".join(lines) + "\n"
+
+
+def clean_text(text: str) -> str:
+    """Clean raw XML text: unescape HTML entities, drop CDATA markers, and
+    collapse runs of blank lines so paragraphs are separated by at most one."""
+    if not text:
+        return ""
+
+    text = html.unescape(text)
+    text = text.replace('<![CDATA[', '').replace(']]>', '')
+    # Collapse runs of blank lines (matches the rest of the document).
+    text = re.sub(r'\n[ \t]*\n(?:[ \t]*\n)+', '\n\n', text)
+    return text.strip()
+
+
+def simplify_cross_references(text: str) -> str:
+    """Convert XML-style ``<see cref="FQN">Label</see>`` references to ``[[Label]]``
+    wiki-links, including self-closing ``<see cref="FQN" />`` forms."""
+    if not text:
+        return ""
+
+    # <see cref="...">LinkText</see> -> [[LinkText]]
+    text = re.sub(r'<see cref="[^"]+">([^<]+)</see>', r'[[\1]]', text)
+
+    # Self-closing <see cref="FQN" /> -> [[last segment of FQN]]
+    def replace_self_closing(match):
+        return f'[[{match.group(1).split(".")[-1]}]]'
+
+    text = re.sub(r'<see cref="([^"]+)"\s*/>', replace_self_closing, text)
+    return text
+
+
 class MarkdownGenerator:
     """Generates markdown documentation for API types."""
 
@@ -86,10 +128,11 @@ class MarkdownGenerator:
 
                 if prop.parameters:
                     md.append("**Parameters**:\n")
-                    for param in prop.parameters:
-                        param_desc = self._clean_text(param.description) if param.description else "No description"
-                        md.append(f"- `{param.name}` - {param_desc}\n")
-                    md.append("")
+                    md.append(_block([
+                        f"- `{param.name}` - "
+                        f"{self._clean_text(param.description) if param.description else 'No description'}"
+                        for param in prop.parameters
+                    ]))
 
                 if prop.returns:
                     md.append(f"**Returns**: {self._clean_text(prop.returns)}\n")
@@ -111,10 +154,11 @@ class MarkdownGenerator:
 
                 if method.parameters:
                     md.append("**Parameters**:\n")
-                    for param in method.parameters:
-                        param_desc = self._clean_text(param.description) if param.description else "No description"
-                        md.append(f"- `{param.name}` - {param_desc}\n")
-                    md.append("")
+                    md.append(_block([
+                        f"- `{param.name}` - "
+                        f"{self._clean_text(param.description) if param.description else 'No description'}"
+                        for param in method.parameters
+                    ]))
 
                 if method.returns:
                     md.append(f"**Returns**: {self._clean_text(method.returns)}\n")
@@ -156,28 +200,8 @@ class MarkdownGenerator:
         return "\n".join(md)
 
     def _clean_text(self, text: str) -> str:
-        """
-        Clean text by unescaping HTML entities and removing CDATA markers.
-
-        Args:
-            text: Raw text from XML
-
-        Returns:
-            Cleaned text
-        """
-        if not text:
-            return ""
-
-        # Unescape HTML entities
-        text = html.unescape(text)
-
-        # Remove CDATA markers if present
-        text = text.replace('<![CDATA[', '').replace(']]>', '')
-
-        # Strip leading/trailing whitespace
-        text = text.strip()
-
-        return text
+        """Instance delegator for the module-level :func:`clean_text`."""
+        return clean_text(text)
 
     def _extract_code_from_example(self, content: str, language: str) -> str:
         """
@@ -301,12 +325,8 @@ class MarkdownGenerator:
         # Title
         md.append(f"# {type_info.name}\n")
 
-        # Metadata
-        md.append(f"**Assembly**: {type_info.assembly}  ")
-        md.append(f"**Namespace**: {type_info.namespace}")
-        if type_info.functional_category:
-            md.append(f"  \n**Category**: {type_info.functional_category}")
-        md.append("\n")
+        # Metadata (one tight block; lines joined with markdown hard breaks)
+        md.append(self._metadata_block(type_info))
 
         # Description
         if type_info.description:
@@ -318,27 +338,29 @@ class MarkdownGenerator:
             md.append("## Remarks\n")
             md.append(f"{self._simplify_cross_references(self._clean_text(type_info.remarks))}\n")
 
-        # Member counts
-        md.append("## Members\n")
+        # Member counts (omit the section entirely when there are none)
+        members = []
         if type_info.properties:
-            md.append(f"- **Properties**: {len(type_info.properties)}\n")
+            members.append(f"- **Properties**: {len(type_info.properties)}")
         if type_info.methods:
-            md.append(f"- **Methods**: {len(type_info.methods)}\n")
+            members.append(f"- **Methods**: {len(type_info.methods)}")
         if type_info.enum_members:
-            md.append(f"- **Enumeration Members**: {len(type_info.enum_members)}\n")
+            members.append(f"- **Enumeration Members**: {len(type_info.enum_members)}")
+        if members:
+            md.append("## Members\n")
+            md.append(_block(members))
 
         # Examples section
         if type_info.examples:
-            md.append("\n## Examples\n")
-            for example_ref in type_info.examples:
-                # Get the relative path to the example file
-                example_path = self._get_example_path_for_overview(example_ref.url, type_info)
-                # Create a link with format: "- Example Name (Language)"
-                md.append(f"- [{example_ref.name} ({example_ref.language})]({example_path})\n")
+            md.append("## Examples\n")
+            md.append(_block([
+                f"- [{ex.name} ({ex.language})]"
+                f"({self._get_example_path_for_overview(ex.url, type_info)})"
+                for ex in type_info.examples
+            ]))
 
         # See Also cross-references
         if type_info.see_also:
-            md.append("")
             md.extend(self._render_see_also(type_info.see_also))
 
         return "\n".join(md)
@@ -387,10 +409,11 @@ class MarkdownGenerator:
         # Parameters
         if member.parameters:
             md.append("## Parameters\n")
-            for param in member.parameters:
-                param_desc = self._simplify_cross_references(self._clean_text(param.description)) if param.description else "No description"
-                md.append(f"- **{param.name}**: {param_desc}\n")
-            md.append("")
+            md.append(_block([
+                f"- **{param.name}**: "
+                f"{self._simplify_cross_references(self._clean_text(param.description)) if param.description else 'No description'}"
+                for param in member.parameters
+            ]))
 
         # Returns
         if member.returns:
@@ -404,16 +427,15 @@ class MarkdownGenerator:
 
         # Examples section
         if member.examples:
-            md.append("\n## Examples\n")
-            for example_ref in member.examples:
-                # Get the relative path to the example file
-                example_path = self._get_example_path_for_member(example_ref.url, type_info)
-                # Create a link with format: "- Example Name (Language)"
-                md.append(f"- [{example_ref.name} ({example_ref.language})]({example_path})\n")
+            md.append("## Examples\n")
+            md.append(_block([
+                f"- [{ex.name} ({ex.language})]"
+                f"({self._get_example_path_for_member(ex.url, type_info)})"
+                for ex in member.examples
+            ]))
 
         # See Also cross-references
         if member.see_also:
-            md.append("")
             md.extend(self._render_see_also(member.see_also))
 
         return "\n".join(md)
@@ -450,11 +472,7 @@ class MarkdownGenerator:
 
         # Title and metadata
         md.append(f"# {type_info.name}\n")
-        md.append(f"**Assembly**: {type_info.assembly}  ")
-        md.append(f"**Namespace**: {type_info.namespace}")
-        if type_info.functional_category:
-            md.append(f"  \n**Category**: {type_info.functional_category}")
-        md.append("\n")
+        md.append(self._metadata_block(type_info))
 
         # Description
         if type_info.description:
@@ -476,9 +494,11 @@ class MarkdownGenerator:
         # Examples (enum-level, if any)
         if type_info.examples:
             md.append("## Examples\n")
-            for example_ref in type_info.examples:
-                example_path = self._get_example_path_for_enum_file(example_ref.url)
-                md.append(f"- [{example_ref.name} ({example_ref.language})]({example_path})\n")
+            md.append(_block([
+                f"- [{ex.name} ({ex.language})]"
+                f"({self._get_example_path_for_enum_file(ex.url)})"
+                for ex in type_info.examples
+            ]))
 
         # See Also cross-references
         if type_info.see_also:
@@ -493,6 +513,21 @@ class MarkdownGenerator:
             f.write(self.generate_enum_documentation(type_info))
         return 1
 
+    def _metadata_block(self, type_info: TypeInfo) -> str:
+        """Render the Assembly/Namespace/Category metadata as one block.
+
+        Lines are joined with markdown hard breaks (two trailing spaces) so they
+        render on consecutive lines, and the block ends with a newline so the
+        join only adds a single blank line before the next section.
+        """
+        lines = [
+            f"**Assembly**: {type_info.assembly}",
+            f"**Namespace**: {type_info.namespace}",
+        ]
+        if type_info.functional_category:
+            lines.append(f"**Category**: {type_info.functional_category}")
+        return "  \n".join(lines) + "\n"
+
     def _render_see_also(self, see_also: List) -> List[str]:
         """
         Render a ``## See Also`` markdown block from a list of CrossRef objects.
@@ -501,51 +536,23 @@ class MarkdownGenerator:
         greppable and consistent with inline cross-references; guide/external
         references (href) become standard markdown links.
 
-        Returns an empty list when there are no cross-references.
+        Returns an empty list when there are no cross-references. The heading and
+        the (tight) list of links are returned as two elements so the caller's
+        ``"\\n".join(md)`` puts one blank line before the heading and none
+        between the links.
         """
         if not see_also:
             return []
 
-        md = ["## See Also\n"]
-        for ref in see_also:
-            if ref.attr == "cref":
-                md.append(f"- [[{ref.label}]]\n")
-            else:
-                md.append(f"- [{ref.label}]({ref.value})\n")
-        return md
+        links = [
+            f"- [[{ref.label}]]" if ref.attr == "cref" else f"- [{ref.label}]({ref.value})"
+            for ref in see_also
+        ]
+        return ["## See Also\n", _block(links)]
 
     def _simplify_cross_references(self, text: str) -> str:
-        """
-        Simplify XML-style cross-references to markdown links.
-        Converts: <see cref="SOLIDWORKS.Interop.sldworks.IModelDoc2">IModelDoc2</see>
-        To: [[IModelDoc2]]
-
-        Args:
-            text: Text with XML-style cross-references
-
-        Returns:
-            Text with simplified markdown links
-        """
-        if not text:
-            return ""
-
-        # Pattern: <see cref="...">LinkText</see>
-        # Replace with [[LinkText]]
-        pattern = r'<see cref="[^"]+">([^<]+)</see>'
-        text = re.sub(pattern, r'[[\1]]', text)
-
-        # Also handle self-closing see tags: <see cref="..." />
-        # Extract type name from FQN and create link
-        def replace_self_closing(match):
-            fqn = match.group(1)
-            # Extract last part of FQN as link text
-            type_name = fqn.split('.')[-1]
-            return f'[[{type_name}]]'
-
-        pattern_self_closing = r'<see cref="([^"]+)"\s*/>'
-        text = re.sub(pattern_self_closing, replace_self_closing, text)
-
-        return text
+        """Instance delegator for the module-level :func:`simplify_cross_references`."""
+        return simplify_cross_references(text)
 
     def save_grep_optimized_documentation(self, type_info: TypeInfo, output_dir: Path) -> int:
         """
