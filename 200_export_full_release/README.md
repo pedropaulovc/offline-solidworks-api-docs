@@ -91,7 +91,9 @@ SolidWorks.Interop.xmldoc.zip
 ├── SolidWorks.Interop.swcommands.xml
 ├── SolidWorks.Interop.swdimxpert.xml
 ├── SolidWorks.Interop.swmotionstudy.xml
-└── ... (10 assemblies total)
+├── SolidWorks.Interop.swbrowser.xml          (Toolbox API)
+├── SolidWorks.Interop.sldtoolboxconfigureaddin.xml  (Toolbox API)
+└── ... (12 assemblies total)
 ```
 
 **Use Case**: Drop these files alongside SolidWorks Interop assemblies (.dll files) to enable IntelliSense in Visual Studio, Rider, or VS Code.

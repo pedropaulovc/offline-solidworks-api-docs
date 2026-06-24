@@ -8,6 +8,6 @@
     "80_parse_examples/output/examples.xml"
   ],
   "output_directory": "90_export_xmldoc\\output",
-  "total_assemblies": 10,
+  "total_assemblies": 12,
   "xmldoc_format": "Microsoft XMLDoc (VS IntelliSense)"
 }

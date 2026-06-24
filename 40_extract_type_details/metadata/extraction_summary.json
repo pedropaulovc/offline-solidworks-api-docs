@@ -1,6 +1,6 @@
 {
-  "total_files_processed": 1578,
-  "types_extracted": 1578,
+  "total_files_processed": 1587,
+  "types_extracted": 1587,
   "errors": 0,
   "output_file": "40_extract_type_details\\metadata\\api_types.xml",
   "error_files": []

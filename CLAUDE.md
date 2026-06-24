@@ -168,7 +168,7 @@ uv run pytest 10_crawl_toc_pages/tests/ -v
 - Must stay within `/2026/english/api/` boundary
 - Content extracted from `__NEXT_DATA__` JSON (helpText field)
 - Minimum 95% success rate for validation
-- Expected ~458 pages from complete crawl
+- Expected ~2250 content pages from complete crawl (core SOLIDWORKS API + Toolbox API)
 
 ## Known Issues & Considerations
 

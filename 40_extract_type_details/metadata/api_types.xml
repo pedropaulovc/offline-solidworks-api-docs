@@ -1,6 +1,15 @@
 <?xml version="1.0" ?>
 <Types>
     <Type>
+        <Name>CTbcApplication</Name>
+        <Assembly>SolidWorks.Interop.sldtoolboxconfigureaddin</Assembly>
+        <Namespace>SolidWorks.Interop.sldtoolboxconfigureaddin</Namespace>
+        <SeeAlso>
+            <See cref="SolidWorks.Interop.sldtoolboxconfigureaddin.CTbcApplication_members">CTbcApplication Members</See>
+            <See cref="SolidWorks.Interop.sldtoolboxconfigureaddin_namespace">SolidWorks.Interop.sldtoolboxconfigureaddin Namespace</See>
+        </SeeAlso>
+    </Type>
+    <Type>
         <Name>IAVIParameter</Name>
         <Assembly>SolidWorks.Interop.swmotionstudy</Assembly>
         <Namespace>SolidWorks.Interop.swmotionstudy</Namespace>
@@ -320,6 +329,18 @@ Get or set the visual properties for the specified display states, components,
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IAppearanceSetting_members">IAppearanceSetting Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
+        </SeeAlso>
+    </Type>
+    <Type>
+        <Name>IApplication</Name>
+        <Assembly>SolidWorks.Interop.swbrowser</Assembly>
+        <Namespace>SolidWorks.Interop.swbrowser</Namespace>
+        <Description><![CDATA[Provides access to the SOLIDWORKS Toolbox Browser add-in.]]></Description>
+        <Remarks><![CDATA[This interface is available only if SOLIDWORKS Toolbox Browser add-in is an active SOLIDWORKS add-in.
+Events are implemented with delegates in the Microsoft .NET Framework. See the <see cref="SOLIDWORKS.Interop.swbrowser_namespace">Overview</see> topic for a list of delegates for this interface.]]></Remarks>
+        <SeeAlso>
+            <See cref="SolidWorks.Interop.swbrowser.IApplication_members">IApplication Members</See>
+            <See cref="SolidWorks.Interop.swbrowser_namespace">SolidWorks.Interop.swbrowser Namespace</See>
         </SeeAlso>
     </Type>
     <Type>
@@ -12738,6 +12759,18 @@ Examine the examples to see the calls for these steps.]]></Remarks>
         </SeeAlso>
     </Type>
     <Type>
+        <Name>IPDMDocManager</Name>
+        <Assembly>SolidWorks.Interop.swbrowser</Assembly>
+        <Namespace>SolidWorks.Interop.swbrowser</Namespace>
+        <Description><![CDATA[Provides access to the SOLIDWORKS Toolbox document manager.]]></Description>
+        <Remarks><![CDATA[This interface is available only if SOLIDWORKS Toolbox Browser add-in is an active SOLIDWORKS add-in.
+Events are implemented with delegates in the Microsoft .NET Framework. See the <see cref="SOLIDWORKS.Interop.swbrowser_namespace">Overview</see> topic for a list of delegates for this interface.]]></Remarks>
+        <SeeAlso>
+            <See cref="SolidWorks.Interop.swbrowser.IPDMDocManager_members">IPDMDocManager Members</See>
+            <See cref="SolidWorks.Interop.swbrowser_namespace">SolidWorks.Interop.swbrowser Namespace</See>
+        </SeeAlso>
+    </Type>
+    <Type>
         <Name>IPLMObjectSpecification</Name>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
         <Namespace>SolidWorks.Interop.sldworks</Namespace>
@@ -19540,6 +19573,28 @@ For more information, see the Thread PropertyManager topic in the SOLIDWORKS Des
         </SeeAlso>
     </Type>
     <Type>
+        <Name>IToolBoxConfiguratorApplication</Name>
+        <Assembly>SolidWorks.Interop.sldtoolboxconfigureaddin</Assembly>
+        <Namespace>SolidWorks.Interop.sldtoolboxconfigureaddin</Namespace>
+        <Description><![CDATA[Provides access to the Welcome to Toolbox Setup dialog.]]></Description>
+        <Remarks><![CDATA[This interface is available only if <see cref="SOLIDWORKS.Interop.sldtoolboxconfigureaddin.IToolboxConfiguratorAddin">IToolboxConfiguratorAddin</see> is an active SOLIDWORKS add-in.]]></Remarks>
+        <SeeAlso>
+            <See cref="SolidWorks.Interop.sldtoolboxconfigureaddin.IToolBoxConfiguratorApplication_members">IToolBoxConfiguratorApplication Members</See>
+            <See cref="SolidWorks.Interop.sldtoolboxconfigureaddin_namespace">SolidWorks.Interop.sldtoolboxconfigureaddin Namespace</See>
+        </SeeAlso>
+    </Type>
+    <Type>
+        <Name>IToolboxConfiguratorAddin</Name>
+        <Assembly>SolidWorks.Interop.sldtoolboxconfigureaddin</Assembly>
+        <Namespace>SolidWorks.Interop.sldtoolboxconfigureaddin</Namespace>
+        <Description><![CDATA[Connects to the Toolbox Configurator (Welcome to Toolbox Setup dialog) when it is opened and disconnects from it when it is closed.]]></Description>
+        <Remarks><![CDATA[This interface is available only if SOLIDWORKS Toolbox Browser is an active SOLIDWORKS add-in.]]></Remarks>
+        <SeeAlso>
+            <See cref="SolidWorks.Interop.sldtoolboxconfigureaddin.IToolboxConfiguratorAddin_members">IToolboxConfiguratorAddin Members</See>
+            <See cref="SolidWorks.Interop.sldtoolboxconfigureaddin_namespace">SolidWorks.Interop.sldtoolboxconfigureaddin Namespace</See>
+        </SeeAlso>
+    </Type>
+    <Type>
         <Name>IToolingSplitFeatureData</Name>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
         <Namespace>SolidWorks.Interop.sldworks</Namespace>
@@ -20384,6 +20439,15 @@ See <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguid
         </SeeAlso>
     </Type>
     <Type>
+        <Name>ToolboxConfiguratorAddin</Name>
+        <Assembly>SolidWorks.Interop.sldtoolboxconfigureaddin</Assembly>
+        <Namespace>SolidWorks.Interop.sldtoolboxconfigureaddin</Namespace>
+        <SeeAlso>
+            <See cref="SolidWorks.Interop.sldtoolboxconfigureaddin.ToolboxConfiguratorAddin_members">ToolboxConfiguratorAddin Members</See>
+            <See cref="SolidWorks.Interop.sldtoolboxconfigureaddin_namespace">SolidWorks.Interop.sldtoolboxconfigureaddin Namespace</See>
+        </SeeAlso>
+    </Type>
+    <Type>
         <Name>UserNotificationHandler</Name>
         <Assembly>SolidWorks.Interop.swpublished</Assembly>
         <Namespace>SolidWorks.Interop.swpublished</Namespace>
@@ -20793,6 +20857,15 @@ If developing a C++ application, use the enumerators to <see href="https://help.
         <Description><![CDATA[Types of targets to which to apply a copied appearance.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
+        </SeeAlso>
+    </Type>
+    <Type>
+        <Name>swApplicationEvents_e</Name>
+        <Assembly>SolidWorks.Interop.swbrowser</Assembly>
+        <Namespace>SolidWorks.Interop.swbrowser</Namespace>
+        <Description><![CDATA[Events to be handled by the SOLIDWORKS Toolbox Browser application.]]></Description>
+        <SeeAlso>
+            <See cref="SolidWorks.Interop.swbrowser_namespace">SolidWorks.Interop.swbrowser Namespace</See>
         </SeeAlso>
     </Type>
     <Type>
@@ -25622,6 +25695,24 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Description><![CDATA[Rebuild state of the components.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
+        </SeeAlso>
+    </Type>
+    <Type>
+        <Name>swPDMDocManagerEvents_e</Name>
+        <Assembly>SolidWorks.Interop.swbrowser</Assembly>
+        <Namespace>SolidWorks.Interop.swbrowser</Namespace>
+        <Description><![CDATA[Events to be handled by the PDM application.]]></Description>
+        <SeeAlso>
+            <See cref="SolidWorks.Interop.swbrowser_namespace">SolidWorks.Interop.swbrowser Namespace</See>
+        </SeeAlso>
+    </Type>
+    <Type>
+        <Name>swPDMStatus_e</Name>
+        <Assembly>SolidWorks.Interop.swbrowser</Assembly>
+        <Namespace>SolidWorks.Interop.swbrowser</Namespace>
+        <Description><![CDATA[PDM document statuses.]]></Description>
+        <SeeAlso>
+            <See cref="SolidWorks.Interop.swbrowser_namespace">SolidWorks.Interop.swbrowser Namespace</See>
         </SeeAlso>
     </Type>
     <Type>

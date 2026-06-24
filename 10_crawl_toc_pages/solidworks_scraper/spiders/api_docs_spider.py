@@ -24,8 +24,19 @@ class ApiDocsSpider(scrapy.Spider):
     name = "api_docs"
     allowed_domains = ["help.solidworks.com"]
 
-    # Starting URL - JSON TOC endpoint
-    start_urls = ["https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id=2"]
+    # Root TOC node ids to seed the crawl. Each is a top-level SOLIDWORKS API
+    # reference (see help.solidworks.com/2026/english/api/SWHelp_List.html):
+    #   2  = core SOLIDWORKS API (SolidWorks.Interop.sldworks, swconst, ...)
+    #   13 = Toolbox API (SolidWorks.Interop.swbrowser, sldtoolboxconfigureaddin)
+    # All roots share the /2026/english/api/ boundary, so the recursive expandToc
+    # logic and URL boundary check below handle every subtree unchanged.
+    TOC_ROOT_IDS = ["2", "13"]
+
+    # Starting URLs - JSON TOC endpoints, one per root node
+    start_urls = [
+        f"https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id={toc_id}"
+        for toc_id in TOC_ROOT_IDS
+    ]
 
     # Custom settings for this spider
     custom_settings = {

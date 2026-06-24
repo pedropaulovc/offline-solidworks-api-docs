@@ -1604,6 +1604,20 @@ NOTE: Because it is possible to have a NULL active document when an add-in is no
         </SeeAlso>
     </Enum>
     <Enum>
+        <Name>swApplicationEvents_e</Name>
+        <Assembly>SolidWorks.Interop.swbrowser</Assembly>
+        <Namespace>SolidWorks.Interop.swbrowser</Namespace>
+        <Members>
+            <Member>
+                <Name>swDestroy</Name>
+                <Description><![CDATA[1 = Notifies that the Toolbox Browser application object is being destroyed]]></Description>
+            </Member>
+        </Members>
+        <SeeAlso>
+            <See cref="SolidWorks.Interop.swbrowser_namespace">SolidWorks.Interop.swbrowser Namespace</See>
+        </SeeAlso>
+    </Enum>
+    <Enum>
         <Name>swApplicationType_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
@@ -29066,6 +29080,78 @@ NOTE: The default for whether an assembly document is opened lightweight is base
         </Members>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
+        </SeeAlso>
+    </Enum>
+    <Enum>
+        <Name>swPDMDocManagerEvents_e</Name>
+        <Assembly>SolidWorks.Interop.swbrowser</Assembly>
+        <Namespace>SolidWorks.Interop.swbrowser</Namespace>
+        <Members>
+            <Member>
+                <Name>swAfterCopyingDocument</Name>
+                <Description><![CDATA[9 = Notifies after Toolbox Browser copies or moves a PDM document]]></Description>
+            </Member>
+            <Member>
+                <Name>swAfterDeletingDocument</Name>
+                <Description><![CDATA[7 = Notifies after Toolbox Browser deletes a PDM document]]></Description>
+            </Member>
+            <Member>
+                <Name>swAfterWritingToDocument</Name>
+                <Description><![CDATA[3 = Notifies after Toolbox Browser writes to a PDM document]]></Description>
+            </Member>
+            <Member>
+                <Name>swBeforeCopyingDocument</Name>
+                <Description><![CDATA[8 = Notifies before Toolbox Browser copies or moves a PDM document]]></Description>
+            </Member>
+            <Member>
+                <Name>swBeforeDeletingDocument</Name>
+                <Description><![CDATA[6 = Notifies before Toolbox Browser deletes a PDM document]]></Description>
+            </Member>
+            <Member>
+                <Name>swBeforeWritingToDocument</Name>
+                <Description><![CDATA[2 = Notifies before Toolbox Browser writes to a PDM document]]></Description>
+            </Member>
+            <Member>
+                <Name>swNewDocumentAdded</Name>
+                <Description><![CDATA[5 = Notifies that Toolbox Browser has created a new PDM document or added a PDM document to the Toolbox Browser]]></Description>
+            </Member>
+            <Member>
+                <Name>swPDMDestroy</Name>
+                <Description><![CDATA[1 = Notifies that the PDM application object is being destroyed]]></Description>
+            </Member>
+            <Member>
+                <Name>swPreInsertDocument</Name>
+                <Description><![CDATA[4 = Notifies before Toolbox Browser inserts a PDM document into an assembly]]></Description>
+            </Member>
+        </Members>
+        <SeeAlso>
+            <See cref="SolidWorks.Interop.swbrowser_namespace">SolidWorks.Interop.swbrowser Namespace</See>
+        </SeeAlso>
+    </Enum>
+    <Enum>
+        <Name>swPDMStatus_e</Name>
+        <Assembly>SolidWorks.Interop.swbrowser</Assembly>
+        <Namespace>SolidWorks.Interop.swbrowser</Namespace>
+        <Members>
+            <Member>
+                <Name>swPDMStatusError</Name>
+                <Description><![CDATA[0]]></Description>
+            </Member>
+            <Member>
+                <Name>swPDMStatusKnownAndAvailable</Name>
+                <Description><![CDATA[2 = Document is known to PDM and writable]]></Description>
+            </Member>
+            <Member>
+                <Name>swPDMStatusKnownAndUnavailable</Name>
+                <Description><![CDATA[3 = Document is known to PDM and not writable]]></Description>
+            </Member>
+            <Member>
+                <Name>swPDMStatusUnknown</Name>
+                <Description><![CDATA[1 = Document is unknown to PDM]]></Description>
+            </Member>
+        </Members>
+        <SeeAlso>
+            <See cref="SolidWorks.Interop.swbrowser_namespace">SolidWorks.Interop.swbrowser Namespace</See>
         </SeeAlso>
     </Enum>
     <Enum>

@@ -142,13 +142,16 @@ class TestApiDocsSpider:
 
     def test_start_requests(self) -> None:
         """Test that start URLs are correctly configured"""
-        # Check that spider has the correct start URL for expandToc
-        assert len(self.spider.start_urls) == 1
-        start_url = self.spider.start_urls[0]
-        assert "expandToc" in start_url
-        assert "version=2026" in start_url
-        assert "language=english" in start_url
-        assert "product=api" in start_url
+        # One seed per root TOC node (core API id=2, Toolbox API id=13)
+        assert len(self.spider.start_urls) == 2
+        for start_url in self.spider.start_urls:
+            assert "expandToc" in start_url
+            assert "version=2026" in start_url
+            assert "language=english" in start_url
+            assert "product=api" in start_url
+        # Both root nodes must be seeded
+        assert any("id=2" in url for url in self.spider.start_urls)
+        assert any("id=13" in url for url in self.spider.start_urls)
 
     def test_spider_statistics_tracking(self) -> None:
         """Test that spider tracks statistics correctly"""

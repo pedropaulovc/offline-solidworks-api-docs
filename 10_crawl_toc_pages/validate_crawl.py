@@ -195,8 +195,10 @@ class CrawlValidator:
             if verbose and url_count > 0:
                 print(f"  Average size: {total_size / url_count / 1024:.2f} KB")
 
-            # Check for minimum page count (allow 5% regression from expected 458)
-            min_pages = 435  # 95% of 458
+            # Check for minimum page count (allow 5% regression from expected total).
+            # url_count includes content pages + expandToc JSON nodes. The full crawl
+            # (core SOLIDWORKS API id=2 + Toolbox API id=13) yields ~4500 such records.
+            min_pages = 4275  # ~95% of 4502
             if url_count < min_pages:
                 self.errors.append(f"Insufficient pages crawled: {url_count} < {min_pages}")
                 return False
