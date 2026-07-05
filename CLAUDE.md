@@ -77,8 +77,19 @@ This is a multi-phase pipeline project for creating offline, searchable versions
 - 125 content pages converted with 100% success rate
 - Validation script and test suite complete
 
+✅ **Phase 11.5 (115_crawl_referenced_pages)**: Complete
+- Closes the "dead link" gap left by the TOC-driven crawls
+- Seeds from `<see href>` references not already in the bundle, follows in-page
+  `/api` links to closure, bounded by the already-crawled set (guards out the
+  `~`-style reference tree)
+- Reuses Phase 110's HTML→Markdown converter; emits a Phase-120-compatible
+  `files_created.jsonl` so referenced pages cross-link as files
+- Runs between Phase 110 and Phase 120
+
 ✅ **Phase 12 (120_export_llm_docs)**: Complete
 - LLM-friendly markdown documentation export
+- Inline `<see cref>` become `[[wiki-links]]`; `<see href>` resolve to relative
+  `docs/` file links (external only when the page ships nowhere in the bundle)
 - Grep-optimized structure (file-per-member for types; one flat file per enum)
 - Enums are emitted as a single `enums/{EnumName}.md` with all members inline
   (not a per-enum directory with one file per member)

@@ -1,0 +1,8 @@
+{
+  "crawler_version": "1.0.0",
+  "start_url": "seed: /api pages referenced but not crawled by phases 10/30/100",
+  "boundary": "/2026/english/api/",
+  "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+  "respect_robots_txt": true,
+  "crawl_delay_seconds": 2
+}

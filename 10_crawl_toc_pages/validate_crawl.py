@@ -231,8 +231,10 @@ class CrawlValidator:
                     # pages, so excluding them avoids false "missing HTML" reports.
                     file_path_str = obj.get("file_path", "")
                     if file_path_str.lower().endswith((".htm", ".html")):
-                        # Convert relative path in metadata to absolute
-                        file_path = self.output_dir.parent / file_path_str
+                        # Convert relative path in metadata to absolute. The crawler
+                        # records Windows-style separators; normalize so the path
+                        # resolves (and matches globbed files) on POSIX too.
+                        file_path = self.output_dir.parent / file_path_str.replace("\\", "/")
                         metadata_files.add(file_path)
 
             # Check for orphaned files

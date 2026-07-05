@@ -12,6 +12,12 @@ import html
 
 from models import TypeInfo, ExampleContent, Member, Property, Method, EnumMember
 
+# ``../`` sequence from a generated file to the bundle root, used to build
+# relative links into ``docs/``. Type files live at ``types/{Name}/*.md`` (two
+# levels deep); enum and index files are one level deep.
+DOCS_PREFIX_TYPE = "../../"
+DOCS_PREFIX_FLAT = "../"
+
 
 def _block(lines: List[str]) -> str:
     """Join already-formatted markdown lines into one tight block (no blank lines between).
@@ -38,27 +44,77 @@ def clean_text(text: str) -> str:
     return text.strip()
 
 
-def simplify_cross_references(text: str) -> str:
-    """Convert XML-style ``<see cref="FQN">Label</see>`` references to ``[[Label]]``
-    wiki-links, including self-closing ``<see cref="FQN" />`` forms."""
+def guide_link_key(url: str) -> str:
+    """Normalize a ``<see href>`` URL to the key used in the guide-link map:
+    the lowercased ``.htm``/``.html`` basename (host, path, and query stripped)."""
+    return url.split('?')[0].rstrip('/').split('/')[-1].lower()
+
+
+def simplify_cross_references(text: str, guide_links: Optional[Dict[str, str]] = None,
+                             rel_prefix: str = "") -> str:
+    """Convert inline XML-style cross-references to markdown/wiki links.
+
+    - ``<see cref="FQN">Label</see>`` and self-closing ``<see cref="FQN" />``
+      become ``[[Label]]`` wiki-links (greppable API references).
+    - ``<see href="URL">Label</see>`` becomes a relative markdown link to the
+      programming-guide file when that page ships in the bundle
+      (``[Label](<rel_prefix + docs/…>)``), otherwise a plain external link
+      ``[Label](URL)``.
+
+    Args:
+        text: Raw text containing ``<see …>`` tags.
+        guide_links: Map of :func:`guide_link_key` -> bundle-relative docs path
+            (e.g. ``docs/Programming with the SOLIDWORKS API/In-process Methods.md``).
+        rel_prefix: ``../`` sequence to reach the bundle root from the file being
+            rendered (``../../`` for ``types/X/…`` files, ``../`` for ``enums/`` and
+            ``index/`` files).
+    """
     if not text:
         return ""
+
+    links = guide_links or {}
 
     # <see cref="...">LinkText</see> -> [[LinkText]]
     text = re.sub(r'<see cref="[^"]+">([^<]+)</see>', r'[[\1]]', text)
 
     # Self-closing <see cref="FQN" /> -> [[last segment of FQN]]
-    def replace_self_closing(match):
-        return f'[[{match.group(1).split(".")[-1]}]]'
+    text = re.sub(r'<see cref="([^"]+)"\s*/>',
+                  lambda m: f'[[{m.group(1).split(".")[-1]}]]', text)
 
-    text = re.sub(r'<see cref="([^"]+)"\s*/>', replace_self_closing, text)
+    # <see href="URL">LinkText</see> -> relative file link (in-bundle) or external link
+    def replace_href(match: "re.Match[str]") -> str:
+        url, label = match.group(1), match.group(2)
+        target = links.get(guide_link_key(url))
+        if target:
+            return f'[{label}](<{rel_prefix}{target}>)'
+        return f'[{label}]({url})'
+
+    text = re.sub(r'<see href="([^"]*)">([^<]+)</see>', replace_href, text)
+    return text
+
+
+def strip_cross_references(text: str) -> str:
+    """Reduce ``<see …>`` cross-references to their plain label text.
+
+    Used for short preview strings (e.g. truncated index descriptions) where a
+    ``[[…]]`` wiki-link or ``[label](<…>)`` file link would only add noise and,
+    worse, be cut mid-link by a length cap. ``<see cref="FQN" />`` self-closing
+    tags collapse to the last FQN segment.
+    """
+    if not text:
+        return ""
+
+    text = re.sub(r'<see (?:cref|href)="[^"]*">([^<]+)</see>', r'\1', text)
+    text = re.sub(r'<see cref="([^"]+)"\s*/>',
+                  lambda m: m.group(1).split(".")[-1], text)
     return text
 
 
 class MarkdownGenerator:
     """Generates markdown documentation for API types."""
 
-    def __init__(self, output_base_path: str, examples_loader_func=None, grep_optimized=False, example_categories=None):
+    def __init__(self, output_base_path: str, examples_loader_func=None, grep_optimized=False,
+                 example_categories=None, guide_links=None):
         """
         Initialize the markdown generator.
 
@@ -67,11 +123,14 @@ class MarkdownGenerator:
             examples_loader_func: Function to load example content by URL
             grep_optimized: If True, generate file-per-member structure for greppability
             example_categories: Dict mapping example URLs to category names (for grep_optimized mode)
+            guide_links: Dict mapping guide_link_key(url) -> bundle-relative docs path,
+                used to turn ``<see href>`` guide references into relative file links
         """
         self.output_base_path = Path(output_base_path)
         self.examples_loader_func = examples_loader_func
         self.grep_optimized = grep_optimized
         self.example_categories = example_categories or {}
+        self.guide_links = guide_links or {}
 
     def generate_type_documentation(self, type_info: TypeInfo, category: Optional[str] = None) -> str:
         """
@@ -296,13 +355,14 @@ class MarkdownGenerator:
         # Member files are at the same level as _overview.md, so use the same logic
         return self._get_example_path_for_overview(url, type_info)
 
-    def generate_type_overview(self, type_info: TypeInfo) -> str:
+    def generate_type_overview(self, type_info: TypeInfo, rel_prefix: str = DOCS_PREFIX_TYPE) -> str:
         """
         Generate type overview markdown (description, remarks, metadata) without members.
         Used for grep-optimized _overview.md files.
 
         Args:
             type_info: The TypeInfo object to document
+            rel_prefix: ``../`` sequence to the bundle root (see DOCS_PREFIX_TYPE)
 
         Returns:
             Generated markdown content as a string
@@ -331,12 +391,12 @@ class MarkdownGenerator:
         # Description
         if type_info.description:
             md.append("## Description\n")
-            md.append(f"{self._simplify_cross_references(self._clean_text(type_info.description))}\n")
+            md.append(f"{self._simplify_cross_references(self._clean_text(type_info.description), rel_prefix)}\n")
 
         # Remarks
         if type_info.remarks:
             md.append("## Remarks\n")
-            md.append(f"{self._simplify_cross_references(self._clean_text(type_info.remarks))}\n")
+            md.append(f"{self._simplify_cross_references(self._clean_text(type_info.remarks), rel_prefix)}\n")
 
         # Member counts (omit the section entirely when there are none)
         members = []
@@ -361,11 +421,12 @@ class MarkdownGenerator:
 
         # See Also cross-references
         if type_info.see_also:
-            md.extend(self._render_see_also(type_info.see_also))
+            md.extend(self._render_see_also(type_info.see_also, rel_prefix))
 
         return "\n".join(md)
 
-    def generate_member_documentation(self, type_info: TypeInfo, member: Member, member_kind: str) -> str:
+    def generate_member_documentation(self, type_info: TypeInfo, member: Member, member_kind: str,
+                                      rel_prefix: str = DOCS_PREFIX_TYPE) -> str:
         """
         Generate markdown documentation for a single member (property or method).
 
@@ -373,6 +434,7 @@ class MarkdownGenerator:
             type_info: The parent TypeInfo object
             member: The member (Property or Method) to document
             member_kind: "property" or "method"
+            rel_prefix: ``../`` sequence to the bundle root (see DOCS_PREFIX_TYPE)
 
         Returns:
             Generated markdown content as a string
@@ -395,7 +457,7 @@ class MarkdownGenerator:
 
         # Description
         if member.description:
-            md.append(f"{self._simplify_cross_references(self._clean_text(member.description))}\n")
+            md.append(f"{self._simplify_cross_references(self._clean_text(member.description), rel_prefix)}\n")
 
         # Signature (prefixed with the return type when known)
         if member.signature:
@@ -411,19 +473,19 @@ class MarkdownGenerator:
             md.append("## Parameters\n")
             md.append(_block([
                 f"- **{param.name}**: "
-                f"{self._simplify_cross_references(self._clean_text(param.description)) if param.description else 'No description'}"
+                f"{self._simplify_cross_references(self._clean_text(param.description), rel_prefix) if param.description else 'No description'}"
                 for param in member.parameters
             ]))
 
         # Returns
         if member.returns:
             md.append(f"## Returns\n")
-            md.append(f"{self._simplify_cross_references(self._clean_text(member.returns))}\n")
+            md.append(f"{self._simplify_cross_references(self._clean_text(member.returns), rel_prefix)}\n")
 
         # Remarks
         if member.remarks:
             md.append(f"## Remarks\n")
-            md.append(f"{self._simplify_cross_references(self._clean_text(member.remarks))}\n")
+            md.append(f"{self._simplify_cross_references(self._clean_text(member.remarks), rel_prefix)}\n")
 
         # Examples section
         if member.examples:
@@ -436,7 +498,7 @@ class MarkdownGenerator:
 
         # See Also cross-references
         if member.see_also:
-            md.extend(self._render_see_also(member.see_also))
+            md.extend(self._render_see_also(member.see_also, rel_prefix))
 
         return "\n".join(md)
 
@@ -445,13 +507,14 @@ class MarkdownGenerator:
         filename = url.split('/')[-1].replace('.htm', '.md').replace('.html', '.md')
         return f"../examples/{filename}"
 
-    def generate_enum_documentation(self, type_info: TypeInfo) -> str:
+    def generate_enum_documentation(self, type_info: TypeInfo, rel_prefix: str = DOCS_PREFIX_FLAT) -> str:
         """
         Generate a single self-contained markdown file for an enumeration, with all
         members inline (replaces the per-member file-per-enum-member layout).
 
         Args:
             type_info: The enum TypeInfo object to document
+            rel_prefix: ``../`` sequence to the bundle root (see DOCS_PREFIX_FLAT)
 
         Returns:
             Generated markdown content as a string
@@ -477,19 +540,19 @@ class MarkdownGenerator:
         # Description
         if type_info.description:
             md.append("## Description\n")
-            md.append(f"{self._simplify_cross_references(self._clean_text(type_info.description))}\n")
+            md.append(f"{self._simplify_cross_references(self._clean_text(type_info.description), rel_prefix)}\n")
 
         # Remarks
         if type_info.remarks:
             md.append("## Remarks\n")
-            md.append(f"{self._simplify_cross_references(self._clean_text(type_info.remarks))}\n")
+            md.append(f"{self._simplify_cross_references(self._clean_text(type_info.remarks), rel_prefix)}\n")
 
         # All enumeration members inline
         md.append("## Enumeration Members\n")
         for enum_member in type_info.enum_members:
             md.append(f"### {enum_member.name}\n")
             if enum_member.description:
-                md.append(f"{self._simplify_cross_references(self._clean_text(enum_member.description))}\n")
+                md.append(f"{self._simplify_cross_references(self._clean_text(enum_member.description), rel_prefix)}\n")
 
         # Examples (enum-level, if any)
         if type_info.examples:
@@ -502,7 +565,7 @@ class MarkdownGenerator:
 
         # See Also cross-references
         if type_info.see_also:
-            md.extend(self._render_see_also(type_info.see_also))
+            md.extend(self._render_see_also(type_info.see_also, rel_prefix))
 
         return "\n".join(md)
 
@@ -528,13 +591,15 @@ class MarkdownGenerator:
             lines.append(f"**Category**: {type_info.functional_category}")
         return "  \n".join(lines) + "\n"
 
-    def _render_see_also(self, see_also: List) -> List[str]:
+    def _render_see_also(self, see_also: List, rel_prefix: str = "") -> List[str]:
         """
         Render a ``## See Also`` markdown block from a list of CrossRef objects.
 
         API references (cref) become ``[[Label]]`` wiki-links so they stay
-        greppable and consistent with inline cross-references; guide/external
-        references (href) become standard markdown links.
+        greppable and consistent with inline cross-references; guide references
+        (href) become relative file links when the page ships in the bundle,
+        otherwise plain external links. ``rel_prefix`` is the ``../`` sequence
+        that reaches the bundle root from the file being rendered.
 
         Returns an empty list when there are no cross-references. The heading and
         the (tight) list of links are returned as two elements so the caller's
@@ -544,15 +609,19 @@ class MarkdownGenerator:
         if not see_also:
             return []
 
-        links = [
-            f"- [[{ref.label}]]" if ref.attr == "cref" else f"- [{ref.label}]({ref.value})"
-            for ref in see_also
-        ]
-        return ["## See Also\n", _block(links)]
+        def render(ref) -> str:
+            if ref.attr == "cref":
+                return f"- [[{ref.label}]]"
+            target = self.guide_links.get(guide_link_key(ref.value))
+            if target:
+                return f"- [{ref.label}](<{rel_prefix}{target}>)"
+            return f"- [{ref.label}]({ref.value})"
 
-    def _simplify_cross_references(self, text: str) -> str:
+        return ["## See Also\n", _block([render(ref) for ref in see_also])]
+
+    def _simplify_cross_references(self, text: str, rel_prefix: str = "") -> str:
         """Instance delegator for the module-level :func:`simplify_cross_references`."""
-        return simplify_cross_references(text)
+        return simplify_cross_references(text, self.guide_links, rel_prefix)
 
     def save_grep_optimized_documentation(self, type_info: TypeInfo, output_dir: Path) -> int:
         """

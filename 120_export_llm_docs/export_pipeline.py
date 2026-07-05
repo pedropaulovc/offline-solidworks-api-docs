@@ -40,7 +40,8 @@ class ExportPipeline:
             phase60_path: str,
             phase80_path: str,
             phase110_path: str,
-            functional_categories_html: str):
+            functional_categories_html: str,
+            phase115_path: str = ""):
         """
         Run the complete export pipeline.
 
@@ -52,7 +53,10 @@ class ExportPipeline:
             phase80_path: Path to Phase 80 XML
             phase110_path: Path to Phase 110 markdown directory
             functional_categories_html: Path to FunctionalCategories HTML
+            phase115_path: Path to Phase 115 referenced-page markdown directory (optional)
         """
+        # Markdown roots whose pages are copied into ``docs/`` and cross-linked.
+        self.guide_roots = [phase110_path] + ([phase115_path] if phase115_path else [])
         print("="*80)
         print("Phase 120: Export LLM-Friendly Documentation")
         print("="*80)
@@ -94,9 +98,14 @@ class ExportPipeline:
         example_categories = self._map_examples_to_categories(data_loader.examples, types)
         print(f"  Mapped {len(example_categories)} examples to categories")
 
+        # Build the guide-link map so inline <see href> references to guide/referenced
+        # pages that ship in the bundle become relative file links (docs/ folder).
+        guide_links = self._build_guide_links(self.guide_roots)
+        print(f"  Resolved {len(guide_links)} guide/referenced pages for cross-linking")
+
         # Step 4: Generate API documentation
         print("\n[4/9] Generating API documentation...")
-        self._generate_api_docs(types, data_loader, example_categories)
+        self._generate_api_docs(types, data_loader, example_categories, guide_links)
 
         # Step 5: Generate index files
         print("\n[5/9] Generating index files...")
@@ -106,9 +115,10 @@ class ExportPipeline:
         print("\n[6/9] Generating example documentation...")
         self._generate_example_docs(data_loader.examples, example_categories)
 
-        # Step 7: Copy programming guide
+        # Step 7: Copy programming guide + referenced pages into docs/
         print("\n[7/9] Copying programming guide...")
-        self._copy_programming_guide(phase110_path)
+        for root in self.guide_roots:
+            self._copy_programming_guide(root)
 
         # Step 8: Generate output README for LLMs
         print("\n[8/9] Generating output README...")
@@ -124,14 +134,41 @@ class ExportPipeline:
         print(f"\nOutput location: {self.output_base}")
         print(f"Total markdown files generated: {self.stats.markdown_files_generated}")
 
-    def _generate_api_docs(self, types: Dict[str, TypeInfo], data_loader: DataLoader, example_categories: Dict[str, str]):
+    def _build_guide_links(self, markdown_roots: List[str]) -> Dict[str, str]:
+        """Map guide/referenced-page URLs to their bundle-relative ``docs/`` paths.
+
+        Reads the ``files_created.jsonl`` beside each markdown root (Phase 110's
+        programming guide and Phase 115's referenced-page closure) and keys it by
+        :func:`guide_link_key` so ``<see href>`` references resolve to the copies
+        ``_copy_programming_guide`` places under ``docs/``. Missing manifests are
+        skipped (those references fall back to external links).
+        """
+        from markdown_generator import guide_link_key
+
+        guide_links: Dict[str, str] = {}
+        for root in markdown_roots:
+            manifest = Path(root).parent.parent / "metadata" / "files_created.jsonl"
+            if not manifest.exists():
+                print(f"  Warning: guide manifest not found at {manifest}; those <see href> links stay external")
+                continue
+            with open(manifest, encoding="utf-8") as f:
+                for line in f:
+                    entry = json.loads(line)
+                    # markdown_path is repo-relative and always under ".../output/markdown/".
+                    rel = entry["markdown_path"].replace("\\", "/").split("output/markdown/", 1)[-1]
+                    guide_links[guide_link_key(entry["original_url"])] = f"docs/{rel}"
+        return guide_links
+
+    def _generate_api_docs(self, types: Dict[str, TypeInfo], data_loader: DataLoader,
+                           example_categories: Dict[str, str], guide_links: Dict[str, str]):
         """Generate grep-optimized markdown documentation for all API types."""
         # Create markdown generator in grep-optimized mode
         generator = MarkdownGenerator(
             output_base_path=str(self.output_base),
             examples_loader_func=data_loader.get_example_content,
             grep_optimized=True,
-            example_categories=example_categories
+            example_categories=example_categories,
+            guide_links=guide_links
         )
 
         # Separate types from enums
@@ -424,6 +461,11 @@ def main():
         help='Path to Phase 110 markdown directory'
     )
     parser.add_argument(
+        '--phase115',
+        default=str(project_root / '115_crawl_referenced_pages/output/markdown'),
+        help='Path to Phase 115 referenced-page markdown directory'
+    )
+    parser.add_argument(
         '--functional-categories',
         default=str(project_root / '10_crawl_toc_pages/output/html/sldworksapi/FunctionalCategories-sldworksapi_2cd1902c_2cd1902c.htmll.html'),
         help='Path to FunctionalCategories HTML file'
@@ -445,7 +487,8 @@ def main():
         phase60_path=args.phase60,
         phase80_path=args.phase80,
         phase110_path=args.phase110,
-        functional_categories_html=args.functional_categories
+        functional_categories_html=args.functional_categories,
+        phase115_path=args.phase115
     )
 
 

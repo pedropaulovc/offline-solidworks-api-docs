@@ -107,6 +107,10 @@ validate 100                       $PY 100_crawl_programming_guide/validate_craw
 run 110 "extract docs markdown"    $PY 110_extract_docs_md/extract_markdown.py
 validate 110                       $PY 110_extract_docs_md/validate_extraction.py
 
+# Phase 115 - crawl /api pages referenced but not covered by earlier phases, then extract
+run 115 "crawl referenced pages"   $PY 115_crawl_referenced_pages/run_crawler.py
+run 115 "extract referenced md"    $PY 115_crawl_referenced_pages/extract_markdown.py
+
 # Phase 120 - export LLM-friendly docs (flat enum files)
 run 120 "export llm docs"          $PY 120_export_llm_docs/export_pipeline.py
 validate 120                       $PY 120_export_llm_docs/validate_export.py

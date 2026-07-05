@@ -9,7 +9,7 @@ from typing import Dict, List
 from collections import defaultdict
 
 from models import TypeInfo
-from markdown_generator import sanitize_filename, _block, clean_text, simplify_cross_references
+from markdown_generator import sanitize_filename, _block, clean_text, strip_cross_references
 
 
 def _format_signature(member) -> str:
@@ -86,9 +86,10 @@ class IndexGenerator:
         if not with_description:
             return entry
 
-        # Clean cross-reference tags and flatten to a single line before truncating
-        # so we never cut through a ``<see cref=...>`` tag mid-string.
-        description = simplify_cross_references(clean_text(type_info.description))
+        # Reduce cross-references to plain label text and flatten to a single line
+        # before truncating, so the 100-char cap never cuts through a tag or a
+        # rendered link (index previews don't need to be navigable).
+        description = strip_cross_references(clean_text(type_info.description))
         description = " ".join(description.split())
         if len(description) > 100:
             description = description[:100] + "..."
