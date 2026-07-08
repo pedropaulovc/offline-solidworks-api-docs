@@ -84,15 +84,17 @@ class ExampleParser:
 
                 elif element.name == 'div' and (
                     'Monospace' in str(element.get('style', '')) or
-                    element.find('p', class_='APICODE') or
-                    element.find('pre', recursive=False)
+                    element.find('p', class_='APICODE')
                 ):
-                    # This is a code container div. The <pre> guard is a DIRECT-child
-                    # check on purpose: a prose wrapper <div> that merely nests a <pre>
-                    # deeper in its subtree must NOT be swallowed as code (the outer
-                    # loop is recursive=False, so its headings/paragraphs would be lost).
-                    # Monospace-styled and APICODE-bearing divs are the real code
-                    # containers; every observed C#/VB.NET example matches via Monospace.
+                    # This is a code container div. Match ONLY on the monospace style
+                    # or an APICODE paragraph — the reliable signals SOLIDWORKS uses for
+                    # a code block. Every observed C#/VB.NET code div is Monospace-styled
+                    # (verified across the example corpus: no real code div depends on a
+                    # bare nested <pre>), so we deliberately do NOT treat "contains a
+                    # <pre>" as a container signal: that would swallow an ordinary prose
+                    # wrapper <div> (e.g. <div><p>text</p><pre>snippet</pre></div>) and,
+                    # because the outer loop is recursive=False, drop its surrounding
+                    # description text.
                     if in_pre_block:
                         in_pre_block = False
 

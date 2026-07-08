@@ -415,31 +415,41 @@ namespace Test
         assert 'using System;' in content
         assert 'namespace Test' in content
 
-    def test_prose_div_with_deeply_nested_pre_not_treated_as_code(self, parser, temp_dirs):
-        """A prose wrapper div that only nests a <pre> deep in its subtree must not
+    def test_prose_div_with_nested_pre_not_treated_as_code(self, parser, temp_dirs):
+        """A plain (non-monospace) wrapper div containing prose plus a <pre> must not
 
-        be swallowed as a code container: the outer element loop is recursive=False,
-        so the div's headings/paragraphs would be lost. The <pre> guard is a
-        direct-child check, so this div is handled as ordinary text.
+        be swallowed as a code container. Only the monospace style / APICODE signals
+        mark a code div, so this div is handled as ordinary text and its surrounding
+        description is preserved rather than dropped by the recursive=False outer loop.
+        Covers both a directly-nested <pre> and one buried deeper in the subtree.
         """
         html_dir, _ = temp_dirs
 
-        html = """
-        <div>
-            <h2>Explanatory heading</h2>
-            <p>Important description that must not be dropped.</p>
-            <blockquote><pre>some incidental snippet</pre></blockquote>
-        </div>
-        """
-        test_file = html_dir / 'test_prose_wrapper.htm'
-        test_file.write_text(html)
+        for label, html in (
+            ("direct", """
+            <div>
+                <h2>Explanatory heading</h2>
+                <p>Important description that must not be dropped.</p>
+                <pre>some incidental snippet</pre>
+            </div>
+            """),
+            ("nested", """
+            <div>
+                <h2>Explanatory heading</h2>
+                <p>Important description that must not be dropped.</p>
+                <blockquote><pre>some incidental snippet</pre></blockquote>
+            </div>
+            """),
+        ):
+            test_file = html_dir / f'test_prose_wrapper_{label}.htm'
+            test_file.write_text(html)
 
-        content = parser.parse_html_file(test_file)
+            content = parser.parse_html_file(test_file)
 
-        assert content is not None
-        # The surrounding description survives (not swallowed into a code block).
-        assert 'Important description that must not be dropped.' in content
-        assert 'Explanatory heading' in content
+            assert content is not None, label
+            # The surrounding description survives (not swallowed into a code block).
+            assert 'Important description that must not be dropped.' in content, label
+            assert 'Explanatory heading' in content, label
 
 
 class TestWhitespaceNormalization:
