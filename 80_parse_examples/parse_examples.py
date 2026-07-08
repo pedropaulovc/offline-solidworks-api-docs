@@ -85,9 +85,14 @@ class ExampleParser:
                 elif element.name == 'div' and (
                     'Monospace' in str(element.get('style', '')) or
                     element.find('p', class_='APICODE') or
-                    element.find('pre')
+                    element.find('pre', recursive=False)
                 ):
-                    # This is a code container div
+                    # This is a code container div. The <pre> guard is a DIRECT-child
+                    # check on purpose: a prose wrapper <div> that merely nests a <pre>
+                    # deeper in its subtree must NOT be swallowed as code (the outer
+                    # loop is recursive=False, so its headings/paragraphs would be lost).
+                    # Monospace-styled and APICODE-bearing divs are the real code
+                    # containers; every observed C#/VB.NET example matches via Monospace.
                     if in_pre_block:
                         in_pre_block = False
 
@@ -98,10 +103,12 @@ class ExampleParser:
                     # Extract the code within the div, in document order. Older doc
                     # pages wrap each line in <p class="APICODE">; newer pages (notably
                     # every C#/VB.NET example) put the whole listing in a nested <pre>.
-                    # Handle both so the code block is never dropped.
+                    # Handle both so the code block is never dropped. Match APICODE by
+                    # class membership (not an exact class list), so a paragraph carrying
+                    # extra classes is still extracted as code rather than dropped.
                     code_children = [
                         c for c in element.find_all(['p', 'pre'])
-                        if c.name == 'pre' or c.get('class') == ['APICODE']
+                        if c.name == 'pre' or 'APICODE' in (c.get('class') or [])
                     ]
                     if code_children:
                         for child in code_children:

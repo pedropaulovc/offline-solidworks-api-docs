@@ -388,6 +388,59 @@ namespace Test
         # Indentation from the <pre> must survive.
         assert '    public class MyClass' in content
 
+    def test_apicode_with_extra_class_in_div(self, parser, temp_dirs):
+        """An APICODE paragraph carrying extra classes must still be extracted.
+
+        The div is classified as a code container via find('p', class_='APICODE')
+        (class membership), so the inner extraction must match the same way rather
+        than requiring an exact ['APICODE'] class list — otherwise the paragraph is
+        dropped and the whole div is mis-extracted as preformatted text.
+        """
+        html_dir, _ = temp_dirs
+
+        html = """
+        <h1>Test (C#)</h1>
+        <div style="font-family:Monospace;">
+            <p class="APICODE hljs-line"><span>using</span> System;</p>
+            <p class="APICODE hljs-line">namespace Test { }</p>
+        </div>
+        """
+        test_file = html_dir / 'test_apicode_extra_class.htm'
+        test_file.write_text(html)
+
+        content = parser.parse_html_file(test_file)
+
+        assert content is not None
+        assert content.count('<code>') == 1
+        assert 'using System;' in content
+        assert 'namespace Test' in content
+
+    def test_prose_div_with_deeply_nested_pre_not_treated_as_code(self, parser, temp_dirs):
+        """A prose wrapper div that only nests a <pre> deep in its subtree must not
+
+        be swallowed as a code container: the outer element loop is recursive=False,
+        so the div's headings/paragraphs would be lost. The <pre> guard is a
+        direct-child check, so this div is handled as ordinary text.
+        """
+        html_dir, _ = temp_dirs
+
+        html = """
+        <div>
+            <h2>Explanatory heading</h2>
+            <p>Important description that must not be dropped.</p>
+            <blockquote><pre>some incidental snippet</pre></blockquote>
+        </div>
+        """
+        test_file = html_dir / 'test_prose_wrapper.htm'
+        test_file.write_text(html)
+
+        content = parser.parse_html_file(test_file)
+
+        assert content is not None
+        # The surrounding description survives (not swallowed into a code block).
+        assert 'Important description that must not be dropped.' in content
+        assert 'Explanatory heading' in content
+
 
 class TestWhitespaceNormalization:
     """Tests for whitespace handling edge cases."""
