@@ -84,7 +84,8 @@ class ExampleParser:
 
                 elif element.name == 'div' and (
                     'Monospace' in str(element.get('style', '')) or
-                    element.find('p', class_='APICODE')
+                    element.find('p', class_='APICODE') or
+                    element.find('pre')
                 ):
                     # This is a code container div
                     if in_pre_block:
@@ -94,9 +95,25 @@ class ExampleParser:
                         content_parts.append('<code>')
                         in_code_block = True
 
-                    # Process all APICODE paragraphs within the div (preserve indentation)
-                    for p in element.find_all('p', class_='APICODE'):
-                        text = self._get_inner_html(p, preserve_newlines=True)
+                    # Extract the code within the div, in document order. Older doc
+                    # pages wrap each line in <p class="APICODE">; newer pages (notably
+                    # every C#/VB.NET example) put the whole listing in a nested <pre>.
+                    # Handle both so the code block is never dropped.
+                    code_children = [
+                        c for c in element.find_all(['p', 'pre'])
+                        if c.name == 'pre' or c.get('class') == ['APICODE']
+                    ]
+                    if code_children:
+                        for child in code_children:
+                            if child.name == 'pre':
+                                text = self._get_inner_html(child, is_pre=True)
+                            else:
+                                text = self._get_inner_html(child, preserve_newlines=True)
+                            if text:
+                                content_parts.append(text)
+                    else:
+                        # No structured code children — treat the div as preformatted.
+                        text = self._get_inner_html(element, is_pre=True)
                         if text:
                             content_parts.append(text)
 

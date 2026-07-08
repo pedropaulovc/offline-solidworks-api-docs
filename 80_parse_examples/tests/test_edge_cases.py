@@ -346,6 +346,48 @@ class TestAPICodeParagraphs:
         assert 'using System' in content
         assert 'namespace Test' in content
 
+    def test_pre_in_div_container(self, parser, temp_dirs):
+        """Test a <pre> code listing nested inside a monospace div.
+
+        Newer doc pages (every C#/VB.NET example, e.g.
+        Insert_Model_Annotations_Example_CSharp) wrap the whole listing in a
+        <pre> inside a monospace <div> with no <p class="APICODE"> paragraphs.
+        The div branch must read the nested <pre>, not silently drop the code.
+        """
+        html_dir, _ = temp_dirs
+
+        html_with_div_pre = """
+        <h1>Test (C#)</h1>
+        <p>This example shows something.</p>
+        <div style="font-family:Monospace; font-size: 10pt; background-color: white;">
+        <pre style="font-family: Consolas"><span class="s1">using</span> System;
+namespace Test
+{
+    public class MyClass
+    {
+        public void Main()
+        {
+        }
+    }
+}</pre>
+        </div>
+        """
+
+        test_file = html_dir / 'test_div_pre.htm'
+        test_file.write_text(html_with_div_pre)
+
+        content = parser.parse_html_file(test_file)
+
+        assert content is not None
+        # The code must not be dropped.
+        assert content.count('<code>') == 1
+        assert '<span' not in content
+        assert 'using System;' in content
+        assert 'namespace Test' in content
+        assert 'public void Main()' in content
+        # Indentation from the <pre> must survive.
+        assert '    public class MyClass' in content
+
 
 class TestWhitespaceNormalization:
     """Tests for whitespace handling edge cases."""
