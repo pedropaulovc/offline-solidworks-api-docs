@@ -346,6 +346,111 @@ class TestAPICodeParagraphs:
         assert 'using System' in content
         assert 'namespace Test' in content
 
+    def test_pre_in_div_container(self, parser, temp_dirs):
+        """Test a <pre> code listing nested inside a monospace div.
+
+        Newer doc pages (every C#/VB.NET example, e.g.
+        Insert_Model_Annotations_Example_CSharp) wrap the whole listing in a
+        <pre> inside a monospace <div> with no <p class="APICODE"> paragraphs.
+        The div branch must read the nested <pre>, not silently drop the code.
+        """
+        html_dir, _ = temp_dirs
+
+        html_with_div_pre = """
+        <h1>Test (C#)</h1>
+        <p>This example shows something.</p>
+        <div style="font-family:Monospace; font-size: 10pt; background-color: white;">
+        <pre style="font-family: Consolas"><span class="s1">using</span> System;
+namespace Test
+{
+    public class MyClass
+    {
+        public void Main()
+        {
+        }
+    }
+}</pre>
+        </div>
+        """
+
+        test_file = html_dir / 'test_div_pre.htm'
+        test_file.write_text(html_with_div_pre)
+
+        content = parser.parse_html_file(test_file)
+
+        assert content is not None
+        # The code must not be dropped.
+        assert content.count('<code>') == 1
+        assert '<span' not in content
+        assert 'using System;' in content
+        assert 'namespace Test' in content
+        assert 'public void Main()' in content
+        # Indentation from the <pre> must survive.
+        assert '    public class MyClass' in content
+
+    def test_apicode_with_extra_class_in_div(self, parser, temp_dirs):
+        """An APICODE paragraph carrying extra classes must still be extracted.
+
+        The div is classified as a code container via find('p', class_='APICODE')
+        (class membership), so the inner extraction must match the same way rather
+        than requiring an exact ['APICODE'] class list — otherwise the paragraph is
+        dropped and the whole div is mis-extracted as preformatted text.
+        """
+        html_dir, _ = temp_dirs
+
+        html = """
+        <h1>Test (C#)</h1>
+        <div style="font-family:Monospace;">
+            <p class="APICODE hljs-line"><span>using</span> System;</p>
+            <p class="APICODE hljs-line">namespace Test { }</p>
+        </div>
+        """
+        test_file = html_dir / 'test_apicode_extra_class.htm'
+        test_file.write_text(html)
+
+        content = parser.parse_html_file(test_file)
+
+        assert content is not None
+        assert content.count('<code>') == 1
+        assert 'using System;' in content
+        assert 'namespace Test' in content
+
+    def test_prose_div_with_nested_pre_not_treated_as_code(self, parser, temp_dirs):
+        """A plain (non-monospace) wrapper div containing prose plus a <pre> must not
+
+        be swallowed as a code container. Only the monospace style / APICODE signals
+        mark a code div, so this div is handled as ordinary text and its surrounding
+        description is preserved rather than dropped by the recursive=False outer loop.
+        Covers both a directly-nested <pre> and one buried deeper in the subtree.
+        """
+        html_dir, _ = temp_dirs
+
+        for label, html in (
+            ("direct", """
+            <div>
+                <h2>Explanatory heading</h2>
+                <p>Important description that must not be dropped.</p>
+                <pre>some incidental snippet</pre>
+            </div>
+            """),
+            ("nested", """
+            <div>
+                <h2>Explanatory heading</h2>
+                <p>Important description that must not be dropped.</p>
+                <blockquote><pre>some incidental snippet</pre></blockquote>
+            </div>
+            """),
+        ):
+            test_file = html_dir / f'test_prose_wrapper_{label}.htm'
+            test_file.write_text(html)
+
+            content = parser.parse_html_file(test_file)
+
+            assert content is not None, label
+            # The surrounding description survives (not swallowed into a code block).
+            assert 'Important description that must not be dropped.' in content, label
+            assert 'Explanatory heading' in content, label
+
 
 class TestWhitespaceNormalization:
     """Tests for whitespace handling edge cases."""

@@ -86,7 +86,15 @@ class ExampleParser:
                     'Monospace' in str(element.get('style', '')) or
                     element.find('p', class_='APICODE')
                 ):
-                    # This is a code container div
+                    # This is a code container div. Match ONLY on the monospace style
+                    # or an APICODE paragraph — the reliable signals SOLIDWORKS uses for
+                    # a code block. Every observed C#/VB.NET code div is Monospace-styled
+                    # (verified across the example corpus: no real code div depends on a
+                    # bare nested <pre>), so we deliberately do NOT treat "contains a
+                    # <pre>" as a container signal: that would swallow an ordinary prose
+                    # wrapper <div> (e.g. <div><p>text</p><pre>snippet</pre></div>) and,
+                    # because the outer loop is recursive=False, drop its surrounding
+                    # description text.
                     if in_pre_block:
                         in_pre_block = False
 
@@ -94,9 +102,27 @@ class ExampleParser:
                         content_parts.append('<code>')
                         in_code_block = True
 
-                    # Process all APICODE paragraphs within the div (preserve indentation)
-                    for p in element.find_all('p', class_='APICODE'):
-                        text = self._get_inner_html(p, preserve_newlines=True)
+                    # Extract the code within the div, in document order. Older doc
+                    # pages wrap each line in <p class="APICODE">; newer pages (notably
+                    # every C#/VB.NET example) put the whole listing in a nested <pre>.
+                    # Handle both so the code block is never dropped. Match APICODE by
+                    # class membership (not an exact class list), so a paragraph carrying
+                    # extra classes is still extracted as code rather than dropped.
+                    code_children = [
+                        c for c in element.find_all(['p', 'pre'])
+                        if c.name == 'pre' or 'APICODE' in (c.get('class') or [])
+                    ]
+                    if code_children:
+                        for child in code_children:
+                            if child.name == 'pre':
+                                text = self._get_inner_html(child, is_pre=True)
+                            else:
+                                text = self._get_inner_html(child, preserve_newlines=True)
+                            if text:
+                                content_parts.append(text)
+                    else:
+                        # No structured code children — treat the div as preformatted.
+                        text = self._get_inner_html(element, is_pre=True)
                         if text:
                             content_parts.append(text)
 
