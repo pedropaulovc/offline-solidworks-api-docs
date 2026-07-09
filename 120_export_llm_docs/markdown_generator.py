@@ -50,6 +50,39 @@ def guide_link_key(url: str) -> str:
     return url.split('?')[0].rstrip('/').split('/')[-1].lower()
 
 
+def parse_api_ref_url(url: str) -> "Optional[tuple[str, str, Optional[str]]]":
+    """Parse a SolidWorks API-reference URL into ``(assembly, type, member)``.
+
+    Reference pages are named ``{Namespace}~{Namespace}.{Type}[~{Member}].html``
+    and live under an assembly folder (``sldworksapi``, ``swconst``, …). Returns
+    ``None`` when the basename has no ``~`` — the reliable marker that separates
+    reference pages from example/programming-guide pages in those same folders.
+
+    Example::
+
+        .../sldworksapi/SolidWorks.interop.sldworks~SolidWorks.interop.sldworks.IFeature~ModifyDefinition.html
+        -> ("sldworksapi", "IFeature", "ModifyDefinition")
+        .../sldworksapi/SolidWorks.interop.sldworks~SolidWorks.interop.sldworks.IMacroFeatureData.html
+        -> ("sldworksapi", "IMacroFeatureData", None)
+    """
+    path = url.split('?')[0].split('#')[0]
+    segments = [s for s in path.split('/') if s]
+    if not segments:
+        return None
+    basename = re.sub(r'\.html?$', '', segments[-1], flags=re.IGNORECASE)
+    if '~' not in basename:
+        return None
+    parts = basename.split('~')
+    if len(parts) < 2:
+        return None
+    assembly = segments[-2] if len(segments) >= 2 else ''
+    type_name = parts[1].rsplit('.', 1)[-1]
+    member_name = parts[2] if len(parts) > 2 else None
+    if not type_name:
+        return None
+    return assembly, type_name, member_name
+
+
 def simplify_cross_references(text: str, guide_links: Optional[Dict[str, str]] = None,
                              rel_prefix: str = "") -> str:
     """Convert inline XML-style cross-references to markdown/wiki links.
