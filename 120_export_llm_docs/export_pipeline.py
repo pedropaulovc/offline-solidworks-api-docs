@@ -119,6 +119,9 @@ class ExportPipeline:
         print("\n[7/9] Copying programming guide...")
         for root in self.guide_roots:
             self._copy_programming_guide(root)
+        # Resolve the API-reference links Phase 110 left pointing at the original
+        # ``.html`` pages so they target the ``types/``/``enums/`` files we ship.
+        self._rewrite_guide_api_links(types, self._api_base_url())
 
         # Step 8: Generate output README for LLMs
         print("\n[8/9] Generating output README...")
@@ -275,6 +278,97 @@ class ExportPipeline:
                     self.stats.programming_guide_files += 1
 
         print(f"  Copied {self.stats.programming_guide_files} programming guide files")
+
+    def _api_base_url(self) -> str:
+        """Online help base URL (``https://help.solidworks.com/2026/english/api/``).
+
+        Derived from a guide manifest's ``original_url`` so the version year is not
+        hard-coded; falls back to the 2026 base if no manifest is available.
+        """
+        default = "https://help.solidworks.com/2026/english/api/"
+        for root in self.guide_roots:
+            manifest = Path(root).parent.parent / "metadata" / "files_created.jsonl"
+            if not manifest.exists():
+                continue
+            with open(manifest, encoding="utf-8") as f:
+                for line in f:
+                    url = json.loads(line).get("original_url", "")
+                    idx = url.find("/api/")
+                    if idx != -1:
+                        return f"https://help.solidworks.com{url[:idx + 5]}"
+            break
+        return default
+
+    def _rewrite_guide_api_links(self, types: Dict[str, TypeInfo], base_url: str) -> None:
+        """Resolve API-reference links in the copied programming guide.
+
+        Phase 110 leaves ``sldworksapi``/``swconst``/… reference links pointing at
+        the original ``.html`` pages (it has no knowledge of the reference tree
+        Phase 120 generates). This rewrites each such link to the shipping
+        ``types/{Type}/{Member}.md``, ``types/{Type}/_overview.md`` or
+        ``enums/{Enum}.md`` file, matching type/member names case-insensitively so
+        source-doc typos (e.g. ``IWizardHoleFeatureDAta2``) still resolve. Links
+        whose target does not ship in the bundle are pointed at the online help
+        page instead of a dead relative path.
+        """
+        import posixpath
+        import re
+        from markdown_generator import parse_api_ref_url
+
+        # Case-insensitive indexes over the shipping API-reference tree.
+        type_idx: Dict[str, tuple] = {}       # type_lower -> (sanitized name, is_enum)
+        member_idx: Dict[tuple, str] = {}     # (type_lower, member_lower) -> filename
+        for t in types.values():
+            type_idx[t.name.lower()] = (sanitize_filename(t.name), t.is_enum)
+            if t.is_enum:
+                continue
+            for m in list(t.properties) + list(t.methods):
+                member_idx[(t.name.lower(), m.name.lower())] = sanitize_filename(m.name)
+
+        docs_root = self.output_base / "docs"
+        if not docs_root.exists():
+            return
+
+        link_re = re.compile(r'(\[[^\]]+\]\()<?([^)>]+?\.html?)>?(\))')
+        resolved = external = 0
+
+        for md_file in docs_root.rglob("*.md"):
+            guide_dir = posixpath.dirname(md_file.relative_to(self.output_base).as_posix())
+            state = {"changed": False}
+
+            def repl(match: "re.Match[str]") -> str:
+                nonlocal resolved, external
+                head, url, tail = match.group(1), match.group(2), match.group(3)
+                parsed = parse_api_ref_url(url)
+                if parsed is None:
+                    return match.group(0)
+
+                assembly, type_name, member_name = parsed
+                entry = type_idx.get(type_name.lower())
+                if entry:
+                    sanitized_type, is_enum = entry
+                    if is_enum:
+                        target = f"enums/{sanitized_type}.md"
+                    elif member_name and (type_name.lower(), member_name.lower()) in member_idx:
+                        member_file = member_idx[(type_name.lower(), member_name.lower())]
+                        target = f"types/{sanitized_type}/{member_file}.md"
+                    else:
+                        target = f"types/{sanitized_type}/_overview.md"
+                    resolved += 1
+                    state["changed"] = True
+                    return f"{head}{posixpath.relpath(target, guide_dir)}{tail}"
+
+                # Not in the bundle: link the canonical online page, not a dead path.
+                basename = url.split('?')[0].split('#')[0].split('/')[-1]
+                external += 1
+                state["changed"] = True
+                return f"{head}{base_url}{assembly}/{basename}{tail}"
+
+            new_content = link_re.sub(repl, md_file.read_text(encoding="utf-8"))
+            if state["changed"]:
+                md_file.write_text(new_content, encoding="utf-8")
+
+        print(f"  Rewrote programming-guide API links: {resolved} in-bundle, {external} external")
 
     def _generate_output_readme(self, types: Dict[str, TypeInfo], examples: Dict[str, ExampleContent]):
         """Generate a README.md in the output folder explaining how to consume the docs."""

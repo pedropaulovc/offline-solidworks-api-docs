@@ -64,6 +64,7 @@ output/
 5. **Index files**: Category/assembly organization preserved as queryable markdown
 6. **YAML frontmatter**: Every file has metadata (type, assembly, category, kind)
 7. **Simplified cross-references**: `[[IModelDoc2]]` instead of `<see cref="...">`
+8. **Resolved guide links**: API-reference links in the programming guide (e.g. `[IWizardHoleFeatureData2::InitializeHole](../../types/IWizardHoleFeatureData2/InitializeHole.md)`) are rewritten from the original `.html` reference pages to the shipping `types/`/`enums/` files — matched case-insensitively so source-doc typos still resolve; targets not in the bundle fall back to the online help page
 
 ## Markdown Format
 
