@@ -1,12 +1,12 @@
 {
   "package_name": "SolidWorks.Interop.xmldoc.zip",
-  "version": "v3.6.0",
+  "version": "v3.7.0",
   "package_type": "xmldoc",
   "description": "Microsoft XMLDoc files for Visual Studio IntelliSense",
   "source_phase": "90_export_xmldoc",
   "source_directory": "90_export_xmldoc\\output",
   "file_count": 12,
-  "archive_size_bytes": 2368130,
+  "archive_size_bytes": 2373744,
   "files": [
     "SolidWorks.Interop.dsgnchk.xml",
     "SolidWorks.Interop.sldtoolboxconfigureaddin.xml",
