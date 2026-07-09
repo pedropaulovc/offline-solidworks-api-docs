@@ -284,6 +284,39 @@ class TestMemberDetailsExtractor:
 
         assert "dialog" in parser.get_remarks()
 
+    def test_extract_remarks_with_nested_divs(self):
+        """Remarks must not truncate at the first nested <div> that closes.
+
+        Regression: the section terminator counted every tag's depth, so a
+        nested block such as <div style="MARGIN-LEFT: 2em"> would return the
+        counter to 0 and cut the remarks off mid-section (e.g. IFeatureManager
+        HoleWizard5 lost every hole/slot type after "Counterbore"). Depth is
+        now tracked on <div> nesting only, so only the wrapper close ends it.
+        """
+        html = """
+        <h1>Remarks</h1>
+        <div id="remarksSection">
+            <p>Intro paragraph before the nested block.</p>
+            <div style="MARGIN-LEFT: 2em">
+                <ol><li>early item</li></ol>
+            </div>
+            <h4>Second Section</h4>
+            <p>content that must survive</p>
+        </div>
+        <h1>See Also</h1>
+        """
+        parser = MemberDetailsExtractor()
+        # Drive the real section detection via the <h1> header, not a manual flag,
+        # so the h1 close/depth interaction is exercised.
+        parser.feed(html)
+
+        remarks = parser.get_remarks()
+        assert "Intro paragraph" in remarks
+        assert "Second Section" in remarks
+        assert "content that must survive" in remarks
+        # The following section header must not bleed into remarks.
+        assert "See Also" not in remarks
+
 
 class TestXMLGeneration:
     """Test XML output generation."""
