@@ -120,6 +120,56 @@ def test_rewrite_type_only_and_enum_and_external():
                 f"{SLD}.INotShipped~DoThing.html)") in text
 
 
+def test_missing_member_falls_back_to_online_page():
+    """A member the type does not export lands on the online page, not the overview."""
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        guide = _write_guide(
+            tmp,
+            f"[gone](../../sldworksapi/{SLD}.IFeature~ObsoleteMethod.html)\n",
+        )
+        ExportPipeline(str(tmp))._rewrite_guide_api_links(
+            _make_types(), "https://help.solidworks.com/2026/english/api/")
+
+        text = guide.read_text(encoding="utf-8")
+        assert "_overview.md" not in text
+        assert ("[gone](https://help.solidworks.com/2026/english/api/sldworksapi/"
+                f"{SLD}.IFeature~ObsoleteMethod.html)") in text
+
+
+def test_reference_link_with_fragment_resolves():
+    """A #fragment (or ?query) after .html still resolves to the member file."""
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        guide = _write_guide(
+            tmp,
+            f"[m](../../sldworksapi/{SLD}.IFeature~GetDefinition.html#remarks)\n",
+        )
+        ExportPipeline(str(tmp))._rewrite_guide_api_links(
+            _make_types(), "https://help.solidworks.com/2026/english/api/")
+
+        assert "[m](../../types/IFeature/GetDefinition.md)" in guide.read_text(encoding="utf-8")
+
+
+def test_basename_only_unresolved_recovers_assembly_from_folder():
+    """A same-directory ref with no assembly segment must not emit a `//` URL."""
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        # Referenced pages live under docs/{assembly}/; the link has no path prefix.
+        ref = tmp / "docs" / "sldworksapi" / "SomePage.md"
+        ref.parent.mkdir(parents=True, exist_ok=True)
+        ref.write_text(
+            f"[x]({SLD.replace('interop', 'Interop')}.INotShipped.html)\n",
+            encoding="utf-8",
+        )
+        ExportPipeline(str(tmp))._rewrite_guide_api_links(
+            _make_types(), "https://help.solidworks.com/2026/english/api/")
+
+        text = ref.read_text(encoding="utf-8")
+        assert "api//" not in text
+        assert "https://help.solidworks.com/2026/english/api/sldworksapi/" in text
+
+
 def test_rewrite_leaves_non_reference_links_untouched():
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)

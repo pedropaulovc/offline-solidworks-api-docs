@@ -329,7 +329,8 @@ class ExportPipeline:
         if not docs_root.exists():
             return
 
-        link_re = re.compile(r'(\[[^\]]+\]\()<?([^)>]+?\.html?)>?(\))')
+        # Allow a #fragment or ?query after the extension (parse_api_ref_url strips them).
+        link_re = re.compile(r'(\[[^\]]+\]\()<?([^)>]+?\.html?(?:[?#][^)>]*)?)>?(\))')
         resolved = external = 0
 
         for md_file in docs_root.rglob("*.md"):
@@ -347,22 +348,32 @@ class ExportPipeline:
                 entry = type_idx.get(type_name.lower())
                 if entry:
                     sanitized_type, is_enum = entry
+                    target = None
                     if is_enum:
                         target = f"enums/{sanitized_type}.md"
-                    elif member_name and (type_name.lower(), member_name.lower()) in member_idx:
+                    elif member_name is None:
+                        target = f"types/{sanitized_type}/_overview.md"
+                    elif (type_name.lower(), member_name.lower()) in member_idx:
                         member_file = member_idx[(type_name.lower(), member_name.lower())]
                         target = f"types/{sanitized_type}/{member_file}.md"
-                    else:
-                        target = f"types/{sanitized_type}/_overview.md"
-                    resolved += 1
-                    state["changed"] = True
-                    return f"{head}{posixpath.relpath(target, guide_dir)}{tail}"
+                    # A named member the type does not export (obsolete/typoed) has no
+                    # file to point at — fall through to the canonical online page
+                    # rather than silently redirecting to the type overview.
+                    if target:
+                        resolved += 1
+                        state["changed"] = True
+                        return f"{head}{posixpath.relpath(target, guide_dir)}{tail}"
 
                 # Not in the bundle: link the canonical online page, not a dead path.
+                # Same-directory references carry no assembly segment in the URL; recover
+                # it from the referenced page's own folder so the URL is not malformed.
+                asm = assembly or posixpath.basename(guide_dir)
+                if not asm or asm == "docs":
+                    return match.group(0)
                 basename = url.split('?')[0].split('#')[0].split('/')[-1]
                 external += 1
                 state["changed"] = True
-                return f"{head}{base_url}{assembly}/{basename}{tail}"
+                return f"{head}{base_url}{asm}/{basename}{tail}"
 
             new_content = link_re.sub(repl, md_file.read_text(encoding="utf-8"))
             if state["changed"]:
