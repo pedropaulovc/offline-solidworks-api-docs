@@ -248,7 +248,6 @@ class TestMemberDetailsExtractor:
         """
         parser = MemberDetailsExtractor()
         parser.in_return_section = True
-        parser.return_depth = 0
         parser.feed(html)
 
         assert "True if" in parser.get_return_value()
@@ -262,12 +261,40 @@ class TestMemberDetailsExtractor:
         """
         parser = MemberDetailsExtractor()
         parser.in_return_section = True
-        parser.return_depth = 0
         parser.feed(html)
 
         result = parser.get_return_value()
         assert "Error as defined by" in result
         assert "-1 indicates an unknown error" in result
+
+    def test_extract_return_value_sibling_blocks(self):
+        """Return value split across sibling blocks must not stop at the first div.
+
+        Regression: return content has no single wrapper <div> -- it is a run of
+        sibling <ul>/<li>/<div>/<p> blocks (e.g. an in-process note followed by an
+        "unsupported languages / In-process Methods" note). A div-close terminator
+        ended the section at the first block's </div>, dropping the rest. The
+        section now ends only at the next section header.
+        """
+        html = """
+        <h4>Return Value</h4>
+        <ul><li><div>in-process: Pointer to an array of longs</div></li></ul>
+        <li>VBA, VB.NET, C#: Not supported
+            <p>See <a href="../In-process_Methods.htm">In-process Methods</a> for details.</p>
+        </li>
+        <h1>Remarks</h1>
+        <div id="remarksSection"><p>trailing remarks</p></div>
+        """
+        parser = MemberDetailsExtractor()
+        parser.feed(html)
+
+        result = parser.get_return_value()
+        assert "in-process: Pointer" in result
+        # Everything after the first block's </div> must survive.
+        assert "Not supported" in result
+        assert "In-process Methods" in result
+        # The next section must not bleed into the return value.
+        assert "trailing remarks" not in result
 
     def test_extract_remarks(self):
         """Test extraction of remarks section."""

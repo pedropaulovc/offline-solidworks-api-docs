@@ -82,7 +82,6 @@ class MemberDetailsExtractor(HTMLParser):
 
         # For collecting return value
         self.return_parts: list[str] = []
-        self.return_depth: int = 0
 
         # For collecting remarks content
         self.remarks_parts: list[str] = []
@@ -174,20 +173,23 @@ class MemberDetailsExtractor(HTMLParser):
                         attrs_str = " " + " ".join([f'{k}="{v}"' for k, v in attrs])
                     self.current_param_desc_parts.append(f"<{tag}{attrs_str}>")
 
-        # Collect all HTML tags in return value section.
-        # Depth is tracked on <div> nesting only: the section is a single
-        # wrapper <div> and ends when that wrapper closes. Counting every tag
-        # is fragile (void elements like <br> never emit an end tag, and the
-        # section-header tag desyncs the count), which truncated long sections.
+        # Collect all HTML tags in return value section. Unlike remarks, return
+        # content has no single wrapper <div>: it is a run of sibling blocks
+        # (<p>, <ul>/<li>, <div> notes for in-process/unsupported languages).
+        # So the section ends at the next section header (handled in
+        # handle_data), never on a div close -- ending on the first div close
+        # would drop every sibling block after it.
         if self.in_return_section and not self.in_h4:
-            if tag == "div":
-                self.return_depth += 1
             attrs_str = ""
             if attrs:
                 attrs_str = " " + " ".join([f'{k}="{v}"' for k, v in attrs])
             self.return_parts.append(f"<{tag}{attrs_str}>")
 
-        # Collect all HTML tags in remarks section (see return-section note above)
+        # Collect all HTML tags in remarks section. Remarks IS wrapped in a
+        # single <div id="remarksSection">, so depth is tracked on <div> nesting
+        # only and the section ends when that wrapper closes. Counting every tag
+        # is fragile (void elements like <br> never emit an end tag, and the
+        # section-header tag desyncs the count), which truncated long remarks.
         if self.in_remarks_section and not self.in_h1:
             if tag == "div":
                 self.remarks_depth += 1
@@ -266,14 +268,9 @@ class MemberDetailsExtractor(HTMLParser):
             if self.in_param_dd:
                 self.current_param_desc_parts.append(f"</{tag}>")
 
-        # Track closing tags in return value section (div-only depth)
+        # Collect closing tags in return value section (ends at next header)
         if self.in_return_section and not self.in_h4:
             self.return_parts.append(f"</{tag}>")
-            if tag == "div":
-                self.return_depth -= 1
-                # The wrapper <div> closing (depth back to 0) ends the section
-                if self.return_depth <= 0:
-                    self.in_return_section = False
 
         # Track closing tags in remarks section (div-only depth)
         if self.in_remarks_section and not self.in_h1:
@@ -351,7 +348,6 @@ class MemberDetailsExtractor(HTMLParser):
             elif text == "Return Value" or text == "Property Value":
                 self.in_parameters_section = False
                 self.in_return_section = True
-                self.return_depth = 0
 
         # Collect signature from C# syntax pre tag
         if self.in_syntax_table and self.syntax_depth > 0 and data:
