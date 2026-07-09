@@ -174,17 +174,23 @@ class MemberDetailsExtractor(HTMLParser):
                         attrs_str = " " + " ".join([f'{k}="{v}"' for k, v in attrs])
                     self.current_param_desc_parts.append(f"<{tag}{attrs_str}>")
 
-        # Collect all HTML tags in return value section
+        # Collect all HTML tags in return value section.
+        # Depth is tracked on <div> nesting only: the section is a single
+        # wrapper <div> and ends when that wrapper closes. Counting every tag
+        # is fragile (void elements like <br> never emit an end tag, and the
+        # section-header tag desyncs the count), which truncated long sections.
         if self.in_return_section and not self.in_h4:
-            self.return_depth += 1
+            if tag == "div":
+                self.return_depth += 1
             attrs_str = ""
             if attrs:
                 attrs_str = " " + " ".join([f'{k}="{v}"' for k, v in attrs])
             self.return_parts.append(f"<{tag}{attrs_str}>")
 
-        # Collect all HTML tags in remarks section
+        # Collect all HTML tags in remarks section (see return-section note above)
         if self.in_remarks_section and not self.in_h1:
-            self.remarks_depth += 1
+            if tag == "div":
+                self.remarks_depth += 1
             attrs_str = ""
             if attrs:
                 attrs_str = " " + " ".join([f'{k}="{v}"' for k, v in attrs])
@@ -260,23 +266,23 @@ class MemberDetailsExtractor(HTMLParser):
             if self.in_param_dd:
                 self.current_param_desc_parts.append(f"</{tag}>")
 
-        # Track closing tags in return value section
+        # Track closing tags in return value section (div-only depth)
         if self.in_return_section and not self.in_h4:
-            self.return_depth -= 1
             self.return_parts.append(f"</{tag}>")
+            if tag == "div":
+                self.return_depth -= 1
+                # The wrapper <div> closing (depth back to 0) ends the section
+                if self.return_depth <= 0:
+                    self.in_return_section = False
 
-            # If we're back to depth 0 and see a closing div, end return section
-            if self.return_depth == 0 and tag == "div":
-                self.in_return_section = False
-
-        # Track closing tags in remarks section
+        # Track closing tags in remarks section (div-only depth)
         if self.in_remarks_section and not self.in_h1:
-            self.remarks_depth -= 1
             self.remarks_parts.append(f"</{tag}>")
-
-            # If we're back to depth 0 and see a closing div, end remarks
-            if self.remarks_depth == 0 and tag == "div":
-                self.in_remarks_section = False
+            if tag == "div":
+                self.remarks_depth -= 1
+                # The wrapper <div> closing (depth back to 0) ends the section
+                if self.remarks_depth <= 0:
+                    self.in_remarks_section = False
 
     def handle_data(self, data: str) -> None:
         text = data.strip()
