@@ -1,6 +1,6 @@
 {
   "package_name": "SolidWorks.Interop.xmldoc.zip",
-  "version": "v3.7.0",
+  "version": "v3.8.0",
   "package_type": "xmldoc",
   "description": "Microsoft XMLDoc files for Visual Studio IntelliSense",
   "source_phase": "90_export_xmldoc",
