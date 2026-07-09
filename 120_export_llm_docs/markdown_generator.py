@@ -31,6 +31,43 @@ def _block(lines: List[str]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _indent_continuation(text: str, indent: str = "  ") -> str:
+    """Indent every line after the first so a multi-line value renders as the
+    continuation of a ``- `` list item (nested paragraphs/sublists stay under
+    the bullet instead of escaping it). Blank lines are left empty."""
+    lines = text.split("\n")
+    return "\n".join(lines[:1] + [f"{indent}{line}" if line else line for line in lines[1:]])
+
+
+# A converted value that opens with a list bullet or heading is block markdown:
+# it must not be pasted inline after a label (``- **Param**: - A``), or the first
+# element is swallowed as literal text instead of starting a list/heading.
+_STARTS_WITH_BLOCK = re.compile(r"\s*(?:[-*] |\d+\. |#{1,6} )")
+
+
+def _indent_all(text: str, indent: str = "  ") -> str:
+    """Indent every non-empty line by ``indent`` (blank lines stay empty)."""
+    return "\n".join(f"{indent}{line}" if line else line for line in text.split("\n"))
+
+
+def _labeled_bullet(prefix: str, content: str) -> str:
+    """Render ``{prefix}{content}`` as a ``- `` list item. If ``content`` starts
+    with block markdown, drop it onto indented continuation lines under the label
+    (``- **Param**:\\n  - A``) instead of inlining it (``- **Param**: - A``)."""
+    if _STARTS_WITH_BLOCK.match(content):
+        return f"{prefix.rstrip()}\n{_indent_all(content)}"
+    return _indent_continuation(f"{prefix}{content}")
+
+
+def _labeled_field(label: str, value: str) -> str:
+    """Render a top-level ``{label} {value}`` field. If ``value`` starts with
+    block markdown, break it onto its own block after the label so the first
+    list item / heading isn't consumed as inline text."""
+    if _STARTS_WITH_BLOCK.match(value):
+        return f"{label}\n\n{value}"
+    return f"{label} {value}"
+
+
 def clean_text(text: str) -> str:
     """Clean raw XML text: unescape HTML entities, drop CDATA markers, and
     collapse runs of blank lines so paragraphs are separated by at most one."""
@@ -221,16 +258,18 @@ class MarkdownGenerator:
                 if prop.parameters:
                     md.append("**Parameters**:\n")
                     md.append(_block([
-                        f"- `{param.name}` - "
-                        f"{self._clean_text(param.description) if param.description else 'No description'}"
+                        _labeled_bullet(
+                            f"- `{param.name}` - ",
+                            self._clean_text(param.description) if param.description else 'No description'
+                        )
                         for param in prop.parameters
                     ]))
 
                 if prop.returns:
-                    md.append(f"**Returns**: {self._clean_text(prop.returns)}\n")
+                    md.append(f"{_labeled_field('**Returns**:', self._clean_text(prop.returns))}\n")
 
                 if prop.remarks:
-                    md.append(f"**Remarks**: {self._clean_text(prop.remarks)}\n")
+                    md.append(f"{_labeled_field('**Remarks**:', self._clean_text(prop.remarks))}\n")
 
         # Methods
         if type_info.methods:
@@ -247,16 +286,18 @@ class MarkdownGenerator:
                 if method.parameters:
                     md.append("**Parameters**:\n")
                     md.append(_block([
-                        f"- `{param.name}` - "
-                        f"{self._clean_text(param.description) if param.description else 'No description'}"
+                        _labeled_bullet(
+                            f"- `{param.name}` - ",
+                            self._clean_text(param.description) if param.description else 'No description'
+                        )
                         for param in method.parameters
                     ]))
 
                 if method.returns:
-                    md.append(f"**Returns**: {self._clean_text(method.returns)}\n")
+                    md.append(f"{_labeled_field('**Returns**:', self._clean_text(method.returns))}\n")
 
                 if method.remarks:
-                    md.append(f"**Remarks**: {self._clean_text(method.remarks)}\n")
+                    md.append(f"{_labeled_field('**Remarks**:', self._clean_text(method.remarks))}\n")
 
         # Examples
         if type_info.examples:
@@ -505,8 +546,10 @@ class MarkdownGenerator:
         if member.parameters:
             md.append("## Parameters\n")
             md.append(_block([
-                f"- **{param.name}**: "
-                f"{self._simplify_cross_references(self._clean_text(param.description), rel_prefix) if param.description else 'No description'}"
+                _labeled_bullet(
+                    f"- **{param.name}**: ",
+                    self._simplify_cross_references(self._clean_text(param.description), rel_prefix) if param.description else 'No description'
+                )
                 for param in member.parameters
             ]))
 

@@ -311,6 +311,26 @@ class TestMemberDetailsExtractor:
 
         assert "dialog" in parser.get_remarks()
 
+    def test_remarks_subheadings_become_markdown_headings(self):
+        """<h4> subheadings inside remarks are kept and rendered as markdown
+        headings (they used to be dropped, flattening them into plain text)."""
+        html = """
+        <h1>Remarks</h1>
+        <div id="remarksSection">
+            <p>Intro.</p>
+            <h4>Counterbore Holes and Slots</h4>
+            <ol><li>CounterBore Diameter</li><li>CounterBore Depth</li></ol>
+        </div>
+        <h1>See Also</h1>
+        """
+        parser = MemberDetailsExtractor()
+        parser.feed(html)
+
+        remarks = parser.get_remarks()
+        assert "#### Counterbore Holes and Slots" in remarks
+        assert "1. CounterBore Diameter" in remarks
+        assert "2. CounterBore Depth" in remarks
+
     def test_extract_remarks_with_nested_divs(self):
         """Remarks must not truncate at the first nested <div> that closes.
 

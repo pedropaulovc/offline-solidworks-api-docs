@@ -108,6 +108,85 @@ def test_member_documentation_generation():
     print("[PASS] Member documentation generation with YAML frontmatter")
 
 
+def test_multiline_param_description_indented_under_bullet():
+    """A parameter whose description carries block markdown (a sublist, extra
+    paragraphs) must keep its continuation lines indented under the ``- `` bullet
+    so it renders as one list item instead of escaping the list."""
+    from models import Parameter
+
+    type_info = TypeInfo(
+        name="IFeatureManager",
+        assembly="SolidWorks.Interop.sldworks",
+        namespace="SolidWorks.Interop.sldworks",
+    )
+    method = Method(name="HoleWizard5", description="Creates holes.")
+    method.parameters.append(Parameter(
+        name="Length",
+        description="Length of slot; valid only if GenericHoleType set to:\n\n- swWzdCounterBoreSlot\n- swWzdHoleSlot",
+    ))
+    method.parameters.append(Parameter(name="Depth", description="Depth of the hole"))
+
+    generator = MarkdownGenerator(output_base_path="test", grep_optimized=True)
+    member_md = generator.generate_member_documentation(type_info, method, "method")
+
+    # The sublist items are indented two spaces so they nest under "- **Length**".
+    assert "- **Length**: Length of slot" in member_md
+    assert "\n  - swWzdCounterBoreSlot" in member_md
+    assert "\n  - swWzdHoleSlot" in member_md
+    # The next parameter is a sibling bullet, not indented.
+    assert "\n- **Depth**: Depth of the hole" in member_md
+
+    print("[PASS] Multi-line parameter description indented under its bullet")
+
+
+def test_param_description_starting_with_list_nests_under_bullet():
+    """A parameter whose description *starts* with a list must not inline the
+    first item after the label (``- **P**: - A``); it goes on indented lines."""
+    from models import Parameter
+
+    type_info = TypeInfo(
+        name="IAssemblyDoc",
+        assembly="SolidWorks.Interop.sldworks",
+        namespace="SolidWorks.Interop.sldworks",
+    )
+    method = Method(name="CompConfigProperties5", description="Sets config properties.")
+    method.parameters.append(Parameter(
+        name="RefConfigName",
+        description="- If a non-empty string is specified, the named config is used\n- If empty, the default is used",
+    ))
+
+    generator = MarkdownGenerator(output_base_path="test", grep_optimized=True)
+    member_md = generator.generate_member_documentation(type_info, method, "method")
+
+    assert "- **RefConfigName**:\n" in member_md          # label on its own line
+    assert "\n  - If a non-empty string" in member_md      # list nested under it
+    assert "- **RefConfigName**: -" not in member_md       # never inlined
+    print("[PASS] List-first parameter description nests under its bullet")
+
+
+def test_block_return_value_not_inlined_after_label():
+    """In the monolithic format, a return/remarks value that is block markdown
+    must break onto its own block instead of ``**Returns**: - A``."""
+    type_info = TypeInfo(
+        name="IThing",
+        assembly="SolidWorks.Interop.sldworks",
+        namespace="SolidWorks.Interop.sldworks",
+    )
+    type_info.methods.append(Method(
+        name="DoIt",
+        returns="- first outcome\n- second outcome",
+        remarks="Plain remark.",
+    ))
+
+    generator = MarkdownGenerator(output_base_path="test", grep_optimized=False)
+    md = generator.generate_type_documentation(type_info)
+
+    assert "**Returns**:\n\n- first outcome" in md
+    assert "**Returns**: -" not in md
+    assert "**Remarks**: Plain remark." in md   # non-block value stays inline
+    print("[PASS] Block return value rendered as a block, not inline")
+
+
 def test_enum_documentation_generation():
     """Test that a single enum file is generated with all members inline."""
     # Create a sample enum type

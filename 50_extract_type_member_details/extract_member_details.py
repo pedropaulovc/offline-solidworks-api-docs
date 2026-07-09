@@ -104,10 +104,14 @@ class MemberDetailsExtractor(HTMLParser):
                 self.in_description = False
             return
 
-        # Track when we're inside an h4 tag
+        # Track when we're inside an h4 tag. Inside remarks, <h4> marks a real
+        # subheading (e.g. "Counterbore Holes and Slots"), so fall through to the
+        # remarks tag collector below to keep it; elsewhere it is only a section
+        # sentinel and is dropped.
         if tag == "h4":
             self.in_h4 = True
-            return
+            if not self.in_remarks_section:
+                return
 
         # Detect C# syntax section for signature extraction
         if tag == "div" and attrs_dict.get("id") == "Syntax_CS":

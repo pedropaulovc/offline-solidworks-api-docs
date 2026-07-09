@@ -128,6 +128,83 @@ class TestConvertLinksToSeeRefs(unittest.TestCase):
         self.assertIn("<see cref=", result)
 
 
+class TestHtmlStructureToMarkdown(unittest.TestCase):
+    """Structural HTML in help text is converted to markdown, not flattened."""
+
+    def test_unordered_list_becomes_bullets(self):
+        result = convert_links_to_see_refs("<ul><li>First</li><li>Second</li></ul>")
+        self.assertIn("- First", result)
+        self.assertIn("- Second", result)
+
+    def test_ordered_list_is_numbered(self):
+        result = convert_links_to_see_refs("<ol><li>Alpha</li><li>Beta</li><li>Gamma</li></ol>")
+        self.assertIn("1. Alpha", result)
+        self.assertIn("2. Beta", result)
+        self.assertIn("3. Gamma", result)
+
+    def test_paragraphs_separated_by_blank_line(self):
+        result = convert_links_to_see_refs("<p>One.</p><p>Two.</p>")
+        self.assertEqual(result, "One.\n\nTwo.")
+
+    def test_heading_becomes_markdown_heading(self):
+        result = convert_links_to_see_refs("<h4>Counterbore Holes</h4><p>Body.</p>")
+        self.assertIn("#### Counterbore Holes", result)
+
+    def test_bold_becomes_double_asterisks(self):
+        self.assertIn("**Screw Fit**", convert_links_to_see_refs("<strong>Screw Fit</strong>"))
+        self.assertIn("**Screw Fit**", convert_links_to_see_refs("<b>Screw Fit</b>"))
+        self.assertIn(
+            "**Head Clearance**",
+            convert_links_to_see_refs('<span style="FONT-WEIGHT: bold">Head Clearance</span>'),
+        )
+
+    def test_trailing_space_moved_outside_bold(self):
+        """Source often wraps a trailing space inside <strong>; the markers must
+        hug the text so CommonMark still recognises the emphasis."""
+        result = convert_links_to_see_refs("see <strong>Remarks </strong>for details")
+        self.assertIn("**Remarks**", result)
+        self.assertNotIn("**Remarks **", result)
+
+    def test_list_item_wrapping_paragraph_hugs_marker(self):
+        result = convert_links_to_see_refs("<ul><li><p>Wrapped item.</p></li></ul>")
+        self.assertIn("- Wrapped item.", result)
+        self.assertNotIn("- \n", result)
+
+    def test_see_ref_preserved_through_conversion(self):
+        html = ('<ul><li>Use '
+                '<a href="SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFeature.html">IFeature</a>'
+                '</li></ul>')
+        result = convert_links_to_see_refs(html)
+        self.assertIn('- Use <see cref="SolidWorks.Interop.sldworks.IFeature">IFeature</see>', result)
+
+    def test_nested_list_is_indented(self):
+        result = convert_links_to_see_refs("<ul><li>Outer<ul><li>Inner</li></ul></li></ul>")
+        self.assertIn("- Outer", result)
+        self.assertIn("  - Inner", result)
+
+    def test_second_paragraph_in_list_item_is_indented(self):
+        """A list item with two paragraphs keeps the second one indented under
+        the marker so it stays part of the item instead of escaping the list."""
+        result = convert_links_to_see_refs("<ul><li><p>First</p><p>Second</p></li></ul>")
+        self.assertIn("- First", result)
+        self.assertIn("\n  Second", result)
+        self.assertNotIn("\nSecond", result.replace("\n  Second", ""))
+
+    def test_nested_list_under_two_digit_ordered_item_aligns_to_content_column(self):
+        """A nested list under item 10 must indent 4 spaces (past ``10. ``), not
+        the 2 that would suffice for a single-digit parent, or it escapes."""
+        items = "".join(f"<li>Item {i}</li>" for i in range(1, 10))
+        html = f"<ol>{items}<li>Tenth<ul><li>Nested</li></ul></li></ol>"
+        result = convert_links_to_see_refs(html)
+        self.assertIn("10. Tenth", result)
+        self.assertIn("\n    - Nested", result)
+
+    def test_nested_list_under_single_digit_ordered_item(self):
+        result = convert_links_to_see_refs("<ol><li>Outer<ul><li>Inner</li></ul></li></ol>")
+        self.assertIn("1. Outer", result)
+        self.assertIn("\n   - Inner", result)
+
+
 class TestHrefToSeeRef(unittest.TestCase):
     """Test resolving See Also hrefs to (attr, value) tuples."""
 
