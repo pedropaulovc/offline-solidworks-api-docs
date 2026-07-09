@@ -1,2 +1,3 @@
 - [SolidWorks API reference trees](solidworks-api-reference-trees.md) — 16 separate API refs (TOC ids 2-17); add one via TOC_ROOT_IDS in the phase-10 spider
 - [Release metadata authority](release-metadata-authority.md) — phase-90 generation_summary.json holds the true type/example counts; export_summary/export_manifest can be stale, don't panic at a rebuild "regression"
+- [Plugin bundle vs release](plugin-bundle-vs-release.md) — developing-solidworks plugin = Phase 120 output + plugin-only files; which dirs to replace when updating the cache; tag before Phase 200 (version comes from latest git tag)
