@@ -182,6 +182,28 @@ class TestHtmlStructureToMarkdown(unittest.TestCase):
         self.assertIn("- Outer", result)
         self.assertIn("  - Inner", result)
 
+    def test_second_paragraph_in_list_item_is_indented(self):
+        """A list item with two paragraphs keeps the second one indented under
+        the marker so it stays part of the item instead of escaping the list."""
+        result = convert_links_to_see_refs("<ul><li><p>First</p><p>Second</p></li></ul>")
+        self.assertIn("- First", result)
+        self.assertIn("\n  Second", result)
+        self.assertNotIn("\nSecond", result.replace("\n  Second", ""))
+
+    def test_nested_list_under_two_digit_ordered_item_aligns_to_content_column(self):
+        """A nested list under item 10 must indent 4 spaces (past ``10. ``), not
+        the 2 that would suffice for a single-digit parent, or it escapes."""
+        items = "".join(f"<li>Item {i}</li>" for i in range(1, 10))
+        html = f"<ol>{items}<li>Tenth<ul><li>Nested</li></ul></li></ol>"
+        result = convert_links_to_see_refs(html)
+        self.assertIn("10. Tenth", result)
+        self.assertIn("\n    - Nested", result)
+
+    def test_nested_list_under_single_digit_ordered_item(self):
+        result = convert_links_to_see_refs("<ol><li>Outer<ul><li>Inner</li></ul></li></ol>")
+        self.assertIn("1. Outer", result)
+        self.assertIn("\n   - Inner", result)
+
 
 class TestHrefToSeeRef(unittest.TestCase):
     """Test resolving See Also hrefs to (attr, value) tuples."""

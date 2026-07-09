@@ -47,8 +47,10 @@ class _HtmlToMarkdown(HTMLParser):
         # stream delivered to handle_data, matching the old manual unescaping.
         super().__init__(convert_charrefs=True)
         self.parts: list[str] = []
-        # Stack of open ordered/unordered lists; each entry tracks its running
-        # item counter so nested ``<ol>`` numbering and indentation stay correct.
+        # Stack of open ordered/unordered lists. Each frame tracks its running
+        # item counter (for ``<ol>`` numbering), ``base_indent`` (the column its
+        # markers sit at) and ``item_indent`` (the content column of the current
+        # item, where continuation paragraphs and nested lists must align).
         self._lists: list[dict[str, object]] = []
         # Parallel stack for <span>: records whether each open span was bold, so
         # the matching </span> knows whether to close a ``**`` run.
@@ -57,6 +59,10 @@ class _HtmlToMarkdown(HTMLParser):
         # <li> (a wrapping <p>/<h4>) hugs the marker instead of starting a blank
         # line, which would leave an empty bullet.
         self._suppress_para = False
+
+    def _cur_indent(self) -> str:
+        """Continuation indent for the innermost open list item (``""`` at top level)."""
+        return str(self._lists[-1]["item_indent"]) if self._lists else ""
 
     def _emit_see(self, tag: str, attrs: list, self_closing: bool) -> None:
         attrs_str = "".join(f' {name}="{value}"' for name, value in attrs)
@@ -70,29 +76,37 @@ class _HtmlToMarkdown(HTMLParser):
             self._emit_see(tag, attrs, self_closing=False)
             return
         if tag == "br":
-            self.parts.append("\n")
+            self.parts.append("\n" + self._cur_indent())
             return
         if tag in _PARAGRAPH_TAGS:
             if not self._suppress_para:
-                self.parts.append("\n\n")
+                self.parts.append("\n\n" + self._cur_indent())
             self._suppress_para = False
             return
         if tag in ("ul", "ol"):
-            self._lists.append({"type": tag, "count": 0})
+            # A nested list's markers align under the content column of the
+            # enclosing item; a top-level list sits at column 0.
+            base = self._cur_indent()
+            self._lists.append({"type": tag, "count": 0, "base_indent": base, "item_indent": base})
             self.parts.append("\n")
             return
         if tag == "li":
-            indent = "  " * max(0, len(self._lists) - 1)
-            if self._lists and self._lists[-1]["type"] == "ol":
-                self._lists[-1]["count"] = int(self._lists[-1]["count"]) + 1
-                marker = f"{self._lists[-1]['count']}. "
+            frame = self._lists[-1] if self._lists else None
+            base = str(frame["base_indent"]) if frame else ""
+            if frame and frame["type"] == "ol":
+                frame["count"] = int(frame["count"]) + 1
+                marker = f"{frame['count']}. "
             else:
                 marker = "- "
-            self.parts.append(f"\n{indent}{marker}")
+            if frame:
+                # Continuation lines / nested lists align under the item's text,
+                # i.e. past the marker (4 cols for "10. ", 3 for "1. ", 2 for "- ").
+                frame["item_indent"] = base + " " * len(marker)
+            self.parts.append(f"\n{base}{marker}")
             self._suppress_para = True
             return
         if re.fullmatch(r"h[1-6]", tag):
-            prefix = "" if self._suppress_para else "\n\n"
+            prefix = "" if self._suppress_para else "\n\n" + self._cur_indent()
             self._suppress_para = False
             self.parts.append(prefix + "#" * int(tag[1]) + " ")
             return
@@ -125,7 +139,7 @@ class _HtmlToMarkdown(HTMLParser):
             self.parts.append("</see>")
             return
         if tag in _PARAGRAPH_TAGS:
-            self.parts.append("\n\n")
+            self.parts.append("\n\n" + self._cur_indent())
             return
         if tag in ("ul", "ol"):
             if self._lists:
@@ -133,7 +147,7 @@ class _HtmlToMarkdown(HTMLParser):
             self.parts.append("\n")
             return
         if re.fullmatch(r"h[1-6]", tag):
-            self.parts.append("\n\n")
+            self.parts.append("\n\n" + self._cur_indent())
             return
         if tag in ("strong", "b"):
             self.parts.append(_B_CLOSE)
