@@ -31,6 +31,14 @@ def _block(lines: List[str]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _indent_continuation(text: str, indent: str = "  ") -> str:
+    """Indent every line after the first so a multi-line value renders as the
+    continuation of a ``- `` list item (nested paragraphs/sublists stay under
+    the bullet instead of escaping it). Blank lines are left empty."""
+    lines = text.split("\n")
+    return "\n".join(lines[:1] + [f"{indent}{line}" if line else line for line in lines[1:]])
+
+
 def clean_text(text: str) -> str:
     """Clean raw XML text: unescape HTML entities, drop CDATA markers, and
     collapse runs of blank lines so paragraphs are separated by at most one."""
@@ -221,8 +229,10 @@ class MarkdownGenerator:
                 if prop.parameters:
                     md.append("**Parameters**:\n")
                     md.append(_block([
-                        f"- `{param.name}` - "
-                        f"{self._clean_text(param.description) if param.description else 'No description'}"
+                        _indent_continuation(
+                            f"- `{param.name}` - "
+                            f"{self._clean_text(param.description) if param.description else 'No description'}"
+                        )
                         for param in prop.parameters
                     ]))
 
@@ -247,8 +257,10 @@ class MarkdownGenerator:
                 if method.parameters:
                     md.append("**Parameters**:\n")
                     md.append(_block([
-                        f"- `{param.name}` - "
-                        f"{self._clean_text(param.description) if param.description else 'No description'}"
+                        _indent_continuation(
+                            f"- `{param.name}` - "
+                            f"{self._clean_text(param.description) if param.description else 'No description'}"
+                        )
                         for param in method.parameters
                     ]))
 
@@ -505,8 +517,10 @@ class MarkdownGenerator:
         if member.parameters:
             md.append("## Parameters\n")
             md.append(_block([
-                f"- **{param.name}**: "
-                f"{self._simplify_cross_references(self._clean_text(param.description), rel_prefix) if param.description else 'No description'}"
+                _indent_continuation(
+                    f"- **{param.name}**: "
+                    f"{self._simplify_cross_references(self._clean_text(param.description), rel_prefix) if param.description else 'No description'}"
+                )
                 for param in member.parameters
             ]))
 

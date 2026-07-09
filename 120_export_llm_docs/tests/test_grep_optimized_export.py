@@ -108,6 +108,37 @@ def test_member_documentation_generation():
     print("[PASS] Member documentation generation with YAML frontmatter")
 
 
+def test_multiline_param_description_indented_under_bullet():
+    """A parameter whose description carries block markdown (a sublist, extra
+    paragraphs) must keep its continuation lines indented under the ``- `` bullet
+    so it renders as one list item instead of escaping the list."""
+    from models import Parameter
+
+    type_info = TypeInfo(
+        name="IFeatureManager",
+        assembly="SolidWorks.Interop.sldworks",
+        namespace="SolidWorks.Interop.sldworks",
+    )
+    method = Method(name="HoleWizard5", description="Creates holes.")
+    method.parameters.append(Parameter(
+        name="Length",
+        description="Length of slot; valid only if GenericHoleType set to:\n\n- swWzdCounterBoreSlot\n- swWzdHoleSlot",
+    ))
+    method.parameters.append(Parameter(name="Depth", description="Depth of the hole"))
+
+    generator = MarkdownGenerator(output_base_path="test", grep_optimized=True)
+    member_md = generator.generate_member_documentation(type_info, method, "method")
+
+    # The sublist items are indented two spaces so they nest under "- **Length**".
+    assert "- **Length**: Length of slot" in member_md
+    assert "\n  - swWzdCounterBoreSlot" in member_md
+    assert "\n  - swWzdHoleSlot" in member_md
+    # The next parameter is a sibling bullet, not indented.
+    assert "\n- **Depth**: Depth of the hole" in member_md
+
+    print("[PASS] Multi-line parameter description indented under its bullet")
+
+
 def test_enum_documentation_generation():
     """Test that a single enum file is generated with all members inline."""
     # Create a sample enum type

@@ -7,6 +7,193 @@ and <see href> tags for IntelliSense documentation.
 """
 
 import re
+from html.parser import HTMLParser
+
+
+# Block-level tags that introduce a paragraph break (blank line) in markdown.
+_PARAGRAPH_TAGS = {"p", "div", "blockquote"}
+
+# Distinct open/close sentinels for emphasis. Using placeholders (rather than
+# emitting ``**``/``*`` directly) lets us relocate whitespace out of an emphasis
+# span before committing to the markers, without confusing them with literal
+# asterisks that appear in the source text (e.g. "*not*"). Resolved in
+# :func:`html_to_markdown`.
+_B_OPEN, _B_CLOSE = "\x01", "\x02"
+_I_OPEN, _I_CLOSE = "\x03", "\x04"
+
+
+def _is_bold_span(attrs: dict[str, str]) -> bool:
+    """True if a ``<span>``'s inline style makes its text bold."""
+    style = attrs.get("style", "").lower()
+    return "font-weight" in style and "bold" in style
+
+
+class _HtmlToMarkdown(HTMLParser):
+    """Convert an HTML fragment to markdown, passing ``<see>`` tags through verbatim.
+
+    The SolidWorks help text uses ``<p>``/``<ul>``/``<ol>``/``<li>``/``<h4>``/
+    ``<strong>`` etc. to structure remarks, parameter descriptions and return
+    values. Stripping those tags outright (the old behaviour) flattened lists and
+    paragraphs into run-on text. This converter preserves the structure as
+    markdown so both the XMLDoc and the LLM-markdown exports render it correctly.
+
+    ``<a>`` tags are expected to have already been rewritten to ``<see cref>`` /
+    ``<see href>`` by :func:`convert_links_to_see_refs`; those are re-emitted
+    unchanged so downstream stages can resolve them.
+    """
+
+    def __init__(self) -> None:
+        # convert_charrefs=True decodes entities (&nbsp;, &lt;, …) into the text
+        # stream delivered to handle_data, matching the old manual unescaping.
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+        # Stack of open ordered/unordered lists; each entry tracks its running
+        # item counter so nested ``<ol>`` numbering and indentation stay correct.
+        self._lists: list[dict[str, object]] = []
+        # Parallel stack for <span>: records whether each open span was bold, so
+        # the matching </span> knows whether to close a ``**`` run.
+        self._span_bold: list[bool] = []
+        # Set right after a list marker is emitted so the first block child of an
+        # <li> (a wrapping <p>/<h4>) hugs the marker instead of starting a blank
+        # line, which would leave an empty bullet.
+        self._suppress_para = False
+
+    def _emit_see(self, tag: str, attrs: list, self_closing: bool) -> None:
+        attrs_str = "".join(f' {name}="{value}"' for name, value in attrs)
+        if self_closing:
+            self.parts.append(f"<{tag}{attrs_str} />")
+        else:
+            self.parts.append(f"<{tag}{attrs_str}>")
+
+    def handle_starttag(self, tag: str, attrs: list) -> None:
+        if tag == "see":
+            self._emit_see(tag, attrs, self_closing=False)
+            return
+        if tag == "br":
+            self.parts.append("\n")
+            return
+        if tag in _PARAGRAPH_TAGS:
+            if not self._suppress_para:
+                self.parts.append("\n\n")
+            self._suppress_para = False
+            return
+        if tag in ("ul", "ol"):
+            self._lists.append({"type": tag, "count": 0})
+            self.parts.append("\n")
+            return
+        if tag == "li":
+            indent = "  " * max(0, len(self._lists) - 1)
+            if self._lists and self._lists[-1]["type"] == "ol":
+                self._lists[-1]["count"] = int(self._lists[-1]["count"]) + 1
+                marker = f"{self._lists[-1]['count']}. "
+            else:
+                marker = "- "
+            self.parts.append(f"\n{indent}{marker}")
+            self._suppress_para = True
+            return
+        if re.fullmatch(r"h[1-6]", tag):
+            prefix = "" if self._suppress_para else "\n\n"
+            self._suppress_para = False
+            self.parts.append(prefix + "#" * int(tag[1]) + " ")
+            return
+        if tag in ("strong", "b"):
+            self.parts.append(_B_OPEN)
+            return
+        if tag in ("em", "i"):
+            self.parts.append(_I_OPEN)
+            return
+        if tag == "span":
+            bold = _is_bold_span(dict(attrs))
+            self._span_bold.append(bold)
+            if bold:
+                self.parts.append(_B_OPEN)
+            return
+        # tr introduces a new table row; any other tag (td, th, table, font, …)
+        # is dropped but its text content is kept.
+        if tag == "tr":
+            self.parts.append("\n")
+
+    def handle_startendtag(self, tag: str, attrs: list) -> None:
+        if tag == "see":
+            self._emit_see(tag, attrs, self_closing=True)
+            return
+        if tag == "br":
+            self.parts.append("\n")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "see":
+            self.parts.append("</see>")
+            return
+        if tag in _PARAGRAPH_TAGS:
+            self.parts.append("\n\n")
+            return
+        if tag in ("ul", "ol"):
+            if self._lists:
+                self._lists.pop()
+            self.parts.append("\n")
+            return
+        if re.fullmatch(r"h[1-6]", tag):
+            self.parts.append("\n\n")
+            return
+        if tag in ("strong", "b"):
+            self.parts.append(_B_CLOSE)
+            return
+        if tag in ("em", "i"):
+            self.parts.append(_I_CLOSE)
+            return
+        if tag == "span":
+            if self._span_bold.pop() if self._span_bold else False:
+                self.parts.append(_B_CLOSE)
+
+    def handle_data(self, data: str) -> None:
+        if not data.strip():
+            # Drop inter-tag whitespace (e.g. the newline between <li> and its
+            # wrapping <p>) while a marker is hugging its first child, so the
+            # marker doesn't end up on a line of its own.
+            if self._suppress_para:
+                return
+            self.parts.append(data)
+            return
+        self._suppress_para = False
+        self.parts.append(data)
+
+    def get_markdown(self) -> str:
+        return "".join(self.parts)
+
+
+def html_to_markdown(html: str) -> str:
+    """Convert an HTML fragment (with ``<see>`` tags already inlined) to markdown.
+
+    Preserves paragraphs, ordered/unordered lists, headings and bold/italic
+    emphasis, and passes ``<see cref>``/``<see href>`` tags through untouched.
+    Trailing per-line whitespace and runs of blank lines are normalised.
+    """
+    parser = _HtmlToMarkdown()
+    parser.feed(html)
+    parser.close()
+    text = parser.get_markdown()
+
+    # Non-breaking spaces decoded from &nbsp; -> regular spaces.
+    text = text.replace("\xa0", " ")
+
+    # Resolve emphasis sentinels. CommonMark forbids whitespace directly inside
+    # the markers (``** foo **`` renders literally), and the source often wraps a
+    # trailing space inside <strong>, so relocate any inner whitespace outside
+    # the span and drop spans left empty.
+    text = re.sub(rf"{_B_OPEN}([ \t]+)", r"\1" + _B_OPEN, text)
+    text = re.sub(rf"([ \t]+){_B_CLOSE}", _B_CLOSE + r"\1", text)
+    text = re.sub(rf"{_I_OPEN}([ \t]+)", r"\1" + _I_OPEN, text)
+    text = re.sub(rf"([ \t]+){_I_CLOSE}", _I_CLOSE + r"\1", text)
+    text = text.replace(_B_OPEN + _B_CLOSE, "").replace(_I_OPEN + _I_CLOSE, "")
+    text = text.replace(_B_OPEN, "**").replace(_B_CLOSE, "**")
+    text = text.replace(_I_OPEN, "*").replace(_I_CLOSE, "*")
+
+    # Strip trailing whitespace on each line (the source riddles list items with
+    # a trailing space before the newline).
+    text = re.sub(r"[ \t]+\n", "\n", text)
+    # Collapse 3+ newlines to a single blank line.
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
 
 
 def convert_links_to_see_refs(html: str) -> str:
@@ -53,17 +240,10 @@ def convert_links_to_see_refs(html: str) -> str:
 
     result = re.sub(pattern, replace_link, html)
 
-    # Clean up HTML entities
-    result = result.replace("&nbsp;", " ")
-    result = result.replace("&amp;", "&")
-    result = result.replace("&lt;", "<")
-    result = result.replace("&gt;", ">")
-
-    # Clean up remaining HTML tags (like <p>, <div>, etc.)
-    # Keep <see cref="..."> and </see> tags
-    result = re.sub(r"<(?!/?see[\s>])[^>]+>", "", result)
-
-    return result.strip()
+    # Convert the remaining HTML structure (paragraphs, lists, headings, bold,
+    # …) to markdown, keeping the <see cref>/<see href> tags intact. This also
+    # decodes HTML entities and normalises whitespace.
+    return html_to_markdown(result)
 
 
 def href_to_see_ref(href: str) -> tuple[str, str]:

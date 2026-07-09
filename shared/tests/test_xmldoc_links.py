@@ -128,6 +128,61 @@ class TestConvertLinksToSeeRefs(unittest.TestCase):
         self.assertIn("<see cref=", result)
 
 
+class TestHtmlStructureToMarkdown(unittest.TestCase):
+    """Structural HTML in help text is converted to markdown, not flattened."""
+
+    def test_unordered_list_becomes_bullets(self):
+        result = convert_links_to_see_refs("<ul><li>First</li><li>Second</li></ul>")
+        self.assertIn("- First", result)
+        self.assertIn("- Second", result)
+
+    def test_ordered_list_is_numbered(self):
+        result = convert_links_to_see_refs("<ol><li>Alpha</li><li>Beta</li><li>Gamma</li></ol>")
+        self.assertIn("1. Alpha", result)
+        self.assertIn("2. Beta", result)
+        self.assertIn("3. Gamma", result)
+
+    def test_paragraphs_separated_by_blank_line(self):
+        result = convert_links_to_see_refs("<p>One.</p><p>Two.</p>")
+        self.assertEqual(result, "One.\n\nTwo.")
+
+    def test_heading_becomes_markdown_heading(self):
+        result = convert_links_to_see_refs("<h4>Counterbore Holes</h4><p>Body.</p>")
+        self.assertIn("#### Counterbore Holes", result)
+
+    def test_bold_becomes_double_asterisks(self):
+        self.assertIn("**Screw Fit**", convert_links_to_see_refs("<strong>Screw Fit</strong>"))
+        self.assertIn("**Screw Fit**", convert_links_to_see_refs("<b>Screw Fit</b>"))
+        self.assertIn(
+            "**Head Clearance**",
+            convert_links_to_see_refs('<span style="FONT-WEIGHT: bold">Head Clearance</span>'),
+        )
+
+    def test_trailing_space_moved_outside_bold(self):
+        """Source often wraps a trailing space inside <strong>; the markers must
+        hug the text so CommonMark still recognises the emphasis."""
+        result = convert_links_to_see_refs("see <strong>Remarks </strong>for details")
+        self.assertIn("**Remarks**", result)
+        self.assertNotIn("**Remarks **", result)
+
+    def test_list_item_wrapping_paragraph_hugs_marker(self):
+        result = convert_links_to_see_refs("<ul><li><p>Wrapped item.</p></li></ul>")
+        self.assertIn("- Wrapped item.", result)
+        self.assertNotIn("- \n", result)
+
+    def test_see_ref_preserved_through_conversion(self):
+        html = ('<ul><li>Use '
+                '<a href="SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFeature.html">IFeature</a>'
+                '</li></ul>')
+        result = convert_links_to_see_refs(html)
+        self.assertIn('- Use <see cref="SolidWorks.Interop.sldworks.IFeature">IFeature</see>', result)
+
+    def test_nested_list_is_indented(self):
+        result = convert_links_to_see_refs("<ul><li>Outer<ul><li>Inner</li></ul></li></ul>")
+        self.assertIn("- Outer", result)
+        self.assertIn("  - Inner", result)
+
+
 class TestHrefToSeeRef(unittest.TestCase):
     """Test resolving See Also hrefs to (attr, value) tuples."""
 
