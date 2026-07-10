@@ -86,10 +86,6 @@ enum_member_count: 0
 
 # IModelDoc2
 
-**Assembly**: SolidWorks.Interop.sldworks
-**Namespace**: SolidWorks.Interop.sldworks
-**Category**: Application Interfaces
-
 ## Description
 
 Allows access to SOLIDWORKS documents: parts, assemblies, and drawings.
