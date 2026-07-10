@@ -159,13 +159,10 @@ enum_member_count: 3
 
 ## Enumeration Members
 
-### swDocPART
-
-Part document type (*.sldprt)
-
-### swDocASSEMBLY
-
-Assembly document type (*.sldasm)
+| Member | Value |
+| --- | --- |
+| swDocPART | 1 = Part document type (*.sldprt) |
+| swDocASSEMBLY | 2 = Assembly document type (*.sldasm) |
 ```
 
 ### Example Files
@@ -302,8 +299,8 @@ grep -r "kind: method" output/types/
 # Find all enumerations
 grep -rl "kind: enum" output/enums/
 
-# Find a specific enum member (members are inline in the enum file)
-grep -rn "### swDocPART" output/enums/
+# Find a specific enum member (members are inline as table rows in the enum file)
+grep -rn "| swDocPART |" output/enums/
 ```
 
 ### Navigate by category

@@ -235,13 +235,10 @@ class MarkdownGenerator:
             md.append("## Remarks\n")
             md.append(f"{self._clean_text(type_info.remarks)}\n")
 
-        # Enum Members
+        # Enum Members, as a Member | Value table
         if type_info.enum_members:
             md.append("## Enumeration Members\n")
-            for enum_member in type_info.enum_members:
-                md.append(f"### {enum_member.name}\n")
-                if enum_member.description:
-                    md.append(f"{self._clean_text(enum_member.description)}\n")
+            md.append(self._enum_members_table(type_info.enum_members, self._clean_text))
 
         # Properties
         if type_info.properties:
@@ -583,6 +580,23 @@ class MarkdownGenerator:
         filename = url.split('/')[-1].replace('.htm', '.md').replace('.html', '.md')
         return f"../examples/{filename}"
 
+    def _enum_members_table(self, enum_members: List[EnumMember], transform) -> str:
+        """Render enumeration members as a two-column ``Member | Value`` markdown table.
+
+        The source ``description`` is a merged ``value = meaning`` blob (or a bare
+        value), so it maps to a single ``Value`` cell. ``transform`` is applied to
+        each description (e.g. clean-up + cross-reference resolution). Cell content
+        is flattened: embedded pipes are escaped and newlines become ``<br>`` so
+        multi-line descriptions (lists, notes) don't break the table.
+        """
+        lines = ["| Member | Value |", "| --- | --- |"]
+        for enum_member in enum_members:
+            value = transform(enum_member.description) if enum_member.description else ""
+            value = value.strip().replace("|", "\\|")
+            value = re.sub(r"\n+", "<br>", value)
+            lines.append(f"| {enum_member.name} | {value} |")
+        return "\n".join(lines) + "\n"
+
     def generate_enum_documentation(self, type_info: TypeInfo, rel_prefix: str = DOCS_PREFIX_FLAT) -> str:
         """
         Generate a single self-contained markdown file for an enumeration, with all
@@ -623,12 +637,12 @@ class MarkdownGenerator:
             md.append("## Remarks\n")
             md.append(f"{self._simplify_cross_references(self._clean_text(type_info.remarks), rel_prefix)}\n")
 
-        # All enumeration members inline
+        # All enumeration members inline, as a Member | Value table
         md.append("## Enumeration Members\n")
-        for enum_member in type_info.enum_members:
-            md.append(f"### {enum_member.name}\n")
-            if enum_member.description:
-                md.append(f"{self._simplify_cross_references(self._clean_text(enum_member.description), rel_prefix)}\n")
+        md.append(self._enum_members_table(
+            type_info.enum_members,
+            lambda text: self._simplify_cross_references(self._clean_text(text), rel_prefix),
+        ))
 
         # Examples (enum-level, if any)
         if type_info.examples:
