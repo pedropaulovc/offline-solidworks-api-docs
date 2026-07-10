@@ -456,9 +456,6 @@ class MarkdownGenerator:
         # Title
         md.append(f"# {type_info.name}\n")
 
-        # Metadata (one tight block; lines joined with markdown hard breaks)
-        md.append(self._metadata_block(type_info))
-
         # Description
         if type_info.description:
             md.append("## Description\n")
@@ -623,9 +620,8 @@ class MarkdownGenerator:
         md.append(f"enum_member_count: {len(type_info.enum_members)}")
         md.append("---\n")
 
-        # Title and metadata
+        # Title
         md.append(f"# {type_info.name}\n")
-        md.append(self._metadata_block(type_info))
 
         # Description
         if type_info.description:
@@ -665,21 +661,6 @@ class MarkdownGenerator:
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(self.generate_enum_documentation(type_info))
         return 1
-
-    def _metadata_block(self, type_info: TypeInfo) -> str:
-        """Render the Assembly/Namespace/Category metadata as one block.
-
-        Lines are joined with markdown hard breaks (two trailing spaces) so they
-        render on consecutive lines, and the block ends with a newline so the
-        join only adds a single blank line before the next section.
-        """
-        lines = [
-            f"**Assembly**: {type_info.assembly}",
-            f"**Namespace**: {type_info.namespace}",
-        ]
-        if type_info.functional_category:
-            lines.append(f"**Category**: {type_info.functional_category}")
-        return "  \n".join(lines) + "\n"
 
     def _render_see_also(self, see_also: List, rel_prefix: str = "") -> List[str]:
         """
