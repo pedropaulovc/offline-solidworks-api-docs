@@ -211,12 +211,11 @@ def test_enum_documentation_generation():
     assert 'enum_member_count: 2' in enum_md
     assert 'assembly: SolidWorks.Interop.swconst' in enum_md
 
-    # Check that ALL members are inline in the single file
+    # Check that ALL members are inline in the single file, rendered as a table
     assert '## Enumeration Members' in enum_md
-    assert '### swValueA' in enum_md
-    assert 'Value A description' in enum_md
-    assert '### swValueB' in enum_md
-    assert 'Value B description' in enum_md
+    assert '| Member | Value |' in enum_md
+    assert '| swValueA | Value A description |' in enum_md
+    assert '| swValueB | Value B description |' in enum_md
 
     print("[PASS] Single-file enum documentation generation with members inline")
 
@@ -374,9 +373,10 @@ def test_enum_file_structure():
         assert 'is_enum: True' in content
         assert 'enum_member_count: 3' in content
         assert '## Enumeration Members' in content
-        assert '### swValue1' in content
-        assert '### swValue2' in content
-        assert '### swValue3' in content
+        assert '| Member | Value |' in content
+        assert '| swValue1 | Value 1 |' in content
+        assert '| swValue2 | Value 2 |' in content
+        assert '| swValue3 | Value 3 |' in content
 
     print("[PASS] Flat single-file enum structure generation")
 
