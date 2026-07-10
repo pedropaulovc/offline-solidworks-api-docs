@@ -87,16 +87,13 @@ enum_member_count: 0
 # IModelDoc2
 
 ## Description
-
 Allows access to SOLIDWORKS documents: parts, assemblies, and drawings.
 
 ## Remarks
-
 There are three main SOLIDWORKS document types: parts, assemblies, and drawings.
 Each document type has its own object ([[IPartDoc]], [[IAssemblyDoc]], [[IDrawingDoc]])...
 
 ## Members
-
 - **Properties**: 24
 - **Methods**: 697
 ```
@@ -119,20 +116,17 @@ category: Application Interfaces
 
 Creates a sketch arc with the specified attributes.
 
-**Signature**: `CreateArc2( double CenterX, double CenterY, double CenterZ, ... )`
+**Signature**: `System.object CreateArc2( double CenterX, double CenterY, double CenterZ, ... )`
 
 ## Parameters
-
 - **CenterX**: X coordinate of arc center point
 - **CenterY**: Y coordinate of arc center point
 - **CenterZ**: Z coordinate of arc center point
 
 ## Returns
-
 Pointer to the [[ISketchArc]] object
 
 ## Remarks
-
 Use [[ISketchManager::CreateArc]] for more control over arc creation...
 ```
 
@@ -154,7 +148,6 @@ enum_member_count: 3
 # swDocumentTypes_e
 
 ## Enumeration Members
-
 | Member | Value |
 | --- | --- |
 | swDocPART | 1 = Part document type (*.sldprt) |
@@ -172,11 +165,9 @@ Each example gets its own markdown file in the appropriate category folder:
 **Source**: [Original URL]
 
 ## Description
-
 Example description extracted from content...
 
 ## Code
-
 ```csharp
 using SolidWorks.Interop.sldworks;
 

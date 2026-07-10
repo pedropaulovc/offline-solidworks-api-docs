@@ -54,12 +54,12 @@ class ExampleGenerator:
 
         # Description
         if description:
-            md.append("## Description\n")
+            md.append("## Description")
             md.append(f"{description}\n")
 
         # Code
         if code:
-            md.append("## Code\n")
+            md.append("## Code")
 
             # Detect language from code content
             language = self._detect_language(code, example.url)
