@@ -227,24 +227,24 @@ class MarkdownGenerator:
 
         # Description
         if type_info.description:
-            md.append("## Description\n")
+            md.append("## Description")
             md.append(f"{self._clean_text(type_info.description)}\n")
 
         # Remarks
         if type_info.remarks:
-            md.append("## Remarks\n")
+            md.append("## Remarks")
             md.append(f"{self._clean_text(type_info.remarks)}\n")
 
         # Enum Members, as a Member | Value table
         if type_info.enum_members:
-            md.append("## Enumeration Members\n")
+            md.append("## Enumeration Members")
             md.append(self._enum_members_table(type_info.enum_members, self._clean_text))
 
         # Properties
         if type_info.properties:
-            md.append("## Properties\n")
+            md.append("## Properties")
             for prop in type_info.properties:
-                md.append(f"### {prop.name}\n")
+                md.append(f"### {prop.name}")
 
                 if prop.description:
                     md.append(f"{self._clean_text(prop.description)}\n")
@@ -270,9 +270,9 @@ class MarkdownGenerator:
 
         # Methods
         if type_info.methods:
-            md.append("## Methods\n")
+            md.append("## Methods")
             for method in type_info.methods:
-                md.append(f"### {method.name}\n")
+                md.append(f"### {method.name}")
 
                 if method.description:
                     md.append(f"{self._clean_text(method.description)}\n")
@@ -298,7 +298,7 @@ class MarkdownGenerator:
 
         # Examples
         if type_info.examples:
-            md.append("## Examples\n")
+            md.append("## Examples")
 
             # Group examples by language
             examples_by_lang = {}
@@ -310,7 +310,7 @@ class MarkdownGenerator:
 
             for lang, examples in sorted(examples_by_lang.items()):
                 for example_ref in examples:
-                    md.append(f"### {example_ref.name} ({lang})\n")
+                    md.append(f"### {example_ref.name} ({lang})")
 
                     # Try to load the full example content
                     if self.examples_loader_func:
@@ -458,12 +458,12 @@ class MarkdownGenerator:
 
         # Description
         if type_info.description:
-            md.append("## Description\n")
+            md.append("## Description")
             md.append(f"{self._simplify_cross_references(self._clean_text(type_info.description), rel_prefix)}\n")
 
         # Remarks
         if type_info.remarks:
-            md.append("## Remarks\n")
+            md.append("## Remarks")
             md.append(f"{self._simplify_cross_references(self._clean_text(type_info.remarks), rel_prefix)}\n")
 
         # Member counts (omit the section entirely when there are none)
@@ -475,12 +475,12 @@ class MarkdownGenerator:
         if type_info.enum_members:
             members.append(f"- **Enumeration Members**: {len(type_info.enum_members)}")
         if members:
-            md.append("## Members\n")
+            md.append("## Members")
             md.append(_block(members))
 
         # Examples section
         if type_info.examples:
-            md.append("## Examples\n")
+            md.append("## Examples")
             md.append(_block([
                 f"- [{ex.name} ({ex.language})]"
                 f"({self._get_example_path_for_overview(ex.url, type_info)})"
@@ -535,7 +535,7 @@ class MarkdownGenerator:
 
         # Parameters
         if member.parameters:
-            md.append("## Parameters\n")
+            md.append("## Parameters")
             md.append(_block([
                 _labeled_bullet(
                     f"- **{param.name}**: ",
@@ -546,17 +546,17 @@ class MarkdownGenerator:
 
         # Returns
         if member.returns:
-            md.append(f"## Returns\n")
+            md.append(f"## Returns")
             md.append(f"{self._simplify_cross_references(self._clean_text(member.returns), rel_prefix)}\n")
 
         # Remarks
         if member.remarks:
-            md.append(f"## Remarks\n")
+            md.append(f"## Remarks")
             md.append(f"{self._simplify_cross_references(self._clean_text(member.remarks), rel_prefix)}\n")
 
         # Examples section
         if member.examples:
-            md.append("## Examples\n")
+            md.append("## Examples")
             md.append(_block([
                 f"- [{ex.name} ({ex.language})]"
                 f"({self._get_example_path_for_member(ex.url, type_info)})"
@@ -622,16 +622,16 @@ class MarkdownGenerator:
 
         # Description
         if type_info.description:
-            md.append("## Description\n")
+            md.append("## Description")
             md.append(f"{self._simplify_cross_references(self._clean_text(type_info.description), rel_prefix)}\n")
 
         # Remarks
         if type_info.remarks:
-            md.append("## Remarks\n")
+            md.append("## Remarks")
             md.append(f"{self._simplify_cross_references(self._clean_text(type_info.remarks), rel_prefix)}\n")
 
         # All enumeration members inline, as a Member | Value table
-        md.append("## Enumeration Members\n")
+        md.append("## Enumeration Members")
         md.append(self._enum_members_table(
             type_info.enum_members,
             lambda text: self._simplify_cross_references(self._clean_text(text), rel_prefix),
@@ -639,7 +639,7 @@ class MarkdownGenerator:
 
         # Examples (enum-level, if any)
         if type_info.examples:
-            md.append("## Examples\n")
+            md.append("## Examples")
             md.append(_block([
                 f"- [{ex.name} ({ex.language})]"
                 f"({self._get_example_path_for_enum_file(ex.url)})"
