@@ -527,14 +527,11 @@ class MarkdownGenerator:
         if member.description:
             md.append(f"{self._simplify_cross_references(self._clean_text(member.description), rel_prefix)}\n")
 
-        # Signature (prefixed with the return type when known)
+        # Signature (prefixed with the return type when known, so the return
+        # type is carried here rather than duplicated on a separate line)
         if member.signature:
             full_signature = f"{member.return_type} {member.signature}".strip() if member.return_type else member.signature
             md.append(f"**Signature**: `{full_signature}`\n")
-
-        # Return type (called out separately for greppability)
-        if member.return_type:
-            md.append(f"**Return type**: `{member.return_type}`\n")
 
         # Parameters
         if member.parameters:

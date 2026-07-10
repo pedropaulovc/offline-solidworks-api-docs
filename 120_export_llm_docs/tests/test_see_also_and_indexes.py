@@ -54,9 +54,10 @@ def test_member_doc_includes_see_also_and_return_type(tmp_path):
     # P0: the stripped cross-link is restored
     assert "## See Also" in md
     assert "[[IComponent2::GetCorresponding Method]]" in md
-    # P3: return type is shown, not discarded
-    assert "**Return type**: `System.object`" in md
+    # P3: return type is shown (carried by the signature prefix), not discarded
+    # or duplicated on a separate line.
     assert "System.object GetCorrespondingEntity(" in md
+    assert "**Return type**:" not in md
 
 
 def test_by_member_name_index_clusters_siblings(tmp_path):
