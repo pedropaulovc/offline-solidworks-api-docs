@@ -197,6 +197,24 @@ def crawled_html_sources(phase_dir: Path, metadata_file: Path) -> list[Reference
     return sources
 
 
+def build_saved_page_keys(phase_dir: Path, metadata_file: Path) -> set[str]:
+    """Keys for pages a crawl phase recorded *and* whose HTML is still on disk.
+
+    Used for phases whose pages reach the bundle through extraction rather than a
+    ``files_created.jsonl`` manifest (Phase 70's examples, via 80 -> 120). Phase 80
+    enumerates the files that exist, so a manifest entry whose HTML is gone -- an
+    interrupted crawl, a deleted output file -- produces no example doc. Keying the
+    exclusion off the manifest alone would then strand the page: not exported as an
+    example, and not seeded here either. Requiring the file makes the gap
+    self-healing instead.
+    """
+    return {
+        key
+        for source in crawled_html_sources(phase_dir, metadata_file)
+        if (key := canonical_key(source.base_url or ""))
+    }
+
+
 def build_seed(reference_sources: Iterable[ReferenceSource], exclusion_keys: set[str]) -> list[str]:
     """Page URLs referenced in the corpus but not already crawled.
 

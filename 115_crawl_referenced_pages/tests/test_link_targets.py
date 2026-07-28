@@ -11,6 +11,7 @@ from link_targets import (
     ReferenceSource,
     build_bundle_doc_keys,
     build_exclusion_keys,
+    build_saved_page_keys,
     build_seed,
     canonical_key,
     crawled_html_sources,
@@ -138,6 +139,26 @@ def test_crawled_html_sources_pairs_each_page_with_its_url(tmp_path):
         ("Example.htm", f"{BASE}/swdimxpertapi/Example.htm")
     ]
     assert crawled_html_sources(phase, phase / "metadata/absent.jsonl") == []
+
+
+def test_saved_page_keys_ignore_entries_whose_html_is_gone(tmp_path):
+    """Phase 80 exports the example files it can read, so a recorded-but-missing page
+    ships nowhere. It must stay seedable here rather than be treated as bundled."""
+    phase = tmp_path / "70_crawl_examples"
+    (phase / "output/html/swdimxpertapi").mkdir(parents=True)
+    (phase / "output/html/swdimxpertapi/Present.htm").write_text("<p>x</p>", encoding="utf-8")
+
+    meta = phase / "metadata/urls_crawled.jsonl"
+    meta.parent.mkdir(parents=True)
+    with jsonlines.open(meta, mode="w") as w:
+        w.write({"url": f"{BASE}/swdimxpertapi/Present.htm",
+                 "file_path": "output\\html\\swdimxpertapi\\Present.htm"})
+        w.write({"url": f"{BASE}/swdimxpertapi/Vanished.htm",
+                 "file_path": "output\\html\\swdimxpertapi\\Vanished.htm"})
+
+    keys = build_saved_page_keys(phase, meta)
+    assert canonical_key(f"{BASE}/swdimxpertapi/Present.htm") in keys
+    assert canonical_key(f"{BASE}/swdimxpertapi/Vanished.htm") not in keys
 
 
 def test_seed_from_crawled_html_finds_relative_siblings(tmp_path):

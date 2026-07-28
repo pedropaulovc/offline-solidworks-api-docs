@@ -30,6 +30,7 @@ from link_targets import (  # noqa: E402
     ReferenceSource,
     build_bundle_doc_keys,
     build_exclusion_keys,
+    build_saved_page_keys,
     build_seed,
     canonical_key,
     crawled_html_sources,
@@ -71,9 +72,10 @@ _BUNDLE_MANIFESTS = [
 # Phase 70's example pages, which Phase 80 parses and Phase 120 emits as
 # ``examples/*.md``. Without this, scanning raw HTML seeds ~2800 example pages that
 # the bundle already ships -- they would be re-crawled and duplicated under docs/.
-# Keyed by ``url``.
-_BUNDLE_CRAWL_MANIFESTS = [
-    REPO_ROOT / "70_crawl_examples/metadata/urls_crawled.jsonl",
+# Only pages whose HTML is still on disk count: Phase 80 exports what it can read,
+# so a recorded-but-missing page ships nowhere and must stay seedable here.
+_BUNDLE_CRAWL_PHASES = [
+    REPO_ROOT / "70_crawl_examples",
 ]
 
 # Crawled help-text HTML, scanned for *relative* links. The extracted corpus below
@@ -123,7 +125,9 @@ class ReferencedSpider(scrapy.Spider):
         super().__init__(*args, **kwargs)
 
         self.crawled_keys = build_exclusion_keys(_EXCLUSION_METADATA)
-        self.bundle_keys = build_bundle_doc_keys(_BUNDLE_MANIFESTS) | build_exclusion_keys(_BUNDLE_CRAWL_MANIFESTS)
+        self.bundle_keys = build_bundle_doc_keys(_BUNDLE_MANIFESTS)
+        for phase in _BUNDLE_CRAWL_PHASES:
+            self.bundle_keys |= build_saved_page_keys(phase, phase / "metadata/urls_crawled.jsonl")
         # Seed = referenced pages not yet available as bundle docs, plus explicit
         # extra seeds. Deduplicate by key and drop any already in the bundle.
         seed_keys: set[str] = set()
