@@ -14,13 +14,17 @@ PHASE_DIR = REPO_ROOT / "115_crawl_referenced_pages"
 sys.path.insert(0, str(PHASE_DIR))
 sys.path.insert(0, str(REPO_ROOT))
 
-from link_targets import build_exclusion_keys, canonical_key  # noqa: E402
+from link_targets import build_saved_page_keys, canonical_key  # noqa: E402
 
 EXAMPLES_META = REPO_ROOT / "70_crawl_examples/metadata/urls_crawled.jsonl"
+EXAMPLES_HTML = REPO_ROOT / "70_crawl_examples/output/html"
 
+# Gate on the crawled HTML, not the manifest: the manifest is committed, so gating
+# on it never skips, and these assertions then run against a corpus whose pages do
+# not exist -- reporting a failure where the honest answer is "not available here".
 pytestmark = pytest.mark.skipif(
-    not EXAMPLES_META.exists(),
-    reason="crawl output not present (gitignored); run phases 10-110 first",
+    not EXAMPLES_HTML.is_dir() or not any(EXAMPLES_HTML.rglob("*.htm*")),
+    reason="crawled HTML not present (output/ is gitignored); run phases 10-110 first",
 )
 
 
@@ -43,8 +47,8 @@ def test_seed_excludes_pages_the_bundle_already_ships(spider):
     """Scanning raw help-text HTML surfaces every example page the docs link to.
     Those already ship as ``examples/*.md`` (Phase 70 -> 80 -> 120), so seeding them
     would re-crawl ~2800 pages and duplicate them under ``docs/``."""
-    example_keys = build_exclusion_keys([EXAMPLES_META])
-    assert example_keys, "expected a populated Phase 70 crawl manifest"
+    example_keys = build_saved_page_keys(REPO_ROOT / "70_crawl_examples", EXAMPLES_META)
+    assert example_keys, "expected saved Phase 70 HTML"
 
     duplicated = [u for u in spider.seed if canonical_key(u) in example_keys]
     assert not duplicated, f"{len(duplicated)} already-bundled example pages seeded, e.g. {duplicated[:3]}"
@@ -53,9 +57,15 @@ def test_seed_excludes_pages_the_bundle_already_ships(spider):
 def test_closure_boundary_covers_example_pages(spider):
     """The closure follows in-page links, and a module page links back to the example
     that referenced it. Without Phase 70 in the boundary, that pulls the example tree
-    into this phase and duplicates it under ``docs/``."""
-    example_keys = build_exclusion_keys([EXAMPLES_META])
-    leaked = [k for k in example_keys if k not in spider.seen]
+    into this phase and duplicates it under ``docs/``.
+
+    Keyed on examples whose HTML survives -- the same condition the boundary uses.
+    A recorded-but-missing page is deliberately *outside* the boundary so it stays
+    crawlable, since Phase 80 cannot export it."""
+    shipping = build_saved_page_keys(REPO_ROOT / "70_crawl_examples", EXAMPLES_META)
+    assert shipping, "expected saved Phase 70 HTML"
+
+    leaked = [k for k in shipping if k not in spider.seen]
     assert not leaked, f"{len(leaked)} example pages outside the closure boundary, e.g. {leaked[:3]}"
 
 

@@ -51,9 +51,6 @@ _EXTRA_SEED_URLS = [
 _EXCLUSION_METADATA = [
     REPO_ROOT / "10_crawl_toc_pages/metadata/urls_crawled.jsonl",
     REPO_ROOT / "30_crawl_type_members/metadata/urls_crawled.jsonl",
-    # Example pages: the closure must stop here too. Module pages link back to the
-    # example that referenced them, which would otherwise pull Phase 70's tree in.
-    REPO_ROOT / "70_crawl_examples/metadata/urls_crawled.jsonl",
     REPO_ROOT / "100_crawl_programming_guide/metadata/urls_crawled.jsonl",
     # This phase's own log, so --resume doesn't re-crawl.
     REPO_ROOT / "115_crawl_referenced_pages/metadata/urls_crawled.jsonl",
@@ -70,10 +67,11 @@ _BUNDLE_MANIFESTS = [
 
 # Also already in the bundle, but with no files_created manifest of their own:
 # Phase 70's example pages, which Phase 80 parses and Phase 120 emits as
-# ``examples/*.md``. Without this, scanning raw HTML seeds ~2800 example pages that
-# the bundle already ships -- they would be re-crawled and duplicated under docs/.
-# Only pages whose HTML is still on disk count: Phase 80 exports what it can read,
-# so a recorded-but-missing page ships nowhere and must stay seedable here.
+# ``examples/*.md``. These both bound the closure -- module pages link back to the
+# example that referenced them, which would otherwise pull Phase 70's tree in --
+# and exclude seeds, so ~2800 already-shipping pages are not re-crawled into docs/.
+# Only pages whose HTML is still on disk count, in both roles: Phase 80 exports what
+# it can read, so a recorded-but-missing page ships nowhere and must stay crawlable.
 _BUNDLE_CRAWL_PHASES = [
     REPO_ROOT / "70_crawl_examples",
 ]
@@ -126,8 +124,15 @@ class ReferencedSpider(scrapy.Spider):
 
         self.crawled_keys = build_exclusion_keys(_EXCLUSION_METADATA)
         self.bundle_keys = build_bundle_doc_keys(_BUNDLE_MANIFESTS)
+        # Phase 70 bounds the closure *and* excludes seeds, on the same condition:
+        # the page ships only if Phase 80 can read its HTML. Adding it to the
+        # boundary off the raw manifest would let a recorded-but-missing page be
+        # skipped when link-following reaches it, stranding it exactly as an
+        # unfiltered seed exclusion would.
         for phase in _BUNDLE_CRAWL_PHASES:
-            self.bundle_keys |= build_saved_page_keys(phase, phase / "metadata/urls_crawled.jsonl")
+            saved = build_saved_page_keys(phase, phase / "metadata/urls_crawled.jsonl")
+            self.bundle_keys |= saved
+            self.crawled_keys |= saved
         # Seed = referenced pages not yet available as bundle docs, plus explicit
         # extra seeds. Deduplicate by key and drop any already in the bundle.
         seed_keys: set[str] = set()
