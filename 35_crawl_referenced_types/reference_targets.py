@@ -126,6 +126,11 @@ def crawl_failure(stats: dict, crawled: int) -> str | None:
     network outage and the extraction phases publish a partial reference set as
     though it were complete.
     """
+    # scrapy writes valid stats however the spider closed, so a graceful
+    # interruption ("shutdown") otherwise looks like a clean partial crawl.
+    reason = stats.get("reason")
+    if reason != "finished":
+        return f"the crawl closed as {reason!r}, not 'finished'"
     failed = stats.get("failed_pages", 0)
     if failed:
         return f"{failed} page(s) failed to crawl; see metadata/errors.jsonl"

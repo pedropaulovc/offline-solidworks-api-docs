@@ -179,7 +179,11 @@ class MetadataLogPipeline:
             spider.logger.debug(f"Logged metadata for {metadata['url']}")
 
         except Exception as e:
-            spider.logger.error(f"Failed to log metadata: {e}")
+            # The HTML is on disk but nothing maps it back to its URL: source
+            # discovery works off this manifest, so the page is orphaned, and the
+            # next --resume re-fetches it. Same treatment as a failed HTML write.
+            spider.logger.error(f"Failed to log metadata for {metadata['url']}: {e}")
+            spider.stats["failed_pages"] += 1
 
         return item
 

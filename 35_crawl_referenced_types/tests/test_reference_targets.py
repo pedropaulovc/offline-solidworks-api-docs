@@ -104,39 +104,61 @@ class TestCrawlFailure:
     """The phase must not report success when the crawl did not actually happen."""
 
     def test_recorded_failures_fail_the_phase(self):
-        assert crawl_failure({"failed_pages": 3, "seed_pages": 10}, crawled=7) is not None
+        assert crawl_failure({"reason": "finished", "failed_pages": 3, "seed_pages": 10}, crawled=7) is not None
 
     def test_a_clean_crawl_passes(self):
-        assert crawl_failure({"failed_pages": 0, "seed_pages": 10}, crawled=10) is None
+        assert crawl_failure({"reason": "finished", "failed_pages": 0, "seed_pages": 10}, crawled=10) is None
 
     def test_a_total_outage_fails_even_with_no_recorded_errors(self):
         """errback may never fire (e.g. DNS dead before any request); zero pages
         against a non-empty seed is still a failed phase."""
-        assert crawl_failure({"failed_pages": 0, "seed_pages": 887}, crawled=0) is not None
+        assert crawl_failure({"reason": "finished", "failed_pages": 0, "seed_pages": 887}, crawled=0) is not None
 
     def test_nothing_to_do_is_not_a_failure(self):
         """A --resume run with everything already crawled seeds nothing."""
-        assert crawl_failure({"failed_pages": 0, "seed_pages": 0}, crawled=0) is None
+        assert crawl_failure({"reason": "finished", "failed_pages": 0, "seed_pages": 0}, crawled=0) is None
 
-    def test_missing_stats_file_is_not_a_failure(self):
-        assert crawl_failure({}, crawled=0) is None
+    def test_empty_stats_are_not_trusted(self):
+        """A spider that died before closed() leaves nothing behind; that is a
+        failed crawl, not an unremarkable one."""
+        assert crawl_failure({}, crawled=0) is not None
 
 
 class TestTruncationIsFailure:
     def test_hitting_the_page_cap_fails_even_with_many_pages_saved(self):
-        stats = {"failed_pages": 0, "seed_pages": 30000, "unscheduled_pages": 12}
+        stats = {"reason": "finished", "failed_pages": 0, "seed_pages": 30000, "unscheduled_pages": 12}
         assert crawl_failure(stats, crawled=20000) is not None
 
     def test_no_truncation_passes(self):
-        stats = {"failed_pages": 0, "seed_pages": 748, "unscheduled_pages": 0}
+        stats = {"reason": "finished", "failed_pages": 0, "seed_pages": 748, "unscheduled_pages": 0}
         assert crawl_failure(stats, crawled=748) is None
 
     def test_a_seed_set_that_is_entirely_soft_404s_is_not_a_failure(self):
         """The pass-2 seed on the 2026 corpus is exactly this: 4 pages the docs
         link to that the site serves 200-with-empty-helpText."""
-        stats = {"failed_pages": 0, "seed_pages": 4, "skipped_pages": 4, "unscheduled_pages": 0}
+        stats = {"reason": "finished", "failed_pages": 0, "seed_pages": 4, "skipped_pages": 4, "unscheduled_pages": 0}
         assert crawl_failure(stats, crawled=0) is None
 
     def test_reaching_nothing_at_all_is_still_a_failure(self):
-        stats = {"failed_pages": 0, "seed_pages": 4, "skipped_pages": 0, "unscheduled_pages": 0}
+        stats = {"reason": "finished", "failed_pages": 0, "seed_pages": 4, "skipped_pages": 0, "unscheduled_pages": 0}
         assert crawl_failure(stats, crawled=0) is not None
+
+
+class TestClosureReason:
+    """scrapy writes a valid stats file however the spider closed, so the reason
+    is the only thing separating a completed crawl from an interrupted one."""
+
+    def test_a_graceful_interruption_is_a_failure(self):
+        stats = {"reason": "shutdown", "failed_pages": 0, "seed_pages": 887}
+        assert crawl_failure(stats, crawled=400) is not None
+
+    def test_a_cancelled_crawl_is_a_failure(self):
+        stats = {"reason": "cancelled", "failed_pages": 0, "seed_pages": 887}
+        assert crawl_failure(stats, crawled=880) is not None
+
+    def test_stats_with_no_reason_at_all_are_not_trusted(self):
+        assert crawl_failure({"failed_pages": 0, "seed_pages": 10}, crawled=10) is not None
+
+    def test_only_finished_passes(self):
+        stats = {"reason": "finished", "failed_pages": 0, "seed_pages": 887, "unscheduled_pages": 0}
+        assert crawl_failure(stats, crawled=748) is None
