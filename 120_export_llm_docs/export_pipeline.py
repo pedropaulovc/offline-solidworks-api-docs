@@ -7,6 +7,7 @@ from the outputs of phases 20, 40, 50, 60, 80, and 110.
 
 import argparse
 import json
+import sys
 import re
 import shutil
 from pathlib import Path
@@ -18,6 +19,9 @@ from data_loader import DataLoader
 from markdown_generator import MarkdownGenerator, sanitize_filename
 from example_generator import ExampleGenerator
 from index_generator import IndexGenerator
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from shared.line_endings import normalize_tree  # noqa: E402
 from models import TypeInfo, ExampleContent, ExportStatistics
 
 
@@ -131,6 +135,11 @@ class ExportPipeline:
         # Step 9: Generate summary report
         print("\n[9/9] Generating summary report...")
         self._generate_summary_report()
+
+        # Ship CRLF regardless of build platform. Must run last: it is the only
+        # point every file has passed through, including those copied in verbatim.
+        changed, scanned = normalize_tree(self.output_base)
+        print(f"  Normalised line endings to CRLF: {changed} of {scanned} files rewritten")
 
         print("\n" + "="*80)
         print("Export Complete!")
