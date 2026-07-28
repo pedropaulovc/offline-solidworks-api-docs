@@ -8,12 +8,15 @@ import jsonlines
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from link_targets import (
+    ReferenceSource,
     build_bundle_doc_keys,
     build_exclusion_keys,
+    build_saved_page_keys,
     build_seed,
     canonical_key,
+    crawled_html_sources,
     is_reference_page,
-    iter_api_page_urls,
+    iter_page_links,
     normalize_request_url,
 )
 
@@ -25,6 +28,14 @@ def test_canonical_key_case_and_slash_insensitive():
     a = canonical_key(f"{BASE}/sldworksapiprogguide/OVERVIEW/In-process_Methods.htm")
     b = canonical_key(f"{BASE}/sldworksapiprogguide//Overview/In-process_Methods.htm")
     assert a == b == "2026/english/api/sldworksapiprogguide/overview/in-process_methods.htm"
+
+
+def test_canonical_key_decodes_percent_escapes():
+    """A link may encode a space the manifest stores literally; both are one page.
+    Without decoding, the encoded form slips past the crawled-set boundary."""
+    encoded = canonical_key(f"{BASE}/sldworksapi/Multiselect_Same%20and_Different_Objects_Example_VB.htm")
+    literal = canonical_key(f"{BASE}/sldworksapi/Multiselect_Same and_Different_Objects_Example_VB.htm")
+    assert encoded == literal is not None
 
 
 def test_canonical_key_rejects_non_pages():
@@ -45,10 +56,29 @@ def test_normalize_request_url_preserves_case_resolves_relative():
     assert normalize_request_url("../swconst/icon.png", base=page) is None
 
 
-def test_iter_api_page_urls():
+def test_iter_page_links_absolute_only_without_base():
     text = f'see <see href="{BASE}/swconst/SO_Colors.htm">Colors</see> and http://other/x.htm'
-    urls = list(iter_api_page_urls(text))
-    assert urls == [f"{BASE}/swconst/SO_Colors.htm"]
+    assert list(iter_page_links(text)) == [
+        f"{BASE}/swconst/SO_Colors.htm",  # absolute literal
+        f"{BASE}/swconst/SO_Colors.htm",  # same page, via the href attribute
+    ]
+    # A relative href is unresolvable with no base, so it is skipped rather than guessed.
+    assert list(iter_page_links('<a href="Sibling_Page.htm">x</a>')) == []
+
+
+def test_iter_page_links_resolves_relative_hrefs_against_base():
+    """The regression: help-text HTML links siblings relatively, and those pages
+    were invisible to a scan that only matched absolute URLs."""
+    page = f"{BASE}/swdimxpertapi/Get_DimXpert_Features_Example_CSharp.htm"
+    html = (
+        '<p>Copy and paste the <a href="DimXpert_Main_Module_CSharp.htm">Main module</a> '
+        'and the <a href="../swconst/DP_Dimensions.htm">settings</a>, '
+        'not the <img src="diagram.png"> image.</p>'
+    )
+    assert sorted(iter_page_links(html, base=page)) == [
+        f"{BASE}/swconst/DP_Dimensions.htm",
+        f"{BASE}/swdimxpertapi/DimXpert_Main_Module_CSharp.htm",
+    ]
 
 
 def test_exclusion_and_seed(tmp_path):
@@ -66,7 +96,7 @@ def test_exclusion_and_seed(tmp_path):
         f'<see href="{BASE}/swconst/DP_Dimensions.htm"/>',     # new
         encoding="utf-8",
     )
-    seed = build_seed([source], excl)
+    seed = build_seed([ReferenceSource(source)], excl)
     assert seed == [f"{BASE}/swconst/DP_Dimensions.htm"]
 
 
@@ -85,8 +115,76 @@ def test_seed_excludes_bundle_docs_not_merely_crawled(tmp_path):
         f'<see href="{BASE}/sldworksapi/FunctionalCategories-sldworksapi.html"/>',  # crawled, not a doc -> seed
         encoding="utf-8",
     )
-    seed = build_seed([source], bundle)
+    seed = build_seed([ReferenceSource(source)], bundle)
     assert seed == [f"{BASE}/sldworksapi/FunctionalCategories-sldworksapi.html"]
+
+
+def test_crawled_html_sources_pairs_each_page_with_its_url(tmp_path):
+    """Crawl manifests store Windows-separator paths; each surviving file becomes a
+    source based at its own URL. Missing files (output/ is gitignored) are dropped."""
+    phase = tmp_path / "70_crawl_examples"
+    (phase / "output/html/swdimxpertapi").mkdir(parents=True)
+    (phase / "output/html/swdimxpertapi/Example.htm").write_text("<p>x</p>", encoding="utf-8")
+
+    meta = phase / "metadata/urls_crawled.jsonl"
+    meta.parent.mkdir(parents=True)
+    with jsonlines.open(meta, mode="w") as w:
+        w.write({"url": f"{BASE}/swdimxpertapi/Example.htm",
+                 "file_path": "output\\html\\swdimxpertapi\\Example.htm"})
+        w.write({"url": f"{BASE}/swdimxpertapi/Gone.htm",
+                 "file_path": "output\\html\\swdimxpertapi\\Gone.htm"})
+
+    sources = crawled_html_sources(phase, meta)
+    assert [(s.path.name, s.base_url) for s in sources] == [
+        ("Example.htm", f"{BASE}/swdimxpertapi/Example.htm")
+    ]
+    assert crawled_html_sources(phase, phase / "metadata/absent.jsonl") == []
+
+
+def test_saved_page_keys_ignore_entries_whose_html_is_gone(tmp_path):
+    """Phase 80 exports the example files it can read, so a recorded-but-missing page
+    ships nowhere. It must stay seedable here rather than be treated as bundled."""
+    phase = tmp_path / "70_crawl_examples"
+    (phase / "output/html/swdimxpertapi").mkdir(parents=True)
+    (phase / "output/html/swdimxpertapi/Present.htm").write_text("<p>x</p>", encoding="utf-8")
+
+    meta = phase / "metadata/urls_crawled.jsonl"
+    meta.parent.mkdir(parents=True)
+    with jsonlines.open(meta, mode="w") as w:
+        w.write({"url": f"{BASE}/swdimxpertapi/Present.htm",
+                 "file_path": "output\\html\\swdimxpertapi\\Present.htm"})
+        w.write({"url": f"{BASE}/swdimxpertapi/Vanished.htm",
+                 "file_path": "output\\html\\swdimxpertapi\\Vanished.htm"})
+
+    keys = build_saved_page_keys(phase, meta)
+    assert canonical_key(f"{BASE}/swdimxpertapi/Present.htm") in keys
+    assert canonical_key(f"{BASE}/swdimxpertapi/Vanished.htm") not in keys
+
+
+def test_seed_from_crawled_html_finds_relative_siblings(tmp_path):
+    """End-to-end for the bug class: a crawled example page linking a sibling code
+    page relatively seeds that page."""
+    page_url = f"{BASE}/swdimxpertapi/Get_DimXpert_Features_Example_CSharp.htm"
+    source = tmp_path / "Example.htm"
+    source.write_text('<a href="DimXpert_Main_Module_CSharp.htm">Main module</a>', encoding="utf-8")
+
+    seed = build_seed([ReferenceSource(source, base_url=page_url)], set())
+    assert seed == [f"{BASE}/swdimxpertapi/DimXpert_Main_Module_CSharp.htm"]
+
+
+def test_seed_drops_generated_reference_pages(tmp_path):
+    """Raw help-text HTML links thousands of ``~`` reference pages -- phase 20/30's
+    territory. They must never become seeds."""
+    page_url = f"{BASE}/sldworksapi/Some_Page.htm"
+    source = tmp_path / "page.htm"
+    source.write_text(
+        '<a href="SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.IView.html">IView</a>'
+        '<a href="Real_Guide_Page.htm">guide</a>',
+        encoding="utf-8",
+    )
+
+    seed = build_seed([ReferenceSource(source, base_url=page_url)], set())
+    assert seed == [f"{BASE}/sldworksapi/Real_Guide_Page.htm"]
 
 
 def test_is_reference_page_guard():

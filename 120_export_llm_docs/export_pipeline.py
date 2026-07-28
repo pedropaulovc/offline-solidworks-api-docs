@@ -7,6 +7,7 @@ from the outputs of phases 20, 40, 50, 60, 80, and 110.
 
 import argparse
 import json
+import re
 import shutil
 from pathlib import Path
 from typing import Dict, List
@@ -121,7 +122,7 @@ class ExportPipeline:
             self._copy_programming_guide(root)
         # Resolve the API-reference links Phase 110 left pointing at the original
         # ``.html`` pages so they target the ``types/``/``enums/`` files we ship.
-        self._rewrite_guide_api_links(types, self._api_base_url())
+        self._rewrite_guide_api_links(types, self._api_base_url(), guide_links, data_loader.examples)
 
         # Step 8: Generate output README for LLMs
         print("\n[8/9] Generating output README...")
@@ -299,21 +300,46 @@ class ExportPipeline:
             break
         return default
 
-    def _rewrite_guide_api_links(self, types: Dict[str, TypeInfo], base_url: str) -> None:
-        """Resolve API-reference links in the copied programming guide.
+    @staticmethod
+    def _md_destination(path: str) -> str:
+        """A Markdown link destination, angle-wrapped when it needs to be.
 
-        Phase 110 leaves ``sldworksapi``/``swconst``/… reference links pointing at
-        the original ``.html`` pages (it has no knowledge of the reference tree
-        Phase 120 generates). This rewrites each such link to the shipping
-        ``types/{Type}/{Member}.md``, ``types/{Type}/_overview.md`` or
-        ``enums/{Enum}.md`` file, matching type/member names case-insensitively so
-        source-doc typos (e.g. ``IWizardHoleFeatureDAta2``) still resolve. Links
-        whose target does not ship in the bundle are pointed at the online help
-        page instead of a dead relative path.
+        Phase 110 mirrors the guide's own hierarchy, so many targets are paths like
+        ``Programming with the SOLIDWORKS API/Add-ins/Toolbars.md``. A bare space
+        ends the destination in CommonMark, which would break the link -- ``<...>``
+        is how ``_render_see_also`` already handles it.
+        """
+        return f"<{path}>" if re.search(r"[ ()]", path) else path
+
+    def _rewrite_guide_api_links(self, types: Dict[str, TypeInfo], base_url: str,
+                                 guide_links: Dict[str, str],
+                                 examples: Dict[str, "ExampleContent"]) -> None:
+        """Resolve links in the copied programming guide and referenced pages.
+
+        Phase 110/115 leave links pointing at the original ``.html`` pages (they
+        have no knowledge of the tree Phase 120 generates). Three kinds resolve:
+
+        - *Reference pages* (``Assembly~Type~Member.html``) become the shipping
+          ``types/{Type}/{Member}.md``, ``types/{Type}/_overview.md`` or
+          ``enums/{Enum}.md`` file, matching names case-insensitively so source-doc
+          typos (e.g. ``IWizardHoleFeatureDAta2``) still resolve.
+        - *Guide/referenced pages* become their ``docs/`` copy.
+        - *Example pages* become their flat ``examples/{name}.md`` file.
+
+        The last two are usually written as bare relative hrefs
+        (``DimXpert_Main_Module_CSharp.htm``, ``../swconst/DP_Units.htm``), which is
+        why they are matched on basename, the same key ``<see href>`` resolution
+        uses. Reference links whose target does not ship are pointed at the online
+        help page instead of a dead relative path.
         """
         import posixpath
-        import re
-        from markdown_generator import parse_api_ref_url
+        from markdown_generator import guide_link_key, parse_api_ref_url
+
+        # Basename -> shipping file, for the non-reference page kinds.
+        page_idx: Dict[str, str] = dict(guide_links)
+        for url in examples:
+            md_name = re.sub(r"\.html?$", ".md", url.split("/")[-1], flags=re.IGNORECASE)
+            page_idx.setdefault(guide_link_key(url), f"examples/{md_name}")
 
         # Case-insensitive indexes over the shipping API-reference tree.
         type_idx: Dict[str, tuple] = {}       # type_lower -> (sanitized name, is_enum)
@@ -331,18 +357,29 @@ class ExportPipeline:
 
         # Allow a #fragment or ?query after the extension (parse_api_ref_url strips them).
         link_re = re.compile(r'(\[[^\]]+\]\()<?([^)>]+?\.html?(?:[?#][^)>]*)?)>?(\))')
-        resolved = external = 0
+        resolved = external = pages = 0
 
         for md_file in docs_root.rglob("*.md"):
             guide_dir = posixpath.dirname(md_file.relative_to(self.output_base).as_posix())
             state = {"changed": False}
 
             def repl(match: "re.Match[str]") -> str:
-                nonlocal resolved, external
+                nonlocal resolved, external, pages
                 head, url, tail = match.group(1), match.group(2), match.group(3)
                 parsed = parse_api_ref_url(url)
                 if parsed is None:
-                    return match.group(0)
+                    # Not a reference page: a guide, referenced or example page,
+                    # linked by bare basename. Point at the copy the bundle ships,
+                    # carrying any #section across to the local file.
+                    target = page_idx.get(guide_link_key(url))
+                    if not target:
+                        return match.group(0)
+                    _, _, fragment = url.partition("#")
+                    anchor = f"#{fragment}" if fragment else ""
+                    destination = f"{posixpath.relpath(target, guide_dir)}{anchor}"
+                    pages += 1
+                    state["changed"] = True
+                    return f"{head}{self._md_destination(destination)}{tail}"
 
                 assembly, type_name, member_name = parsed
                 entry = type_idx.get(type_name.lower())
@@ -380,6 +417,7 @@ class ExportPipeline:
                 md_file.write_text(new_content, encoding="utf-8")
 
         print(f"  Rewrote programming-guide API links: {resolved} in-bundle, {external} external")
+        print(f"  Resolved {pages} guide/example page links to bundle files")
 
     def _generate_output_readme(self, types: Dict[str, TypeInfo], examples: Dict[str, ExampleContent]):
         """Generate a README.md in the output folder explaining how to consume the docs."""

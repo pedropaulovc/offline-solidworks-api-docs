@@ -12,7 +12,6 @@ JSON -- identical to the Phase 100 programming-guide spider.
 import glob
 import hashlib
 import json
-import re
 from collections.abc import Generator
 from pathlib import Path
 from typing import Any
@@ -28,12 +27,15 @@ import sys
 
 sys.path.insert(0, str(REPO_ROOT / "115_crawl_referenced_pages"))
 from link_targets import (  # noqa: E402
+    ReferenceSource,
     build_bundle_doc_keys,
     build_exclusion_keys,
+    build_saved_page_keys,
     build_seed,
     canonical_key,
+    crawled_html_sources,
     is_reference_page,
-    normalize_request_url,
+    iter_page_links,
 )
 
 # Pages to crawl beyond what the corpus literally references. The docs link
@@ -55,24 +57,55 @@ _EXCLUSION_METADATA = [
 ]
 
 # Pages already exported as bundle docs -- the seed exclusion. A referenced page is
-# only skipped as a seed if it is already a doc; pages crawled elsewhere but never
+# only skipped as a seed if it already ships; pages crawled elsewhere but never
 # exported (e.g. FunctionalCategories) are still seeded so they reach the bundle.
+# Keyed by ``original_url``.
 _BUNDLE_MANIFESTS = [
     REPO_ROOT / "110_extract_docs_md/metadata/files_created.jsonl",
     REPO_ROOT / "115_crawl_referenced_pages/metadata/files_created.jsonl",
 ]
 
-# Corpus scanned for the initial ``<see href>`` / link references.
-def _reference_sources() -> list[Path]:
-    sources = [
-        REPO_ROOT / "40_extract_type_details/metadata/api_types.xml",
-        REPO_ROOT / "50_extract_type_member_details/metadata/api_member_details.xml",
-        REPO_ROOT / "60_extract_enum_members/metadata/enum_members.xml",
-    ]
-    sources += [Path(p) for p in glob.glob(str(REPO_ROOT / "110_extract_docs_md/output/markdown/**/*.md"), recursive=True)]
-    return sources
+# Also already in the bundle, but with no files_created manifest of their own:
+# Phase 70's example pages, which Phase 80 parses and Phase 120 emits as
+# ``examples/*.md``. These both bound the closure -- module pages link back to the
+# example that referenced them, which would otherwise pull Phase 70's tree in --
+# and exclude seeds, so ~2800 already-shipping pages are not re-crawled into docs/.
+# Only pages whose HTML is still on disk count, in both roles: Phase 80 exports what
+# it can read, so a recorded-but-missing page ships nowhere and must stay crawlable.
+_BUNDLE_CRAWL_PHASES = [
+    REPO_ROOT / "70_crawl_examples",
+]
 
-_HREF = re.compile(r'(?:href|src)\s*=\s*"([^"]+)"', re.IGNORECASE)
+# Crawled help-text HTML, scanned for *relative* links. The extracted corpus below
+# preserves only absolute ``<see href>`` URLs, so a page linked the way multi-module
+# examples link their sibling code pages -- ``href="DimXpert_Main_Module_CSharp.htm"``
+# -- was invisible to the seed and shipped as a dead link. The raw HTML is the ground
+# truth for what the docs actually link to.
+_CRAWLED_HTML_PHASES = [
+    "10_crawl_toc_pages",
+    "30_crawl_type_members",
+    "70_crawl_examples",
+    "100_crawl_programming_guide",
+    "115_crawl_referenced_pages",
+]
+
+
+# Corpus scanned for the initial ``<see href>`` / link references.
+def _reference_sources() -> list[ReferenceSource]:
+    # Derived files: no single origin page, so absolute URLs only.
+    sources = [
+        ReferenceSource(REPO_ROOT / "40_extract_type_details/metadata/api_types.xml"),
+        ReferenceSource(REPO_ROOT / "50_extract_type_member_details/metadata/api_member_details.xml"),
+        ReferenceSource(REPO_ROOT / "60_extract_enum_members/metadata/enum_members.xml"),
+    ]
+    sources += [
+        ReferenceSource(Path(p))
+        for p in glob.glob(str(REPO_ROOT / "110_extract_docs_md/output/markdown/**/*.md"), recursive=True)
+    ]
+    # Crawled HTML: each page's own URL resolves its relative links.
+    for phase in _CRAWLED_HTML_PHASES:
+        sources += crawled_html_sources(REPO_ROOT / phase, REPO_ROOT / phase / "metadata/urls_crawled.jsonl")
+    return sources
 
 
 class ReferencedSpider(scrapy.Spider):
@@ -91,6 +124,15 @@ class ReferencedSpider(scrapy.Spider):
 
         self.crawled_keys = build_exclusion_keys(_EXCLUSION_METADATA)
         self.bundle_keys = build_bundle_doc_keys(_BUNDLE_MANIFESTS)
+        # Phase 70 bounds the closure *and* excludes seeds, on the same condition:
+        # the page ships only if Phase 80 can read its HTML. Adding it to the
+        # boundary off the raw manifest would let a recorded-but-missing page be
+        # skipped when link-following reaches it, stranding it exactly as an
+        # unfiltered seed exclusion would.
+        for phase in _BUNDLE_CRAWL_PHASES:
+            saved = build_saved_page_keys(phase, phase / "metadata/urls_crawled.jsonl")
+            self.bundle_keys |= saved
+            self.crawled_keys |= saved
         # Seed = referenced pages not yet available as bundle docs, plus explicit
         # extra seeds. Deduplicate by key and drop any already in the bundle.
         seed_keys: set[str] = set()
@@ -171,10 +213,7 @@ class ReferencedSpider(scrapy.Spider):
             self.logger.warning(f"MAX_PAGES ({self.MAX_PAGES}) reached; stopping closure expansion")
             return
 
-        for raw in _HREF.findall(help_text):
-            target = normalize_request_url(raw, base=response.url)
-            if not target:
-                continue
+        for target in iter_page_links(help_text, base=response.url):
             tkey = canonical_key(target)
             if not tkey or tkey in self.seen:
                 continue

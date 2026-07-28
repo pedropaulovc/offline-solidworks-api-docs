@@ -81,10 +81,32 @@ def clean_text(text: str) -> str:
     return text.strip()
 
 
+def url_fragment(url: str) -> str:
+    """The ``#section`` suffix of ``url``, or ``""``.
+
+    :func:`guide_link_key` deliberately ignores fragments when identifying a page,
+    so every caller that resolves a link through that map must re-attach this to
+    the local target -- otherwise a link to a section lands at the top of the page.
+    """
+    _, _, fragment = url.partition("#")
+    return f"#{fragment}" if fragment else ""
+
+
 def guide_link_key(url: str) -> str:
-    """Normalize a ``<see href>`` URL to the key used in the guide-link map:
-    the lowercased ``.htm``/``.html`` basename (host, path, and query stripped)."""
-    return url.split('?')[0].rstrip('/').split('/')[-1].lower()
+    """Normalize a ``<see href>`` URL to the key used in the guide-link map: the
+    lowercased ``.htm``/``.html`` basename (host, path, query and fragment stripped).
+
+    A ``#section`` suffix names a place *within* a page, so it must not change which
+    page the key identifies — callers re-attach it to the resolved target.
+
+    Percent-escapes are decoded so a link written
+    ``SolidWorks_API_Add-Ins%2c_Project_Templates%2c_and_Wizards.htm`` matches the
+    manifest's literal-comma form of the same page; otherwise the encoded spelling
+    misses the map and ships as a dead relative link.
+    """
+    from urllib.parse import unquote
+
+    return unquote(url.split('#')[0].split('?')[0].rstrip('/').split('/')[-1]).lower()
 
 
 def parse_api_ref_url(url: str) -> "Optional[tuple[str, str, Optional[str]]]":
@@ -156,7 +178,7 @@ def simplify_cross_references(text: str, guide_links: Optional[Dict[str, str]] =
         url, label = match.group(1), match.group(2)
         target = links.get(guide_link_key(url))
         if target:
-            return f'[{label}](<{rel_prefix}{target}>)'
+            return f'[{label}](<{rel_prefix}{target}{url_fragment(url)}>)'
         return f'[{label}]({url})'
 
     text = re.sub(r'<see href="([^"]*)">([^<]+)</see>', replace_href, text)
@@ -682,7 +704,7 @@ class MarkdownGenerator:
                 return f"- [[{ref.label}]]"
             target = self.guide_links.get(guide_link_key(ref.value))
             if target:
-                return f"- [{ref.label}](<{rel_prefix}{target}>)"
+                return f"- [{ref.label}](<{rel_prefix}{target}{url_fragment(ref.value)}>)"
             return f"- [{ref.label}]({ref.value})"
 
         return ["## See Also\n", _block([render(ref) for ref in see_also])]

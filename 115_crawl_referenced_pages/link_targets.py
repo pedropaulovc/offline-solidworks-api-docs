@@ -10,14 +10,23 @@ network-free core:
 - :func:`build_exclusion_keys` loads the keys of pages already crawled by phases
   10/30/100 (and 115 itself on resume). These bound the closure: the spider
   treats them as already-seen, so it never re-expands into the reference tree.
-- :func:`build_seed` scans the extracted corpus for absolute ``/api`` page links
-  and returns those whose key is not already crawled -- the crawl's entry points.
+- :func:`build_seed` scans the corpus for ``/api`` page links -- absolute URLs in
+  the extracted XML/Markdown, and ``href``/``src`` attributes (usually *relative*)
+  in the crawled help-text HTML -- and returns those whose key is not already
+  crawled: the crawl's entry points.
+
+A :class:`ReferenceSource` pairs a file with the page URL its relative links
+resolve against. Sources without a base (extracted XML, Markdown) contribute only
+absolute URLs; crawled HTML carries its own page URL, so a bare
+``href="Foo_Example_CSharp.htm"`` -- the form multi-module examples use to link
+their sibling code pages -- resolves and is seeded.
 """
 
 import re
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
-from urllib.parse import urljoin, urlparse
+from urllib.parse import unquote, urljoin, urlparse
 
 import jsonlines
 
@@ -32,12 +41,33 @@ _ABS_API_URL = re.compile(
     re.IGNORECASE,
 )
 
+# href/src attributes in help-text HTML. Mostly relative (``Foo.htm``,
+# ``../swconst/Bar.htm``), so resolving them needs the containing page's URL.
+_HREF_ATTR = re.compile(r'(?:href|src)\s*=\s*"([^"]+)"', re.IGNORECASE)
+
+
+@dataclass(frozen=True)
+class ReferenceSource:
+    """A corpus file scanned for page links.
+
+    ``base_url`` is the URL of the page the file's content came from; it is what
+    relative ``href``s resolve against. ``None`` for derived files (extracted XML,
+    Markdown) that carry no single origin page -- those yield absolute URLs only.
+    """
+
+    path: Path
+    base_url: str | None = None
+
 
 def canonical_key(url: str) -> str | None:
     """Case-insensitive identity of an ``/api`` documentation page.
 
     Returns ``<lower path under api>`` with collapsed slashes and no query, or
     ``None`` when the URL is not a page (wrong host/tree, or not ``.htm``/``.html``).
+
+    Percent-escapes are decoded so a link written ``Multiselect_Same%20and_...`` and
+    the crawl manifest's ``Multiselect_Same and_...`` share one identity -- otherwise
+    the encoded form dodges the crawled-set boundary and gets fetched twice.
     """
     if not url:
         return None
@@ -48,7 +78,7 @@ def canonical_key(url: str) -> str | None:
     if parsed.netloc and parsed.netloc != "help.solidworks.com":
         return None
 
-    path = re.sub(r"/{2,}", "/", parsed.path).strip("/").lower()
+    path = re.sub(r"/{2,}", "/", unquote(parsed.path)).strip("/").lower()
     if not path.startswith(API_PREFIX):
         return None
     if not path.endswith(PAGE_SUFFIXES):
@@ -88,10 +118,24 @@ def normalize_request_url(url: str, base: str | None = None) -> str | None:
     return f"{HOST}{clean_path}"
 
 
-def iter_api_page_urls(text: str) -> Iterable[str]:
-    """Yield every absolute ``/api`` page URL that literally appears in ``text``."""
+def iter_page_links(text: str, base: str | None = None) -> Iterable[str]:
+    """Yield every ``/api`` page URL reachable from ``text``, absolutized.
+
+    Two link forms are picked up: absolute URLs appearing literally (the ``<see
+    href>`` form the extracted corpus stores), and ``href``/``src`` attributes,
+    which in raw help-text HTML are typically relative and need ``base`` -- the
+    URL of the page ``text`` came from -- to resolve. Without a ``base``, relative
+    attributes are unresolvable and skipped.
+
+    May yield the same page twice (once per form); callers dedupe by key.
+    """
     for match in _ABS_API_URL.finditer(text):
         yield match.group(0)
+
+    for raw in _HREF_ATTR.findall(text):
+        resolved = normalize_request_url(raw, base=base)
+        if resolved:
+            yield resolved
 
 
 def build_exclusion_keys(metadata_files: Iterable[Path]) -> set[str]:
@@ -129,19 +173,67 @@ def build_bundle_doc_keys(files_created_files: Iterable[Path]) -> set[str]:
     return keys
 
 
-def build_seed(reference_sources: Iterable[Path], exclusion_keys: set[str]) -> list[str]:
-    """Absolute page URLs referenced in the corpus but not already crawled.
+def crawled_html_sources(phase_dir: Path, metadata_file: Path) -> list[ReferenceSource]:
+    """:class:`ReferenceSource` per page saved by a crawl phase, each carrying the
+    page's own URL as the base for its relative links.
+
+    Reads the phase's ``urls_crawled.jsonl`` (``url`` + ``file_path``). Paths are
+    stored with Windows separators, so they are normalized before joining. Entries
+    whose file is gone (output/ is gitignored and re-crawled) are skipped.
+    """
+    if not Path(metadata_file).exists():
+        return []
+
+    sources: list[ReferenceSource] = []
+    with jsonlines.open(metadata_file) as reader:
+        for entry in reader:
+            url = entry.get("url", "")
+            raw_path = (entry.get("file_path") or "").replace("\\", "/")
+            if not url or not raw_path:
+                continue
+            path = Path(phase_dir) / raw_path
+            if path.exists():
+                sources.append(ReferenceSource(path=path, base_url=url))
+    return sources
+
+
+def build_saved_page_keys(phase_dir: Path, metadata_file: Path) -> set[str]:
+    """Keys for pages a crawl phase recorded *and* whose HTML is still on disk.
+
+    Used for phases whose pages reach the bundle through extraction rather than a
+    ``files_created.jsonl`` manifest (Phase 70's examples, via 80 -> 120). Phase 80
+    enumerates the files that exist, so a manifest entry whose HTML is gone -- an
+    interrupted crawl, a deleted output file -- produces no example doc. Keying the
+    exclusion off the manifest alone would then strand the page: not exported as an
+    example, and not seeded here either. Requiring the file makes the gap
+    self-healing instead.
+    """
+    return {
+        key
+        for source in crawled_html_sources(phase_dir, metadata_file)
+        if (key := canonical_key(source.base_url or ""))
+    }
+
+
+def build_seed(reference_sources: Iterable[ReferenceSource], exclusion_keys: set[str]) -> list[str]:
+    """Page URLs referenced in the corpus but not already crawled.
+
+    Generated reference pages are dropped here for the same reason the closure
+    never follows them (see :func:`is_reference_page`): scanning raw help-text HTML
+    surfaces thousands of ``~`` links, which are phase 20/30's territory.
 
     Deduplicated by :func:`canonical_key` and returned sorted for reproducibility.
     """
     seed: dict[str, str] = {}
     for source in reference_sources:
-        if not Path(source).exists():
+        if not source.path.exists():
             continue
-        text = Path(source).read_text(encoding="utf-8", errors="ignore")
-        for url in iter_api_page_urls(text):
+        text = source.path.read_text(encoding="utf-8", errors="ignore")
+        for url in iter_page_links(text, base=source.base_url):
             key = canonical_key(url)
             if not key or key in exclusion_keys or key in seed:
+                continue
+            if is_reference_page(url):
                 continue
             request_url = normalize_request_url(url)
             if request_url:
