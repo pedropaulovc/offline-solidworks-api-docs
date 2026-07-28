@@ -354,9 +354,10 @@ def create_xml_output(enums: list[dict[str, Any]]) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Extract enum members from SolidWorks API HTML files")
     parser.add_argument(
-        "--input-dir",
+        "--input-dirs",
         type=Path,
-        default=Path("10_crawl_toc_pages/output/html"),
+        nargs="+",
+        default=[Path("10_crawl_toc_pages/output/html"), Path("35_crawl_referenced_types/output/html")],
         help="Input directory containing HTML files (default: 10_crawl_toc_pages/output/html)",
     )
     parser.add_argument(
@@ -370,7 +371,7 @@ def main() -> int:
     args = parser.parse_args()
 
     # Find all HTML files
-    html_dirs = list(args.input_dir.glob("*"))
+    html_dirs = [sub for d in args.input_dirs if d.exists() for sub in d.glob("*")]
     all_html_files = []
     for html_dir in html_dirs:
         if html_dir.is_dir():
@@ -380,7 +381,7 @@ def main() -> int:
     enum_files = [f for f in all_html_files if is_enum_file(f)]
 
     if not enum_files:
-        print(f"No enum files found in {args.input_dir}")
+        print(f"No enum files found in {', '.join(str(d) for d in args.input_dirs)}")
         return 1
 
     print(f"Found {len(enum_files)} enum files to process (out of {len(all_html_files)} total HTML files)")

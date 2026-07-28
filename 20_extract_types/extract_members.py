@@ -8,11 +8,18 @@ extracts type information (properties and methods) into an XML format.
 
 import argparse
 import json
+import re
+import sys
 import xml.dom.minidom as minidom
 import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
+
+# Add parent directory to path for shared module imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from shared.extraction_utils import canonical_assembly  # noqa: E402
 
 
 class MemberExtractor(HTMLParser):
@@ -130,18 +137,21 @@ def extract_namespace_from_filename(html_file: Path) -> tuple[str | None, str | 
         parts = filename.split("~")
 
         # Assembly is the part before ~
-        assembly = parts[0]
+        assembly = canonical_assembly(parts[0])
 
-        # Extract full type name (after ~ but before _members_)
+        # Extract full type name (after ~ but before the _members marker).
+        # Phase 10 saves Type_members_<hash>.html, phase 35 the bare upstream
+        # Type_members.html -- splitting on "_members_" alone leaves the latter's
+        # suffix glued to the type, yielding namespace "...sldworks.IBody_members".
         if len(parts) > 1:
-            full_type_part = parts[1].split("_members_")[0]
+            full_type_part = re.split(r"_members(?:_|\.html$)", parts[1])[0]
 
             # Namespace is the full type name minus the last segment (the type name itself)
             # e.g., SolidWorks.Interop.sldworks.IAnnotationView -> SolidWorks.Interop.sldworks
             # If there's no dot, the namespace is the same as assembly
             namespace = assembly
             if "." in full_type_part:
-                namespace = ".".join(full_type_part.split(".")[:-1])
+                namespace = canonical_assembly(".".join(full_type_part.split(".")[:-1]))
 
             return assembly, namespace, full_type_part
 
@@ -233,10 +243,12 @@ def create_xml_output(types: list[dict[str, Any]]) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Extract API members from crawled HTML files")
     parser.add_argument(
-        "--input-dir",
+        "--input-dirs",
         type=Path,
-        default=Path("10_crawl_toc_pages/output/html"),
-        help="Directory containing crawled HTML files",
+        nargs="+",
+        default=[Path("10_crawl_toc_pages/output/html"), Path("35_crawl_referenced_types/output/html")],
+        help="Directories containing crawled HTML files (phase 10's TOC crawl plus phase 35's "
+        "reference pages, which the source TOC never exposes)",
     )
     parser.add_argument(
         "--output-dir", type=Path, default=Path("20_extract_types/metadata"), help="Directory to save output files"
@@ -248,11 +260,13 @@ def main() -> int:
     # Ensure output directory exists
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Find all member HTML files
-    member_files = list(args.input_dir.rglob("*_members_*.html"))
+    # Find all member HTML files. Phase 10 appends a query hash to the name
+    # (``..._members_1a2b3c4d_....html``); phase 35 crawls the same page without a
+    # query, so it lands as ``..._members.html`` -- match both.
+    member_files = [f for d in args.input_dirs if d.exists() for f in d.rglob("*_members*.html")]
 
     if not member_files:
-        print(f"No member files found in {args.input_dir}")
+        print(f"No member files found in {', '.join(str(d) for d in args.input_dirs)}")
         return 1
 
     print(f"Found {len(member_files)} member files to process")

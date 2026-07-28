@@ -598,9 +598,10 @@ def create_xml_output(members: list[dict[str, Any]]) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Extract member details from crawled HTML files")
     parser.add_argument(
-        "--input-dir",
+        "--input-dirs",
         type=Path,
-        default=Path("30_crawl_type_members/output/html"),
+        nargs="+",
+        default=[Path("30_crawl_type_members/output/html"), Path("35_crawl_referenced_types/output/html")],
         help="Directory containing crawled member HTML files",
     )
     parser.add_argument(
@@ -617,11 +618,11 @@ def main() -> int:
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     # Find all member HTML files
-    all_html_files = list(args.input_dir.rglob("*.html"))
+    all_html_files = [f for d in args.input_dirs if d.exists() for f in d.rglob("*.html")]
     member_files = [f for f in all_html_files if is_member_file(f)]
 
     if not member_files:
-        print(f"No member files found in {args.input_dir}")
+        print(f"No member files found in {', '.join(str(d) for d in args.input_dirs)}")
         return 1
 
     print(f"Found {len(member_files)} member files to process (out of {len(all_html_files)} total HTML files)")

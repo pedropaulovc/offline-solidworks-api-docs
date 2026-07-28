@@ -1,0 +1,22 @@
+{
+  "seed_pages": 887,
+  "excluded_pages": 18167,
+  "out_of_scope_pages": 24,
+  "out_of_scope_by_assembly": {
+    "sldworksapivb6": 3,
+    "swcostingapi": 1,
+    "routingapi": 9,
+    "sustainabilityapi": 1,
+    "swdocmgrapi": 6,
+    "fworksapi": 1,
+    "swinspectionapi": 1,
+    "swsimulationapi": 1,
+    "swutilitiesapi": 1
+  },
+  "total_pages": 748,
+  "successful_pages": 748,
+  "failed_pages": 0,
+  "skipped_pages": 352,
+  "members_discovered": 213,
+  "reason": "finished"
+}

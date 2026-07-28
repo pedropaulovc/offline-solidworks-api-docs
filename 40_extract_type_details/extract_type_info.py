@@ -25,6 +25,7 @@ from shared.extraction_utils import (
     infer_language_from_filename,
     is_type_file,
     prettify_xml,
+    strip_page_title_kind,
 )
 from shared.xmldoc_links import convert_links_to_see_refs, href_to_see_ref
 
@@ -182,8 +183,7 @@ class TypeInfoExtractor(HTMLParser):
 
         # Capture type name from pagetitle
         if self.in_pagetitle and text:
-            # Remove " Interface", " Class", or " Enumeration" suffix if present
-            self.type_name = text.replace(" Interface", "").replace(" Class", "").replace(" Enumeration", "").strip()
+            self.type_name = strip_page_title_kind(text)
 
         # Capture description (text between pagetitle and first h1)
         # Use original data (not stripped) to preserve spacing
@@ -368,9 +368,10 @@ def create_xml_output(types: list[dict[str, Any]]) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Extract type information from crawled HTML files")
     parser.add_argument(
-        "--input-dir",
+        "--input-dirs",
         type=Path,
-        default=Path("10_crawl_toc_pages/output/html"),
+        nargs="+",
+        default=[Path("10_crawl_toc_pages/output/html"), Path("35_crawl_referenced_types/output/html")],
         help="Directory containing crawled HTML files",
     )
     parser.add_argument(
@@ -384,11 +385,11 @@ def main() -> int:
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     # Find all type HTML files (excluding members and namespace files)
-    all_html_files = list(args.input_dir.rglob("*.html"))
+    all_html_files = [f for d in args.input_dirs if d.exists() for f in d.rglob("*.html")]
     type_files = [f for f in all_html_files if is_type_file(f)]
 
     if not type_files:
-        print(f"No type files found in {args.input_dir}")
+        print(f"No type files found in {', '.join(str(d) for d in args.input_dirs)}")
         return 1
 
     print(f"Found {len(type_files)} type files to process (out of {len(all_html_files)} total HTML files)")

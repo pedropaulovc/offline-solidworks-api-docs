@@ -67,13 +67,23 @@ log "Starting full pipeline refresh (FROM=$FROM)"
 run 10 "crawl TOC pages"           $PY 10_crawl_toc_pages/run_crawler.py
 validate 10                        $PY 10_crawl_toc_pages/validate_crawl.py
 
-# Phase 20 - extract types from TOC
+# Phase 20 - extract types from TOC (drives the phase 30 crawl)
 run 20 "extract types"             $PY 20_extract_types/extract_members.py
 validate 20                        $PY 20_extract_types/validate_extraction.py
 
 # Phase 30 - crawl type member pages
 run 30 "crawl type members"        $PY 30_crawl_type_members/run_crawler.py
 validate 30                        $PY 30_crawl_type_members/validate_crawl.py
+
+# Phase 35 - crawl reference pages the source TOC never exposes (its "Enumerations"
+# nodes return the Interfaces list for several namespaces), seeded from the links
+# in what phases 10/30 already crawled.
+run 35 "crawl referenced types"    $PY 35_crawl_referenced_types/run_crawler.py
+
+# Phase 20 again - api_members.xml feeds phases 90/120, so it has to include the
+# types phase 35 just discovered. Pure local re-extraction over both input dirs.
+run 20 "extract types (+phase 35)" $PY 20_extract_types/extract_members.py
+validate 20                        $PY 20_extract_types/validate_extraction.py
 
 # Phase 40 - extract type details (descriptions, examples, remarks)
 run 40 "extract type details"      $PY 40_extract_type_details/extract_type_info.py
