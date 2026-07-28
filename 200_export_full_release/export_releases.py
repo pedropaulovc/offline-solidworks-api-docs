@@ -85,7 +85,9 @@ class ReleaseExporter:
         """
         file_count = 0
 
-        for file_path in source_dir.rglob("*"):
+        # Sorted so the archive's member order is identical on every machine;
+        # rglob() yields filesystem order, which differs between builds.
+        for file_path in sorted(source_dir.rglob("*")):
             if file_path.is_file():
                 # Calculate archive path
                 rel_path = file_path.relative_to(source_dir)
@@ -127,7 +129,7 @@ class ReleaseExporter:
         xml_files = []
 
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
-            for xml_file in self.xmldoc_source.glob("*.xml"):
+            for xml_file in sorted(self.xmldoc_source.glob("*.xml")):
                 zipf.write(xml_file, arcname=xml_file.name)
                 xml_files.append(xml_file.name)
                 file_count += 1
@@ -146,7 +148,7 @@ class ReleaseExporter:
             "package_type": "xmldoc",
             "description": "Microsoft XMLDoc files for Visual Studio IntelliSense",
             "source_phase": "90_export_xmldoc",
-            "source_directory": str(self.xmldoc_source.relative_to(self.project_root)),
+            "source_directory": self.xmldoc_source.relative_to(self.project_root).as_posix(),
             "file_count": file_count,
             "archive_size_bytes": zip_size,
             "files": xml_files,
@@ -243,7 +245,7 @@ class ReleaseExporter:
             "package_type": "llm_docs",
             "description": "LLM-friendly markdown documentation (grep-optimized)",
             "source_phase": "120_export_llm_docs",
-            "source_directory": str(self.llm_docs_source.relative_to(self.project_root)),
+            "source_directory": self.llm_docs_source.relative_to(self.project_root).as_posix(),
             "file_count": total_files,
             "archive_size_bytes": zip_size,
         }
