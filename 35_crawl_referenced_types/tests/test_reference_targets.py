@@ -120,3 +120,23 @@ class TestCrawlFailure:
 
     def test_missing_stats_file_is_not_a_failure(self):
         assert crawl_failure({}, crawled=0) is None
+
+
+class TestTruncationIsFailure:
+    def test_hitting_the_page_cap_fails_even_with_many_pages_saved(self):
+        stats = {"failed_pages": 0, "seed_pages": 30000, "unscheduled_pages": 12}
+        assert crawl_failure(stats, crawled=20000) is not None
+
+    def test_no_truncation_passes(self):
+        stats = {"failed_pages": 0, "seed_pages": 748, "unscheduled_pages": 0}
+        assert crawl_failure(stats, crawled=748) is None
+
+    def test_a_seed_set_that_is_entirely_soft_404s_is_not_a_failure(self):
+        """The pass-2 seed on the 2026 corpus is exactly this: 4 pages the docs
+        link to that the site serves 200-with-empty-helpText."""
+        stats = {"failed_pages": 0, "seed_pages": 4, "skipped_pages": 4, "unscheduled_pages": 0}
+        assert crawl_failure(stats, crawled=0) is None
+
+    def test_reaching_nothing_at_all_is_still_a_failure(self):
+        stats = {"failed_pages": 0, "seed_pages": 4, "skipped_pages": 0, "unscheduled_pages": 0}
+        assert crawl_failure(stats, crawled=0) is not None

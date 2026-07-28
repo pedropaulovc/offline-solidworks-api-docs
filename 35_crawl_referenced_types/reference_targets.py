@@ -129,6 +129,14 @@ def crawl_failure(stats: dict, crawled: int) -> str | None:
     failed = stats.get("failed_pages", 0)
     if failed:
         return f"{failed} page(s) failed to crawl; see metadata/errors.jsonl"
-    if stats.get("seed_pages") and not crawled:
+    unscheduled = stats.get("unscheduled_pages", 0)
+    if unscheduled:
+        # MAX_PAGES tripped. Plenty of pages were still saved, so `crawled` alone
+        # looks healthy -- but the reference set is knowingly truncated and the
+        # exports must not treat it as complete.
+        return f"page cap reached; {unscheduled} page(s) were never scheduled"
+    if stats.get("seed_pages") and not crawled and not stats.get("skipped_pages"):
+        # Reached nothing at all. A run whose seeds were *all* soft-404s is not a
+        # failure -- that is the shape the second pass legitimately produces.
         return f"{stats['seed_pages']} seed page(s) produced no crawled page"
     return None

@@ -38,6 +38,7 @@ from reference_targets import (  # noqa: E402
 )
 from shared.api_urls import (  # noqa: E402
     build_exclusion_keys,
+    build_saved_page_keys,
     canonical_key,
     crawled_html_sources,
     is_reference_page,
@@ -53,11 +54,12 @@ from shared.api_urls import (  # noqa: E402
 # TOC-driven crawls have re-run; phases 70/100/115 still hold the *previous*
 # refresh's HTML, and scanning that would seed reference types the current corpus
 # no longer links to. The post-115 pass adds them once they are current.
+_SELF_PHASE = "35_crawl_referenced_types"
 _EARLY_PHASES = [
     "10_crawl_toc_pages",
     "30_crawl_type_members",
     # This phase's own log, so --resume doesn't re-crawl.
-    "35_crawl_referenced_types",
+    _SELF_PHASE,
 ]
 _LATE_PHASES = [
     "70_crawl_examples",
@@ -95,11 +97,22 @@ class ReferencedTypesSpider(scrapy.Spider):
         self.all_sources = str(all_sources).lower() in {"1", "true", "yes"}
         phases = corpus_phases(self.all_sources)
 
-        self.crawled_keys = build_exclusion_keys([_metadata(p) for p in phases])
-        self.shipped = build_shipped_assemblies([_metadata(p) for p in _SHIPPED_SOURCES])
+        others = [ph for ph in phases if ph != _SELF_PHASE]
+        self.crawled_keys = build_exclusion_keys([_metadata(ph) for ph in others])
+        # This phase's own pages are excluded only while their HTML is still on
+        # disk. output/ is gitignored but metadata/ is committed, so keying off the
+        # manifest alone would make --resume on a fresh checkout skip all 748
+        # recorded pages and leave nothing for extraction to read.
+        self.crawled_keys |= build_saved_page_keys(
+            REPO_ROOT / _SELF_PHASE, _metadata(_SELF_PHASE)
+        )
+        self.shipped = build_shipped_assemblies([_metadata(ph) for ph in _SHIPPED_SOURCES])
 
+        # Deliberately not this phase's own HTML: parse_page expands member-list
+        # pages only, and scanning pass 1's type/member pages here would bypass that
+        # boundary and let each resume walk another step into the reference tree.
         sources = []
-        for phase in phases:
+        for phase in others:
             sources += crawled_html_sources(REPO_ROOT / phase, _metadata(phase))
         seed, self.out_of_scope = build_seed(sources, self.crawled_keys, self.shipped)
 
@@ -171,18 +184,27 @@ class ReferencedTypesSpider(scrapy.Spider):
             self.stats["skipped_pages"] += 1
             return
 
+        # A page whose payload we cannot read is a *failure*, not a skip: skips do
+        # not reach crawl_failure(), so a mangled response would drop the type from
+        # the exports with the phase still reporting success. Only the recognised
+        # soft-404 below (served-but-empty helpText) is legitimately skippable.
         json_text = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
         if not json_text:
-            self.logger.warning(f"No __NEXT_DATA__ in {response.url}")
-            self.stats["skipped_pages"] += 1
+            self.logger.error(f"No __NEXT_DATA__ in {response.url}")
+            self.stats["failed_pages"] += 1
             return
         try:
             data = json.loads(json_text)
-            help_text = data.get("props", {}).get("pageProps", {}).get("helpContentData", {}).get("helpText")
         except json.JSONDecodeError as e:
             self.logger.error(f"Bad __NEXT_DATA__ JSON in {response.url}: {e}")
-            self.stats["skipped_pages"] += 1
+            self.stats["failed_pages"] += 1
             return
+        content = data.get("props", {}).get("pageProps", {}).get("helpContentData")
+        if not isinstance(content, dict):
+            self.logger.error(f"Unexpected __NEXT_DATA__ shape in {response.url}")
+            self.stats["failed_pages"] += 1
+            return
+        help_text = content.get("helpText")
         if not help_text:
             # A page the docs link to but the source serves empty -- the same
             # soft-404 shape phase 115 sees. Not an error, just nothing to save.

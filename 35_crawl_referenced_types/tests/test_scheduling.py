@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 from types import SimpleNamespace
 
+import jsonlines
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -30,6 +31,8 @@ spider_mod = _load(
     "phase35_spider", "solidworks_scraper/spiders/referenced_types_spider.py"
 )
 pipelines = _load("phase35_pipelines2", "solidworks_scraper/pipelines.py")
+
+from shared.api_urls import build_exclusion_keys, build_saved_page_keys  # noqa: E402
 
 SEED = "https://help.solidworks.com/2026/english/api/sldworksapi/A~B.C.html"
 
@@ -131,3 +134,35 @@ class TestSaveFailure:
 
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-v"]))
+
+
+class TestSelfExclusion:
+    """metadata/ is committed but output/ is gitignored, so a recorded page whose
+    HTML is absent must not be treated as already crawled."""
+
+    def _write(self, phase_dir, rows):
+        (phase_dir / "metadata").mkdir(parents=True, exist_ok=True)
+        meta = phase_dir / "metadata" / "urls_crawled.jsonl"
+        with jsonlines.open(meta, mode="w") as w:
+            for r in rows:
+                w.write(r)
+        return meta
+
+    def test_a_recorded_page_with_no_file_is_not_excluded(self, tmp_path):
+        rows = [
+            {"url": f"{SEED}", "file_path": "output/html/present.html"},
+            {
+                "url": "https://help.solidworks.com/2026/english/api/sldworksapi/X~Y.Z.html",
+                "file_path": "output/html/vanished.html",
+            },
+        ]
+        meta = self._write(tmp_path, rows)
+        (tmp_path / "output" / "html").mkdir(parents=True)
+        (tmp_path / "output" / "html" / "present.html").write_text("<html/>")
+
+        kept = build_saved_page_keys(tmp_path, meta)
+        every = build_exclusion_keys([meta])
+
+        assert len(every) == 2, "manifest-only view excludes both"
+        assert len(kept) == 1, "the page whose HTML vanished stays crawlable"
+        assert kept < every
