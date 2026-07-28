@@ -5,14 +5,28 @@ Tests for the Functional Categories Parser
 import sys
 from pathlib import Path
 
+import pytest
+
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from functional_categories_parser import FunctionalCategoriesParser
 
-# Determine HTML file path relative to project root
+# The page is a Phase 10 crawl artifact under the gitignored output/ tree, and its
+# name carries a hash of the request query. Glob for it rather than pinning that
+# hash, and skip when the crawl has not been run -- otherwise a fresh clone (and
+# CI) reports failures for data that was never meant to be in the repository.
 PROJECT_ROOT = Path(__file__).parent.parent.parent
-HTML_PATH = PROJECT_ROOT / "10_crawl_toc_pages" / "output" / "html" / "sldworksapi" / "FunctionalCategories-sldworksapi_2cd1902c_2cd1902c.htmll.html"
+_CANDIDATES = sorted(
+    (PROJECT_ROOT / "10_crawl_toc_pages" / "output" / "html" / "sldworksapi")
+    .glob("FunctionalCategories-sldworksapi*.html")
+)
+HTML_PATH = _CANDIDATES[0] if _CANDIDATES else None
+
+pytestmark = pytest.mark.skipif(
+    HTML_PATH is None,
+    reason="Phase 10 crawl output not present (output/ is gitignored); run phase 10 first",
+)
 
 
 def test_parser_loads_categories():
