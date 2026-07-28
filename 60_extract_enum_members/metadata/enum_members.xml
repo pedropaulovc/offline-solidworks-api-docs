@@ -1952,6 +1952,10 @@
                 <Description><![CDATA[26 = <see cref="SOLIDWORKS.Interop.sldworks.DAssemblyDocEvents_AddCustomPropertyNotifyEventHandler">AddCustomPropertyNotify</see>]]></Description>
             </Member>
             <Member>
+                <Name>swAssemblyAddDependencyNotify</Name>
+                <Description><![CDATA[103 = <see cref="SOLIDWORKS.Interop.sldworks.DAssemblyDocEvents_AddDependencyNotifyEventHandler">AddDependencyNotify</see>]]></Description>
+            </Member>
+            <Member>
                 <Name>swAssemblyAddDvePagePreNotify</Name>
                 <Description><![CDATA[60 = Not used.]]></Description>
             </Member>
@@ -2070,6 +2074,10 @@
             <Member>
                 <Name>swAssemblyDeleteCustomPropertyNotify</Name>
                 <Description><![CDATA[28 = <see cref="SOLIDWORKS.Interop.sldworks.DAssemblyDocEvents_DeleteCustomPropertyNotifyEventHandler">DeleteCustomPropertyNotify</see>]]></Description>
+            </Member>
+            <Member>
+                <Name>swAssemblyDeleteDependencyNotify</Name>
+                <Description><![CDATA[104 = <see cref="SOLIDWORKS.Interop.sldworks.DAssemblyDocEvents_DeleteDependencyNotifyEventHandler">DeleteDependencyNotify</see>]]></Description>
             </Member>
             <Member>
                 <Name>swAssemblyDeleteItemNotify</Name>
@@ -6430,6 +6438,10 @@
             <Member>
                 <Name>swCommands_Autosolve_Toggle</Name>
                 <Description><![CDATA[997; valid for drawings; **Tools menu > Sketch Settings > Automatic Solve**]]></Description>
+            </Member>
+            <Member>
+                <Name>swCommands_AutoUpdateDrawing</Name>
+                <Description><![CDATA[3551; valid for parts and assemblies; **File menu > Update Drawings**]]></Description>
             </Member>
             <Member>
                 <Name>swCommands_Auxiliary</Name>
@@ -14345,6 +14357,28 @@
         </SeeAlso>
     </Enum>
     <Enum>
+        <Name>swCompatibilityDialogOptions_e</Name>
+        <Assembly>SolidWorks.Interop.swconst</Assembly>
+        <Namespace>SolidWorks.Interop.swconst</Namespace>
+        <Members>
+            <Member>
+                <Name>swCompatibilityDialogOptions_AlwaysShow</Name>
+                <Description><![CDATA[0 = Always show the dialog regardless of the outcome of the compatibility check.]]></Description>
+            </Member>
+            <Member>
+                <Name>swCompatibilityDialogOptions_NeverShow</Name>
+                <Description><![CDATA[2 = Never show the dialog regardless of the outcome of the compatibility check.]]></Description>
+            </Member>
+            <Member>
+                <Name>swCompatibilityDialogOptions_ShowOnIncompatible</Name>
+                <Description><![CDATA[1 = Only show the dialog when incompatibilities are found.]]></Description>
+            </Member>
+        </Members>
+        <SeeAlso>
+            <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
+        </SeeAlso>
+    </Enum>
+    <Enum>
         <Name>swComponentIdentifier_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
@@ -18567,6 +18601,10 @@ DAssemblyDocEvents_ConfigurationChangeNotifyEventHandler]]></Description>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
         <Members>
             <Member>
+                <Name>swDisplayPaneAIContentTab</Name>
+                <Description><![CDATA[3]]></Description>
+            </Member>
+            <Member>
                 <Name>swDisplayPaneLifeCycleTab</Name>
                 <Description><![CDATA[1]]></Description>
             </Member>
@@ -19051,6 +19089,10 @@ DAssemblyDocEvents_ConfigurationChangeNotifyEventHandler]]></Description>
                 <Description><![CDATA[20 = <see cref="SOLIDWORKS.Interop.sldworks.DDrawingDocEvents_AddCustomPropertyNotifyEventHandler">AddCustomPropertyNotify</see>]]></Description>
             </Member>
             <Member>
+                <Name>swDrawingAddDependencyNotify</Name>
+                <Description><![CDATA[62 = <see cref="SOLIDWORKS.Interop.sldworks.DDrawingDocEvents_AddDependencyNotifyEventHandler">AddDependencyNotify</see>]]></Description>
+            </Member>
+            <Member>
                 <Name>swDrawingAddDvePagePreNotify</Name>
                 <Description><![CDATA[40 = Not used.]]></Description>
             </Member>
@@ -19093,6 +19135,10 @@ DAssemblyDocEvents_ConfigurationChangeNotifyEventHandler]]></Description>
             <Member>
                 <Name>swDrawingDeleteCustomPropertyNotify</Name>
                 <Description><![CDATA[22 = <see cref="SOLIDWORKS.Interop.sldworks.DDrawingDocEvents_DeleteCustomPropertyNotifyEventHandler">DeleteCustomPropertyNotify</see>]]></Description>
+            </Member>
+            <Member>
+                <Name>swDrawingDeleteDependencyNotify</Name>
+                <Description><![CDATA[63 = <see cref="SOLIDWORKS.Interop.sldworks.DDrawingDocEvents_DeleteDependencyNotifyEventHandler">DeleteDependencyNotify</see>]]></Description>
             </Member>
             <Member>
                 <Name>swDrawingDeleteItemNotify</Name>
@@ -22261,8 +22307,16 @@ DAssemblyDocEvents_ConfigurationChangeNotifyEventHandler]]></Description>
 - was executed is such a way that the resulting file might not be complete, possibly because SOLIDWORKS is hidden; if the error persists after <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.Visible">setting SOLIDWORKS to visible</see> and re-attempting the Save As operation, contact SOLIDWORKS API support.]]></Description>
             </Member>
             <Member>
+                <Name>swFileSaveDoNotUpgradeError</Name>
+                <Description><![CDATA[32768 or 0x8000 = Attempt to save a file too many versions behind with "Do Not Upgrade" enabled.]]></Description>
+            </Member>
+            <Member>
                 <Name>swFileSaveFormatNotAvailable</Name>
                 <Description><![CDATA[32 or 0x20 = Save As file type is not valid]]></Description>
+            </Member>
+            <Member>
+                <Name>swFileSaveIncompatibleItemsError</Name>
+                <Description><![CDATA[65536 or 0x10000 = Cannot save to previous version due to incompatible features.]]></Description>
             </Member>
             <Member>
                 <Name>swFileSaveRequiresSavingReferences</Name>
@@ -30075,6 +30129,10 @@ To override the default and specify a value with <see cref="SOLIDWORKS.Interop.s
                 <Description><![CDATA[21 = <see cref="SOLIDWORKS.Interop.sldworks.DPartDocEvents_AddCustomPropertyNotifyEventHandler">AddCustomPropertyNotify</see>]]></Description>
             </Member>
             <Member>
+                <Name>swPartAddDependencyNotify</Name>
+                <Description><![CDATA[85 = <see cref="SOLIDWORKS.Interop.sldworks.DPartDocEvents_AddDependencyNotifyEventHandler">AddDependencyNotify</see>]]></Description>
+            </Member>
+            <Member>
                 <Name>swPartAddDvePagePreNotify</Name>
                 <Description><![CDATA[Not used]]></Description>
             </Member>
@@ -30137,6 +30195,10 @@ To override the default and specify a value with <see cref="SOLIDWORKS.Interop.s
             <Member>
                 <Name>swPartDeleteCustomPropertyNotify</Name>
                 <Description><![CDATA[23 = <see cref="SOLIDWORKS.Interop.sldworks.DPartDocEvents_DeleteCustomPropertyNotifyEventHandler">DeleteCustomPropertyNotify</see>]]></Description>
+            </Member>
+            <Member>
+                <Name>swPartDeleteDependencyNotify</Name>
+                <Description><![CDATA[86 = <see cref="SOLIDWORKS.Interop.sldworks.DPartDocEvents_DeleteDependencyNotifyEventHandler">DeleteDependencyNotify</see>]]></Description>
             </Member>
             <Member>
                 <Name>swPartDeleteItemNotify</Name>
@@ -34505,6 +34567,28 @@ Edit revolve: one direction revolution with a 360-degree angle; if you use <see 
             <Member>
                 <Name>swSaveRestoreSettingsSuccess</Name>
                 <Description><![CDATA[0]]></Description>
+            </Member>
+        </Members>
+        <SeeAlso>
+            <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
+        </SeeAlso>
+    </Enum>
+    <Enum>
+        <Name>swSaveToVersion_e</Name>
+        <Assembly>SolidWorks.Interop.swconst</Assembly>
+        <Namespace>SolidWorks.Interop.swconst</Namespace>
+        <Members>
+            <Member>
+                <Name>swSaveToVersion_Antepenultimate</Name>
+                <Description><![CDATA[2 = Save to the file format of the second most recent previous major release of SOLIDWORKS]]></Description>
+            </Member>
+            <Member>
+                <Name>swSaveToVersion_DoNotUpgrade</Name>
+                <Description><![CDATA[0 = Save without upgrading it to a more recent file format]]></Description>
+            </Member>
+            <Member>
+                <Name>swSaveToVersion_Penultimate</Name>
+                <Description><![CDATA[1 = Save to the file format of the most recent previous major release of SOLIDWORKS]]></Description>
             </Member>
         </Members>
         <SeeAlso>
@@ -43559,6 +43643,10 @@ When you trim sketch segments using Power trim in the user interface, you drag y
                 <Description><![CDATA[See <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/System_Options_and_Document_Properties.htm">System Options and Document Properties.</see>]]></Description>
             </Member>
             <Member>
+                <Name>swSaveToVersion</Name>
+                <Description><![CDATA[See <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/System_Options_and_Document_Properties.htm">System Options and Document Properties.</see>]]></Description>
+            </Member>
+            <Member>
                 <Name>swSearchDissectionDailyStartTime</Name>
                 <Description><![CDATA[See <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/System_Options_and_Document_Properties.htm">System Options and Document Properties.</see>]]></Description>
             </Member>
@@ -46777,8 +46865,12 @@ When you trim sketch segments using Power trim in the user interface, you drag y
                 <Description><![CDATA[See <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/System_Options_and_Document_Properties.htm">System Options and Document Properties.</see>]]></Description>
             </Member>
             <Member>
+                <Name>swEnableInterfDetMultiThread</Name>
+                <Description><![CDATA[Registry setting to control whether to perform interference detection on a secondary thread; to set, call ISldWorks::SetUserPreferenceToggle swUserPreferenceToggle_e.swEnableInterfDetProgressDlg True/False]]></Description>
+            </Member>
+            <Member>
                 <Name>swEnableInterfDetProgressDlg</Name>
-                <Description><![CDATA[Registry setting to control whether to display the progress dialog; to set, call ISldWorks::SetUserPreferenceToggle swUserPreferenceToggle_e.swEnableInterfDetProgressDlg True/False]]></Description>
+                <Description><![CDATA[Registry setting to control whether to display the progress dialog during interference detection; to set, call ISldWorks::SetUserPreferenceToggle swUserPreferenceToggle_e.swEnableInterfDetProgressDlg True/False]]></Description>
             </Member>
             <Member>
                 <Name>swEnableMouseGestures</Name>
@@ -46798,6 +46890,10 @@ When you trim sketch segments using Power trim in the user interface, you drag y
             </Member>
             <Member>
                 <Name>swEnablePropertyManager</Name>
+                <Description><![CDATA[See <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/System_Options_and_Document_Properties.htm">System Options and Document Properties.</see>]]></Description>
+            </Member>
+            <Member>
+                <Name>swEnableSaveToVersion</Name>
                 <Description><![CDATA[See <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/System_Options_and_Document_Properties.htm">System Options and Document Properties.</see>]]></Description>
             </Member>
             <Member>
@@ -46858,6 +46954,10 @@ When you trim sketch segments using Power trim in the user interface, you drag y
             </Member>
             <Member>
                 <Name>swExtRefUpdateCompNames</Name>
+                <Description><![CDATA[See <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/System_Options_and_Document_Properties.htm">System Options and Document Properties.</see>]]></Description>
+            </Member>
+            <Member>
+                <Name>swFamilyTableDimName</Name>
                 <Description><![CDATA[See <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Overview/System_Options_and_Document_Properties.htm">System Options and Document Properties.</see>]]></Description>
             </Member>
             <Member>
@@ -48643,6 +48743,32 @@ When you trim sketch segments using Power trim in the user interface, you drag y
             <Member>
                 <Name>swStraightTransition</Name>
                 <Description><![CDATA[1 = Fillet changes from one radius to another linearly without matching edge tangency with an adjacent fillet]]></Description>
+            </Member>
+        </Members>
+        <SeeAlso>
+            <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
+        </SeeAlso>
+    </Enum>
+    <Enum>
+        <Name>swVersionCompatibilityResult_e</Name>
+        <Assembly>SolidWorks.Interop.swconst</Assembly>
+        <Namespace>SolidWorks.Interop.swconst</Namespace>
+        <Members>
+            <Member>
+                <Name>swVersionCompatibilityResult_Completed</Name>
+                <Description><![CDATA[0 = Success. No incompatibility found.]]></Description>
+            </Member>
+            <Member>
+                <Name>swVersionCompatibilityResult_FailFileNotResolved</Name>
+                <Description><![CDATA[2 = Failure. The file could not be resolved.]]></Description>
+            </Member>
+            <Member>
+                <Name>swVersionCompatibilityResult_FailInvalidVersion</Name>
+                <Description><![CDATA[3 = Failure. The requested version is not valid for compatibility checks. (See <see cref="SolidWorks.Interop.swconst.swSaveToVersion_e">swSaveToVersion_e</see>)]]></Description>
+            </Member>
+            <Member>
+                <Name>swVersionCompatibilityResult_FailUnknown</Name>
+                <Description><![CDATA[1 = Failure. The file contains features incompatible with the specified version, or could not be checked.]]></Description>
             </Member>
         </Members>
         <SeeAlso>

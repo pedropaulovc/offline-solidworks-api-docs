@@ -1,30 +1,30 @@
 {
   "statistics": {
     "total_assemblies": 12,
-    "total_types": 1525,
-    "total_properties": 3633,
-    "total_methods": 8298,
-    "total_enum_members": 10468,
-    "types_with_descriptions": 1519,
+    "total_types": 1529,
+    "total_properties": 3638,
+    "total_methods": 8299,
+    "total_enum_members": 10492,
+    "types_with_descriptions": 1523,
     "types_with_remarks": 394,
     "types_with_examples": 457,
     "examples_added": 623,
     "properties_with_params": 106,
-    "methods_with_params": 5117,
-    "total_parameters_documented": 15524
+    "methods_with_params": 5118,
+    "total_parameters_documented": 15528
   },
   "output_files": {
-    "SolidWorks.Interop.sldtoolboxconfigureaddin": "90_export_xmldoc\\output\\SolidWorks.Interop.sldtoolboxconfigureaddin.xml",
-    "SolidWorks.Interop.swmotionstudy": "90_export_xmldoc\\output\\SolidWorks.Interop.swmotionstudy.xml",
-    "SolidWorks.Interop.sldworks": "90_export_xmldoc\\output\\SolidWorks.Interop.sldworks.xml",
-    "SolidWorks.Interop.swbrowser": "90_export_xmldoc\\output\\SolidWorks.Interop.swbrowser.xml",
-    "SolidWorks.Interop.swdimxpert": "90_export_xmldoc\\output\\SolidWorks.Interop.swdimxpert.xml",
-    "SolidWorks.Interop.swpublished": "90_export_xmldoc\\output\\SolidWorks.Interop.swpublished.xml",
-    "SolidWorks.Interop.dsgnchk": "90_export_xmldoc\\output\\SolidWorks.Interop.dsgnchk.xml",
-    "SolidWorks.Interop.swscanto3d": "90_export_xmldoc\\output\\SolidWorks.Interop.swscanto3d.xml",
-    "SolidWorks.Interop.sw3dprinter": "90_export_xmldoc\\output\\SolidWorks.Interop.sw3dprinter.xml",
-    "SolidWorks.Interop.swhtmlcontrol": "90_export_xmldoc\\output\\SolidWorks.Interop.swhtmlcontrol.xml",
-    "SolidWorks.Interop.swconst": "90_export_xmldoc\\output\\SolidWorks.Interop.swconst.xml",
-    "SolidWorks.Interop.swcommands": "90_export_xmldoc\\output\\SolidWorks.Interop.swcommands.xml"
+    "SolidWorks.Interop.sldtoolboxconfigureaddin": "90_export_xmldoc/output/SolidWorks.Interop.sldtoolboxconfigureaddin.xml",
+    "SolidWorks.Interop.swmotionstudy": "90_export_xmldoc/output/SolidWorks.Interop.swmotionstudy.xml",
+    "SolidWorks.Interop.sldworks": "90_export_xmldoc/output/SolidWorks.Interop.sldworks.xml",
+    "SolidWorks.Interop.swbrowser": "90_export_xmldoc/output/SolidWorks.Interop.swbrowser.xml",
+    "SolidWorks.Interop.swdimxpert": "90_export_xmldoc/output/SolidWorks.Interop.swdimxpert.xml",
+    "SolidWorks.Interop.swpublished": "90_export_xmldoc/output/SolidWorks.Interop.swpublished.xml",
+    "SolidWorks.Interop.dsgnchk": "90_export_xmldoc/output/SolidWorks.Interop.dsgnchk.xml",
+    "SolidWorks.Interop.swscanto3d": "90_export_xmldoc/output/SolidWorks.Interop.swscanto3d.xml",
+    "SolidWorks.Interop.sw3dprinter": "90_export_xmldoc/output/SolidWorks.Interop.sw3dprinter.xml",
+    "SolidWorks.Interop.swhtmlcontrol": "90_export_xmldoc/output/SolidWorks.Interop.swhtmlcontrol.xml",
+    "SolidWorks.Interop.swconst": "90_export_xmldoc/output/SolidWorks.Interop.swconst.xml",
+    "SolidWorks.Interop.swcommands": "90_export_xmldoc/output/SolidWorks.Interop.swcommands.xml"
   }
 }

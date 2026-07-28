@@ -20657,6 +20657,16 @@ For more information, read the **Variable Size Fillets** topic in the SOLIDWORKS
         </SeeAlso>
     </Type>
     <Type>
+        <Name>IVersionCompatibilityItem</Name>
+        <Assembly>SolidWorks.Interop.sldworks</Assembly>
+        <Namespace>SolidWorks.Interop.sldworks</Namespace>
+        <Description><![CDATA[Describes a reason a document cannot be saved to the file format of a previous version of SOLIDWORKS.]]></Description>
+        <SeeAlso>
+            <See cref="SolidWorks.Interop.sldworks.IVersionCompatibilityItem_members">IVersionCompatibilityItem Members</See>
+            <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
+        </SeeAlso>
+    </Type>
+    <Type>
         <Name>IVertex</Name>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
         <Namespace>SolidWorks.Interop.sldworks</Namespace>
@@ -22774,6 +22784,15 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Description><![CDATA[SOLIDWORKS toolbar and menu commands.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swcommands_namespace">SolidWorks.Interop.swcommands Namespace</See>
+        </SeeAlso>
+    </Type>
+    <Type>
+        <Name>swCompatibilityDialogOptions_e</Name>
+        <Assembly>SolidWorks.Interop.swconst</Assembly>
+        <Namespace>SolidWorks.Interop.swconst</Namespace>
+        <Description><![CDATA[Options for displaying the previous file format version compatibility check results dialog.]]></Description>
+        <SeeAlso>
+            <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
     </Type>
     <Type>
@@ -27985,6 +28004,15 @@ Edit revolve
         </SeeAlso>
     </Type>
     <Type>
+        <Name>swSaveToVersion_e</Name>
+        <Assembly>SolidWorks.Interop.swconst</Assembly>
+        <Namespace>SolidWorks.Interop.swconst</Namespace>
+        <Description><![CDATA[Previous version file formats available for save compatibility checks.]]></Description>
+        <SeeAlso>
+            <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
+        </SeeAlso>
+    </Type>
+    <Type>
         <Name>swSaveWithReferencesOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
@@ -30761,6 +30789,15 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
         <Description><![CDATA[Variable radius fillet transition options.]]></Description>
+        <SeeAlso>
+            <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
+        </SeeAlso>
+    </Type>
+    <Type>
+        <Name>swVersionCompatibilityResult_e</Name>
+        <Assembly>SolidWorks.Interop.swconst</Assembly>
+        <Namespace>SolidWorks.Interop.swconst</Namespace>
+        <Description><![CDATA[Results for file version compatibility checks.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
