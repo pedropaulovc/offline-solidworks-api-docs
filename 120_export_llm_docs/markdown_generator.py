@@ -83,8 +83,16 @@ def clean_text(text: str) -> str:
 
 def guide_link_key(url: str) -> str:
     """Normalize a ``<see href>`` URL to the key used in the guide-link map:
-    the lowercased ``.htm``/``.html`` basename (host, path, and query stripped)."""
-    return url.split('?')[0].rstrip('/').split('/')[-1].lower()
+    the lowercased ``.htm``/``.html`` basename (host, path, and query stripped).
+
+    Percent-escapes are decoded so a link written
+    ``SolidWorks_API_Add-Ins%2c_Project_Templates%2c_and_Wizards.htm`` matches the
+    manifest's literal-comma form of the same page; otherwise the encoded spelling
+    misses the map and ships as a dead relative link.
+    """
+    from urllib.parse import unquote
+
+    return unquote(url.split('?')[0].rstrip('/').split('/')[-1]).lower()
 
 
 def parse_api_ref_url(url: str) -> "Optional[tuple[str, str, Optional[str]]]":
