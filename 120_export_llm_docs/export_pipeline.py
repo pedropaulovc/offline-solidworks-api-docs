@@ -7,6 +7,7 @@ from the outputs of phases 20, 40, 50, 60, 80, and 110.
 
 import argparse
 import json
+import re
 import shutil
 from pathlib import Path
 from typing import Dict, List
@@ -299,6 +300,17 @@ class ExportPipeline:
             break
         return default
 
+    @staticmethod
+    def _md_destination(path: str) -> str:
+        """A Markdown link destination, angle-wrapped when it needs to be.
+
+        Phase 110 mirrors the guide's own hierarchy, so many targets are paths like
+        ``Programming with the SOLIDWORKS API/Add-ins/Toolbars.md``. A bare space
+        ends the destination in CommonMark, which would break the link -- ``<...>``
+        is how ``_render_see_also`` already handles it.
+        """
+        return f"<{path}>" if re.search(r"[ ()]", path) else path
+
     def _rewrite_guide_api_links(self, types: Dict[str, TypeInfo], base_url: str,
                                  guide_links: Dict[str, str],
                                  examples: Dict[str, "ExampleContent"]) -> None:
@@ -321,7 +333,6 @@ class ExportPipeline:
         help page instead of a dead relative path.
         """
         import posixpath
-        import re
         from markdown_generator import guide_link_key, parse_api_ref_url
 
         # Basename -> shipping file, for the non-reference page kinds.
@@ -365,9 +376,10 @@ class ExportPipeline:
                         return match.group(0)
                     _, _, fragment = url.partition("#")
                     anchor = f"#{fragment}" if fragment else ""
+                    destination = f"{posixpath.relpath(target, guide_dir)}{anchor}"
                     pages += 1
                     state["changed"] = True
-                    return f"{head}{posixpath.relpath(target, guide_dir)}{anchor}{tail}"
+                    return f"{head}{self._md_destination(destination)}{tail}"
 
                 assembly, type_name, member_name = parsed
                 entry = type_idx.get(type_name.lower())
