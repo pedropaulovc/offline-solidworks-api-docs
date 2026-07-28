@@ -40,6 +40,11 @@ def clear_previous(metadata_dir: Path, output_dir: Path) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Crawl reference pages the TOC never exposes")
     parser.add_argument("--resume", action="store_true", help="Continue from a previous crawl (keep existing data)")
+    parser.add_argument(
+        "--all-sources",
+        action="store_true",
+        help="Also seed from phases 70/100/115 (only correct once they have re-run this cycle)",
+    )
     args = parser.parse_args()
 
     project_dir = Path(__file__).parent.resolve()
@@ -52,17 +57,25 @@ def main() -> int:
     if not args.resume:
         clear_previous(metadata_dir, output_dir)
 
+    # Removed up front so a spider that dies before closed() -- e.g. on a malformed
+    # source manifest during __init__ -- cannot be mistaken for a clean run by
+    # leaving the previous run's statistics behind for --resume to read.
+    stats_file = metadata_dir / "crawl_stats.json"
+    stats_file.unlink(missing_ok=True)
+
     process = CrawlerProcess(get_project_settings())
-    process.crawl(ReferencedTypesSpider)
+    process.crawl(ReferencedTypesSpider, all_sources=args.all_sources)
     process.start()
 
     urls_file = metadata_dir / "urls_crawled.jsonl"
     crawled = sum(1 for _ in open(urls_file)) if urls_file.exists() else 0
     print(f"\nReferenced-types crawl complete: {crawled} pages saved to {output_dir / 'html'}")
 
-    stats_file = metadata_dir / "crawl_stats.json"
-    stats = json.loads(stats_file.read_text()) if stats_file.exists() else {}
-    problem = crawl_failure(stats, crawled)
+    if not stats_file.exists():
+        print("ERROR: the spider never wrote crawl_stats.json -- it did not run to completion")
+        return 1
+
+    problem = crawl_failure(json.loads(stats_file.read_text()), crawled)
     if problem:
         print(f"ERROR: {problem}")
         return 1

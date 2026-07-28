@@ -124,10 +124,12 @@ run 115 "crawl referenced pages"   $PY 115_crawl_referenced_pages/run_crawler.py
 run 115 "extract referenced md"    $PY 115_crawl_referenced_pages/extract_markdown.py
 
 # Phase 35 second pass - phases 70/100/115 are seed sources for the referenced-type
-# crawl too, and none of them existed when it first ran. --resume fetches only what
-# their pages reference beyond the first pass (4 pages on the 2026 corpus), so the
-# local re-extractions below fold it into the exports before phase 120 reads them.
-run 116 "crawl referenced types (pass 2)"   $PY 35_crawl_referenced_types/run_crawler.py --resume
+# crawl too, but on the first pass they hold either nothing or the previous refresh's
+# HTML, so pass 1 deliberately ignores them (--all-sources is what opts them in).
+# --resume fetches only what their now-current pages reference beyond pass 1 (4 pages
+# on the 2026 corpus); the local re-extractions below fold it into the exports before
+# phase 120 reads them.
+run 116 "crawl referenced types (pass 2)"   $PY 35_crawl_referenced_types/run_crawler.py --resume --all-sources
 run 117 "extract types (+pass 2)"           $PY 20_extract_types/extract_members.py
 run 117 "extract type details (+pass 2)"    $PY 40_extract_type_details/extract_type_info.py
 run 117 "extract member details (+pass 2)"  $PY 50_extract_type_member_details/extract_member_details.py

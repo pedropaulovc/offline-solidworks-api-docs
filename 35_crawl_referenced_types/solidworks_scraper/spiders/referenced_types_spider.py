@@ -48,15 +48,26 @@ from shared.api_urls import (  # noqa: E402
 
 # Phases whose crawled help-text HTML is scanned for reference links, and which
 # together define the already-crawled boundary.
-_CORPUS_PHASES = [
+#
+# Split because run_pipeline.sh runs this phase twice. On the first pass only the
+# TOC-driven crawls have re-run; phases 70/100/115 still hold the *previous*
+# refresh's HTML, and scanning that would seed reference types the current corpus
+# no longer links to. The post-115 pass adds them once they are current.
+_EARLY_PHASES = [
     "10_crawl_toc_pages",
     "30_crawl_type_members",
-    "70_crawl_examples",
-    "100_crawl_programming_guide",
-    "115_crawl_referenced_pages",
     # This phase's own log, so --resume doesn't re-crawl.
     "35_crawl_referenced_types",
 ]
+_LATE_PHASES = [
+    "70_crawl_examples",
+    "100_crawl_programming_guide",
+    "115_crawl_referenced_pages",
+]
+
+
+def corpus_phases(include_late: bool) -> list[str]:
+    return _EARLY_PHASES + (_LATE_PHASES if include_late else [])
 
 # Assemblies the pipeline ships, derived from what the TOC-driven phases crawled.
 _SHIPPED_SOURCES = ["10_crawl_toc_pages", "30_crawl_type_members"]
@@ -77,20 +88,26 @@ class ReferencedTypesSpider(scrapy.Spider):
     # Safety net against an unexpected runaway expansion; logged if reached.
     MAX_PAGES = 20000
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, all_sources: Any = False, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
-        self.crawled_keys = build_exclusion_keys([_metadata(p) for p in _CORPUS_PHASES])
+        # Scrapy passes spider arguments as strings.
+        self.all_sources = str(all_sources).lower() in {"1", "true", "yes"}
+        phases = corpus_phases(self.all_sources)
+
+        self.crawled_keys = build_exclusion_keys([_metadata(p) for p in phases])
         self.shipped = build_shipped_assemblies([_metadata(p) for p in _SHIPPED_SOURCES])
 
         sources = []
-        for phase in _CORPUS_PHASES:
+        for phase in phases:
             sources += crawled_html_sources(REPO_ROOT / phase, _metadata(phase))
         seed, self.out_of_scope = build_seed(sources, self.crawled_keys, self.shipped)
 
         # A newly discovered type only enters phase 20 with its member list, so
         # queue that alongside the type page itself.
         self.seed: list[str] = []
+        self.scheduled = 0
+        self.limit_hit = False
         self.seen: set[str] = set(self.crawled_keys)
         for url in seed + [m for m in map(member_list_url, seed) if m]:
             key = canonical_key(url)
@@ -99,7 +116,9 @@ class ReferencedTypesSpider(scrapy.Spider):
                 self.seed.append(url)
 
         self.stats: dict[str, Any] = {
+            "source_phases": phases,
             "seed_pages": len(self.seed),
+            "unscheduled_pages": 0,
             "excluded_pages": len(self.crawled_keys),
             "out_of_scope_pages": sum(self.out_of_scope.values()),
             "out_of_scope_by_assembly": self.out_of_scope,
@@ -121,7 +140,30 @@ class ReferencedTypesSpider(scrapy.Spider):
                 + ", ".join(f"{a}={n}" for a, n in sorted(self.out_of_scope.items()))
             )
         for url in self.seed:
-            yield scrapy.Request(url, callback=self.parse_page, errback=self.handle_error)
+            request = self.schedule(url)
+            if request is None:
+                break
+            yield request
+
+    def schedule(self, url: str) -> scrapy.Request | None:
+        """Queue a page, or None once the safety limit is reached.
+
+        The cap has to be applied here, where requests are created, rather than
+        only before expanding a response: seeds are all scheduled up front, and a
+        member list received just under the limit would otherwise enqueue its whole
+        member set. In-flight requests can still land after the cap trips, so the
+        real ceiling is MAX_PAGES plus at most one concurrency window.
+        """
+        if self.scheduled >= self.MAX_PAGES:
+            if not self.limit_hit:
+                self.limit_hit = True
+                self.logger.warning(
+                    f"MAX_PAGES ({self.MAX_PAGES}) reached; scheduling no further pages"
+                )
+            self.stats["unscheduled_pages"] += 1
+            return None
+        self.scheduled += 1
+        return scrapy.Request(url, callback=self.parse_page, errback=self.handle_error)
 
     def parse_page(self, response: Response) -> Generator[Any, None, None]:
         key = canonical_key(response.url)
@@ -166,9 +208,6 @@ class ReferencedTypesSpider(scrapy.Spider):
         # their links would walk the whole reference tree, which is phase 10/30's job.
         if "_members" not in key:
             return
-        if self.stats["total_pages"] >= self.MAX_PAGES:
-            self.logger.warning(f"MAX_PAGES ({self.MAX_PAGES}) reached; stopping expansion")
-            return
 
         for raw in iter_page_links(help_text, base=response.url):
             target = normalize_request_url(raw)
@@ -180,8 +219,11 @@ class ReferencedTypesSpider(scrapy.Spider):
             if page_assembly(target) not in self.shipped:
                 continue
             self.seen.add(tkey)
+            request = self.schedule(target)
+            if request is None:
+                return
             self.stats["members_discovered"] += 1
-            yield scrapy.Request(target, callback=self.parse_page, errback=self.handle_error)
+            yield request
 
     def handle_error(self, failure: Failure) -> Generator[dict[str, Any], None, None]:
         self.stats["failed_pages"] += 1

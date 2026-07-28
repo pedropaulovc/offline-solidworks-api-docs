@@ -55,8 +55,14 @@ class HtmlSavePipeline:
             spider.logger.debug(f"Saved HTML to {file_path}")
 
         except Exception as e:
+            # Drop rather than pass on: MetadataLogPipeline runs next (400 vs this
+            # pipeline's 300) and would record the URL in urls_crawled.jsonl with no
+            # file behind it. The page would then be missing from extraction *and*
+            # skipped by the next --resume as already crawled. Counting it as a
+            # failure is what makes run_crawler exit non-zero.
             spider.logger.error(f"Failed to save HTML for {url}: {e}")
-            item["save_error"] = str(e)
+            spider.stats["failed_pages"] += 1
+            raise DropItem(f"could not save {url}: {e}") from e
 
         return item
 
