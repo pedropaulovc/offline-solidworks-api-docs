@@ -358,13 +358,16 @@ class ExportPipeline:
                 parsed = parse_api_ref_url(url)
                 if parsed is None:
                     # Not a reference page: a guide, referenced or example page,
-                    # linked by bare basename. Point at the copy the bundle ships.
+                    # linked by bare basename. Point at the copy the bundle ships,
+                    # carrying any #section across to the local file.
                     target = page_idx.get(guide_link_key(url))
                     if not target:
                         return match.group(0)
+                    _, _, fragment = url.partition("#")
+                    anchor = f"#{fragment}" if fragment else ""
                     pages += 1
                     state["changed"] = True
-                    return f"{head}{posixpath.relpath(target, guide_dir)}{tail}"
+                    return f"{head}{posixpath.relpath(target, guide_dir)}{anchor}{tail}"
 
                 assembly, type_name, member_name = parsed
                 entry = type_idx.get(type_name.lower())

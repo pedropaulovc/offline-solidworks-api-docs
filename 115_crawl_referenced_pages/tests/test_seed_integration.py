@@ -66,20 +66,46 @@ def test_seed_excludes_generated_reference_pages(spider):
     assert not leaked, f"{len(leaked)} reference pages seeded, e.g. {leaked[:3]}"
 
 
-def test_seed_includes_relatively_linked_sibling_pages(spider):
+EXAMPLE_PAGE = (
+    REPO_ROOT / "70_crawl_examples/output/html/swdimxpertapi"
+    / "Get_DimXpert_Features_and_Annotations_in_a_Model_Example_CSharp.htm"
+)
+EXAMPLE_URL = (
+    "https://help.solidworks.com/2026/english/api/swdimxpertapi/"
+    "Get_DimXpert_Features_and_Annotations_in_a_Model_Example_CSharp.htm"
+)
+
+
+@pytest.mark.skipif(not EXAMPLE_PAGE.exists(), reason="Phase 70 crawl output not present")
+def test_relative_links_are_discovered_from_the_real_corpus():
     """Regression: multi-module examples link their code pages with a bare relative
-    href, which an absolute-URL-only scan never saw."""
-    expected = [
-        "https://help.solidworks.com/2026/english/api/swdimxpertapi/DimXpert_Main_Module_CSharp.htm",
-        "https://help.solidworks.com/2026/english/api/swdimxpertapi/DimXpert_FeatureData_Module_CSharp.htm",
-        "https://help.solidworks.com/2026/english/api/swdimxpertapi/DimXpert_AnnotationData_Module_CSharp.htm",
-    ]
+    href, which an absolute-URL-only scan never saw.
+
+    Asserts on :func:`build_seed` over the real page with an *empty* exclusion set,
+    so it fails if the raw-HTML relative-link scan breaks. Going through
+    ``spider.seed`` instead would not: once this phase has run, the three pages are
+    in the checked-in bundle manifest and drop out of the seed legitimately, which
+    makes a bundle-aware assertion pass no matter what the scan does.
+    """
+    from link_targets import ReferenceSource, build_seed
+
+    seed = build_seed([ReferenceSource(EXAMPLE_PAGE, base_url=EXAMPLE_URL)], set())
+
+    base = "https://help.solidworks.com/2026/english/api/swdimxpertapi/"
+    for module in ("Main", "FeatureData", "AnnotationData"):
+        assert f"{base}DimXpert_{module}_Module_CSharp.htm" in seed
+
+
+@pytest.mark.skipif(not EXAMPLE_PAGE.exists(), reason="Phase 70 crawl output not present")
+def test_relatively_linked_pages_reach_the_bundle(spider):
+    """The same three pages, from the pipeline's side: seeded on a fresh run, and
+    already shipping once this phase has run. Complements the discovery test above,
+    which is what actually guards the scan."""
     seed_keys = {canonical_key(u) for u in spider.seed}
-    bundled = spider.bundle_keys
-    for url in expected:
-        key = canonical_key(url)
-        # Seeded on a fresh run; already in the bundle once this phase has run.
-        assert key in seed_keys or key in bundled, f"{url} neither seeded nor bundled"
+    base = "https://help.solidworks.com/2026/english/api/swdimxpertapi/"
+    for module in ("Main", "FeatureData", "AnnotationData"):
+        key = canonical_key(f"{base}DimXpert_{module}_Module_CSharp.htm")
+        assert key in seed_keys or key in spider.bundle_keys, f"{module} neither seeded nor bundled"
 
 
 if __name__ == "__main__":

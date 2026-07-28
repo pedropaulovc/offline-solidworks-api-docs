@@ -82,8 +82,11 @@ def clean_text(text: str) -> str:
 
 
 def guide_link_key(url: str) -> str:
-    """Normalize a ``<see href>`` URL to the key used in the guide-link map:
-    the lowercased ``.htm``/``.html`` basename (host, path, and query stripped).
+    """Normalize a ``<see href>`` URL to the key used in the guide-link map: the
+    lowercased ``.htm``/``.html`` basename (host, path, query and fragment stripped).
+
+    A ``#section`` suffix names a place *within* a page, so it must not change which
+    page the key identifies — callers re-attach it to the resolved target.
 
     Percent-escapes are decoded so a link written
     ``SolidWorks_API_Add-Ins%2c_Project_Templates%2c_and_Wizards.htm`` matches the
@@ -92,7 +95,7 @@ def guide_link_key(url: str) -> str:
     """
     from urllib.parse import unquote
 
-    return unquote(url.split('?')[0].rstrip('/').split('/')[-1]).lower()
+    return unquote(url.split('#')[0].split('?')[0].rstrip('/').split('/')[-1]).lower()
 
 
 def parse_api_ref_url(url: str) -> "Optional[tuple[str, str, Optional[str]]]":

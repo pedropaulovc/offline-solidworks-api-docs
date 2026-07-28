@@ -211,6 +211,29 @@ def test_rewrite_resolves_guide_and_example_page_links():
         assert "[gone](../swconst/NotShipped.htm)" in text
 
 
+def test_rewrite_carries_fragment_onto_resolved_page_link():
+    """A #section names a place within a page, so it must not change which page the
+    link resolves to, and must survive onto the local target."""
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        page = tmp / "docs" / "swconst" / "Some_Page.md"
+        page.parent.mkdir(parents=True, exist_ok=True)
+        page.write_text("see [section](DP_Units.htm#remarks)\n", encoding="utf-8")
+
+        ExportPipeline(str(tmp))._rewrite_guide_api_links(
+            _make_types(), "https://help.solidworks.com/2026/english/api/",
+            {"dp_units.htm": "docs/swconst/DP_Units.md"}, {})
+
+        assert "[section](DP_Units.md#remarks)" in page.read_text(encoding="utf-8")
+
+
+def test_guide_link_key_ignores_fragment():
+    """``Page.htm#remarks`` and ``Page.htm`` name the same page."""
+    from markdown_generator import guide_link_key
+
+    assert guide_link_key("Other_Page.htm#remarks") == guide_link_key("Other_Page.htm")
+
+
 def test_guide_link_key_decodes_percent_escapes():
     """A link may percent-encode a comma the manifest stores literally; both name
     the same page, so they must share a key or the link ships dead."""
