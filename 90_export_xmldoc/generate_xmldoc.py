@@ -18,7 +18,11 @@ import json
 import re
 import xml.dom.minidom as minidom
 import xml.etree.ElementTree as ET
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from shared.line_endings import normalize_tree  # noqa: E402
 from typing import Any
 
 from data_merger import DataMerger, TypeInfo
@@ -695,6 +699,9 @@ Examples:
     print(f"  - With parameter info: {generator.stats['methods_with_params']}")
     print(f"Parameters documented: {generator.stats['total_parameters_documented']}")
     print(f"Enum members: {generator.stats['total_enum_members']}")
+    changed, scanned = normalize_tree(Path(args.output_dir))
+    print(f"Normalised line endings to CRLF: {changed} of {scanned} files rewritten")
+
     print(f"\nOutput directory: {args.output_dir}")
     print("\nGeneration complete!")
 
