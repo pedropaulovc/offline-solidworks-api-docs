@@ -81,6 +81,17 @@ def clean_text(text: str) -> str:
     return text.strip()
 
 
+def url_fragment(url: str) -> str:
+    """The ``#section`` suffix of ``url``, or ``""``.
+
+    :func:`guide_link_key` deliberately ignores fragments when identifying a page,
+    so every caller that resolves a link through that map must re-attach this to
+    the local target -- otherwise a link to a section lands at the top of the page.
+    """
+    _, _, fragment = url.partition("#")
+    return f"#{fragment}" if fragment else ""
+
+
 def guide_link_key(url: str) -> str:
     """Normalize a ``<see href>`` URL to the key used in the guide-link map: the
     lowercased ``.htm``/``.html`` basename (host, path, query and fragment stripped).
@@ -167,7 +178,7 @@ def simplify_cross_references(text: str, guide_links: Optional[Dict[str, str]] =
         url, label = match.group(1), match.group(2)
         target = links.get(guide_link_key(url))
         if target:
-            return f'[{label}](<{rel_prefix}{target}>)'
+            return f'[{label}](<{rel_prefix}{target}{url_fragment(url)}>)'
         return f'[{label}]({url})'
 
     text = re.sub(r'<see href="([^"]*)">([^<]+)</see>', replace_href, text)
@@ -693,7 +704,7 @@ class MarkdownGenerator:
                 return f"- [[{ref.label}]]"
             target = self.guide_links.get(guide_link_key(ref.value))
             if target:
-                return f"- [{ref.label}](<{rel_prefix}{target}>)"
+                return f"- [{ref.label}](<{rel_prefix}{target}{url_fragment(ref.value)}>)"
             return f"- [{ref.label}]({ref.value})"
 
         return ["## See Also\n", _block([render(ref) for ref in see_also])]

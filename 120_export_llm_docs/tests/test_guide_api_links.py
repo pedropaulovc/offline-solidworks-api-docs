@@ -243,3 +243,27 @@ def test_guide_link_key_decodes_percent_escapes():
     literal = guide_link_key("/2026/english/api/sldworksapiprogguide/Overview/"
                              "SolidWorks_API_Add-Ins,_Project_Templates,_and_Wizards.htm?id=1.2.3.0")
     assert encoded == literal
+
+
+def test_see_href_reattaches_fragment_to_resolved_target():
+    """guide_link_key ignores fragments when identifying a page, so a <see href>
+    pointing at a section must not land at the top of the bundled page."""
+    from markdown_generator import simplify_cross_references
+
+    out = simplify_cross_references(
+        '<see href="https://help.solidworks.com/2026/english/api/swconst/DP_Units.htm#remarks">Units</see>',
+        {"dp_units.htm": "docs/swconst/DP_Units.md"},
+        rel_prefix="../../",
+    )
+    assert out == "[Units](<../../docs/swconst/DP_Units.md#remarks>)"
+
+
+def test_see_href_without_fragment_is_unchanged():
+    from markdown_generator import simplify_cross_references
+
+    out = simplify_cross_references(
+        '<see href="https://help.solidworks.com/2026/english/api/swconst/DP_Units.htm">Units</see>',
+        {"dp_units.htm": "docs/swconst/DP_Units.md"},
+        rel_prefix="../../",
+    )
+    assert out == "[Units](<../../docs/swconst/DP_Units.md>)"
