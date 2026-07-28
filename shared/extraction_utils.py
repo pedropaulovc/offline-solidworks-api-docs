@@ -12,6 +12,43 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
+# The site spells the assembly inconsistently in page filenames -- the TOC tree
+# uses SolidWorks.Interop.sldworks, parts of the reference tree SOLIDWORKS.Interop.sldworks.
+# Both are the same assembly, so fold them onto one spelling; otherwise phase 90
+# emits two XMLDoc files for it and phase 120 splits the type across two trees.
+_ASSEMBLY_RE = re.compile(r"^solidworks\.interop\.(.+)$", re.IGNORECASE)
+
+
+def canonical_assembly(assembly: str) -> str:
+    """Normalise a SolidWorks interop assembly name to its canonical casing.
+
+    Non-matching names are returned unchanged, so a new assembly family is
+    passed through rather than silently mangled.
+    """
+    match = _ASSEMBLY_RE.match(assembly)
+    if not match:
+        return assembly
+    return f"SolidWorks.Interop.{match.group(1).lower()}"
+
+
+# Page titles are "<Name> <Kind>", and in the reference tree a disambiguating
+# parenthetical follows: "DAssemblyDocEvents_AutoSaveNotifyEventHandler Delegate
+# (SolidWorks.Interop.sldworks)". Both must come off to leave the type name.
+_PAGE_TITLE_KIND_RE = re.compile(
+    r"^(?P<name>.+?)\s+(?:Interface|Class|Enumeration|Delegate|Structure)"
+    r"(?:\s*\([^()]*\))?$"
+)
+
+
+def strip_page_title_kind(title: str) -> str:
+    """Reduce a documentation page title to the bare type name.
+
+    A title that carries no recognised kind is returned stripped but otherwise
+    intact, so an unfamiliar page shape stays visible instead of being truncated.
+    """
+    match = _PAGE_TITLE_KIND_RE.match(title.strip())
+    return match.group("name").strip() if match else title.strip()
+
 
 def extract_namespace_from_filename(html_file: Path) -> tuple[str | None, str | None, str | None]:
     """
@@ -36,11 +73,12 @@ def extract_namespace_from_filename(html_file: Path) -> tuple[str | None, str | 
     filename = html_file.name
 
     # Split on ~ to get assembly and full type path
+    # (assembly casing is normalised: see canonical_assembly)
     if "~" in filename:
         parts = filename.split("~")
 
         # Assembly is the part before first ~
-        assembly = parts[0]
+        assembly = canonical_assembly(parts[0])
 
         # Extract full type name (after first ~ but before second ~ or hash)
         if len(parts) >= 2:
@@ -59,7 +97,7 @@ def extract_namespace_from_filename(html_file: Path) -> tuple[str | None, str | 
             if "." in type_part:
                 namespace_parts = type_part.split(".")
                 type_name = namespace_parts[-1]
-                namespace = ".".join(namespace_parts[:-1])
+                namespace = canonical_assembly(".".join(namespace_parts[:-1]))
             else:
                 # If there's no dot, the namespace is the same as assembly
                 namespace = assembly
@@ -159,8 +197,10 @@ def is_type_file(html_file: Path) -> bool:
     """
     filename = html_file.name.lower()
 
-    # Exclude members and namespace files
-    if "_members_" in filename or "_namespace_" in filename:
+    # Exclude members and namespace files. Phase 10 saves these with a trailing
+    # hash (Type_members_<hash>.html); phase 35 saves the bare upstream name
+    # (Type_members.html), so match the suffix as well as the infix.
+    if re.search(r"_(members|namespace)(_|\.html$)", filename):
         return False
 
     # Exclude special files
