@@ -21,7 +21,7 @@ uv run python 02_extract_members/extract_members.py
 
 ```bash
 uv run python 02_extract_members/extract_members.py \
-  --input-dir 10_crawl_toc_pages/output/html \
+  --input-dirs 10_crawl_toc_pages/output/html 35_crawl_referenced_types/output/html \
   --output-dir 02_extract_members/metadata
 ```
 

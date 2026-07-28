@@ -116,3 +116,19 @@ def member_list_url(type_page_url: str) -> str | None:
 
     head, _, extension = type_page_url.rpartition(".")
     return f"{head}_members.{extension}" if head else None
+
+
+def crawl_failure(stats: dict, crawled: int) -> str | None:
+    """Describe why the crawl should be treated as failed, or None if it is fine.
+
+    The spider only *records* failures -- ``process.start()`` returns normally
+    however many requests died. Without this the phase exits 0 after a total
+    network outage and the extraction phases publish a partial reference set as
+    though it were complete.
+    """
+    failed = stats.get("failed_pages", 0)
+    if failed:
+        return f"{failed} page(s) failed to crawl; see metadata/errors.jsonl"
+    if stats.get("seed_pages") and not crawled:
+        return f"{stats['seed_pages']} seed page(s) produced no crawled page"
+    return None

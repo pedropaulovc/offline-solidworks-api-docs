@@ -19,7 +19,7 @@ from typing import Any
 # Add parent directory to path for shared module imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from shared.extraction_utils import add_see_also_element
+from shared.extraction_utils import add_see_also_element, strip_page_title_kind
 from shared.xmldoc_links import convert_links_to_see_refs, href_to_see_ref
 
 
@@ -151,8 +151,7 @@ class EnumMemberExtractor(HTMLParser):
 
         # Capture type name from pagetitle
         if self.in_pagetitle and text:
-            # Remove " Enumeration" suffix if present
-            self.type_name = text.replace(" Enumeration", "").strip()
+            self.type_name = strip_page_title_kind(text)
 
         # Detect Members section header (only in h1 tags - but we simplify here)
         if text == "Members":

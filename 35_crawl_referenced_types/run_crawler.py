@@ -9,6 +9,7 @@ Usage:
 """
 
 import argparse
+import json
 import os
 import shutil
 import sys
@@ -20,6 +21,7 @@ from scrapy.utils.project import get_project_settings
 sys.path.insert(0, str(Path(__file__).parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from reference_targets import crawl_failure
 from solidworks_scraper.spiders.referenced_types_spider import ReferencedTypesSpider
 
 
@@ -57,6 +59,13 @@ def main() -> int:
     urls_file = metadata_dir / "urls_crawled.jsonl"
     crawled = sum(1 for _ in open(urls_file)) if urls_file.exists() else 0
     print(f"\nReferenced-types crawl complete: {crawled} pages saved to {output_dir / 'html'}")
+
+    stats_file = metadata_dir / "crawl_stats.json"
+    stats = json.loads(stats_file.read_text()) if stats_file.exists() else {}
+    problem = crawl_failure(stats, crawled)
+    if problem:
+        print(f"ERROR: {problem}")
+        return 1
     return 0
 
 

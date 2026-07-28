@@ -126,18 +126,22 @@ class MetadataLogPipeline:
         self.errors_file: Path = self.metadata_dir / "errors.jsonl"
         self.manifest_file: Path = self.metadata_dir / "manifest.json"
 
-        # Initialize manifest
-        self.init_manifest()
+    def open_spider(self, spider: Spider) -> None:
+        # Written here rather than in __init__ so the crawl policy it records is
+        # read from the settings actually in force, not restated by hand.
+        self.init_manifest(spider)
 
-    def init_manifest(self) -> None:
+    def init_manifest(self, spider: Spider) -> None:
         """Initialize or update the manifest file"""
+        settings = spider.settings
         manifest = {
             "crawler_version": "1.0.0",
             "start_url": "seed: /api pages referenced but not crawled by phases 10/30/100",
             "boundary": "/2026/english/api/",
-            "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            "respect_robots_txt": True,
-            "crawl_delay_seconds": 2,
+            "user_agent": settings.get("USER_AGENT"),
+            "respect_robots_txt": settings.getbool("ROBOTSTXT_OBEY"),
+            "crawl_delay_seconds": settings.getfloat("DOWNLOAD_DELAY"),
+            "concurrent_requests_per_domain": settings.getint("CONCURRENT_REQUESTS_PER_DOMAIN"),
         }
 
         with open(self.manifest_file, "w", encoding="utf-8") as f:

@@ -10,7 +10,12 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "35_crawl_referenced_types"))
 sys.path.insert(0, str(REPO_ROOT))
 
-from reference_targets import build_seed, build_shipped_assemblies, member_list_url  # noqa: E402
+from reference_targets import (  # noqa: E402
+    build_seed,
+    build_shipped_assemblies,
+    crawl_failure,
+    member_list_url,
+)
 from shared.api_urls import ReferenceSource, canonical_key  # noqa: E402
 
 BASE = "https://help.solidworks.com/2026/english/api"
@@ -93,3 +98,25 @@ def test_member_list_url(url, expected):
 
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-v"]))
+
+
+class TestCrawlFailure:
+    """The phase must not report success when the crawl did not actually happen."""
+
+    def test_recorded_failures_fail_the_phase(self):
+        assert crawl_failure({"failed_pages": 3, "seed_pages": 10}, crawled=7) is not None
+
+    def test_a_clean_crawl_passes(self):
+        assert crawl_failure({"failed_pages": 0, "seed_pages": 10}, crawled=10) is None
+
+    def test_a_total_outage_fails_even_with_no_recorded_errors(self):
+        """errback may never fire (e.g. DNS dead before any request); zero pages
+        against a non-empty seed is still a failed phase."""
+        assert crawl_failure({"failed_pages": 0, "seed_pages": 887}, crawled=0) is not None
+
+    def test_nothing_to_do_is_not_a_failure(self):
+        """A --resume run with everything already crawled seeds nothing."""
+        assert crawl_failure({"failed_pages": 0, "seed_pages": 0}, crawled=0) is None
+
+    def test_missing_stats_file_is_not_a_failure(self):
+        assert crawl_failure({}, crawled=0) is None
