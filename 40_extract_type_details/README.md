@@ -66,7 +66,7 @@ uv run python 03_extract_type_info/extract_type_info.py --verbose
 
 # Specify custom input/output directories
 uv run python 03_extract_type_info/extract_type_info.py \
-  --input-dir path/to/html \
+  --input-dirs path/to/html [more/html ...] \
   --output-dir path/to/output
 ```
 

@@ -67,13 +67,25 @@ log "Starting full pipeline refresh (FROM=$FROM)"
 run 10 "crawl TOC pages"           $PY 10_crawl_toc_pages/run_crawler.py
 validate 10                        $PY 10_crawl_toc_pages/validate_crawl.py
 
-# Phase 20 - extract types from TOC
+# Phase 20 - extract types from TOC (drives the phase 30 crawl)
 run 20 "extract types"             $PY 20_extract_types/extract_members.py
 validate 20                        $PY 20_extract_types/validate_extraction.py
 
 # Phase 30 - crawl type member pages
 run 30 "crawl type members"        $PY 30_crawl_type_members/run_crawler.py
 validate 30                        $PY 30_crawl_type_members/validate_crawl.py
+
+# Phase 35 - crawl reference pages the source TOC never exposes (its "Enumerations"
+# nodes return the Interfaces list for several namespaces), seeded from the links
+# in what phases 10/30 already crawled.
+run 35 "crawl referenced types"    $PY 35_crawl_referenced_types/run_crawler.py
+
+# Phase 20 again - api_members.xml feeds phases 90/120, so it has to include the
+# types phase 35 just discovered. Pure local re-extraction over both input dirs.
+# Numbered 36, not 20: `run` skips anything below --from, so numbering this 20
+# would drop the refresh from exactly the `--from 35` resume that needs it.
+run 36 "extract types (+phase 35)" $PY 20_extract_types/extract_members.py
+validate 36                        $PY 20_extract_types/validate_extraction.py
 
 # Phase 40 - extract type details (descriptions, examples, remarks)
 run 40 "extract type details"      $PY 40_extract_type_details/extract_type_info.py
@@ -110,6 +122,20 @@ validate 110                       $PY 110_extract_docs_md/validate_extraction.p
 # Phase 115 - crawl /api pages referenced but not covered by earlier phases, then extract
 run 115 "crawl referenced pages"   $PY 115_crawl_referenced_pages/run_crawler.py
 run 115 "extract referenced md"    $PY 115_crawl_referenced_pages/extract_markdown.py
+
+# Phase 35 second pass - phases 70/100/115 are seed sources for the referenced-type
+# crawl too, but on the first pass they hold either nothing or the previous refresh's
+# HTML, so pass 1 deliberately ignores them (--all-sources is what opts them in).
+# --resume fetches only what their now-current pages reference beyond pass 1 (4 pages
+# on the 2026 corpus); the local re-extractions below fold it into the exports before
+# phase 120 reads them.
+run 116 "crawl referenced types (pass 2)"   $PY 35_crawl_referenced_types/run_crawler.py --resume --all-sources
+run 117 "extract types (+pass 2)"           $PY 20_extract_types/extract_members.py
+run 117 "extract type details (+pass 2)"    $PY 40_extract_type_details/extract_type_info.py
+run 117 "extract member details (+pass 2)"  $PY 50_extract_type_member_details/extract_member_details.py
+run 117 "extract enum members (+pass 2)"    $PY 60_extract_enum_members/extract_enum_members.py
+run 117 "export xmldoc (+pass 2)"           $PY 90_export_xmldoc/generate_xmldoc.py
+validate 117                                $PY 90_export_xmldoc/validate_xmldoc.py
 
 # Phase 120 - export LLM-friendly docs (flat enum files)
 run 120 "export llm docs"          $PY 120_export_llm_docs/export_pipeline.py

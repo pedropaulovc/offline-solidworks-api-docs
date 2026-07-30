@@ -63,7 +63,7 @@ uv run python 50_extract_type_member_details/extract_member_details.py --verbose
 
 # Specify custom input/output directories
 uv run python 50_extract_type_member_details/extract_member_details.py \
-  --input-dir path/to/html \
+  --input-dirs path/to/html [more/html ...] \
   --output-dir path/to/output
 ```
 
