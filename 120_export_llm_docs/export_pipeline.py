@@ -17,7 +17,7 @@ from collections import defaultdict
 from functional_categories_parser import FunctionalCategoriesParser
 from data_loader import DataLoader
 from markdown_generator import MarkdownGenerator, sanitize_filename
-from example_generator import ExampleGenerator
+from example_generator import ExampleGenerator, build_example_filenames
 from index_generator import IndexGenerator
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -37,6 +37,7 @@ class ExportPipeline:
         """
         self.output_base = Path(output_base)
         self.stats = ExportStatistics()
+        self.example_filenames: Dict[str, str] = {}
 
     def run(self,
             phase20_path: str,
@@ -65,6 +66,7 @@ class ExportPipeline:
         print("="*80)
         print("Phase 120: Export LLM-Friendly Documentation")
         print("="*80)
+        self._reset_output()
 
         # Step 1: Parse functional categories
         print("\n[1/6] Parsing functional categories...")
@@ -86,6 +88,7 @@ class ExportPipeline:
         )
         print(f"  Loaded {len(types)} types")
         print(f"  Loaded {len(data_loader.examples)} examples")
+        self.example_filenames = build_example_filenames(data_loader.examples)
 
         # Assign functional categories to types (case-insensitive lookup)
         # Create a lowercase version of the category mapping for case-insensitive lookup
@@ -147,6 +150,12 @@ class ExportPipeline:
         print(f"\nOutput location: {self.output_base}")
         print(f"Total markdown files generated: {self.stats.markdown_files_generated}")
 
+    def _reset_output(self) -> None:
+        """Remove stale generated files before producing a fresh bundle."""
+        if self.output_base.exists():
+            shutil.rmtree(self.output_base)
+        self.output_base.mkdir(parents=True, exist_ok=True)
+
     def _build_guide_links(self, markdown_roots: List[str]) -> Dict[str, str]:
         """Map guide/referenced-page URLs to their bundle-relative ``docs/`` paths.
 
@@ -181,7 +190,8 @@ class ExportPipeline:
             examples_loader_func=data_loader.get_example_content,
             grep_optimized=True,
             example_categories=example_categories,
-            guide_links=guide_links
+            guide_links=guide_links,
+            example_filenames=self.example_filenames,
         )
 
         # Separate types from enums
@@ -247,7 +257,10 @@ class ExportPipeline:
         examples_path = self.output_base / "examples"
 
         # Create example generator
-        generator = ExampleGenerator(output_base_path=str(examples_path))
+        generator = ExampleGenerator(
+            output_base_path=str(examples_path),
+            filename_map=self.example_filenames,
+        )
 
         # Generate example docs (all in flat folder, category passed for API compatibility only)
         for url, example in examples.items():
@@ -347,7 +360,10 @@ class ExportPipeline:
         # Basename -> shipping file, for the non-reference page kinds.
         page_idx: Dict[str, str] = dict(guide_links)
         for url in examples:
-            md_name = re.sub(r"\.html?$", ".md", url.split("/")[-1], flags=re.IGNORECASE)
+            md_name = self.example_filenames.get(
+                url,
+                re.sub(r"\.html?$", ".md", url.split("/")[-1], flags=re.IGNORECASE),
+            )
             page_idx.setdefault(guide_link_key(url), f"examples/{md_name}")
 
         # Case-insensitive indexes over the shipping API-reference tree.

@@ -3,13 +3,13 @@
   "description": "Convert HTML documentation to Markdown with hierarchical organization",
   "input_dir": "100_crawl_programming_guide\\output\\html",
   "output_dir": "110_extract_docs_md\\output\\markdown",
-  "timestamp": "2026-06-13T02:28:14.347535+00:00",
+  "timestamp": "2026-08-01T19:28:47.109127+00:00",
   "stats": {
-    "total_nodes": 145,
-    "converted_files": 125,
+    "total_nodes": 146,
+    "converted_files": 126,
     "skipped_files": 0,
     "failed_files": 0,
-    "start_time": "2026-06-13T02:28:14.065600+00:00",
-    "end_time": "2026-06-13T02:28:14.346786+00:00"
+    "start_time": "2026-08-01T19:28:46.806058+00:00",
+    "end_time": "2026-08-01T19:28:47.109127+00:00"
   }
 }

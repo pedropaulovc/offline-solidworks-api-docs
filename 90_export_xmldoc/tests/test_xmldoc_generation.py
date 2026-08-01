@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pytest
-from data_merger import DataMerger, TypeInfo, Property, Method, EnumMember
+from data_merger import DataMerger, TypeInfo, Property, Method, EnumMember, Parameter
 from generate_xmldoc import XMLDocGenerator, set_element_content
 
 
@@ -232,7 +232,7 @@ Second line with <see cref="Type2">Type2</see>.
 
 
 class TestExampleGeneration:
-    """Tests for <example> element generation with C# code."""
+    """Tests for standard examples and the multilingual example catalog."""
 
     @pytest.fixture
     def temp_dir(self):
@@ -363,12 +363,23 @@ End Sub
         assert 'public class TestExample' in code_text
         assert 'Console.WriteLine' in code_text
 
-        # Verify VBA code is NOT included (C# only)
+        # Non-C# examples remain out of the standard IntelliSense member XML.
         assert 'Debug.Print' not in xml_content
         assert 'VBA Example' not in xml_content
 
-    def test_vba_examples_excluded(self, temp_dir, sample_types_with_examples, sample_examples_xml):
-        """Test that non-C# examples are excluded."""
+        # They are present in the companion catalog with language metadata.
+        catalog_file = output_files['examples']
+        catalog_root = ET.parse(catalog_file).getroot()
+        vba_example = catalog_root.find(
+            ".//{urn:solidworks:offline-xmldoc:1}example[@language='VBA']"
+        )
+        assert vba_example is not None
+        assert 'Debug.Print' in (vba_example.findtext(
+            '{urn:solidworks:offline-xmldoc:1}content'
+        ) or '')
+
+    def test_non_csharp_examples_cataloged(self, temp_dir, sample_types_with_examples, sample_examples_xml):
+        """Test that non-C# examples are available in the catalog."""
         # Load data
         merger = DataMerger()
         merger.load_api_types(sample_types_with_examples)
@@ -390,8 +401,16 @@ End Sub
         # Should have C# code
         assert 'Console.WriteLine' in xml_str
 
-        # Should NOT have VBA code
+        # Standard IntelliSense XML stays C#-only.
         assert 'Debug.Print' not in xml_str
+
+        catalog_content = output_files['examples'].read_text(encoding='utf-8')
+        assert 'Debug.Print' in catalog_content
+        assert 'language="VBA"' in catalog_content
+        assert '__CDATA_START__' not in catalog_content
+        assert '__CDATA_END__' not in catalog_content
+        assert '__cdata__' not in catalog_content
+        assert '<![CDATA[' in catalog_content
 
     def test_multiple_csharp_examples(self, temp_dir):
         """Test type with multiple C# examples."""
@@ -492,7 +511,8 @@ Console.WriteLine("Example 2");
 
         # Check statistics
         assert generator.stats['types_with_examples'] == 1
-        assert generator.stats['examples_added'] == 1  # Only C# example added
+        assert generator.stats['examples_added'] == 1  # Only C# example added inline
+        assert generator.stats['examples_cataloged'] == 2
 
     def test_no_examples_when_content_missing(self, temp_dir):
         """Test that no example is added if content is not found."""
@@ -522,6 +542,8 @@ Console.WriteLine("Example 2");
         types_file.write_text(types_xml, encoding='utf-8')
         examples_file = temp_dir / 'examples.xml'
         examples_file.write_text(examples_xml, encoding='utf-8')
+        stale_catalog = temp_dir / 'SolidWorks.Interop.examples.xml'
+        stale_catalog.write_text('<stale />', encoding='utf-8')
 
         # Load and generate
         merger = DataMerger()
@@ -551,6 +573,7 @@ Console.WriteLine("Example 2");
         # Statistics should reflect this
         assert generator.stats['types_with_examples'] == 1  # Type has examples
         assert generator.stats['examples_added'] == 0  # But none were added
+        assert not stale_catalog.exists()
 
     def test_code_special_characters_not_escaped(self, temp_dir):
         """Test that special characters in code are not HTML-escaped."""
@@ -627,6 +650,165 @@ if (x < 10 && y > 5)
         assert '&lt;' not in cdata_content
         assert '&gt;' not in cdata_content
         assert '&amp;&amp;' not in cdata_content
+
+
+class TestExtendedXmlDoc:
+    """Tests for signatures and conceptual guide companion documents."""
+
+    @pytest.fixture
+    def temp_dir(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            yield Path(tmpdir)
+
+    def test_complete_signature_is_emitted(self, temp_dir):
+        merger = DataMerger()
+        type_info = TypeInfo(
+            name='ITestType',
+            assembly='TestAssembly',
+            namespace='Test.Namespace',
+        )
+        method = Method(
+            name='DoThing',
+            url='testapi/DoThing.htm',
+            signature='DoThing( System.string name, out System.int error )',
+            return_type='System.bool',
+            parameter_types=['System.String', 'System.Int32@'],
+            parameters=[
+                Parameter('name', 'System.String'),
+                Parameter('error', 'System.Int32@'),
+            ],
+        )
+        type_info.methods.append(method)
+        merger.types['Test.Namespace.ITestType'] = type_info
+
+        generator = XMLDocGenerator(
+            output_dir=temp_dir,
+            metadata_dir=temp_dir,
+            verbose=False,
+        )
+        output_files = generator.generate_all(merger)
+
+        root = ET.parse(output_files['TestAssembly']).getroot()
+        method_member = next(
+            member for member in root.findall('.//member')
+            if member.get('name', '').startswith(
+                'M:Test.Namespace.ITestType.DoThing('
+            )
+        )
+        signature = method_member.find(
+            '{urn:solidworks:offline-xmldoc:1}signature'
+        )
+        assert signature is not None
+        assert signature.get('display') == (
+            'System.bool DoThing( System.string name, out System.int error )'
+        )
+        assert signature.get('return-type') == 'System.bool'
+        parameters = signature.findall(
+            '{urn:solidworks:offline-xmldoc:1}parameter'
+        )
+        assert [(item.get('name'), item.get('type')) for item in parameters] == [
+            ('name', 'System.String'),
+            ('error', 'System.Int32@'),
+        ]
+
+    def test_guide_pages_are_embedded_as_markdown(self, temp_dir):
+        guide_dir = temp_dir / 'guide'
+        guide_dir.mkdir()
+        (guide_dir / 'Overview.md').write_text(
+            '# API Overview\n\nUse the API guide.\n',
+            encoding='utf-8',
+        )
+
+        merger = DataMerger()
+        merger.types['Test.Namespace.ITestType'] = TypeInfo(
+            name='ITestType',
+            assembly='TestAssembly',
+            namespace='Test.Namespace',
+        )
+        generator = XMLDocGenerator(
+            output_dir=temp_dir,
+            metadata_dir=temp_dir,
+            guide_dirs=[guide_dir],
+            verbose=False,
+        )
+        output_files = generator.generate_all(merger)
+
+        root = ET.parse(output_files['guides']).getroot()
+        guide = root.find(
+            ".//{urn:solidworks:offline-xmldoc:1}guide"
+        )
+        assert guide is not None
+        assert guide.get('title') == 'API Overview'
+        assert 'Use the API guide.' in guide.findtext(
+            '{urn:solidworks:offline-xmldoc:1}content'
+        )
+
+    def test_member_level_examples_are_cataloged(self, temp_dir):
+        members_file = temp_dir / 'members.xml'
+        members_file.write_text(
+            '''<Members>
+              <Type>
+                <Name>ITestType</Name>
+                <Assembly>TestAssembly</Assembly>
+                <Namespace>Test.Namespace</Namespace>
+                <PublicMethods>
+                  <Method><Name>DoThing</Name><Url>DoThing.htm</Url></Method>
+                </PublicMethods>
+              </Type>
+            </Members>''',
+            encoding='utf-8',
+        )
+        details_file = temp_dir / 'details.xml'
+        details_file.write_text(
+            '''<Members>
+              <Member>
+                <Type>Test.Namespace.ITestType</Type>
+                <Name>DoThing</Name>
+                <Signature>DoThing()</Signature>
+                <ReturnType>System.void</ReturnType>
+                <Examples>
+                  <Example>
+                    <Name>Do Thing Example</Name>
+                    <Language>VB.NET</Language>
+                    <Url>DoThing_VBNET.htm</Url>
+                  </Example>
+                </Examples>
+              </Member>
+            </Members>''',
+            encoding='utf-8',
+        )
+        examples_file = temp_dir / 'examples.xml'
+        examples_file.write_text(
+            '''<Examples>
+              <Example>
+                <Url>DoThing_VBNET.htm</Url>
+                <Content><![CDATA[Example\n<code>Console.WriteLine("ok")</code>]]></Content>
+              </Example>
+            </Examples>''',
+            encoding='utf-8',
+        )
+
+        merger = DataMerger()
+        merger.load_api_members(members_file)
+        merger.load_member_details(details_file)
+        merger.load_examples(examples_file)
+        generator = XMLDocGenerator(
+            output_dir=temp_dir,
+            metadata_dir=temp_dir,
+            verbose=False,
+        )
+        output_files = generator.generate_all(merger)
+
+        catalog = ET.parse(output_files['examples']).getroot()
+        example = catalog.find(
+            ".//{urn:solidworks:offline-xmldoc:1}example[@language='VB.NET']"
+        )
+        assert example is not None
+        applies_to = example.find('{urn:solidworks:offline-xmldoc:1}applies-to')
+        assert applies_to is not None
+        assert applies_to.get('cref', '').startswith(
+            'M:Test.Namespace.ITestType.DoThing'
+        )
 
 
 if __name__ == '__main__':

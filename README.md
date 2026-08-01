@@ -57,7 +57,7 @@ This project provides two comprehensive documentation packages for the SolidWork
 
 ### XMLDoc Package (~2 MB compressed, ~15 MB uncompressed)
 
-Contains 10 XML files providing IntelliSense documentation for all SolidWorks API assemblies:
+Contains XML files providing IntelliSense documentation for all SolidWorks API assemblies, plus companion semantic catalogs:
 
 - **Comprehensive coverage**: 2,518 types, 11,523 members
 - **Full descriptions**: Type and member documentation
@@ -65,6 +65,9 @@ Contains 10 XML files providing IntelliSense documentation for all SolidWorks AP
 - **Return values**: Detailed return type documentation
 - **Code examples**: 3,708+ examples (VBA, C#, VB.NET, C++)
 - **Remarks**: Usage notes and best practices
+- **Complete signatures**: Namespaced `sw:signature` elements retain return types, parameter types, and property accessors
+- **Multilingual examples**: `SolidWorks.Interop.examples.xml` catalogs VBA, VB.NET, C++ COM, and C# examples with language metadata
+- **Programming guide**: `SolidWorks.Interop.guides.xml` embeds the programming/how-to Markdown pages
 
 ### LLM Documentation Package (~50 MB compressed, ~200 MB uncompressed)
 

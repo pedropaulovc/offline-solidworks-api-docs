@@ -101,6 +101,32 @@ class DataLoader:
                     namespace=namespace
                 )
 
+            type_info = self.types[fqn]
+
+            properties_elem = type_elem.find('PublicProperties')
+            if properties_elem is not None:
+                for prop_elem in properties_elem.findall('Property'):
+                    prop_name = (prop_elem.findtext('Name') or '').strip()
+                    prop_url = (prop_elem.findtext('Url') or '').strip()
+                    if not prop_name or not prop_url:
+                        continue
+                    if any(prop.name == prop_name and prop.url == prop_url
+                           for prop in type_info.properties):
+                        continue
+                    type_info.properties.append(Property(name=prop_name, url=prop_url))
+
+            methods_elem = type_elem.find('PublicMethods')
+            if methods_elem is not None:
+                for method_elem in methods_elem.findall('Method'):
+                    method_name = (method_elem.findtext('Name') or '').strip()
+                    method_url = (method_elem.findtext('Url') or '').strip()
+                    if not method_name or not method_url:
+                        continue
+                    if any(method.name == method_name and method.url == method_url
+                           for method in type_info.methods):
+                        continue
+                    type_info.methods.append(Method(name=method_name, url=method_url))
+
     def _load_phase40(self, xml_path: str):
         """
         Load type details from Phase 40.
@@ -204,6 +230,20 @@ class DataLoader:
                         description=param_desc
                     ))
 
+            # Match details onto the authoritative Phase 20 member inventory.
+            is_property = '(' not in signature
+            members = type_info.properties if is_property else type_info.methods
+            member = next((candidate for candidate in members if candidate.name == name), None)
+            if member is None:
+                continue
+
+            member.description = description
+            member.returns = returns
+            member.remarks = remarks
+            member.signature = signature
+            member.return_type = return_type
+            member.parameters = parameters
+
             # Parse examples
             examples = []
             examples_elem = member_elem.find('Examples')
@@ -221,38 +261,8 @@ class DataLoader:
                         )
                         examples.append(example_ref)
 
-            # Parse See Also cross-references
-            see_also = parse_see_also(member_elem)
-
-            # Determine if this is a property or method based on signature
-            is_property = '(' not in signature
-
-            if is_property:
-                prop = Property(
-                    name=name,
-                    description=description,
-                    parameters=parameters,
-                    returns=returns,
-                    remarks=remarks,
-                    signature=signature,
-                    return_type=return_type,
-                    examples=examples,
-                    see_also=see_also
-                )
-                type_info.properties.append(prop)
-            else:
-                method = Method(
-                    name=name,
-                    description=description,
-                    parameters=parameters,
-                    returns=returns,
-                    remarks=remarks,
-                    signature=signature,
-                    return_type=return_type,
-                    examples=examples,
-                    see_also=see_also
-                )
-                type_info.methods.append(method)
+            member.examples = examples
+            member.see_also = parse_see_also(member_elem)
 
     def _load_phase60(self, xml_path: str):
         """

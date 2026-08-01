@@ -15,6 +15,7 @@ This phase packages the final outputs from the documentation pipeline into distr
 1. **XMLDoc Package**: `SolidWorks.Interop.xmldoc.zip`
    - Contains Microsoft XMLDoc files from Phase 90
    - For Visual Studio IntelliSense integration
+   - Includes companion guide and multilingual-example catalogs
    - ~15 MB compressed
 
 2. **LLM Docs Package**: `SolidWorks.Interop.llms.zip`
@@ -93,10 +94,14 @@ SolidWorks.Interop.xmldoc.zip
 ├── SolidWorks.Interop.swmotionstudy.xml
 ├── SolidWorks.Interop.swbrowser.xml          (Toolbox API)
 ├── SolidWorks.Interop.sldtoolboxconfigureaddin.xml  (Toolbox API)
-└── ... (12 assemblies total)
+├── SolidWorks.Interop.guides.xml              (programming/how-to Markdown)
+├── SolidWorks.Interop.examples.xml            (all language examples)
+└── ... (12 assemblies plus companion catalogs)
 ```
 
 **Use Case**: Drop these files alongside SolidWorks Interop assemblies (.dll files) to enable IntelliSense in Visual Studio, Rider, or VS Code.
+
+The companion catalogs use the `urn:solidworks:offline-xmldoc:1` namespace and retain complete signatures, programming-guide pages, and examples in VBA, VB.NET, C++ COM, and C# for custom consumers.
 
 ### LLM Docs Package
 

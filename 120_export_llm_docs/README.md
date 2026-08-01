@@ -44,10 +44,10 @@ output/
 │   ├── by_assembly.md                    # Types organized by .NET assembly
 │   └── statistics.md                     # Quick stats and largest types
 │
-├── examples/                             # Code examples (flat folder structure)
+├── examples/                             # Code examples (collision-safe flat filenames)
 │   ├── Create_Advanced_Hole_Example_CSharp.md
 │   ├── Create_Assembly_Example_CSharp.md
-│   └── ... (all examples in single folder)
+│   └── ... (all examples in a single folder; colliding URLs get API-prefix names)
 │
 └── docs/                                 # Programming guide
     ├── Overview.md
@@ -303,7 +303,7 @@ cat output/index/statistics.md
 
 - All types from Phase 20 have corresponding type directories with _overview.md
 - All members have individual markdown files with YAML frontmatter
-- All examples from Phase 80 have corresponding markdown files
+- Every unique example URL from Phase 80 has exactly one corresponding markdown file
 - All programming guide content from Phase 110 copied successfully
 - Functional categories correctly applied to sldworks types
 - Index files generated (by_category, by_assembly, statistics)

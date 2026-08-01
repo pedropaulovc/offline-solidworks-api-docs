@@ -5,17 +5,54 @@ This module generates markdown files for code examples organized by functional c
 """
 
 import re
+import hashlib
 from pathlib import Path
-from typing import Dict
+from collections import defaultdict
+from typing import Dict, Iterable, Optional
 import html
 
 from models import ExampleContent
 
 
+def example_basename(url: str) -> str:
+    """Return the stable flat filename for an example URL."""
+    filename = url.rstrip('/').split('/')[-1]
+    filename = re.sub(r'\.(htm|html)$', '.md', filename, flags=re.IGNORECASE)
+    return filename if filename.endswith('.md') else f'{filename}.md'
+
+
+def build_example_filenames(urls: Iterable[str]) -> Dict[str, str]:
+    """Build collision-free filenames while preserving ordinary basenames."""
+    grouped: Dict[str, list[str]] = defaultdict(list)
+    for url in sorted(set(urls)):
+        grouped[example_basename(url)].append(url)
+
+    result: Dict[str, str] = {}
+    used: set[str] = set()
+    for basename, grouped_urls in sorted(grouped.items()):
+        for url in grouped_urls:
+            if len(grouped_urls) == 1:
+                candidate = basename
+            else:
+                parent = url.rstrip('/').split('/')[-2]
+                candidate = f'{parent}__{basename}'
+
+            if candidate in used:
+                digest = hashlib.sha1(url.encode('utf-8')).hexdigest()[:8]
+                stem, suffix = candidate.rsplit('.', 1)
+                candidate = f'{stem}__{digest}.{suffix}'
+
+            used.add(candidate)
+            result[url] = candidate
+
+    return result
+
+
 class ExampleGenerator:
     """Generates markdown documentation for code examples."""
 
-    def __init__(self, output_base_path: str):
+    def __init__(self, output_base_path: str,
+                 filename_map: Optional[Dict[str, str]] = None):
         """
         Initialize the example generator.
 
@@ -23,6 +60,7 @@ class ExampleGenerator:
             output_base_path: Base path for output markdown files (docs/examples/)
         """
         self.output_base_path = Path(output_base_path)
+        self.filename_map = filename_map or {}
 
     def generate_example_documentation(self, example: ExampleContent) -> str:
         """
@@ -197,17 +235,7 @@ class ExampleGenerator:
         Returns:
             Markdown filename
         """
-        # Get the last part of the URL
-        filename = url.split('/')[-1]
-
-        # Replace .htm/.html with .md
-        filename = re.sub(r'\.(htm|html)$', '.md', filename, flags=re.IGNORECASE)
-
-        # If no extension was replaced, add .md
-        if not filename.endswith('.md'):
-            filename += '.md'
-
-        return filename
+        return self.filename_map.get(url, example_basename(url))
 
     def _sanitize_path(self, name: str) -> str:
         """

@@ -1,11 +1,11 @@
 {
-  "total_files_processed": 12914,
-  "members_extracted": 12914,
-  "members_with_parameters": 5779,
-  "members_with_return_values": 9272,
-  "members_with_examples": 3251,
-  "members_with_remarks": 6569,
+  "total_files_processed": 11557,
+  "members_extracted": 11557,
+  "members_with_parameters": 5077,
+  "members_with_return_values": 9170,
+  "members_with_examples": 3234,
+  "members_with_remarks": 6508,
   "errors": 0,
-  "output_file": "50_extract_type_member_details/metadata/api_member_details.xml",
+  "output_file": "50_extract_type_member_details\\metadata\\api_member_details.xml",
   "error_files": []
 }
