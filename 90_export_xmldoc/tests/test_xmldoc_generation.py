@@ -407,6 +407,10 @@ End Sub
         catalog_content = output_files['examples'].read_text(encoding='utf-8')
         assert 'Debug.Print' in catalog_content
         assert 'language="VBA"' in catalog_content
+        assert '__CDATA_START__' not in catalog_content
+        assert '__CDATA_END__' not in catalog_content
+        assert '__cdata__' not in catalog_content
+        assert '<![CDATA[' in catalog_content
 
     def test_multiple_csharp_examples(self, temp_dir):
         """Test type with multiple C# examples."""

@@ -9,7 +9,7 @@
       "source_phase": "90_export_xmldoc",
       "source_directory": "90_export_xmldoc/output",
       "file_count": 14,
-      "archive_size_bytes": 4629057,
+      "archive_size_bytes": 4605359,
       "files": [
         "SolidWorks.Interop.dsgnchk.xml",
         "SolidWorks.Interop.examples.xml",
@@ -39,5 +39,5 @@
     }
   ],
   "total_packages": 2,
-  "total_size_bytes": 17021810
+  "total_size_bytes": 16998112
 }

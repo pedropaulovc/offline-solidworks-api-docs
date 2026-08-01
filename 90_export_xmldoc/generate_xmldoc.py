@@ -296,16 +296,22 @@ class XMLDocGenerator:
 
         # Pattern to find ordinary or namespaced elements with CDATA markers.
         # The content between markers will be HTML-escaped, so we need to unescape it.
-        pattern = r'<([A-Za-z_][\w:.-]*) __cdata__="true">(__CDATA_START__)(.*?)(__CDATA_END__)</\1>'
+        pattern = (
+            r'<(?P<tag>[A-Za-z_][\w:.-]*)(?P<before>[^>]*?)\s'
+            r'__cdata__="true"(?P<after>[^>]*)>'
+            r'__CDATA_START__(?P<content>.*?)__CDATA_END__'
+            r'</(?P=tag)>'
+        )
 
         def replace_cdata(match):
             # Get the content between markers (will be HTML-escaped)
-            content = match.group(3)
+            content = match.group('content')
             # Unescape the HTML entities
             content = html_module.unescape(content)
             # Return with proper CDATA wrapper
-            tag = match.group(1)
-            return f'<{tag}><![CDATA[{content}]]></{tag}>'
+            tag = match.group('tag')
+            attributes = f"{match.group('before')}{match.group('after')}".rstrip()
+            return f'<{tag}{attributes}><![CDATA[{content}]]></{tag}>'
 
         # Replace all CDATA markers
         xml_str = re.sub(pattern, replace_cdata, xml_str, flags=re.DOTALL)
