@@ -119,6 +119,7 @@ class XMLDocValidator:
             # Parse XML
             tree = ET.parse(xml_file)
             root = tree.getroot()
+            raw_xml = xml_file.read_text(encoding='utf-8')
 
             # Validate root element
             if root.tag != 'doc':
@@ -151,7 +152,14 @@ class XMLDocValidator:
                 return
 
             # Validate each member
+            member_ids = set()
             for member_elem in members_elem.findall('member'):
+                member_id = member_elem.get('name', '')
+                if member_id in member_ids:
+                    self.add_issue('error', 'id',
+                                   f"Duplicate member ID: '{member_id}'",
+                                   xml_file.name)
+                member_ids.add(member_id)
                 self.validate_member(member_elem, xml_file.name, file_stats)
 
             # Check file statistics
@@ -172,6 +180,9 @@ class XMLDocValidator:
                              "File contains no members",
                              xml_file.name)
 
+            if has_extension_content:
+                self.validate_extension_content(root, raw_xml, xml_file.name)
+
             # Store file stats
             self.result.stats[xml_file.name] = file_stats
 
@@ -183,6 +194,31 @@ class XMLDocValidator:
             self.add_issue('error', 'validation',
                          f"Validation error: {e}",
                          xml_file.name)
+
+    def validate_extension_content(self, root: ET.Element, raw_xml: str,
+                                   filename: str) -> None:
+        """Validate namespaced guide/example content and its CDATA encoding."""
+        content_elements = root.findall(f'.//{{{self.SW_NAMESPACE}}}content')
+        if not content_elements:
+            self.add_issue('error', 'content',
+                           "Extension document has no <sw:content> elements",
+                           filename)
+            return
+
+        if '__CDATA_START__' in raw_xml or '__CDATA_END__' in raw_xml or '__cdata__' in raw_xml:
+            self.add_issue('error', 'content',
+                           "Extension content contains internal CDATA markers",
+                           filename)
+        if '<![CDATA[' not in raw_xml:
+            self.add_issue('error', 'content',
+                           "Extension content is not encoded as CDATA",
+                           filename)
+
+        for content in content_elements:
+            if not (content.text or '').strip():
+                self.add_issue('error', 'content',
+                               "Empty extension content element",
+                               filename)
 
     def validate_member(self, member_elem: ET.Element, filename: str,
                        stats: dict) -> None:

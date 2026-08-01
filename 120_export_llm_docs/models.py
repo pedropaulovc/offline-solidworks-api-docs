@@ -52,6 +52,7 @@ class Member:
     return_type: str = ""
     examples: List[ExampleReference] = field(default_factory=list)
     see_also: List[CrossRef] = field(default_factory=list)
+    url: str = ""
 
 
 @dataclass

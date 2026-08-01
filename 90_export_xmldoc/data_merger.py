@@ -326,6 +326,7 @@ class DataMerger:
         root = tree.getroot()
 
         members_count = 0
+        seen_members: set[tuple[str, str, str, str]] = set()
         for type_elem in root.findall('Type'):
             name = type_elem.findtext('Name', '').strip()
             assembly = type_elem.findtext('Assembly', '').strip()
@@ -353,6 +354,10 @@ class DataMerger:
                     prop_url = prop_elem.findtext('Url', '').strip()
 
                     if prop_name and prop_url:
+                        member_key = (type_key, 'property', prop_name, prop_url)
+                        if member_key in seen_members:
+                            continue
+                        seen_members.add(member_key)
                         type_info.properties.append(Property(
                             name=prop_name,
                             url=prop_url
@@ -367,6 +372,10 @@ class DataMerger:
                     method_url = method_elem.findtext('Url', '').strip()
 
                     if method_name and method_url:
+                        member_key = (type_key, 'method', method_name, method_url)
+                        if member_key in seen_members:
+                            continue
+                        seen_members.add(member_key)
                         type_info.methods.append(Method(
                             name=method_name,
                             url=method_url

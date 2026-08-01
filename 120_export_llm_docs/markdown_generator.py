@@ -206,7 +206,7 @@ class MarkdownGenerator:
     """Generates markdown documentation for API types."""
 
     def __init__(self, output_base_path: str, examples_loader_func=None, grep_optimized=False,
-                 example_categories=None, guide_links=None):
+                 example_categories=None, guide_links=None, example_filenames=None):
         """
         Initialize the markdown generator.
 
@@ -217,12 +217,14 @@ class MarkdownGenerator:
             example_categories: Dict mapping example URLs to category names (for grep_optimized mode)
             guide_links: Dict mapping guide_link_key(url) -> bundle-relative docs path,
                 used to turn ``<see href>`` guide references into relative file links
+            example_filenames: Dict mapping source example URLs to bundle filenames
         """
         self.output_base_path = Path(output_base_path)
         self.examples_loader_func = examples_loader_func
         self.grep_optimized = grep_optimized
         self.example_categories = example_categories or {}
         self.guide_links = guide_links or {}
+        self.example_filenames = example_filenames or {}
 
     def generate_type_documentation(self, type_info: TypeInfo, category: Optional[str] = None) -> str:
         """
@@ -409,7 +411,10 @@ class MarkdownGenerator:
         """
         # Convert URL to filename
         # e.g., "sldworksapi/Create_Advanced_Hole_Example_CSharp.htm" -> "Create_Advanced_Hole_Example_CSharp.md"
-        filename = url.split('/')[-1].replace('.htm', '.md').replace('.html', '.md')
+        filename = self.example_filenames.get(
+            url,
+            url.split('/')[-1].replace('.htm', '.md').replace('.html', '.md'),
+        )
 
         # Relative path from API doc to docs/examples/Example.md (flat folder structure)
         # Assuming API doc is at api/assembly/Type.md, need to go up 2 levels
@@ -428,7 +433,10 @@ class MarkdownGenerator:
         """
         # Convert URL to filename
         # e.g., "sldworksapi/Traverse_Bodies_Example_CPlusPlusCLI.htm" -> "Traverse_Bodies_Example_CPlusPlusCLI.md"
-        filename = url.split('/')[-1].replace('.htm', '.md').replace('.html', '.md')
+        filename = self.example_filenames.get(
+            url,
+            url.split('/')[-1].replace('.htm', '.md').replace('.html', '.md'),
+        )
 
         # Relative path from types/TypeName/_overview.md or enums/EnumName/_overview.md
         # to examples/Example.md (flat folder structure)
@@ -593,7 +601,10 @@ class MarkdownGenerator:
 
     def _get_example_path_for_enum_file(self, url: str) -> str:
         """Relative path to an example file from a flat ``enums/{Enum}.md`` file (up one level)."""
-        filename = url.split('/')[-1].replace('.htm', '.md').replace('.html', '.md')
+        filename = self.example_filenames.get(
+            url,
+            url.split('/')[-1].replace('.htm', '.md').replace('.html', '.md'),
+        )
         return f"../examples/{filename}"
 
     def _enum_members_table(self, enum_members: List[EnumMember], transform) -> str:

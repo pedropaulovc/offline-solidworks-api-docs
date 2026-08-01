@@ -286,14 +286,14 @@ Each assembly gets its own XMLDoc file:
 
 ## Example Code Integration
 
-**New in this version**: The generator now automatically includes C# code examples in the XMLDoc output!
+The generator includes C# examples inline in the standard XMLDoc files and preserves every recovered example in the companion example catalog.
 
 ### How It Works
 
-1. **Filters for C# examples**: Only C# examples are included (VBA, VB.NET, etc. are excluded)
-2. **Retrieves example content**: Uses Phase 8 parsed example data
-3. **Adds `<example>` elements**: Each C# example gets its own `<example>` element
-4. **Wraps code in `<code>` tags**: Example content is properly formatted
+1. **Adds C# examples inline**: C# examples are included as `<example>` elements in the standard assembly XMLDoc files
+2. **Preserves all languages**: VBA, VB.NET, and other recovered examples are stored in `SolidWorks.Interop.examples.xml`
+3. **Adds cross-references**: Assembly members link to every applicable cataloged example with `sw:example-ref`
+4. **Protects source code**: Example content is emitted as real CDATA so embedded XML-like code remains valid XML
 
 ### Example Output
 
@@ -331,15 +331,16 @@ Each assembly gets its own XMLDoc file:
 
 - **IntelliSense Integration**: Examples appear directly in Visual Studio tooltips
 - **Contextual Help**: Developers see working code examples while coding
-- **C#-Focused**: Only C# examples included (most relevant for .NET developers)
-- **Automatic**: No manual copying needed - examples come from Phase 8 parsing
+- **Multi-language**: The companion catalog retains every recovered example language
+- **XML-safe**: Embedded `<`, `>`, and `&` characters remain inside CDATA sections
+- **Automatic**: No manual copying needed - examples come from Phase 80 parsing
 
 ### Statistics
 
 After generation, check the summary output:
 ```
-  - With examples: 561
-  - C# examples added: 561
+  - Example records cataloged: 2,839
+  - C# examples added inline: 623
 ```
 
 This tells you how many types have example code integrated.
@@ -428,7 +429,11 @@ Use the XMLDoc files as input to generate:
     "total_enum_members": 15678,
     "types_with_descriptions": 2020,
     "types_with_remarks": 456,
-    "types_with_examples": 561
+    "types_with_examples": 457,
+    "examples_added": 623,
+    "examples_cataloged": 2839,
+    "guide_pages": 141,
+    "members_with_signatures": 11551
   },
   "output_files": {
     "SolidWorks.Interop.sldworks": "90_export_xmldoc/output/SolidWorks.Interop.sldworks.xml"

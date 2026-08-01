@@ -6,6 +6,8 @@ This script validates the completeness and quality of the exported documentation
 
 import argparse
 import json
+import re
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Dict, List
 from collections import defaultdict
@@ -14,7 +16,9 @@ from collections import defaultdict
 class ExportValidator:
     """Validates the exported documentation."""
 
-    def __init__(self, output_path: str):
+    def __init__(self, output_path: str,
+                 phase20_path: str = '20_extract_types/metadata/api_members.xml',
+                 phase80_path: str = '80_parse_examples/output/examples.xml'):
         """
         Initialize the validator.
 
@@ -22,6 +26,8 @@ class ExportValidator:
             output_path: Path to the output directory
         """
         self.output_path = Path(output_path)
+        self.phase20_path = Path(phase20_path)
+        self.phase80_path = Path(phase80_path)
         self.errors = []
         self.warnings = []
 
@@ -55,6 +61,9 @@ class ExportValidator:
         # Check summary report
         print("\n[5/5] Validating summary report...")
         self._validate_summary_report()
+
+        print("\n[6/6] Validating source inventory parity...")
+        self._validate_source_inventory_parity()
 
         # Print results
         print("\n" + "="*80)
@@ -277,6 +286,66 @@ class ExportValidator:
             self.errors.append("Summary report is not valid JSON")
         except Exception as e:
             self.errors.append(f"Error reading summary report: {e}")
+
+    def _validate_source_inventory_parity(self):
+        """Ensure generated member and example files match the source inventory."""
+        if not self.phase20_path.exists() or not self.phase80_path.exists():
+            print("  Source inventory files not available; parity check skipped")
+            return
+
+        phase20_root = ET.parse(self.phase20_path).getroot()
+        members = set()
+        for type_elem in phase20_root.findall('Type'):
+            type_key = (
+                type_elem.findtext('Namespace', '').strip(),
+                type_elem.findtext('Name', '').strip(),
+            )
+            for kind, path in (('property', 'PublicProperties/Property'),
+                               ('method', 'PublicMethods/Method')):
+                for member_elem in type_elem.findall(path):
+                    name = member_elem.findtext('Name', '').strip()
+                    url = member_elem.findtext('Url', '').strip()
+                    if name and url:
+                        members.add((*type_key, kind, name, url))
+
+        actual_properties = 0
+        actual_methods = 0
+        for member_file in (self.output_path / 'types').rglob('*.md'):
+            if member_file.name == '_overview.md':
+                continue
+            content = member_file.read_text(encoding='utf-8')
+            kind = re.search(r'^kind: (property|method)\s*$', content, re.MULTILINE)
+            if kind is None:
+                self.errors.append(f"Member file missing kind: {member_file}")
+                continue
+            if kind.group(1) == 'property':
+                actual_properties += 1
+            else:
+                actual_methods += 1
+
+        expected_properties = sum(item[2] == 'property' for item in members)
+        expected_methods = sum(item[2] == 'method' for item in members)
+        print(f"  Properties: {actual_properties} / {expected_properties}")
+        print(f"  Methods: {actual_methods} / {expected_methods}")
+        if (actual_properties, actual_methods) != (expected_properties, expected_methods):
+            self.errors.append(
+                f"Member inventory mismatch: generated {actual_properties} properties and "
+                f"{actual_methods} methods, expected {expected_properties} and {expected_methods}"
+            )
+
+        phase80_root = ET.parse(self.phase80_path).getroot()
+        expected_examples = {
+            (example.findtext('Url') or '').strip()
+            for example in phase80_root.findall('Example')
+            if (example.findtext('Url') or '').strip()
+        }
+        actual_examples = list((self.output_path / 'examples').rglob('*.md'))
+        print(f"  Examples: {len(actual_examples)} / {len(expected_examples)}")
+        if len(actual_examples) != len(expected_examples):
+            self.errors.append(
+                f"Example inventory mismatch: generated {len(actual_examples)}, "
+                f"expected {len(expected_examples)}"
+            )
 
     def _validate_markdown_file(self, file_path: Path, doc_type: str, require_yaml: bool = False):
         """
