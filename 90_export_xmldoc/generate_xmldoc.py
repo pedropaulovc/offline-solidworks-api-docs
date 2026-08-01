@@ -164,8 +164,11 @@ class XMLDocGenerator:
         if self.guide_dirs:
             output_files['guides'] = self.generate_guides_xmldoc()
 
+        examples_file = self.output_dir / 'SolidWorks.Interop.examples.xml'
         if self.merger.examples:
             output_files['examples'] = self.generate_examples_xmldoc()
+        elif examples_file.exists():
+            examples_file.unlink()
 
         return output_files
 

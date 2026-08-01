@@ -542,6 +542,8 @@ Console.WriteLine("Example 2");
         types_file.write_text(types_xml, encoding='utf-8')
         examples_file = temp_dir / 'examples.xml'
         examples_file.write_text(examples_xml, encoding='utf-8')
+        stale_catalog = temp_dir / 'SolidWorks.Interop.examples.xml'
+        stale_catalog.write_text('<stale />', encoding='utf-8')
 
         # Load and generate
         merger = DataMerger()
@@ -571,6 +573,7 @@ Console.WriteLine("Example 2");
         # Statistics should reflect this
         assert generator.stats['types_with_examples'] == 1  # Type has examples
         assert generator.stats['examples_added'] == 0  # But none were added
+        assert not stale_catalog.exists()
 
     def test_code_special_characters_not_escaped(self, temp_dir):
         """Test that special characters in code are not HTML-escaped."""

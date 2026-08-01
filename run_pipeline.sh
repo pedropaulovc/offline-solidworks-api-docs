@@ -95,10 +95,6 @@ validate 70                        $PY 70_crawl_examples/validate_crawl.py
 run 80 "parse examples"            $PY 80_parse_examples/parse_examples.py
 validate 80                        $PY 80_parse_examples/validate_parse.py
 
-# Phase 90 - export XMLDoc
-run 90 "export xmldoc"             $PY 90_export_xmldoc/generate_xmldoc.py
-validate 90                        $PY 90_export_xmldoc/validate_xmldoc.py
-
 # Phase 100 - crawl programming guide
 run 100 "crawl programming guide"  $PY 100_crawl_programming_guide/run_crawler.py
 validate 100                       $PY 100_crawl_programming_guide/validate_crawl.py
@@ -110,6 +106,10 @@ validate 110                       $PY 110_extract_docs_md/validate_extraction.p
 # Phase 115 - crawl /api pages referenced but not covered by earlier phases, then extract
 run 115 "crawl referenced pages"   $PY 115_crawl_referenced_pages/run_crawler.py
 run 115 "extract referenced md"    $PY 115_crawl_referenced_pages/extract_markdown.py
+
+# Phase 90 - export XMLDoc after guide Markdown exists
+run 90 "export xmldoc"             $PY 90_export_xmldoc/generate_xmldoc.py
+validate 90                        $PY 90_export_xmldoc/validate_xmldoc.py
 
 # Phase 120 - export LLM-friendly docs (flat enum files)
 run 120 "export llm docs"          $PY 120_export_llm_docs/export_pipeline.py
