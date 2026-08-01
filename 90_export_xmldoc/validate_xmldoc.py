@@ -45,6 +45,7 @@ class XMLDocValidator:
 
     # Valid ID prefixes
     VALID_PREFIXES = {'T:', 'P:', 'M:', 'F:', 'E:', 'N:', '!:'}
+    SW_NAMESPACE = 'urn:solidworks:offline-xmldoc:1'
 
     def __init__(self, output_dir: Path, verbose: bool = False):
         """
@@ -162,7 +163,11 @@ class XMLDocValidator:
                 file_stats['events']
             )
 
-            if file_stats['total_members'] == 0:
+            has_extension_content = any(
+                root.find(f'{{{self.SW_NAMESPACE}}}{name}') is not None
+                for name in ('guides', 'examples')
+            )
+            if file_stats['total_members'] == 0 and not has_extension_content:
                 self.add_issue('warning', 'content',
                              "File contains no members",
                              xml_file.name)

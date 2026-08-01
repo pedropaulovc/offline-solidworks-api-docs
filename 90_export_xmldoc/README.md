@@ -1,6 +1,6 @@
 # Phase 9: Generate XMLDoc Files
 
-Generates standard Microsoft XMLDoc files from merged API documentation data. Creates one XML file per assembly that can be used for IntelliSense in Visual Studio and other IDEs.
+Generates Microsoft XMLDoc files from merged API documentation data. Creates one XML file per assembly for IntelliSense, plus namespaced companion XML files containing conceptual guides and the complete multilingual example catalog.
 
 ## Overview
 
@@ -29,6 +29,14 @@ This phase combines data from multiple previous phases and generates XMLDoc file
    - `<value>` for property value descriptions
    - `<availability>` for version information
    - `<example>` with C# code examples (automatically included for types with examples)
+   - `sw:signature` extensions with complete member signatures and structured parameters
+   - `sw:example-ref` extensions linking API types to all recovered examples
+
+4. **Generates companion semantic catalogs**:
+   - `SolidWorks.Interop.guides.xml` embeds Phase 110/115 Markdown pages as CDATA
+   - `SolidWorks.Interop.examples.xml` contains all recovered examples with language, title, source URL, and API type references
+
+The `sw:` elements use the namespace `urn:solidworks:offline-xmldoc:1`. Standard IntelliSense consumers can continue reading the regular XMLDoc tags; custom consumers can read the extension elements for information not represented by the Microsoft XMLDoc format.
 
 ## Output Format
 
@@ -36,7 +44,7 @@ This phase combines data from multiple previous phases and generates XMLDoc file
 
 ```xml
 <?xml version='1.0' encoding='utf-8'?>
-<doc>
+<doc xmlns:sw="urn:solidworks:offline-xmldoc:1">
   <assembly>
     <name>SolidWorks.Interop.sldworks</name>
   </assembly>
@@ -64,9 +72,11 @@ This phase combines data from multiple previous phases and generates XMLDoc file
     </member>
     <member name="P:SolidWorks.Interop.sldworks.IModelDoc2.GetTitle">
       <summary>Gets the title of the document.</summary>
+      <sw:signature kind="property" display="System.String GetTitle {get;}" return-type="System.String" />
     </member>
     <member name="M:SolidWorks.Interop.sldworks.IModelDoc2.Save">
       <summary>Saves the document.</summary>
+      <sw:signature kind="method" display="System.Boolean Save()" return-type="System.Boolean" />
     </member>
     <member name="F:SolidWorks.Interop.swconst.swDocumentTypes_e.swDocPART">
       <summary>Part document type.</summary>
@@ -74,6 +84,8 @@ This phase combines data from multiple previous phases and generates XMLDoc file
   </members>
 </doc>
 ```
+
+The guide and example companion files use the same `<doc>` container and can be consumed by XML parsers without requiring a SolidWorks assembly. Their namespaced content is intentionally nonstandard because Visual Studio does not define a browseable conceptual-document or language-aware example format.
 
 ### ID String Format
 
@@ -106,6 +118,9 @@ uv run python 90_export_xmldoc/generate_xmldoc.py --verbose
 
 # Specify custom output directory
 uv run python 90_export_xmldoc/generate_xmldoc.py --output-dir custom/path
+
+# Use explicit guide roots (repeatable; defaults to Phase 110 and 115 roots)
+uv run python 90_export_xmldoc/generate_xmldoc.py --guide-dir path/to/markdown
 ```
 
 ### Validate Generated Files

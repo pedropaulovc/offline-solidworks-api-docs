@@ -25,8 +25,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from shared.line_endings import normalize_tree  # noqa: E402
 from typing import Any
 
-from data_merger import DataMerger, TypeInfo
+from data_merger import DataMerger, ExampleReference, TypeInfo
 from id_generator import XMLDocIDGenerator
+
+SW_NAMESPACE = 'urn:solidworks:offline-xmldoc:1'
+SW_PREFIX = f'{{{SW_NAMESPACE}}}'
+ET.register_namespace('sw', SW_NAMESPACE)
+
+
+def sw_tag(name: str) -> str:
+    """Return a namespaced extension element name."""
+    return f'{SW_PREFIX}{name}'
 
 
 def set_element_content(element: ET.Element, content: str) -> None:
@@ -59,24 +68,25 @@ def set_element_content(element: ET.Element, content: str) -> None:
         element.text = content
 
 
-def set_code_content(element: ET.Element, code: str) -> None:
+def set_cdata_content(element: ET.Element, content: str) -> None:
     """
-    Set code element content using CDATA to prevent HTML escaping.
+    Set element content using CDATA to prevent XML escaping.
 
-    This function wraps code content in CDATA sections so that characters
-    like <, >, & are preserved as-is without HTML escaping.
-
-    Args:
-        element: The <code> element
-        code: The code content
+    ElementTree does not write CDATA sections directly, so a marker is
+    replaced after serialization.
     """
-    if not code:
+    if not content:
         return
 
-    # Mark the element for CDATA wrapping with a special marker
-    # We'll replace this after XML generation
-    element.text = f"__CDATA_START__{code}__CDATA_END__"
+    # CDATA cannot contain its own terminator. Split it before serialization.
+    safe_content = content.replace(']]>', ']]]]><![CDATA[>')
+    element.text = f"__CDATA_START__{safe_content}__CDATA_END__"
     element.set("__cdata__", "true")
+
+
+def set_code_content(element: ET.Element, code: str) -> None:
+    """Set code content using CDATA."""
+    set_cdata_content(element, code)
 
 
 class XMLDocGenerator:
@@ -84,7 +94,8 @@ class XMLDocGenerator:
     Generates XMLDoc files from merged API documentation.
     """
 
-    def __init__(self, output_dir: Path, metadata_dir: Path, verbose: bool = False):
+    def __init__(self, output_dir: Path, metadata_dir: Path,
+                 guide_dirs: list[Path] | None = None, verbose: bool = False):
         """
         Initialize the XMLDoc generator.
 
@@ -95,6 +106,7 @@ class XMLDocGenerator:
         """
         self.output_dir = output_dir
         self.metadata_dir = metadata_dir
+        self.guide_dirs = [path for path in (guide_dirs or []) if path.exists()]
         self.verbose = verbose
         self.id_gen = XMLDocIDGenerator()
         self.merger = None  # Will be set when generate_all is called
@@ -110,6 +122,9 @@ class XMLDocGenerator:
             'types_with_remarks': 0,
             'types_with_examples': 0,
             'examples_added': 0,
+            'examples_cataloged': 0,
+            'guide_pages': 0,
+            'members_with_signatures': 0,
             'properties_with_params': 0,
             'methods_with_params': 0,
             'total_parameters_documented': 0,
@@ -146,6 +161,12 @@ class XMLDocGenerator:
             output_files[assembly_name] = output_file
             self.log(f"  -> {output_file}")
 
+        if self.guide_dirs:
+            output_files['guides'] = self.generate_guides_xmldoc()
+
+        if self.merger.examples:
+            output_files['examples'] = self.generate_examples_xmldoc()
+
         return output_files
 
     def generate_assembly_xmldoc(self, assembly_name: str, types: list[TypeInfo]) -> Path:
@@ -174,7 +195,11 @@ class XMLDocGenerator:
         for type_info in types:
             self.add_type_to_members(members_elem, type_info)
 
-        # Pretty-print and save
+        output_file = self.output_dir / f"{assembly_name}.xml"
+        return self._write_xml_document(doc, output_file)
+
+    def _write_xml_document(self, doc: ET.Element, output_file: Path) -> Path:
+        """Serialize one XMLDoc document with deterministic formatting."""
         xml_str = ET.tostring(doc, encoding='unicode')
 
         # Replace CDATA markers with actual CDATA sections before parsing
@@ -187,8 +212,6 @@ class XMLDocGenerator:
         lines = [line for line in pretty_xml.split('\n') if line.strip()]
         pretty_xml = '\n'.join(lines)
 
-        # Write to file
-        output_file = self.output_dir / f"{assembly_name}.xml"
         output_file.write_text(pretty_xml, encoding='utf-8')
 
         return output_file
@@ -271,22 +294,193 @@ class XMLDocGenerator:
         """
         import html as html_module
 
-        # Pattern to find code elements with CDATA markers
-        # The content between markers will be HTML-escaped, so we need to unescape it
-        pattern = r'<code __cdata__="true">(__CDATA_START__)(.*?)(__CDATA_END__)</code>'
+        # Pattern to find ordinary or namespaced elements with CDATA markers.
+        # The content between markers will be HTML-escaped, so we need to unescape it.
+        pattern = r'<([A-Za-z_][\w:.-]*) __cdata__="true">(__CDATA_START__)(.*?)(__CDATA_END__)</\1>'
 
         def replace_cdata(match):
             # Get the content between markers (will be HTML-escaped)
-            content = match.group(2)
+            content = match.group(3)
             # Unescape the HTML entities
             content = html_module.unescape(content)
             # Return with proper CDATA wrapper
-            return f'<code><![CDATA[{content}]]></code>'
+            tag = match.group(1)
+            return f'<{tag}><![CDATA[{content}]]></{tag}>'
 
         # Replace all CDATA markers
         xml_str = re.sub(pattern, replace_cdata, xml_str, flags=re.DOTALL)
 
         return xml_str
+
+    def _guide_title(self, content: str, fallback: str) -> str:
+        """Extract the first Markdown H1 title, falling back to the filename."""
+        for line in content.splitlines():
+            if line.startswith('# '):
+                return line[2:].strip()
+        return fallback
+
+    def _example_links(self):
+        """Yield every API member and its attached example references."""
+        for type_info in sorted(self.merger.types.values(), key=lambda item: f'{item.namespace}.{item.name}'):
+            type_id = self.id_gen.generate_type_id(type_info.namespace, type_info.name)
+            yield type_id, type_info.examples
+
+            for prop in type_info.properties:
+                prop_id = self.id_gen.generate_property_id(
+                    type_info.namespace,
+                    type_info.name,
+                    prop.name,
+                    parameters=getattr(prop, 'parameter_types', None),
+                )
+                yield prop_id, prop.examples
+
+            for method in type_info.methods:
+                method_id = self.id_gen.generate_method_id(
+                    type_info.namespace,
+                    type_info.name,
+                    method.name,
+                    parameters=getattr(method, 'parameter_types', None),
+                )
+                yield method_id, method.examples
+
+    def _infer_example_language(self, url: str) -> str:
+        """Infer a language for an orphan example when no API ref has it."""
+        upper_url = url.upper()
+        if 'CPLUSPLUS' in upper_url or 'CPP' in upper_url:
+            return 'C++ COM'
+        if 'VBNET' in upper_url:
+            return 'VB.NET'
+        if upper_url.endswith('_VB.HTM'):
+            return 'VBA'
+        if 'CSHARP' in upper_url:
+            return 'C#'
+        return 'Unknown'
+
+    def add_example_refs(self, member: ET.Element, references: list) -> None:
+        """Link a real XMLDoc member to all of its examples."""
+        if not self.merger:
+            return
+        for example_ref in references:
+            if self.merger.get_example_content(example_ref.url):
+                ET.SubElement(member, sw_tag('example-ref'), {
+                    'id': example_ref.url.lstrip('/'),
+                    'language': example_ref.language,
+                    'source': example_ref.url,
+                })
+
+    def generate_guides_xmldoc(self) -> Path:
+        """Write conceptual/how-to Markdown pages into a companion XMLDoc."""
+        doc = ET.Element('doc')
+        assembly = ET.SubElement(doc, 'assembly')
+        ET.SubElement(assembly, 'name').text = 'SolidWorks.Interop.guides'
+        ET.SubElement(doc, 'members')
+        guides = ET.SubElement(doc, sw_tag('guides'), {'format': 'markdown'})
+
+        for index, guide_dir in enumerate(self.guide_dirs, start=1):
+            root_label = f'root{index}'
+            for guide_path in sorted(guide_dir.rglob('*.md')):
+                relative_path = guide_path.relative_to(guide_dir).as_posix()
+                content = guide_path.read_text(encoding='utf-8')
+                guide = ET.SubElement(guides, sw_tag('guide'), {
+                    'id': f'{root_label}/{relative_path}',
+                    'title': self._guide_title(content, guide_path.stem),
+                    'source': relative_path,
+                    'root': root_label,
+                })
+                content_elem = ET.SubElement(guide, sw_tag('content'), {
+                    'format': 'markdown'
+                })
+                set_cdata_content(content_elem, content)
+                self.stats['guide_pages'] += 1
+
+        output_file = self.output_dir / 'SolidWorks.Interop.guides.xml'
+        return self._write_xml_document(doc, output_file)
+
+    def generate_examples_xmldoc(self) -> Path:
+        """Write all recovered examples and language metadata to a catalog."""
+        doc = ET.Element('doc')
+        assembly = ET.SubElement(doc, 'assembly')
+        ET.SubElement(assembly, 'name').text = 'SolidWorks.Interop.examples'
+        ET.SubElement(doc, 'members')
+        examples_elem = ET.SubElement(doc, sw_tag('examples'))
+
+        examples = {}
+        for member_id, references in self._example_links():
+            for example_ref in references:
+                content = self.merger.get_example_content(example_ref.url)
+                if not content:
+                    continue
+
+                key = example_ref.url.lstrip('/')
+                if key not in examples:
+                    examples[key] = {
+                        'ref': example_ref,
+                        'content': content,
+                        'member_ids': [],
+                    }
+                if member_id not in examples[key]['member_ids']:
+                    examples[key]['member_ids'].append(member_id)
+
+        # Preserve any parsed example content that is not linked from a type or
+        # member. This keeps the catalog complete even when the source docs have
+        # an orphaned example page.
+        for url, example_content in self.merger.examples.items():
+            key = url.lstrip('/')
+            if key not in examples:
+                examples[key] = {
+                    'ref': ExampleReference(
+                        name=Path(url).stem,
+                        language=self._infer_example_language(url),
+                        url=url,
+                    ),
+                    'content': example_content.content,
+                    'member_ids': [],
+                }
+
+        for key in sorted(examples):
+            item = examples[key]
+            example_ref = item['ref']
+            example = ET.SubElement(examples_elem, sw_tag('example'), {
+                'id': key,
+                'title': example_ref.name,
+                'language': example_ref.language,
+                'source': example_ref.url,
+            })
+            for member_id in item['member_ids']:
+                ET.SubElement(example, sw_tag('applies-to'), {'cref': member_id})
+            content_elem = ET.SubElement(example, sw_tag('content'), {
+                'format': 'solidworks-example'
+            })
+            set_cdata_content(content_elem, item['content'])
+            self.stats['examples_cataloged'] += 1
+
+        output_file = self.output_dir / 'SolidWorks.Interop.examples.xml'
+        return self._write_xml_document(doc, output_file)
+
+    def add_signature(self, member: ET.Element, data: Any, kind: str) -> None:
+        """Add the complete Phase 50 signature as a machine-readable extension."""
+        signature = getattr(data, 'signature', None)
+        return_type = getattr(data, 'return_type', None)
+        if not signature and not return_type:
+            return
+
+        full_signature = ' '.join(
+            part for part in (return_type, signature) if part
+        )
+        signature_elem = ET.SubElement(member, sw_tag('signature'), {
+            'kind': kind,
+            'display': full_signature,
+        })
+        if return_type:
+            signature_elem.set('return-type', return_type)
+
+        for parameter in getattr(data, 'parameters', None) or []:
+            attrs = {'name': parameter.name, 'type': parameter.type}
+            if parameter.type.endswith('@'):
+                attrs['direction'] = 'byref'
+            ET.SubElement(signature_elem, sw_tag('parameter'), attrs)
+
+        self.stats['members_with_signatures'] += 1
 
     def add_see_also(self, member: ET.Element, see_also: list) -> None:
         """
@@ -331,7 +525,8 @@ class XMLDocGenerator:
             set_element_content(remarks, '\n' + type_info.remarks + '\n')
             self.stats['types_with_remarks'] += 1
 
-        # Add examples (C# only)
+        # Keep C# examples in standard XMLDoc form for IntelliSense. All
+        # languages are emitted in the companion examples catalog below.
         if type_info.examples:
             self.stats['types_with_examples'] += 1
 
@@ -345,6 +540,9 @@ class XMLDocGenerator:
                     if content:
                         # Create example element
                         example_elem = ET.SubElement(type_member, 'example')
+                        example_elem.set(f'{SW_PREFIX}language', example_ref.language)
+                        example_elem.set(f'{SW_PREFIX}source', example_ref.url)
+                        example_elem.set(f'{SW_PREFIX}title', example_ref.name)
 
                         # Parse content manually since Phase 06 content has <code> tags
                         # but the code inside contains special characters
@@ -352,6 +550,8 @@ class XMLDocGenerator:
 
                         self.stats['examples_added'] += 1
                         self.log(f"  Added C# example: {example_ref.name}")
+
+        self.add_example_refs(type_member, type_info.examples)
 
         # Add See Also cross-references
         self.add_see_also(type_member, type_info.see_also)
@@ -392,6 +592,7 @@ class XMLDocGenerator:
         # Create member element
         member = ET.SubElement(members_elem, 'member')
         member.set('name', prop_id)
+        self.add_example_refs(member, prop.examples)
 
         # Add summary if available
         if hasattr(prop, 'summary') and prop.summary:
@@ -401,6 +602,8 @@ class XMLDocGenerator:
             # Placeholder summary
             summary = ET.SubElement(member, 'summary')
             summary.text = f"Gets or sets {prop.name}."
+
+        self.add_signature(member, prop, 'property')
 
         # Add param tags for indexed properties
         if hasattr(prop, 'parameters') and prop.parameters:
@@ -455,6 +658,7 @@ class XMLDocGenerator:
         # Create member element
         member = ET.SubElement(members_elem, 'member')
         member.set('name', method_id)
+        self.add_example_refs(member, method.examples)
 
         # Add summary if available
         if hasattr(method, 'summary') and method.summary:
@@ -464,6 +668,8 @@ class XMLDocGenerator:
             # Placeholder summary
             summary = ET.SubElement(member, 'summary')
             summary.text = f"{method.name} method."
+
+        self.add_signature(member, method, 'method')
 
         # Add param tags for each parameter
         if hasattr(method, 'parameters') and method.parameters:
@@ -536,7 +742,7 @@ class XMLDocGenerator:
         # Generate summary
         summary = {
             'statistics': self.stats,
-            'output_files': {name: str(path) for name, path in output_files.items()},
+            'output_files': {name: path.as_posix() for name, path in output_files.items()},
         }
 
         # Save summary
@@ -554,7 +760,7 @@ class XMLDocGenerator:
                 '60_extract_enum_members/metadata/enum_members.xml',
                 '80_parse_examples/output/examples.xml',
             ],
-            'output_directory': str(self.output_dir),
+            'output_directory': self.output_dir.as_posix(),
             'total_assemblies': self.stats['total_assemblies'],
             'xmldoc_format': 'Microsoft XMLDoc (VS IntelliSense)',
         }
@@ -617,6 +823,13 @@ Examples:
     )
 
     parser.add_argument(
+        '--guide-dir',
+        type=Path,
+        action='append',
+        help='Markdown guide directory to embed; may be repeated'
+    )
+
+    parser.add_argument(
         '--output-dir',
         type=Path,
         default=Path('90_export_xmldoc/output'),
@@ -676,9 +889,17 @@ Examples:
         return
 
     # Generate XMLDoc files
+    guide_dirs = args.guide_dir
+    if guide_dirs is None:
+        guide_dirs = [
+            Path('110_extract_docs_md/output/markdown'),
+            Path('115_crawl_referenced_pages/output/markdown'),
+        ]
+
     generator = XMLDocGenerator(
         output_dir=args.output_dir,
         metadata_dir=args.metadata_dir,
+        guide_dirs=guide_dirs,
         verbose=args.verbose
     )
 
@@ -693,6 +914,9 @@ Examples:
     print(f"  - With remarks: {generator.stats['types_with_remarks']}")
     print(f"  - With examples: {generator.stats['types_with_examples']}")
     print(f"  - C# examples added: {generator.stats['examples_added']}")
+    print(f"  - Examples cataloged: {generator.stats['examples_cataloged']}")
+    print(f"Guide pages: {generator.stats['guide_pages']}")
+    print(f"Members with signatures: {generator.stats['members_with_signatures']}")
     print(f"Properties: {generator.stats['total_properties']}")
     print(f"  - With parameter info: {generator.stats['properties_with_params']}")
     print(f"Methods: {generator.stats['total_methods']}")

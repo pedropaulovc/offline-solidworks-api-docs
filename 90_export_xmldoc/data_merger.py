@@ -36,6 +36,14 @@ class SeeAlsoRef:
 
 
 @dataclass
+class ExampleReference:
+    """Represents an example reference."""
+    name: str
+    language: str
+    url: str
+
+
+@dataclass
 class Property:
     """Represents a property member."""
     name: str
@@ -44,8 +52,11 @@ class Property:
     value: Optional[str] = None
     remarks: Optional[str] = None
     availability: Optional[str] = None
+    signature: Optional[str] = None
+    return_type: Optional[str] = None
     parameter_types: Optional[list[str]] = None  # For indexed properties (just types for signature)
     parameters: Optional[list[Parameter]] = None  # Full parameter info with descriptions
+    examples: list[ExampleReference] = field(default_factory=list)
     see_also: list[SeeAlsoRef] = field(default_factory=list)
 
 
@@ -58,8 +69,11 @@ class Method:
     returns: Optional[str] = None
     remarks: Optional[str] = None
     availability: Optional[str] = None
+    signature: Optional[str] = None
+    return_type: Optional[str] = None
     parameter_types: Optional[list[str]] = None  # Parameter types for signature
     parameters: Optional[list[Parameter]] = None  # Full parameter info with descriptions
+    examples: list[ExampleReference] = field(default_factory=list)
     see_also: list[SeeAlsoRef] = field(default_factory=list)
 
 
@@ -68,14 +82,6 @@ class EnumMember:
     """Represents an enumeration member."""
     name: str
     description: str
-
-
-@dataclass
-class ExampleReference:
-    """Represents an example reference."""
-    name: str
-    language: str
-    url: str
 
 
 @dataclass
@@ -99,6 +105,26 @@ class ExampleContent:
     """Represents example code content."""
     url: str
     content: str
+
+
+def parse_example_references(parent_elem: ET.Element) -> list[ExampleReference]:
+    """Parse all example references attached to a type or member."""
+    examples_elem = parent_elem.find('Examples')
+    if examples_elem is None:
+        return []
+
+    references = []
+    for example_elem in examples_elem.findall('Example'):
+        name = example_elem.findtext('Name', '').strip()
+        language = example_elem.findtext('Language', '').strip()
+        url = example_elem.findtext('Url', '').strip()
+        if name and url:
+            references.append(ExampleReference(
+                name=name,
+                language=language or 'Unknown',
+                url=url,
+            ))
+    return references
 
 
 def parse_see_also(parent_elem: ET.Element) -> list[SeeAlsoRef]:
@@ -404,19 +430,7 @@ class DataMerger:
                 type_info.remarks = remarks
 
             # Load examples
-            examples_elem = type_elem.find('Examples')
-            if examples_elem is not None:
-                for example_elem in examples_elem.findall('Example'):
-                    example_name = example_elem.findtext('Name', '').strip()
-                    example_lang = example_elem.findtext('Language', '').strip()
-                    example_url = example_elem.findtext('Url', '').strip()
-
-                    if example_name and example_url:
-                        type_info.examples.append(ExampleReference(
-                            name=example_name,
-                            language=example_lang or 'Unknown',
-                            url=example_url
-                        ))
+            type_info.examples.extend(parse_example_references(type_elem))
 
             # Load See Also cross-references
             see_also = parse_see_also(type_elem)
@@ -479,14 +493,18 @@ class DataMerger:
             # Extract member details
             description = member_elem.findtext('Description', '').strip()
             returns = member_elem.findtext('Returns', '').strip()
+            return_type = member_elem.findtext('ReturnType', '').strip()
             remarks = member_elem.findtext('Remarks', '').strip()
             signature = member_elem.findtext('Signature', '').strip()
+            examples = parse_example_references(member_elem)
 
             # Remove CDATA markers if present
             if description:
                 description = description.replace('<![CDATA[', '').replace(']]>', '').strip()
             if returns:
                 returns = returns.replace('<![CDATA[', '').replace(']]>', '').strip()
+            if return_type:
+                return_type = return_type.replace('<![CDATA[', '').replace(']]>', '').strip()
             if remarks:
                 remarks = remarks.replace('<![CDATA[', '').replace(']]>', '').strip()
 
@@ -538,10 +556,16 @@ class DataMerger:
                         prop.value = returns
                     if remarks:
                         prop.remarks = remarks
+                    if signature:
+                        prop.signature = signature
+                    if return_type:
+                        prop.return_type = return_type
                     if parameter_types:
                         prop.parameter_types = parameter_types
                     if parameters:
                         prop.parameters = parameters
+                    if examples:
+                        prop.examples = examples
                     if see_also:
                         prop.see_also = see_also
                     found = True
@@ -558,10 +582,16 @@ class DataMerger:
                             method.returns = returns
                         if remarks:
                             method.remarks = remarks
+                        if signature:
+                            method.signature = signature
+                        if return_type:
+                            method.return_type = return_type
                         if parameter_types:
                             method.parameter_types = parameter_types
                         if parameters:
                             method.parameters = parameters
+                        if examples:
+                            method.examples = examples
                         if see_also:
                             method.see_also = see_also
                         found = True
