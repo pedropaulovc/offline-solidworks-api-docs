@@ -4,13 +4,13 @@
     "types_with_descriptions": 1523,
     "types_with_remarks": 394,
     "types_with_examples": 457,
-    "total_properties": 3509,
-    "total_methods": 8042,
+    "total_properties": 3514,
+    "total_methods": 8043,
     "total_enum_members": 10492,
     "total_examples": 2839,
     "functional_categories": 39,
-    "markdown_files_generated": 15925,
-    "programming_guide_files": 141
+    "markdown_files_generated": 15931,
+    "programming_guide_files": 323
   },
   "output_location": "C:\\src\\offline-solidworks-api-docs\\120_export_llm_docs\\output"
 }

@@ -16,6 +16,11 @@
 
 set -uo pipefail
 
+# Keep Python validation and crawl logs Unicode-safe on Windows hosts whose
+# default console code page is cp1252.
+export PYTHONUTF8=1
+export PYTHONIOENCODING=utf-8
+
 cd "$(dirname "$0")"
 
 FROM="0"

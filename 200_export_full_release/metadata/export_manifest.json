@@ -9,7 +9,7 @@
       "source_phase": "90_export_xmldoc",
       "source_directory": "90_export_xmldoc/output",
       "file_count": 14,
-      "archive_size_bytes": 4588447,
+      "archive_size_bytes": 4728348,
       "files": [
         "SolidWorks.Interop.dsgnchk.xml",
         "SolidWorks.Interop.examples.xml",
@@ -34,10 +34,10 @@
       "description": "LLM-friendly markdown documentation (grep-optimized)",
       "source_phase": "120_export_llm_docs",
       "source_directory": "120_export_llm_docs/output",
-      "file_count": 16066,
-      "archive_size_bytes": 12417448
+      "file_count": 16254,
+      "archive_size_bytes": 12661361
     }
   ],
   "total_packages": 2,
-  "total_size_bytes": 17005895
+  "total_size_bytes": 17389709
 }
