@@ -1,6 +1,6 @@
 {
-  "package_name": "SolidWorks.Interop.llms.zip",
-  "version": "v3.12.0",
+  "package_name": "SolidWorks.Interop.llms.v3.12.1.zip",
+  "version": "v3.12.1",
   "package_type": "llm_docs",
   "description": "LLM-friendly markdown documentation (grep-optimized)",
   "source_phase": "120_export_llm_docs",

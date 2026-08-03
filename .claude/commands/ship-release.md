@@ -37,28 +37,26 @@ Perform a complete release workflow for the project. Follow these steps in order
 
 ## Step 5: Run Phase 200 Export
 
-1. Run `uv run python 200_export_full_release/export_releases.py --verbose`
-2. Verify both packages were created successfully:
-   - SolidWorks.Interop.xmldoc.zip
-   - SolidWorks.Interop.llms.zip
+1. Run `uv run python 200_export_full_release/export_releases.py --version v{version} --verbose`
+2. Verify both versioned packages were created successfully:
+   - `200_export_full_release/output/SolidWorks.Interop.xmldoc.v{version}.zip`
+   - `200_export_full_release/output/SolidWorks.Interop.llms.v{version}.zip`
 
-## Step 6: Prepare Release Artifacts
+## Step 6: Verify Release Artifacts
 
-1. Copy and rename the packages for GitHub release:
-   - Copy `200_export_full_release/output/SolidWorks.Interop.xmldoc.zip` to `SolidWorks.Interop.xmldoc.v{version}.zip`
-   - Copy `200_export_full_release/output/SolidWorks.Interop.llms.zip` to `SolidWorks.Interop.llms.v{version}.zip`
-2. Create these versioned copies in a temporary location or the output directory
+1. Confirm the generated filenames include the exact release version.
+2. Do not copy or rename unversioned files. Phase 200 now writes the final GitHub asset names directly.
 
 ## Step 7: Create GitHub Release
 
 1. Use `gh release create` to create the GitHub release
 2. Title: "v{version}"
 3. Body: The generated changelog
-4. Attach the versioned zip files:
-   - `SolidWorks.Interop.xmldoc.v{version}.zip`
-   - `SolidWorks.Interop.llms.v{version}.zip`
+4. Attach the generated versioned zip files:
+   - `200_export_full_release/output/SolidWorks.Interop.xmldoc.v{version}.zip`
+   - `200_export_full_release/output/SolidWorks.Interop.llms.v{version}.zip`
 5. Mark as latest release
-6. Clean up the temporary versioned copies after upload
+6. Clean up generated files after upload if they are not needed locally
 
 ## Step 8: Summary
 

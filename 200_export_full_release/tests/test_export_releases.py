@@ -12,6 +12,7 @@ import pytest
 
 # Add parent directory to path for imports
 import sys
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from export_releases import ReleaseExporter
@@ -98,9 +99,7 @@ class TestReleaseExporter:
     @patch("subprocess.run")
     def test_get_git_version_success(self, mock_run, exporter):
         """Test getting git version successfully."""
-        mock_run.return_value = MagicMock(
-            stdout="v1.0.0\nv0.9.0\nv0.8.0\n", returncode=0
-        )
+        mock_run.return_value = MagicMock(stdout="v1.0.0\nv0.9.0\nv0.8.0\n", returncode=0)
 
         version = exporter.get_git_version()
 
@@ -138,8 +137,8 @@ class TestReleaseExporter:
         assert "SolidWorks.Interop.sldworks.xml" in metadata["files"]
         assert "SolidWorks.Interop.swconst.xml" in metadata["files"]
 
-        # Check zip file was created (without version in filename)
-        zip_path = temp_project["output_dir"] / "SolidWorks.Interop.xmldoc.zip"
+        # Check zip file was created with the release version in its filename
+        zip_path = temp_project["output_dir"] / "SolidWorks.Interop.xmldoc.v1.0.0.zip"
         assert zip_path.exists()
 
         # Check zip contents
@@ -176,8 +175,8 @@ class TestReleaseExporter:
         assert metadata["package_type"] == "llm_docs"
         assert metadata["file_count"] == 5  # 4 markdown files + README.md
 
-        # Check zip file was created (without version in filename)
-        zip_path = temp_project["output_dir"] / "SolidWorks.Interop.llms.zip"
+        # Check zip file was created with the release version in its filename
+        zip_path = temp_project["output_dir"] / "SolidWorks.Interop.llms.v1.0.0.zip"
         assert zip_path.exists()
 
         # Check zip contents
@@ -212,14 +211,14 @@ class TestReleaseExporter:
         """Test saving metadata files."""
         metadata_list = [
             {
-                "package_name": "SolidWorks.Interop.xmldoc.zip",
+                "package_name": "SolidWorks.Interop.xmldoc.v1.0.0.zip",
                 "version": "v1.0.0",
                 "package_type": "xmldoc",
                 "file_count": 2,
                 "archive_size_bytes": 1024,
             },
             {
-                "package_name": "SolidWorks.Interop.llms.zip",
+                "package_name": "SolidWorks.Interop.llms.v1.0.0.zip",
                 "version": "v1.0.0",
                 "package_type": "llm_docs",
                 "file_count": 4,
@@ -241,15 +240,11 @@ class TestReleaseExporter:
         assert manifest["total_size_bytes"] == 3072  # 1024 + 2048
         assert len(manifest["packages"]) == 2
 
-        # Check individual metadata files (still versioned)
-        xmldoc_metadata_path = (
-            temp_project["metadata_dir"] / "SolidWorks.Interop.xmldoc.json"
-        )
+        # Check individual metadata files include the release version
+        xmldoc_metadata_path = temp_project["metadata_dir"] / "SolidWorks.Interop.xmldoc.v1.0.0.json"
         assert xmldoc_metadata_path.exists()
 
-        llm_metadata_path = (
-            temp_project["metadata_dir"] / "SolidWorks.Interop.llms.json"
-        )
+        llm_metadata_path = temp_project["metadata_dir"] / "SolidWorks.Interop.llms.v1.0.0.json"
         assert llm_metadata_path.exists()
 
     @patch.object(ReleaseExporter, "get_git_version", return_value="v1.0.0")
@@ -259,9 +254,9 @@ class TestReleaseExporter:
 
         assert success is True
 
-        # Check both packages were created (without version in filename)
-        xmldoc_zip = temp_project["output_dir"] / "SolidWorks.Interop.xmldoc.zip"
-        llm_zip = temp_project["output_dir"] / "SolidWorks.Interop.llms.zip"
+        # Check both packages were created with the release version in their filenames
+        xmldoc_zip = temp_project["output_dir"] / "SolidWorks.Interop.xmldoc.v1.0.0.zip"
+        llm_zip = temp_project["output_dir"] / "SolidWorks.Interop.llms.v1.0.0.zip"
 
         assert xmldoc_zip.exists()
         assert llm_zip.exists()
@@ -285,9 +280,7 @@ class TestReleaseExporter:
         # Create a zip and add the directory
         zip_path = temp_project["output_dir"] / "test.zip"
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
-            file_count = exporter._add_directory_to_zip(
-                zipf, test_dir, arc_prefix="prefix"
-            )
+            file_count = exporter._add_directory_to_zip(zipf, test_dir, arc_prefix="prefix")
 
         # Check results
         assert file_count == 3
