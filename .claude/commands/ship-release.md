@@ -19,7 +19,7 @@ Perform a complete release workflow for the project. Follow these steps in order
 
 1. Get the current latest git tag (e.g., v2.2.0)
 2. Increment to the next minor version (e.g., v2.2.0 → v2.3.0)
-3. Ask the user to confirm the version number or provide a custom one
+3. Ask the user to confirm the full tag, including its leading `v`, or provide a custom one. Use that value as `{version}` below.
 
 ## Step 3: Generate Changelog
 
@@ -37,10 +37,10 @@ Perform a complete release workflow for the project. Follow these steps in order
 
 ## Step 5: Run Phase 200 Export
 
-1. Run `uv run python 200_export_full_release/export_releases.py --version v{version} --verbose`
+1. Run `uv run python 200_export_full_release/export_releases.py --version {version} --verbose`
 2. Verify both versioned packages were created successfully:
-   - `200_export_full_release/output/SolidWorks.Interop.xmldoc.v{version}.zip`
-   - `200_export_full_release/output/SolidWorks.Interop.llms.v{version}.zip`
+   - `200_export_full_release/output/SolidWorks.Interop.xmldoc.{version}.zip`
+   - `200_export_full_release/output/SolidWorks.Interop.llms.{version}.zip`
 
 ## Step 6: Verify Release Artifacts
 
@@ -50,11 +50,11 @@ Perform a complete release workflow for the project. Follow these steps in order
 ## Step 7: Create GitHub Release
 
 1. Use `gh release create` to create the GitHub release
-2. Title: "v{version}"
+2. Title: "{version}"
 3. Body: The generated changelog
 4. Attach the generated versioned zip files:
-   - `200_export_full_release/output/SolidWorks.Interop.xmldoc.v{version}.zip`
-   - `200_export_full_release/output/SolidWorks.Interop.llms.v{version}.zip`
+   - `200_export_full_release/output/SolidWorks.Interop.xmldoc.{version}.zip`
+   - `200_export_full_release/output/SolidWorks.Interop.llms.{version}.zip`
 5. Mark as latest release
 6. Clean up generated files after upload if they are not needed locally
 
