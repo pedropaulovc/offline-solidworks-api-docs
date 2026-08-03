@@ -12,34 +12,35 @@ Creates versioned, distributable zip archives from the pipeline outputs for easy
 
 This phase packages the final outputs from the documentation pipeline into distributable archives:
 
-1. **XMLDoc Package**: `SolidWorks.Interop.xmldoc.zip`
+1. **XMLDoc Package**: `SolidWorks.Interop.xmldoc.v{version}.zip`
    - Contains Microsoft XMLDoc files from Phase 90
    - For Visual Studio IntelliSense integration
    - Includes companion guide and multilingual-example catalogs
    - ~15 MB compressed
 
-2. **LLM Docs Package**: `SolidWorks.Interop.llms.zip`
+2. **LLM Docs Package**: `SolidWorks.Interop.llms.v{version}.zip`
    - Contains LLM-friendly markdown documentation from Phase 120
    - Grep-optimized structure with ~25,000+ files
    - ~20-30 MB compressed
 
 ## Version Tracking
 
-Version information is tracked in metadata files but not in package filenames:
-- Latest git tag is retrieved using `git tag --sort=-v:refname`
-- Version is stored in metadata JSON files
-- Package names remain constant for easy automation
+The release version is part of every distributable package filename:
+- Phase 200 reads the latest git tag unless `--version` is supplied
+- `SolidWorks.Interop.xmldoc.v{version}.zip` contains XMLDoc files
+- `SolidWorks.Interop.llms.v{version}.zip` contains LLM-friendly documentation
+- Matching package metadata files use the same versioned basename with `.json`
 
 ## Usage
 
 ### Export All Packages
 
 ```bash
-# Export with default settings
+# Export using the latest git tag
 uv run python 200_export_full_release/export_releases.py
 
-# Export with verbose output
-uv run python 200_export_full_release/export_releases.py --verbose
+# Export an explicit release version
+uv run python 200_export_full_release/export_releases.py --version v3.12.1 --verbose
 
 # Custom output directory
 uv run python 200_export_full_release/export_releases.py --output-dir custom/path
@@ -70,8 +71,8 @@ uv run pytest 200_export_full_release/tests/ --cov=200_export_full_release
 ```
 200_export_full_release/
 ├── output/                                    # Created zip packages
-│   ├── SolidWorks.Interop.xmldoc.zip         # XMLDoc package
-│   └── SolidWorks.Interop.llms.zip           # LLM docs package
+│   ├── SolidWorks.Interop.xmldoc.v{version}.zip  # XMLDoc package
+│   └── SolidWorks.Interop.llms.v{version}.zip    # LLM docs package
 ├── metadata/                                  # Export metadata
 │   ├── export_manifest.json                   # Overall export info with version
 │   ├── SolidWorks.Interop.xmldoc.v*.json     # XMLDoc package metadata (versioned)
@@ -86,7 +87,7 @@ uv run pytest 200_export_full_release/tests/ --cov=200_export_full_release
 Contains all `.xml` files from `90_export_xmldoc/output/`:
 
 ```
-SolidWorks.Interop.xmldoc.zip
+SolidWorks.Interop.xmldoc.v{version}.zip
 ├── SolidWorks.Interop.sldworks.xml     (~12 MB)
 ├── SolidWorks.Interop.swconst.xml      (~2 MB)
 ├── SolidWorks.Interop.swcommands.xml
@@ -108,22 +109,21 @@ The companion catalogs use the `urn:solidworks:offline-xmldoc:1` namespace and r
 Contains the entire markdown documentation tree from `120_export_llm_docs/output/`:
 
 ```
-SolidWorks.Interop.llms.zip
+SolidWorks.Interop.llms.v{version}.zip
 ├── README.md                      # Usage guide and structure overview
-├── api/                           # API reference
-│   ├── types/                     # Regular types (interfaces, classes)
-│   │   ├── IModelDoc2/
-│   │   │   ├── _overview.md
-│   │   │   ├── CreateArc.md
-│   │   │   └── ... (721 members)
-│   │   └── ... (1,563 types)
-│   ├── enums/                     # Enumerations
-│   │   ├── swDocumentTypes_e/
-│   │   └── ... (955 enums)
-│   └── index/                     # Navigation
-│       ├── by_category.md
-│       ├── by_assembly.md
-│       └── statistics.md
+├── types/                         # API types
+│   ├── IModelDoc2/
+│   │   ├── _overview.md
+│   │   ├── CreateArc.md
+│   │   └── ... (721 members)
+│   └── ... (1,563 types)
+├── enums/                         # Enumerations
+│   ├── swDocumentTypes_e/
+│   └── ... (955 enums)
+├── index/                         # Navigation
+│   ├── by_category.md
+│   ├── by_assembly.md
+│   └── statistics.md
 ├── examples/                      # Code examples (flat folder)
 └── docs/                          # Programming guide
     ├── Overview.md
@@ -148,13 +148,13 @@ Overall export summary:
   "version": "v1.0.0",
   "packages": [
     {
-      "package_name": "SolidWorks.Interop.xmldoc.zip",
+      "package_name": "SolidWorks.Interop.xmldoc.v1.0.0.zip",
       "package_type": "xmldoc",
       "file_count": 10,
       "archive_size_bytes": 15728640
     },
     {
-      "package_name": "SolidWorks.Interop.llms.zip",
+      "package_name": "SolidWorks.Interop.llms.v1.0.0.zip",
       "package_type": "llm_docs",
       "file_count": 25432,
       "archive_size_bytes": 26214400
@@ -171,7 +171,7 @@ Each package gets its own metadata file (e.g., `SolidWorks.Interop.xmldoc.v1.0.0
 
 ```json
 {
-  "package_name": "SolidWorks.Interop.xmldoc.zip",
+  "package_name": "SolidWorks.Interop.xmldoc.v1.0.0.zip",
   "version": "v1.0.0",
   "package_type": "xmldoc",
   "description": "Microsoft XMLDoc files for Visual Studio IntelliSense",
@@ -275,14 +275,14 @@ The validation script checks:
 
 Checking packages for version: v1.0.0
 
-XMLDoc Package: SolidWorks.Interop.xmldoc.zip
+XMLDoc Package: SolidWorks.Interop.xmldoc.v1.0.0.zip
   ✓ File exists
   ✓ Valid zip archive
   ✓ Contains 10 .xml files
   ✓ Size: 15,728,640 bytes (15.00 MB)
   ✓ Metadata matches
 
-LLM Docs Package: SolidWorks.Interop.llms.zip
+LLM Docs Package: SolidWorks.Interop.llms.v1.0.0.zip
   ✓ File exists
   ✓ Valid zip archive
   ✓ Contains types/ directory (14,234 files)
@@ -316,7 +316,7 @@ Extract LLM docs package and point your AI assistant to it:
 
 ```bash
 # Extract package
-unzip SolidWorks.Interop.llms.zip -d solidworks-docs/
+unzip SolidWorks.Interop.llms.v{version}.zip -d solidworks-docs/
 
 # Search for specific API
 grep -r "CreateArc" solidworks-docs/types/IModelDoc2/
@@ -331,7 +331,7 @@ Use the LLM docs package as source for a static site generator:
 
 ```bash
 # Example with MkDocs, Docusaurus, etc.
-unzip SolidWorks.Interop.llms.zip -d docs/
+unzip SolidWorks.Interop.llms.v{version}.zip -d docs/
 mkdocs build
 ```
 
@@ -341,13 +341,13 @@ Upload packages to internal file server or artifact repository:
 
 ```bash
 # Upload to artifact repository
-aws s3 cp SolidWorks.Interop.xmldoc.zip s3://artifacts/
-aws s3 cp SolidWorks.Interop.llms.zip s3://artifacts/
+aws s3 cp SolidWorks.Interop.xmldoc.v{version}.zip s3://artifacts/
+aws s3 cp SolidWorks.Interop.llms.v{version}.zip s3://artifacts/
 
 # Or add to GitHub releases
 gh release create v1.0.0 \
-  SolidWorks.Interop.xmldoc.zip \
-  SolidWorks.Interop.llms.zip
+  SolidWorks.Interop.xmldoc.v1.0.0.zip \
+  SolidWorks.Interop.llms.v1.0.0.zip
 ```
 
 ## Dependencies

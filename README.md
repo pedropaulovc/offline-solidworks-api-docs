@@ -14,7 +14,7 @@ This project provides two comprehensive documentation packages for the SolidWork
 **Use with Claude, ChatGPT, Cursor, or other AI coding assistants:**
 
 1. **Download** the latest LLM docs package from [releases](https://github.com/pedropaulovc/offline-solidworks-api-docs/releases/latest)
-   - File: `SolidWorks.LLM.Docs.v{version}.zip`
+   - File: `SolidWorks.Interop.llms.v{version}.zip`
 
 2. **Extract** the ZIP file to your preferred location
 
@@ -31,18 +31,22 @@ This project provides two comprehensive documentation packages for the SolidWork
 1. **Download** the latest XMLDoc package from [releases](https://github.com/pedropaulovc/offline-solidworks-api-docs/releases/latest)
    - File: `SolidWorks.Interop.xmldoc.v{version}.zip`
 
-2. **Extract** the ZIP file to get 10 XML files:
+2. **Extract** the ZIP file to get 14 XML files:
    ```
+   SolidWorks.Interop.dsgnchk.xml
+   SolidWorks.Interop.examples.xml
+   SolidWorks.Interop.guides.xml
+   SolidWorks.Interop.sldtoolboxconfigureaddin.xml
    SolidWorks.Interop.sldworks.xml
-   SolidWorks.Interop.swconst.xml
-   SolidWorks.Interop.swpublished.xml
-   SolidWorks.Interop.swdocumentmgr.xml
-   SolidWorks.Interop.swmotionstudy.xml
-   SolidWorks.Interop.cosworks.xml
+   SolidWorks.Interop.sw3dprinter.xml
+   SolidWorks.Interop.swbrowser.xml
    SolidWorks.Interop.swcommands.xml
-   SolidWorks.Interop.SwSelectionManager.xml
-   SolidWorks.Interop.StructuralAnalysisDoc.xml
-   SolidWorks.Interop.SWRoutingLib.xml
+   SolidWorks.Interop.swconst.xml
+   SolidWorks.Interop.swdimxpert.xml
+   SolidWorks.Interop.swhtmlcontrol.xml
+   SolidWorks.Interop.swmotionstudy.xml
+   SolidWorks.Interop.swpublished.xml
+   SolidWorks.Interop.swscanto3d.xml
    ```
 
 3. **Copy** the XML files to your SolidWorks SDK DLL location:
@@ -76,7 +80,7 @@ Contains 26,902 markdown files optimized for AI consumption:
 #### Folder Structure
 
 ```
-📁 SolidWorks.LLM.Docs/
+📁 solidworks-docs/ (extracted from `SolidWorks.Interop.llms.v{version}.zip`)
 ├── 📄 README.md                    # Guide for using with LLMs
 │
 ├── 📁 types/                       # API Types (1,563 types)

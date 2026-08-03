@@ -97,7 +97,7 @@ class ReleaseValidator:
 
     def validate_xmldoc_package(self, version: str) -> bool:
         """Validate the XMLDoc package."""
-        package_name = "SolidWorks.Interop.xmldoc.zip"
+        package_name = f"SolidWorks.Interop.xmldoc.{version}.zip"
         zip_path = self.output_dir / package_name
 
         print(f"\n=== Validating XMLDoc Package ===")
@@ -140,6 +140,21 @@ class ReleaseValidator:
                 if metadata_path.exists():
                     with open(metadata_path, encoding="utf-8") as f:
                         metadata = json.load(f)
+                    if metadata["package_name"] == package_name:
+                        self._log("Metadata filename matches package filename", "success")
+                    else:
+                        self._log(
+                            f"Metadata package name mismatch: {metadata['package_name']} != {package_name}",
+                            "error",
+                        )
+
+                    if metadata["version"] == version:
+                        self._log("Package version matches metadata", "success")
+                    else:
+                        self._log(
+                            f"Package version mismatch: {metadata['version']} != {version}",
+                            "error",
+                        )
 
                     # Check file count
                     if len(xml_files) == metadata["file_count"]:
@@ -167,7 +182,7 @@ class ReleaseValidator:
 
     def validate_llm_docs_package(self, version: str) -> bool:
         """Validate the LLM docs package."""
-        package_name = "SolidWorks.Interop.llms.zip"
+        package_name = f"SolidWorks.Interop.llms.{version}.zip"
         zip_path = self.output_dir / package_name
 
         print(f"\n=== Validating LLM Docs Package ===")
@@ -227,6 +242,21 @@ class ReleaseValidator:
                 if metadata_path.exists():
                     with open(metadata_path, encoding="utf-8") as f:
                         metadata = json.load(f)
+                    if metadata["package_name"] == package_name:
+                        self._log("Metadata filename matches package filename", "success")
+                    else:
+                        self._log(
+                            f"Metadata package name mismatch: {metadata['package_name']} != {package_name}",
+                            "error",
+                        )
+
+                    if metadata["version"] == version:
+                        self._log("Package version matches metadata", "success")
+                    else:
+                        self._log(
+                            f"Package version mismatch: {metadata['version']} != {version}",
+                            "error",
+                        )
 
                     # Check file count
                     if len(file_list) == metadata["file_count"]:
@@ -270,17 +300,31 @@ class ReleaseValidator:
             if manifest["version"] == version:
                 self._log(f"Manifest version matches: {version}", "success")
             else:
-                self._log(
-                    f"Version mismatch: {manifest['version']} != {version}", "error"
-                )
+                self._log(f"Version mismatch: {manifest['version']} != {version}", "error")
 
             # Check packages
             package_count = len(manifest["packages"])
             self._log(f"Manifest lists {package_count} packages", "info")
 
+            expected_names = {
+                "xmldoc": f"SolidWorks.Interop.xmldoc.{version}.zip",
+                "llm_docs": f"SolidWorks.Interop.llms.{version}.zip",
+            }
+
             for pkg in manifest["packages"]:
                 pkg_type = pkg["package_type"]
                 pkg_name = pkg["package_name"]
+                expected_name = expected_names.get(pkg_type)
+                if expected_name and pkg_name != expected_name:
+                    self._log(
+                        f"Manifest package name mismatch: {pkg_name} != {expected_name}",
+                        "error",
+                    )
+                if pkg.get("version") != version:
+                    self._log(
+                        f"Manifest package version mismatch: {pkg.get('version')} != {version}",
+                        "error",
+                    )
                 self._log(f"  {pkg_type}: {pkg_name}", "info")
 
             return True
@@ -352,9 +396,7 @@ class ReleaseValidator:
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Validate exported release packages"
-    )
+    parser = argparse.ArgumentParser(description="Validate exported release packages")
     parser.add_argument(
         "--output-dir",
         type=Path,
@@ -367,17 +409,13 @@ def main():
         default=Path("200_export_full_release/metadata"),
         help="Metadata directory",
     )
-    parser.add_argument(
-        "--version", type=str, help="Version to validate (default: latest git tag)"
-    )
+    parser.add_argument("--version", type=str, help="Version to validate (default: latest git tag)")
     parser.add_argument(
         "--save-report",
         type=Path,
         help="Save validation report to JSON file",
     )
-    parser.add_argument(
-        "--verbose", "-v", action="store_true", help="Enable verbose output"
-    )
+    parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
 
     args = parser.parse_args()
 

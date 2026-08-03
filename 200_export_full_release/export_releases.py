@@ -69,9 +69,7 @@ class ReleaseExporter:
         if self.verbose:
             print(message)
 
-    def _add_directory_to_zip(
-        self, zipf: zipfile.ZipFile, source_dir: Path, arc_prefix: str = ""
-    ) -> int:
+    def _add_directory_to_zip(self, zipf: zipfile.ZipFile, source_dir: Path, arc_prefix: str = "") -> int:
         """
         Add all files from a directory to a zip file.
 
@@ -116,8 +114,8 @@ class ReleaseExporter:
             self._log(f"Error: XMLDoc source directory not found: {self.xmldoc_source}")
             return None
 
-        # Create zip filename (without version number)
-        zip_name = "SolidWorks.Interop.xmldoc.zip"
+        # Include the release version in every distributable artifact filename.
+        zip_name = f"SolidWorks.Interop.xmldoc.{version}.zip"
         zip_path = self.output_dir / zip_name
 
         self._log(f"\nCreating XMLDoc package: {zip_name}")
@@ -167,13 +165,11 @@ class ReleaseExporter:
             Metadata dict if successful, None otherwise
         """
         if not self.llm_docs_source.exists():
-            self._log(
-                f"Error: LLM docs source directory not found: {self.llm_docs_source}"
-            )
+            self._log(f"Error: LLM docs source directory not found: {self.llm_docs_source}")
             return None
 
-        # Create zip filename (without version number)
-        zip_name = "SolidWorks.Interop.llms.zip"
+        # Include the release version in every distributable artifact filename.
+        zip_name = f"SolidWorks.Interop.llms.{version}.zip"
         zip_path = self.output_dir / zip_name
 
         self._log(f"\nCreating LLM docs package: {zip_name}")
@@ -283,16 +279,17 @@ class ReleaseExporter:
 
             self._log(f"  {pkg_name}")
 
-    def export_all(self) -> bool:
+    def export_all(self, version: Optional[str] = None) -> bool:
         """
         Export all release packages.
+
+        Args:
+            version: Release version override. If omitted, use the latest git tag.
 
         Returns:
             True if all packages were created successfully
         """
-        # Get version from git
-        version = self.get_git_version()
-
+        version = version or self.get_git_version()
         # Export packages
         metadata_list = []
 
@@ -319,8 +316,11 @@ class ReleaseExporter:
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Export full release packages from pipeline outputs"
+    parser = argparse.ArgumentParser(description="Export full release packages from pipeline outputs")
+    parser.add_argument(
+        "--version",
+        type=str,
+        help="Release version for artifact filenames (default: latest git tag)",
     )
     parser.add_argument(
         "--output-dir",
@@ -334,9 +334,7 @@ def main():
         default=Path("200_export_full_release/metadata"),
         help="Metadata directory (default: 200_export_full_release/metadata)",
     )
-    parser.add_argument(
-        "--verbose", "-v", action="store_true", help="Enable verbose output"
-    )
+    parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
 
     args = parser.parse_args()
 
@@ -354,7 +352,7 @@ def main():
 
     # Export all packages
     print("=== SolidWorks API Documentation - Release Export ===\n")
-    success = exporter.export_all()
+    success = exporter.export_all(version=args.version)
 
     if success:
         print("\n[SUCCESS] Release packages created successfully!")
