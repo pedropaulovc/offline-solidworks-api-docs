@@ -9,6 +9,7 @@ This spider crawls the SolidWorks API documentation by:
 
 import hashlib
 import json
+import re
 import sys
 from collections.abc import Generator
 from datetime import datetime
@@ -51,6 +52,15 @@ class ApiDocsSpider(scrapy.Spider):
     # share the SOLIDWORKS_API_BOUNDARY, so the recursive expandToc logic and URL
     # boundary check below handle every subtree unchanged.
     TOC_ROOT_IDS = ["2", "3", "4", "44", "45", "46", "47", "48"]
+
+    # 2027 also expands every type into "Methods"/"Properties" TOC nodes that list
+    # each member page, and dropped the type's "Members" node. Member pages are
+    # Phase 30's job, and Phase 20 parses the combined `<Type>_members.html` page,
+    # which still exists on the server but is no longer linked from the TOC. So a
+    # member-list node is replaced by its type's `_members.html` page (keyed by
+    # the parent type node id, so Methods and Properties dedupe to one request)
+    # and its member subtree is not expanded.
+    MEMBER_LIST_PATH = re.compile(r"_(?:methods|properties)\.html$")
 
     # Starting URLs - JSON TOC endpoints, one per root node
     start_urls = [expand_toc_url(toc_id) for toc_id in TOC_ROOT_IDS]
@@ -102,7 +112,6 @@ class ApiDocsSpider(scrapy.Spider):
 
             self.logger.info(f"Found {len(urls)} URLs in JSON TOC")
 
-            # Create requests for each URL
             for url in urls:
                 # Convert relative URL to absolute
                 full_url = url
@@ -115,20 +124,24 @@ class ApiDocsSpider(scrapy.Spider):
                     self.logger.debug(f"Skipping URL outside boundary: {full_url}")
                     continue
 
+                query_params = parse_qs(parsed.query)
+                id_value = query_params["id"][0] if "id" in query_params else None
+
+                if self.MEMBER_LIST_PATH.search(parsed.path):
+                    yield self.members_page_request(parsed.path, id_value)
+                    continue
+
                 # Yield request for the page itself
                 yield scrapy.Request(
                     full_url, callback=self.parse_page, errback=self.handle_error, meta={"original_url": full_url}
                 )
 
-                # Extract id parameter and create expandToc request
-                query_params = parse_qs(parsed.query)
-                if "id" in query_params:
-                    id_value = query_params["id"][0]
-                    toc_url = expand_toc_url(id_value)
+                if id_value is None:
+                    continue
 
-                    self.logger.debug(f"Adding expandToc URL for id={id_value}: {toc_url}")
-
-                    yield scrapy.Request(toc_url, callback=self.parse, errback=self.handle_error, dont_filter=False)
+                toc_url = expand_toc_url(id_value)
+                self.logger.debug(f"Adding expandToc URL for id={id_value}: {toc_url}")
+                yield scrapy.Request(toc_url, callback=self.parse, errback=self.handle_error, dont_filter=False)
 
         except json.JSONDecodeError as e:
             self.logger.error(f"Failed to parse JSON from {response.url}: {e}")
@@ -154,15 +167,31 @@ class ApiDocsSpider(scrapy.Spider):
 
         # Handle object (dict)
         elif isinstance(data, dict):
-            # Extract URL if present
-            if "url" in data and data["url"]:
-                urls.append(data["url"])
+            url = data.get("url")
+            if url:
+                urls.append(url)
+
+            # Member-list nodes stand in for their type's _members page; their
+            # per-member children are Phase 30's job.
+            if url and self.MEMBER_LIST_PATH.search(urlparse(url).path):
+                return urls
 
             # Recursively process children
-            if "children" in data and data["children"]:
+            if data.get("children"):
                 urls.extend(self.extract_urls_from_json(data["children"]))
 
         return urls
+
+    def members_page_request(self, member_list_path: str, member_list_id: str | None) -> scrapy.Request:
+        """Request the `<Type>_members.html` page standing in for a Methods/Properties TOC node."""
+        members_path = self.MEMBER_LIST_PATH.sub("_members.html", member_list_path)
+        members_url = f"{self.base_url}{members_path}"
+        if member_list_id:
+            type_id = member_list_id.rsplit(".", 1)[0]
+            members_url = f"{members_url}?id={type_id}"
+        return scrapy.Request(
+            members_url, callback=self.parse_page, errback=self.handle_error, meta={"original_url": members_url}
+        )
 
     def parse_page(self, response: Response) -> Generator[dict[str, Any], None, None]:
         """Parse and save a documentation page"""

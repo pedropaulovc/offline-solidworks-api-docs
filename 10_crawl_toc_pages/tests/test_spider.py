@@ -261,6 +261,35 @@ class TestApiDocsSpider:
         assert f"{SOLIDWORKS_API_BASE_PATH}/page3.htm" in urls
         assert f"{SOLIDWORKS_API_BASE_PATH}/page4.htm" in urls
 
+    def test_type_node_member_lists_map_to_single_members_page(self) -> None:
+        """A 2027 type node's Methods/Properties children become one _members.html request, unexpanded."""
+        type_page = f"{SOLIDWORKS_API_BASE_PATH}/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFoo"
+        type_node = {
+            "url": f"{type_page}.html?id=4.1.7",
+            "children": [
+                {"url": f"{type_page}.html?id=4.1.7.0"},
+                {
+                    "url": f"{type_page}_methods.html?id=4.1.7.1",
+                    "children": [{"url": f"{type_page}~Bar.html?id=4.1.7.1.0"}],
+                },
+                {"url": f"{type_page}_properties.html?id=4.1.7.2"},
+            ],
+        }
+        response = Mock(spec=Response)
+        response.text = json.dumps(type_node)
+        response.url = expand_toc_url("4.1.7")
+        response.status = 200
+        response.headers = {}
+        response.body = response.text.encode()
+
+        request_urls = [r.url for r in self.spider.parse(response) if not isinstance(r, dict)]
+
+        members_url = f"{SOLIDWORKS_BASE_URL}{type_page}_members.html?id=4.1.7"
+        assert request_urls.count(members_url) == 2  # scheduler dedupes the identical URL
+        assert not any("_methods" in u or "_properties" in u or "~Bar" in u for u in request_urls)
+        assert expand_toc_url("4.1.7.1") not in request_urls
+        assert expand_toc_url("4.1.7.0") in request_urls
+
     def test_extract_urls_from_json_no_data(self) -> None:
         """Test extract_urls_from_json handles empty data gracefully"""
         # Test with empty dict
