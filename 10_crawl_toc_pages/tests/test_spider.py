@@ -295,20 +295,27 @@ class TestApiDocsSpider:
         assert expand_toc_url("4.1.7.0") not in request_urls
 
     def test_page_shared_across_branches_keeps_both_subtrees(self) -> None:
-        """Only an Overview child (direct child of the first requester) is skipped; other duplicates still expand."""
+        """Both branches of a shared page expand, and each branch's Overview child is skipped."""
         page = f"{SOLIDWORKS_API_BASE_PATH}/sldworksapi/Shared.html"
-        listing = {"children": [{"url": f"{page}?id=4.1.3"}, {"url": f"{page}?id=4.2.9"}]}
-        response = Mock(spec=Response)
-        response.text = json.dumps(listing)
-        response.url = expand_toc_url("4")
-        response.status = 200
-        response.headers = {}
-        response.body = response.text.encode()
 
-        request_urls = [r.url for r in self.spider.parse(response) if not isinstance(r, dict)]
+        def parse_toc(node: dict, toc_id: str) -> list[str]:
+            response = Mock(spec=Response)
+            response.text = json.dumps(node)
+            response.url = expand_toc_url(toc_id)
+            response.status = 200
+            response.headers = {}
+            response.body = response.text.encode()
+            return [r.url for r in self.spider.parse(response) if not isinstance(r, dict)]
 
+        request_urls = parse_toc({"children": [{"url": f"{page}?id=4.1.3"}, {"url": f"{page}?id=4.2.9"}]}, "4")
         assert expand_toc_url("4.1.3") in request_urls
         assert expand_toc_url("4.2.9") in request_urls
+
+        # Expand the second branch first: its Overview child is still recognized.
+        for branch in ["4.2.9", "4.1.3"]:
+            overview_urls = parse_toc({"url": f"{page}?id={branch}", "children": [{"url": f"{page}?id={branch}.0"}]}, branch)
+            assert f"{SOLIDWORKS_BASE_URL}{page}?id={branch}.0" not in overview_urls
+            assert expand_toc_url(f"{branch}.0") not in overview_urls
 
     def test_folder_pages_are_not_deduped_by_path(self) -> None:
         """help_list.htm backs every folder node; each id must still be expanded."""
