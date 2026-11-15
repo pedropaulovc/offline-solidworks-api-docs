@@ -2,6 +2,7 @@
 
 import tempfile
 from pathlib import Path
+from unittest.mock import Mock
 
 import pytest
 from scrapy.http import Request, Response
@@ -70,8 +71,20 @@ def test_version_marker_not_current_when_pages_failed(marker_pipeline, spider):
     assert marker.read_text().strip() != SOLIDWORKS_API_VERSION
 
 
-def test_version_marker_not_written_over_older_corpus(marker_pipeline, spider):
-    """A --resume run on last year's pages mixes years; the corpus must not be marked current."""
+def test_version_marker_not_current_after_callback_exception(marker_pipeline, spider):
+    """Exceptions in parse_page never reach the errback; the crawler's stats still record them."""
+    pipeline, marker = marker_pipeline
+    spider.crawler = Mock()
+    spider.crawler.stats.get_value.side_effect = lambda key, default=None: 2 if key == "spider_exceptions/count" else 0
+    pipeline.open_spider(spider)
+
+    pipeline.spider_closed(spider, "finished")
+
+    assert marker.read_text().strip() != SOLIDWORKS_API_VERSION
+
+
+def test_older_corpus_marker_is_dropped(marker_pipeline, spider):
+    """A --resume run on last year's pages mixes years; no year may claim the corpus afterwards."""
     pipeline, marker = marker_pipeline
     marker.write_text("1999\n")
     (pipeline.output_dir / "old.htm").write_text("x")
@@ -79,7 +92,7 @@ def test_version_marker_not_written_over_older_corpus(marker_pipeline, spider):
     pipeline.open_spider(spider)
     pipeline.spider_closed(spider, "finished")
 
-    assert marker.read_text().strip() == "1999"
+    assert not marker.exists()
 
 
 @pytest.fixture
