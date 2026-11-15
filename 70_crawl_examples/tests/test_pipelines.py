@@ -14,6 +14,11 @@ from solidworks_scraper.spiders.examples_spider import ExamplesSpider
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL, SOLIDWORKS_API_VERSION
 
 
+def test_exercises_this_phase_pipelines():
+    """solidworks_scraper is a package name five crawl phases share; these tests must load phase 70's."""
+    assert Path(pipelines.__file__).resolve().is_relative_to(Path(__file__).resolve().parents[1])
+
+
 @pytest.fixture
 def marker_pipeline(tmp_path, monkeypatch):
     """HtmlSavePipeline writing its corpus and version marker under tmp_path."""

@@ -54,17 +54,11 @@ pytestmark = [
 
 @pytest.fixture(scope="module")
 def spider():
-    # Load by path: ``solidworks_scraper`` is a package name five crawl phases
-    # share, so a plain import resolves to whichever phase pytest imported first.
-    import importlib.util
+    # The root conftest keeps ``solidworks_scraper`` (a package name five crawl
+    # phases share) pointing at this phase's copy while this phase's tests run.
+    from solidworks_scraper.spiders.referenced_spider import ReferencedSpider
 
-    spec = importlib.util.spec_from_file_location(
-        "phase115_referenced_spider",
-        PHASE_DIR / "solidworks_scraper/spiders/referenced_spider.py",
-    )
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module.ReferencedSpider()
+    return ReferencedSpider()
 
 
 def test_seed_excludes_pages_the_bundle_already_ships(spider):

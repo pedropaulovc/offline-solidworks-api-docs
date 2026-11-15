@@ -103,6 +103,6 @@ pythonpath = [
     "90_export_xmldoc",
     "100_crawl_programming_guide",
     "110_extract_docs_md",
-    "shared",
+    ".",
 ]
 addopts = "--import-mode=importlib"

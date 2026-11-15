@@ -1,5 +1,6 @@
 """Tests for the examples spider"""
 
+import inspect
 import tempfile
 from pathlib import Path
 
@@ -15,6 +16,11 @@ from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
 def spider():
     """Create a spider instance for testing"""
     return ExamplesSpider()
+
+
+def test_exercises_this_phase_spider():
+    """solidworks_scraper is a package name five crawl phases share; these tests must load phase 70's."""
+    assert Path(inspect.getfile(ExamplesSpider.__init__)).resolve().is_relative_to(Path(__file__).resolve().parents[1])
 
 
 @pytest.fixture
@@ -65,6 +71,7 @@ def test_load_urls_converts_relative_to_absolute():
         spider = ExamplesSpider()
         spider.type_xml_file = temp_path
         spider.member_xml_file = Path("nonexistent.xml")  # Won't exist
+        spider.legacy_urls_file = Path("nonexistent.txt")  # Skip the tracked orphan-recovery list
         urls = spider._load_urls()
 
         assert len(urls) == 1
@@ -108,6 +115,7 @@ def test_load_urls_removes_duplicates():
         spider = ExamplesSpider()
         spider.type_xml_file = temp_path
         spider.member_xml_file = Path("nonexistent.xml")  # Won't exist
+        spider.legacy_urls_file = Path("nonexistent.txt")  # Skip the tracked orphan-recovery list
         urls = spider._load_urls()
 
         assert len(urls) == 2
@@ -163,6 +171,7 @@ def test_load_urls_from_both_files():
         spider = ExamplesSpider()
         spider.type_xml_file = type_path
         spider.member_xml_file = member_path
+        spider.legacy_urls_file = Path("nonexistent.txt")  # Skip the tracked orphan-recovery list
         urls = spider._load_urls()
 
         # Should have 3 unique URLs (test1, test2, test3)
