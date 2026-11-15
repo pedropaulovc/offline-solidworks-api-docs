@@ -2,9 +2,10 @@
 
 import tempfile
 from pathlib import Path
+from unittest.mock import Mock
 
 import pytest
-from scrapy.http import Request, Response
+from scrapy.http import HtmlResponse, Request, Response
 
 from solidworks_scraper import pipelines
 from solidworks_scraper.pipelines import HtmlSavePipeline, ValidationPipeline
@@ -70,8 +71,68 @@ def test_version_marker_not_current_when_pages_failed(marker_pipeline, spider):
     assert marker.read_text().strip() != SOLIDWORKS_API_VERSION
 
 
-def test_version_marker_not_written_over_older_corpus(marker_pipeline, spider):
-    """A --resume run on last year's pages mixes years; the corpus must not be marked current."""
+def test_version_marker_not_current_after_callback_exception(marker_pipeline, spider):
+    """Exceptions in parse_page never reach the errback; the crawler's stats still record them."""
+    pipeline, marker = marker_pipeline
+    spider.crawler = Mock()
+    spider.crawler.stats.get_value.side_effect = lambda key, default=None: 2 if key == "spider_exceptions/count" else 0
+    pipeline.open_spider(spider)
+
+    pipeline.spider_closed(spider, "finished")
+
+    assert marker.read_text().strip() != SOLIDWORKS_API_VERSION
+
+
+def test_version_marker_not_current_after_save_failure(marker_pipeline, spider):
+    """A page whose write raises leaves a hole, whatever LOG_LEVEL hides from the log counters."""
+    pipeline, marker = marker_pipeline
+    pipeline.open_spider(spider)
+    url = f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/Some_Example.htm"
+    pipeline.url_to_file_path(url).mkdir(parents=True)  # a directory where the page file should go
+
+    item = pipeline.process_item({"url": url, "content": "<html>example</html>"}, spider)
+    pipeline.spider_closed(spider, "finished")
+
+    assert "save_error" in item
+    assert spider.stats["save_failures"] == 1
+    assert marker.read_text().strip() != SOLIDWORKS_API_VERSION
+
+
+@pytest.mark.parametrize("source_state", ["malformed", "missing"])
+def test_version_marker_not_current_after_url_source_failure(marker_pipeline, spider, tmp_path, source_state):
+    """A malformed or missing example-URL source drops whole URL families; that corpus is not complete."""
+    pipeline, marker = marker_pipeline
+    xml = tmp_path / "api_member_details.xml"
+    if source_state == "malformed":
+        xml.write_text("<Types><Type>")
+    spider._load_urls_from_file(xml, "member details")
+    pipeline.open_spider(spider)
+
+    pipeline.spider_closed(spider, "finished")
+
+    assert spider.stats["url_source_failures"] == 1
+    assert marker.read_text().strip() != SOLIDWORKS_API_VERSION
+
+
+def test_version_marker_not_current_after_next_data_parse_failure(marker_pipeline, spider):
+    """A page whose __NEXT_DATA__ is not JSON is never saved; that corpus is not complete."""
+    pipeline, marker = marker_pipeline
+    url = f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/test.htm"
+    body = b'<html><script id="__NEXT_DATA__" type="application/json">{not json</script></html>'
+    response = HtmlResponse(
+        url=url, request=Request(url), body=body, encoding="utf-8", headers={"Content-Type": "text/html"}
+    )
+    pipeline.open_spider(spider)
+
+    assert list(spider.parse_page(response)) == []
+    pipeline.spider_closed(spider, "finished")
+
+    assert spider.stats["parse_failures"] == 1
+    assert marker.read_text().strip() != SOLIDWORKS_API_VERSION
+
+
+def test_older_corpus_marker_is_dropped(marker_pipeline, spider):
+    """A --resume run on last year's pages mixes years; no year may claim the corpus afterwards."""
     pipeline, marker = marker_pipeline
     marker.write_text("1999\n")
     (pipeline.output_dir / "old.htm").write_text("x")
@@ -79,7 +140,7 @@ def test_version_marker_not_written_over_older_corpus(marker_pipeline, spider):
     pipeline.open_spider(spider)
     pipeline.spider_closed(spider, "finished")
 
-    assert marker.read_text().strip() == "1999"
+    assert not marker.exists()
 
 
 @pytest.fixture

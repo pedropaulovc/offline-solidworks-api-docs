@@ -45,6 +45,26 @@ def read_marker_year() -> str | None:
     return CRAWL_VERSION_FILE.read_text(encoding="utf-8").strip().removesuffix(PARTIAL_SUFFIX) or None
 
 
+def crawl_failures(spider: Spider) -> dict[str, int]:
+    """Nonzero counts of events that leave holes in the corpus, by kind.
+
+    Each kind is counted once at its source (not via log counters, which depend on
+    LOG_LEVEL and count unrelated errors): failed downloads (errback), callback
+    exceptions, pages whose __NEXT_DATA__ failed to parse, page saves that raised,
+    and required example-URL sources that were missing or failed to load.
+    """
+    counts = {
+        "failed downloads": spider.stats["failed_pages"],
+        "parse failures": spider.stats["parse_failures"],
+        "save failures": spider.stats["save_failures"],
+        "URL source failures": spider.stats["url_source_failures"],
+    }
+    crawler = getattr(spider, "crawler", None)  # absent on spiders built outside a crawler
+    if crawler is not None:
+        counts["callback exceptions"] = crawler.stats.get_value("spider_exceptions/count", 0)
+    return {kind: count for kind, count in counts.items() if count}
+
+
 class HtmlSavePipeline:
     """Pipeline to save HTML content to organized file structure"""
 
@@ -62,10 +82,13 @@ class HtmlSavePipeline:
     def open_spider(self, spider: Spider) -> None:
         corpus_empty = not any(self.output_dir.rglob("*.htm*"))
         if not corpus_empty and read_marker_year() != SOLIDWORKS_API_VERSION:
-            # Older or unmarked pages: leave the marker as it is (never this
-            # year's complete marker), so the corpus stays non-current until a
-            # fresh crawl clears it.
+            # Older or unmarked pages: this run would mix years. Drop the marker so
+            # no year (old or new) claims the corpus until a fresh crawl clears it.
             self.corpus_version = CorpusVersion.MIXED
+            CRAWL_VERSION_FILE.unlink(missing_ok=True)
+            spider.logger.warning(
+                f"output/html holds pages not marked {SOLIDWORKS_API_VERSION}; corpus stays unmarked. Run a fresh crawl."
+            )
             return
 
         self.corpus_version = CorpusVersion.CURRENT
@@ -74,8 +97,15 @@ class HtmlSavePipeline:
     def spider_closed(self, spider: Spider, reason: str) -> None:
         if reason != "finished" or self.corpus_version is not CorpusVersion.CURRENT:
             return
-        # "finished" only means the scheduler drained; failed downloads leave holes.
-        if getattr(spider, "stats", {}).get("failed_pages", 0):
+        # "finished" only means the scheduler drained; failed downloads, callback
+        # exceptions and save errors all leave holes in the corpus.
+        failures = crawl_failures(spider)
+        if failures:
+            summary = ", ".join(f"{count} {kind}" for kind, count in failures.items())
+            spider.logger.warning(
+                f"Crawl incomplete ({summary}); {CRAWL_VERSION_FILE.name} stays "
+                f"'{SOLIDWORKS_API_VERSION}{PARTIAL_SUFFIX}'. Fix them and re-run (--resume) to mark the corpus complete."
+            )
             return
         CRAWL_VERSION_FILE.write_text(f"{SOLIDWORKS_API_VERSION}\n", encoding="utf-8")
 
@@ -98,11 +128,9 @@ class HtmlSavePipeline:
         # Generate file path from URL
         file_path = self.url_to_file_path(url)
 
-        # Ensure parent directory exists
-        file_path.parent.mkdir(parents=True, exist_ok=True)
-
         # Save HTML content
         try:
+            file_path.parent.mkdir(parents=True, exist_ok=True)
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(content)
 
@@ -112,6 +140,7 @@ class HtmlSavePipeline:
 
         except Exception as e:
             spider.logger.error(f"Failed to save HTML for {url}: {e}")
+            spider.stats["save_failures"] += 1
             item["save_error"] = str(e)
 
         return item

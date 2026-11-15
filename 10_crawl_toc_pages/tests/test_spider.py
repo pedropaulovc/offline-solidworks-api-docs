@@ -314,6 +314,7 @@ class TestApiDocsSpider:
         # Expand the second branch first: its Overview child is still recognized.
         for branch in ["4.2.9", "4.1.3"]:
             overview_urls = parse_toc({"url": f"{page}?id={branch}", "children": [{"url": f"{page}?id={branch}.0"}]}, branch)
+            assert expand_toc_url(branch) in overview_urls  # the response was actually processed
             assert f"{SOLIDWORKS_BASE_URL}{page}?id={branch}.0" not in overview_urls
             assert expand_toc_url(f"{branch}.0") not in overview_urls
 
