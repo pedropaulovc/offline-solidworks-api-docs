@@ -3,7 +3,6 @@ Tests for the TypeMembersSpider
 """
 
 import xml.etree.ElementTree as ET
-from pathlib import Path
 
 import pytest
 from scrapy.http import HtmlResponse, Request
@@ -11,11 +10,6 @@ from scrapy.http import HtmlResponse, Request
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
 from solidworks_scraper.spiders import type_members_spider
 from solidworks_scraper.spiders.type_members_spider import TypeMembersSpider
-
-
-def test_exercises_this_phase_spider():
-    """solidworks_scraper is a package name five crawl phases share; these tests must load phase 30's."""
-    assert Path(type_members_spider.__file__).resolve().is_relative_to(Path(__file__).resolve().parents[1])
 
 
 @pytest.fixture

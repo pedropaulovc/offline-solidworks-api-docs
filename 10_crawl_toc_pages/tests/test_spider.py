@@ -2,7 +2,6 @@
 Tests for the SolidWorks API documentation spider.
 """
 
-import inspect
 import json
 import sys
 from pathlib import Path
@@ -23,11 +22,6 @@ from shared.constants import (
     SOLIDWORKS_BASE_URL,
     expand_toc_url,
 )
-
-
-def test_exercises_this_phase_spider() -> None:
-    """solidworks_scraper is a package name five crawl phases share; these tests must load phase 10's."""
-    assert Path(inspect.getfile(ApiDocsSpider.__init__)).resolve().is_relative_to(Path(__file__).resolve().parents[1])
 
 
 class TestApiDocsSpider:

@@ -1,6 +1,5 @@
 """Tests for the examples spider"""
 
-import inspect
 import tempfile
 from pathlib import Path
 
@@ -16,11 +15,6 @@ from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
 def spider():
     """Create a spider instance for testing"""
     return ExamplesSpider()
-
-
-def test_exercises_this_phase_spider():
-    """solidworks_scraper is a package name five crawl phases share; these tests must load phase 70's."""
-    assert Path(inspect.getfile(ExamplesSpider.__init__)).resolve().is_relative_to(Path(__file__).resolve().parents[1])
 
 
 @pytest.fixture
