@@ -14,6 +14,7 @@ import xml.dom.minidom as minidom
 import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
 from pathlib import Path
+from enum import Enum
 from typing import Any
 
 # Add parent directory to path for shared module imports
@@ -21,6 +22,15 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from shared.extraction_utils import add_see_also_element
 from shared.xmldoc_links import convert_links_to_see_refs, href_to_see_ref
+
+
+class PageRegion(Enum):
+    """Where the parser is on an enum page, in document order."""
+
+    HEADER = "header"  # title + 2027 chrome (repeats "See Also"/"Members" as links)
+    BODY = "body"  # inside <div id="mainbody">, before any section heading
+    MEMBERS = "members"
+    SEE_ALSO = "see_also"
 
 
 class EnumMemberExtractor(HTMLParser):
@@ -34,12 +44,10 @@ class EnumMemberExtractor(HTMLParser):
 
         # State tracking
         self.in_pagetitle: bool = False
-        self.in_mainbody: bool = False
-        self.in_see_also_section: bool = False
+        self.region: PageRegion = PageRegion.HEADER
         self.in_see_also_link: bool = False
         self.current_seealso_href: str | None = None
         self.current_seealso_text: str = ""
-        self.in_members_section: bool = False
         self.in_members_table: bool = False
         self.in_member_row: bool = False
         self.in_member_name_cell: bool = False
@@ -59,11 +67,11 @@ class EnumMemberExtractor(HTMLParser):
         # Section headers only count inside the page body; the header chrome
         # before <div id="mainbody"> repeats "See Also"/"Members" as links.
         if tag == "div" and attrs_dict.get("id") == "mainbody":
-            self.in_mainbody = True
+            self.region = PageRegion.BODY
             return
 
         # Detect links in See Also section (collect every cross-reference link)
-        if self.in_see_also_section and tag == "a":
+        if self.region is PageRegion.SEE_ALSO and tag == "a":
             href = attrs_dict.get("href", "")
             if href and not href.startswith("#"):
                 self.in_see_also_link = True
@@ -72,7 +80,7 @@ class EnumMemberExtractor(HTMLParser):
             return
 
         # Detect members table (enum members)
-        is_enum_members_table = self.in_members_section and tag == "table" and attrs_dict.get("class") == "FilteredItemListTable"
+        is_enum_members_table = self.region is PageRegion.MEMBERS and tag == "table" and attrs_dict.get("class") == "FilteredItemListTable"
         if is_enum_members_table:
             self.in_members_table = True
             return
@@ -161,14 +169,14 @@ class EnumMemberExtractor(HTMLParser):
             # Remove " Enumeration" suffix if present
             self.type_name = text.replace(" Enumeration", "").strip()
 
-        # Detect Members section header (only in h1 tags - but we simplify here)
-        if self.in_mainbody and text == "Members":
-            self.in_members_section = True
+        # Section headings only count once inside the page body
+        # (only in h1 tags - but we simplify here)
+        if self.region is not PageRegion.HEADER and text == "Members":
+            self.region = PageRegion.MEMBERS
 
-        # Detect See Also section header (appears after the members table)
-        if self.in_mainbody and text == "See Also":
-            self.in_see_also_section = True
-            self.in_members_section = False
+        # See Also section heading (appears after the members table)
+        if self.region is not PageRegion.HEADER and text == "See Also":
+            self.region = PageRegion.SEE_ALSO
 
         # Collect link text in See Also section
         if self.in_see_also_link and data:

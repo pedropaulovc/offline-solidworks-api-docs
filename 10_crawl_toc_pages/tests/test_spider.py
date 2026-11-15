@@ -285,7 +285,7 @@ class TestApiDocsSpider:
         request_urls = [r.url for r in self.spider.parse(response) if not isinstance(r, dict)]
 
         members_url = f"{SOLIDWORKS_BASE_URL}{type_page}_members.html?id=4.1.7"
-        assert request_urls.count(members_url) == 2  # scheduler dedupes the identical URL
+        assert request_urls.count(members_url) == 1
         assert not any("_methods" in u or "_properties" in u or "~Bar" in u for u in request_urls)
         assert expand_toc_url("4.1.7.1") not in request_urls
 
@@ -293,6 +293,22 @@ class TestApiDocsSpider:
         type_page_requests = [u for u in request_urls if u.startswith(f"{SOLIDWORKS_BASE_URL}{type_page}.html")]
         assert type_page_requests == [f"{SOLIDWORKS_BASE_URL}{type_page}.html?id=4.1.7"]
         assert expand_toc_url("4.1.7.0") not in request_urls
+
+    def test_page_shared_across_branches_keeps_both_subtrees(self) -> None:
+        """Only an Overview child (direct child of the first requester) is skipped; other duplicates still expand."""
+        page = f"{SOLIDWORKS_API_BASE_PATH}/sldworksapi/Shared.html"
+        listing = {"children": [{"url": f"{page}?id=4.1.3"}, {"url": f"{page}?id=4.2.9"}]}
+        response = Mock(spec=Response)
+        response.text = json.dumps(listing)
+        response.url = expand_toc_url("4")
+        response.status = 200
+        response.headers = {}
+        response.body = response.text.encode()
+
+        request_urls = [r.url for r in self.spider.parse(response) if not isinstance(r, dict)]
+
+        assert expand_toc_url("4.1.3") in request_urls
+        assert expand_toc_url("4.2.9") in request_urls
 
     def test_folder_pages_are_not_deduped_by_path(self) -> None:
         """help_list.htm backs every folder node; each id must still be expanded."""

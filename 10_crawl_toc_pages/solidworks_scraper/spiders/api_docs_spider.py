@@ -73,10 +73,10 @@ class ApiDocsSpider(scrapy.Spider):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.crawled_urls: set[str] = set()
-        # Page paths already requested. 2027 type nodes have an "Overview" child
-        # pointing at the same page with a different ?id=, which would otherwise
-        # save every type page twice.
-        self.requested_page_paths: set[str] = set()
+        # TOC id that first requested each page path. 2027 type nodes have an
+        # "Overview" child pointing at the same page with a different ?id=, which
+        # would otherwise save every type page twice.
+        self.page_path_owner: dict[str, str | None] = {}
         self.base_path: str = SOLIDWORKS_API_BOUNDARY
         self.base_url: str = SOLIDWORKS_BASE_URL
 
@@ -132,16 +132,15 @@ class ApiDocsSpider(scrapy.Spider):
                 id_value = query_params["id"][0] if "id" in query_params else None
 
                 if self.MEMBER_LIST_PATH.search(parsed.path):
-                    yield self.members_page_request(parsed.path, id_value)
+                    members_request = self.members_page_request(parsed.path, id_value)
+                    if members_request is not None:
+                        yield members_request
                     continue
 
-                # help_list.htm is the shared page of every folder node; each id has
-                # its own children, so only real content pages dedupe by path.
-                is_folder_page = parsed.path.endswith("/help_list.htm")
-                if not is_folder_page and parsed.path in self.requested_page_paths:
-                    self.logger.debug(f"Skipping already-requested page path: {full_url}")
+                if self.is_overview_duplicate(parsed.path, id_value):
+                    self.logger.debug(f"Skipping Overview duplicate of its parent page: {full_url}")
                     continue
-                self.requested_page_paths.add(parsed.path)
+                self.page_path_owner.setdefault(parsed.path, id_value)
 
                 # Yield request for the page itself
                 yield scrapy.Request(
@@ -194,12 +193,32 @@ class ApiDocsSpider(scrapy.Spider):
 
         return urls
 
-    def members_page_request(self, member_list_path: str, member_list_id: str | None) -> scrapy.Request:
-        """Request the `<Type>_members.html` page standing in for a Methods/Properties TOC node."""
+    def is_overview_duplicate(self, path: str, id_value: str | None) -> bool:
+        """True for a node that repeats its parent node's page (the 2027 type "Overview" child).
+
+        Only direct children of the node that first requested the path are
+        skipped, page and subtree alike. Any other node sharing a path (e.g. a page
+        listed under two TOC branches) keeps its own fetch and expansion, so no
+        subtree depends on which response arrived first. help_list.htm is the
+        shared page of every folder node and is never a duplicate.
+        """
+        if path.endswith("/help_list.htm") or id_value is None or path not in self.page_path_owner:
+            return False
+        return id_value.rsplit(".", 1)[0] == self.page_path_owner[path]
+
+    def members_page_request(self, member_list_path: str, member_list_id: str | None) -> scrapy.Request | None:
+        """Request the `<Type>_members.html` page standing in for a Methods/Properties TOC node.
+
+        Returns None when the type's members page was already requested (Methods and
+        Properties siblings, or a nested member-list node under the same type)."""
         members_path = self.MEMBER_LIST_PATH.sub("_members.html", member_list_path)
+        if members_path in self.page_path_owner:
+            return None
+        type_id = member_list_id.rsplit(".", 1)[0] if member_list_id else None
+        self.page_path_owner[members_path] = type_id
+
         members_url = f"{self.base_url}{members_path}"
-        if member_list_id:
-            type_id = member_list_id.rsplit(".", 1)[0]
+        if type_id:
             members_url = f"{members_url}?id={type_id}"
         return scrapy.Request(
             members_url, callback=self.parse_page, errback=self.handle_error, meta={"original_url": members_url}

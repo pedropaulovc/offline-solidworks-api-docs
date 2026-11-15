@@ -157,6 +157,18 @@ class TestDataMerger:
         assert type_info.examples[0].name == 'Test Example'
         assert type_info.examples[0].language == 'C#'
 
+    def test_duplicate_type_records_do_not_duplicate_examples(self, sample_types_xml, temp_dir):
+        """Phase 40 emits one record per crawled copy of a type page; examples must stay single."""
+        single = sample_types_xml.read_text(encoding='utf-8')
+        record = single[single.index('<Type>'):single.index('</Types>')]
+        doubled = temp_dir / 'api_types_doubled.xml'
+        doubled.write_text(single.replace('</Types>', f'{record}</Types>'), encoding='utf-8')
+
+        merger = DataMerger()
+        merger.load_api_types(doubled)
+
+        assert len(merger.types['Test.Namespace.ITestType'].examples) == 1
+
     def test_load_enum_members(self, sample_enums_xml):
         """Test loading enum members from Phase 04."""
         merger = DataMerger()
