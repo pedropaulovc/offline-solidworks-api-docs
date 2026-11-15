@@ -4,7 +4,6 @@ Tests for the crawler pipelines
 
 import hashlib
 import json
-from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
@@ -17,11 +16,6 @@ from solidworks_scraper.pipelines import (
     MetadataLogPipeline,
     ValidationPipeline,
 )
-
-
-def test_exercises_this_phase_pipelines():
-    """solidworks_scraper is a package name five crawl phases share; these tests must load phase 30's."""
-    assert Path(pipelines.__file__).resolve().is_relative_to(Path(__file__).resolve().parents[1])
 
 
 @pytest.fixture

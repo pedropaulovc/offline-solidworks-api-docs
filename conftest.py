@@ -81,19 +81,41 @@ def _activate(phase: Path) -> None:
     _active_phase = phase
 
 
-def _activate_for(path: Path | None) -> None:
+def _activate_for(path: Path | None) -> Path | None:
     phase = _phase_of(path)
     if phase is not None:
         _activate(phase)
+    return phase
+
+
+def _assert_modules_belong_to(phase: Path) -> None:
+    """Every loaded module behind a shared name must be ``phase``'s own copy.
+
+    This is the invariant the activation exists for; checking it here covers every
+    phase (present and future) instead of per-file guard tests."""
+    strays = sorted(
+        f"{name} ({owner.name})"
+        for name, module in sys.modules.items()
+        if name.partition(".")[0] in PHASE_LOCAL_NAMES
+        and (owner := _module_phase(module)) is not None
+        and owner != phase
+    )
+    if strays:
+        raise RuntimeError(f"{phase.name} is active but other phases' modules are loaded: {', '.join(strays)}")
 
 
 @pytest.hookimpl(wrapper=True)
 def pytest_make_collect_report(collector: pytest.Collector):  # type: ignore[no-untyped-def]
-    _activate_for(collector.path)
-    return (yield)
+    phase = _activate_for(collector.path)
+    report = yield
+    if phase is not None:
+        _assert_modules_belong_to(phase)
+    return report
 
 
 @pytest.hookimpl(wrapper=True)
 def pytest_runtest_protocol(item: pytest.Item, nextitem: pytest.Item | None):  # type: ignore[no-untyped-def]
-    _activate_for(item.path)
+    phase = _activate_for(item.path)
+    if phase is not None:
+        _assert_modules_belong_to(phase)
     return (yield)

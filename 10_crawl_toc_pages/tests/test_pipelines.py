@@ -2,6 +2,7 @@
 Tests for the SolidWorks API documentation pipelines.
 """
 
+import importlib
 import json
 import shutil
 import sys
@@ -26,9 +27,12 @@ from solidworks_scraper.pipelines import (
 )
 
 
-def test_exercises_this_phase_pipelines() -> None:
-    """solidworks_scraper is a package name five crawl phases share; these tests must load phase 10's."""
-    assert Path(pipelines.__file__).resolve().is_relative_to(Path(__file__).resolve().parents[1])
+def test_runtime_import_resolves_to_this_phase() -> None:
+    """Imports resolved while a test runs (lazy imports, mock.patch targets) must see phase 10's package.
+
+    conftest.py swaps phase-local modules per test; this fails if that runtime switch regresses."""
+    module = importlib.import_module("solidworks_scraper.pipelines")
+    assert Path(module.__file__).resolve().is_relative_to(Path(__file__).resolve().parents[1])
 
 
 class TestHtmlSavePipeline:

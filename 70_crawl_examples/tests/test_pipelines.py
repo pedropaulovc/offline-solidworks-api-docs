@@ -1,5 +1,6 @@
 """Tests for the pipelines"""
 
+import importlib
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock
@@ -14,9 +15,12 @@ from solidworks_scraper.spiders.examples_spider import ExamplesSpider
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL, SOLIDWORKS_API_VERSION
 
 
-def test_exercises_this_phase_pipelines():
-    """solidworks_scraper is a package name five crawl phases share; these tests must load phase 70's."""
-    assert Path(pipelines.__file__).resolve().is_relative_to(Path(__file__).resolve().parents[1])
+def test_runtime_import_resolves_to_this_phase():
+    """Imports resolved while a test runs (lazy imports, mock.patch targets) must see phase 70's package.
+
+    conftest.py swaps phase-local modules per test; this fails if that runtime switch regresses."""
+    module = importlib.import_module("solidworks_scraper.pipelines")
+    assert Path(module.__file__).resolve().is_relative_to(Path(__file__).resolve().parents[1])
 
 
 @pytest.fixture
