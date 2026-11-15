@@ -2,6 +2,7 @@
 Tests for the SolidWorks API documentation pipelines.
 """
 
+import importlib
 import json
 import shutil
 import sys
@@ -17,12 +18,21 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from shared.constants import SOLIDWORKS_API_BOUNDARY, SOLIDWORKS_API_FULL_BASE_URL
 from scrapy.exceptions import DropItem
+from solidworks_scraper import pipelines
 from solidworks_scraper.pipelines import (
     DuplicateCheckPipeline,
     HtmlSavePipeline,
     MetadataLogPipeline,
     ValidationPipeline,
 )
+
+
+def test_runtime_import_resolves_to_this_phase() -> None:
+    """Imports resolved while a test runs (lazy imports, mock.patch targets) must see phase 10's package.
+
+    conftest.py swaps phase-local modules per test; this fails if that runtime switch regresses."""
+    module = importlib.import_module("solidworks_scraper.pipelines")
+    assert Path(module.__file__).resolve().is_relative_to(Path(__file__).resolve().parents[1])
 
 
 class TestHtmlSavePipeline:
@@ -127,21 +137,16 @@ class TestHtmlSavePipeline:
 class TestMetadataLogPipeline:
     """Test suite for MetadataLogPipeline"""
 
-    def setup_method(self) -> None:
-        """Set up test fixtures"""
-        self.temp_dir = tempfile.mkdtemp()
+    @pytest.fixture(autouse=True)
+    def pipeline_in_tmp(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Pipeline whose metadata dir (manifest written by __init__) lives under tmp_path.
 
-        # Create pipeline and override paths to use temp directory
+        The metadata dir is resolved from the pipelines module's ``__file__``, so
+        redirect that instead of letting __init__ rewrite the tracked manifest.
+        """
+        monkeypatch.setattr(pipelines, "__file__", str(tmp_path / "solidworks_scraper" / "pipelines.py"))
         self.pipeline = MetadataLogPipeline()
-        self.pipeline.metadata_dir = Path(self.temp_dir) / "metadata"
-        self.pipeline.metadata_dir.mkdir(parents=True, exist_ok=True)
-        self.pipeline.urls_file = self.pipeline.metadata_dir / "urls_crawled.jsonl"
-        self.pipeline.errors_file = self.pipeline.metadata_dir / "errors.jsonl"
-        self.pipeline.manifest_file = self.pipeline.metadata_dir / "manifest.json"
-
-    def teardown_method(self) -> None:
-        """Clean up after tests"""
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
+        assert self.pipeline.metadata_dir == tmp_path / "metadata"
 
     def test_manifest_creation(self) -> None:
         """Test that manifest file is created"""

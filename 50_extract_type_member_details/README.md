@@ -144,7 +144,6 @@ From a full crawl of SolidWorks API documentation:
 │   ├── api_member_details.xml     # Extracted member information
 │   └── extraction_summary.json    # Extraction statistics
 └── tests/                          # Unit tests
-    ├── __init__.py
     └── test_extract_member_details.py
 ```
 

@@ -134,7 +134,7 @@ From a full crawl of SolidWorks API documentation:
 ## File Structure
 
 ```
-03_extract_type_info/
+40_extract_type_details/
 ├── extract_type_info.py      # Main extraction script
 ├── validate_extraction.py    # Validation script
 ├── README.md                  # This file
@@ -142,7 +142,6 @@ From a full crawl of SolidWorks API documentation:
 │   ├── api_types.xml          # Extracted type information
 │   └── extraction_summary.json # Extraction statistics
 └── tests/                     # Unit tests
-    ├── __init__.py
     └── test_extract_type_info.py
 ```
 

@@ -1,5 +1,6 @@
 """Tests for the pipelines"""
 
+import importlib
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock
@@ -12,6 +13,14 @@ from solidworks_scraper.pipelines import HtmlSavePipeline, ValidationPipeline
 from solidworks_scraper.spiders.examples_spider import ExamplesSpider
 
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL, SOLIDWORKS_API_VERSION
+
+
+def test_runtime_import_resolves_to_this_phase():
+    """Imports resolved while a test runs (lazy imports, mock.patch targets) must see phase 70's package.
+
+    conftest.py swaps phase-local modules per test; this fails if that runtime switch regresses."""
+    module = importlib.import_module("solidworks_scraper.pipelines")
+    assert Path(module.__file__).resolve().is_relative_to(Path(__file__).resolve().parents[1])
 
 
 @pytest.fixture
@@ -145,8 +154,14 @@ def test_older_corpus_marker_is_dropped(marker_pipeline, spider):
 
 @pytest.fixture
 def spider():
-    """Create a spider instance for testing"""
-    return ExamplesSpider()
+    """A spider whose failure counters start clean.
+
+    ExamplesSpider() loads the real phase 40/50 XML in __init__; a developer who has
+    cleaned or regenerated those would otherwise start every marker test with
+    url_source_failures > 0 and see pipeline failures that are really missing data."""
+    instance = ExamplesSpider()
+    instance.stats["url_source_failures"] = 0
+    return instance
 
 
 @pytest.fixture

@@ -3,12 +3,12 @@ Tests for the TypeMembersSpider
 """
 
 import xml.etree.ElementTree as ET
-from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 import pytest
 from scrapy.http import HtmlResponse, Request
 
+from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
+from solidworks_scraper.spiders import type_members_spider
 from solidworks_scraper.spiders.type_members_spider import TypeMembersSpider
 
 
@@ -16,6 +16,19 @@ from solidworks_scraper.spiders.type_members_spider import TypeMembersSpider
 def spider():
     """Create a spider instance for testing"""
     return TypeMembersSpider()
+
+
+@pytest.fixture
+def members_xml(tmp_path, monkeypatch):
+    """Phase 2 api_members.xml path that load_urls reads, redirected under tmp_path.
+
+    load_urls resolves the file relative to the spider module's ``__file__``.
+    """
+    fake_module_file = tmp_path / "30_crawl_type_members" / "solidworks_scraper" / "spiders" / "type_members_spider.py"
+    monkeypatch.setattr(type_members_spider, "__file__", str(fake_module_file))
+    xml_file = tmp_path / "20_extract_types" / "metadata" / "api_members.xml"
+    xml_file.parent.mkdir(parents=True)
+    return xml_file
 
 
 @pytest.fixture
@@ -83,10 +96,11 @@ def sample_html_response():
         url="https://help.solidworks.com/test",
         body=html_content.encode("utf-8"),
         request=request,
+        headers={"Content-Type": "text/html; charset=utf-8"},
     )
 
 
-class TestTypeMembers Spider:
+class TestTypeMembersSpider:
     """Test suite for TypeMembersSpider"""
 
     def test_spider_name(self, spider):
@@ -97,19 +111,11 @@ class TestTypeMembers Spider:
         """Test allowed domains configuration"""
         assert "help.solidworks.com" in spider.allowed_domains
 
-    def test_load_urls_from_xml(self, spider, tmp_path, sample_xml_content):
+    def test_load_urls_from_xml(self, spider, members_xml, sample_xml_content):
         """Test loading URLs from XML file"""
-        # Create temporary XML file
-        xml_file = tmp_path / "api_members.xml"
-        xml_file.write_text(sample_xml_content)
+        members_xml.write_text(sample_xml_content)
 
-        # Mock the path to point to our temp file
-        with patch.object(
-            Path,
-            "__truediv__",
-            side_effect=lambda self, other: xml_file if str(other).endswith("api_members.xml") else Path(self) / other,
-        ):
-            urls = spider.load_urls()
+        urls = spider.load_urls()
 
         # Should extract 3 unique URLs
         assert len(urls) == 3
@@ -117,7 +123,7 @@ class TestTypeMembers Spider:
         assert "/sldworksapi/Test~TestMethod.html" in urls
         assert "/sldworksapi/Test~TestProperty2.html" in urls
 
-    def test_load_urls_deduplication(self, spider, tmp_path):
+    def test_load_urls_deduplication(self, spider, members_xml):
         """Test that duplicate URLs are removed"""
         xml_content = """<?xml version="1.0" ?>
 <Types>
@@ -145,15 +151,9 @@ class TestTypeMembers Spider:
     </Type>
 </Types>"""
 
-        xml_file = tmp_path / "api_members.xml"
-        xml_file.write_text(xml_content)
+        members_xml.write_text(xml_content)
 
-        with patch.object(
-            Path,
-            "__truediv__",
-            side_effect=lambda self, other: xml_file if str(other).endswith("api_members.xml") else Path(self) / other,
-        ):
-            urls = spider.load_urls()
+        urls = spider.load_urls()
 
         # Should have only 1 URL (duplicates removed)
         assert len(urls) == 1
@@ -205,6 +205,7 @@ class TestTypeMembers Spider:
             url="https://help.solidworks.com/test",
             body=html_content.encode("utf-8"),
             request=request,
+            headers={"Content-Type": "text/html; charset=utf-8"},
         )
 
         items = list(spider.parse_page(response))
@@ -213,27 +214,24 @@ class TestTypeMembers Spider:
         assert len(items) == 0
         assert spider.stats["skipped_pages"] == 1
 
-    def test_start_requests_generates_requests(self, spider, tmp_path, sample_xml_content):
+    def test_start_requests_generates_requests(self, spider, members_xml, sample_xml_content):
         """Test that start_requests generates correct requests"""
-        xml_file = tmp_path / "api_members.xml"
-        xml_file.write_text(sample_xml_content)
+        members_xml.write_text(sample_xml_content)
 
-        with patch.object(
-            Path,
-            "__truediv__",
-            side_effect=lambda self, other: xml_file if str(other).endswith("api_members.xml") else Path(self) / other,
-        ):
-            spider.urls_to_crawl = spider.load_urls()
+        spider.urls_to_crawl = spider.load_urls()
 
         requests = list(spider.start_requests())
 
         # Should generate 3 requests
         assert len(requests) == 3
 
-        # Check that URLs are absolute and have format parameter
-        for req in requests:
-            assert req.url.startswith("https://help.solidworks.com")
-            assert "format=p&value=1" in req.url
+        # Pages are fetched as plain absolute URLs (content comes from __NEXT_DATA__,
+        # so no print-format query is needed)
+        assert sorted(req.url for req in requests) == [
+            f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/Test~TestMethod.html",
+            f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/Test~TestProperty.html",
+            f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/Test~TestProperty2.html",
+        ]
 
     def test_handle_error_logs_failure(self, spider):
         """Test that handle_error logs failures correctly"""

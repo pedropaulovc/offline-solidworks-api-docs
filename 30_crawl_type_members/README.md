@@ -74,7 +74,6 @@ def load_urls(self):
 
 The Scrapy spider:
 - Converts relative URLs to absolute URLs
-- Adds print preview format parameters (`?format=p&value=1`)
 - Downloads each page
 - Extracts `helpText` from `__NEXT_DATA__` JSON
 - Saves HTML content to organized file structure

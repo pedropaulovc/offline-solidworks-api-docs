@@ -4,12 +4,12 @@ Tests for the crawler pipelines
 
 import hashlib
 import json
-from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
 
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
+from solidworks_scraper import pipelines
 from solidworks_scraper.pipelines import (
     DuplicateCheckPipeline,
     HtmlSavePipeline,
@@ -28,8 +28,8 @@ def spider():
 
 @pytest.fixture
 def sample_item():
-    """Sample item for testing"""
-    content = "<html><body><h1>Test Content</h1></body></html>"
+    """Sample valid item for testing (content above ValidationPipeline's 100-byte minimum)"""
+    content = "<html><body><h1>TestMethod</h1><p>Test description of the TestMethod member documentation page.</p></body></html>"
     return {
         "url": "https://help.solidworks.com/test/TestMethod.html",
         "original_url": "/test/TestMethod.html",
@@ -97,18 +97,24 @@ class TestHtmlSavePipeline:
 class TestMetadataLogPipeline:
     """Test suite for MetadataLogPipeline"""
 
-    def test_init_creates_directories(self, tmp_path):
-        """Test that __init__ creates required directories"""
-        with pytest.MonkeyPatch.context() as m:
-            # This test is more of a smoke test
-            # In real usage, directories are created by settings
-            pass
+    @pytest.fixture
+    def pipeline(self, tmp_path, monkeypatch):
+        """Pipeline whose metadata dir (created, with a manifest, by __init__) is tmp_path/metadata.
 
-    def test_init_manifest(self, tmp_path):
+        The metadata dir is resolved from the pipelines module's ``__file__``, so
+        redirect that instead of letting __init__ rewrite the tracked manifest.
+        """
+        monkeypatch.setattr(pipelines, "__file__", str(tmp_path / "solidworks_scraper" / "pipelines.py"))
+        return MetadataLogPipeline()
+
+    def test_init_creates_directories(self, tmp_path, pipeline):
+        """Test that __init__ creates the metadata directory and its manifest"""
+        assert pipeline.metadata_dir == tmp_path / "metadata"
+        assert pipeline.manifest_file.exists()
+
+    def test_init_manifest(self, pipeline):
         """Test manifest file creation"""
-        pipeline = MetadataLogPipeline()
-        pipeline.metadata_dir = tmp_path
-        pipeline.manifest_file = tmp_path / "manifest.json"
+        pipeline.manifest_file.unlink()
 
         pipeline.init_manifest()
 
@@ -121,28 +127,18 @@ class TestMetadataLogPipeline:
         assert "phase" in manifest
         assert manifest["phase"] == "30_crawl_type_members"
 
-    def test_process_item_logs_metadata(self, tmp_path, sample_item, spider):
+    def test_process_item_logs_metadata(self, pipeline, sample_item, spider):
         """Test that metadata is logged"""
-        pipeline = MetadataLogPipeline()
-        pipeline.metadata_dir = tmp_path
-        pipeline.urls_file = tmp_path / "urls_crawled.jsonl"
-        pipeline.errors_file = tmp_path / "errors.jsonl"
-        pipeline.manifest_file = tmp_path / "manifest.json"
-
         # Add file_path to item
         sample_item["file_path"] = "output/html/test.html"
 
         result = pipeline.process_item(sample_item, spider)
 
         assert result == sample_item
-        # File should be created (checked by existence, not content for simplicity)
+        assert pipeline.urls_file.exists()
 
-    def test_log_error(self, tmp_path):
+    def test_log_error(self, pipeline):
         """Test error logging"""
-        pipeline = MetadataLogPipeline()
-        pipeline.metadata_dir = tmp_path
-        pipeline.errors_file = tmp_path / "errors.jsonl"
-
         error_item = {"type": "error", "url": "test_url", "error": "Test error message"}
 
         pipeline.log_error(error_item)
