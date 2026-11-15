@@ -154,8 +154,14 @@ def test_older_corpus_marker_is_dropped(marker_pipeline, spider):
 
 @pytest.fixture
 def spider():
-    """Create a spider instance for testing"""
-    return ExamplesSpider()
+    """A spider whose failure counters start clean.
+
+    ExamplesSpider() loads the real phase 40/50 XML in __init__; a developer who has
+    cleaned or regenerated those would otherwise start every marker test with
+    url_source_failures > 0 and see pipeline failures that are really missing data."""
+    instance = ExamplesSpider()
+    instance.stats["url_source_failures"] = 0
+    return instance
 
 
 @pytest.fixture
