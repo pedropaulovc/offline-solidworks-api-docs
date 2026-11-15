@@ -50,10 +50,12 @@ def crawl_failures(spider: Spider) -> dict[str, int]:
 
     Each kind is counted once at its source (not via log counters, which depend on
     LOG_LEVEL and count unrelated errors): failed downloads (errback), callback
-    exceptions, page saves that raised, and example-URL sources that failed to load.
+    exceptions, pages whose __NEXT_DATA__ failed to parse, page saves that raised,
+    and required example-URL sources that were missing or failed to load.
     """
     counts = {
         "failed downloads": spider.stats["failed_pages"],
+        "parse failures": spider.stats["parse_failures"],
         "save failures": spider.stats["save_failures"],
         "URL source failures": spider.stats["url_source_failures"],
     }

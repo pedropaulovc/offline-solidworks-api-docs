@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
-from scrapy.http import Request, Response
+from scrapy.http import HtmlResponse, Request, Response
 
 from solidworks_scraper import pipelines
 from solidworks_scraper.pipelines import HtmlSavePipeline, ValidationPipeline
@@ -98,17 +98,36 @@ def test_version_marker_not_current_after_save_failure(marker_pipeline, spider):
     assert marker.read_text().strip() != SOLIDWORKS_API_VERSION
 
 
-def test_version_marker_not_current_after_url_source_failure(marker_pipeline, spider, tmp_path):
-    """A malformed example-URL source shrinks the crawl's URL list; that corpus is not complete."""
+@pytest.mark.parametrize("source_state", ["malformed", "missing"])
+def test_version_marker_not_current_after_url_source_failure(marker_pipeline, spider, tmp_path, source_state):
+    """A malformed or missing example-URL source drops whole URL families; that corpus is not complete."""
     pipeline, marker = marker_pipeline
-    bad_xml = tmp_path / "api_types.xml"
-    bad_xml.write_text("<Types><Type>")
-    spider._load_urls_from_file(bad_xml, "types")
+    xml = tmp_path / "api_member_details.xml"
+    if source_state == "malformed":
+        xml.write_text("<Types><Type>")
+    spider._load_urls_from_file(xml, "member details")
     pipeline.open_spider(spider)
 
     pipeline.spider_closed(spider, "finished")
 
     assert spider.stats["url_source_failures"] == 1
+    assert marker.read_text().strip() != SOLIDWORKS_API_VERSION
+
+
+def test_version_marker_not_current_after_next_data_parse_failure(marker_pipeline, spider):
+    """A page whose __NEXT_DATA__ is not JSON is never saved; that corpus is not complete."""
+    pipeline, marker = marker_pipeline
+    url = f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/test.htm"
+    body = b'<html><script id="__NEXT_DATA__" type="application/json">{not json</script></html>'
+    response = HtmlResponse(
+        url=url, request=Request(url), body=body, encoding="utf-8", headers={"Content-Type": "text/html"}
+    )
+    pipeline.open_spider(spider)
+
+    assert list(spider.parse_page(response)) == []
+    pipeline.spider_closed(spider, "finished")
+
+    assert spider.stats["parse_failures"] == 1
     assert marker.read_text().strip() != SOLIDWORKS_API_VERSION
 
 

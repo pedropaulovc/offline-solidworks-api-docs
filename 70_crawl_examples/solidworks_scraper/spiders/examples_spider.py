@@ -49,8 +49,10 @@ class ExamplesSpider(scrapy.Spider):
             "failed_pages": 0,
             "skipped_pages": 0,
             # Holes in the corpus that are not download failures (see
-            # HtmlSavePipeline.spider_closed): pages that could not be written, and
-            # example-URL sources that could not be read.
+            # HtmlSavePipeline.spider_closed): pages whose __NEXT_DATA__ could not be
+            # parsed, pages that could not be written, and required example-URL
+            # sources that were missing or unreadable.
+            "parse_failures": 0,
             "save_failures": 0,
             "url_source_failures": 0,
             "urls_from_types": 0,
@@ -111,7 +113,10 @@ class ExamplesSpider(scrapy.Spider):
         urls = set()
 
         if not xml_file.exists():
+            # Both XML sources are required; without one, a whole family of example
+            # URLs is never crawled.
             self.logger.warning(f"XML file not found: {xml_file} ({source_name})")
+            self.stats["url_source_failures"] += 1
             return urls
 
         try:
@@ -190,7 +195,7 @@ class ExamplesSpider(scrapy.Spider):
 
         except json.JSONDecodeError as e:
             self.logger.error(f"Failed to parse __NEXT_DATA__ JSON from {response.url}: {e}")
-            self.stats["skipped_pages"] += 1
+            self.stats["parse_failures"] += 1
             return
 
         # Create item with JSON data
