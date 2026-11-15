@@ -49,6 +49,32 @@ class TestTypeInfoExtractor(unittest.TestCase):
 
         self.assertEqual(parser.type_name, "DAssemblyDocEvents_ActiveConfigChangeNotifyEventHandler")
 
+    def test_description_skips_2027_header_chrome(self) -> None:
+        """2027 pages put See Also/Members links, filter widgets and breadcrumbs before #mainbody; none of it is description."""
+        html = """
+        <html>
+        <div id="pagetop">
+            <span id="pagetitle">IAdvancedHoleFeatureData Interface</span>
+            <a href="#seealsobookmark">See Also</a>
+            <a href="SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IAdvancedHoleFeatureData_members.html">Members</a>
+            <label id="expandAllLabel">Expand All</label>
+            <label id="CSLabel">Language Filter: C#</label>
+            <table id="pagetopbreadcrumbs"><tr><td>
+                <a href="SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks_namespace.html">SolidWorks.Interop.sldworks Namespace</a> : IAdvancedHoleFeatureData Interface
+            </td></tr></table>
+        </div>
+        <div id="pagebody"><div id="mainbody">
+            Allows access to the Advanced Hole feature data.
+            <h1>.NET Syntax</h1>
+        </div></div>
+        </html>
+        """
+
+        parser = TypeInfoExtractor()
+        parser.feed(html)
+
+        self.assertEqual(parser.get_description().strip(), "Allows access to the Advanced Hole feature data.")
+
     def test_description_with_links_converted_to_see_cref(self) -> None:
         """Test that links in description are converted to XMLDoc <see cref> format (IDocumentSpecification bug)."""
         html = """

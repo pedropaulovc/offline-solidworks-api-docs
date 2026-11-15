@@ -73,6 +73,10 @@ class ApiDocsSpider(scrapy.Spider):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.crawled_urls: set[str] = set()
+        # Page paths already requested. 2027 type nodes have an "Overview" child
+        # pointing at the same page with a different ?id=, which would otherwise
+        # save every type page twice.
+        self.requested_page_paths: set[str] = set()
         self.base_path: str = SOLIDWORKS_API_BOUNDARY
         self.base_url: str = SOLIDWORKS_BASE_URL
 
@@ -130,6 +134,14 @@ class ApiDocsSpider(scrapy.Spider):
                 if self.MEMBER_LIST_PATH.search(parsed.path):
                     yield self.members_page_request(parsed.path, id_value)
                     continue
+
+                # help_list.htm is the shared page of every folder node; each id has
+                # its own children, so only real content pages dedupe by path.
+                is_folder_page = parsed.path.endswith("/help_list.htm")
+                if not is_folder_page and parsed.path in self.requested_page_paths:
+                    self.logger.debug(f"Skipping already-requested page path: {full_url}")
+                    continue
+                self.requested_page_paths.add(parsed.path)
 
                 # Yield request for the page itself
                 yield scrapy.Request(

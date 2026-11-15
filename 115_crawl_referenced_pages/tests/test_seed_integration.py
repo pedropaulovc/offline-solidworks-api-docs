@@ -16,28 +16,30 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from link_targets import build_saved_page_keys, canonical_key  # noqa: E402
 
-from shared.constants import SOLIDWORKS_API_BOUNDARY, SOLIDWORKS_API_FULL_BASE_URL  # noqa: E402
+from shared.constants import SOLIDWORKS_API_FULL_BASE_URL, SOLIDWORKS_API_VERSION  # noqa: E402
 
 EXAMPLES_META = REPO_ROOT / "70_crawl_examples/metadata/urls_crawled.jsonl"
 EXAMPLES_HTML = REPO_ROOT / "70_crawl_examples/output/html"
+# Written by the Phase 70 HtmlSavePipeline next to the gitignored corpus.
+EXAMPLES_CRAWL_VERSION = REPO_ROOT / "70_crawl_examples/output/crawl_version.txt"
 
 
 def _corpus_is_current_version() -> bool:
-    """True when the Phase 70 crawl log was recorded for SOLIDWORKS_API_VERSION.
+    """True when the local Phase 70 corpus was crawled for SOLIDWORKS_API_VERSION.
 
-    After a doc-year bump the local corpus still holds the previous year's URLs
-    until phases 70-120 are re-run; its pages are then outside the current
-    boundary, so the assertions below have nothing honest to check."""
-    if not EXAMPLES_META.exists():
+    After a doc-year bump the local corpus still holds the previous year's pages
+    until phases 70-120 are re-run, while the committed metadata already names the
+    new year; the assertions below then have nothing honest to check. Saved pages
+    carry no year, so read the marker the crawl writes beside them."""
+    if not EXAMPLES_CRAWL_VERSION.exists():
         return False
-    with open(EXAMPLES_META, encoding="utf-8") as f:
-        return any(SOLIDWORKS_API_BOUNDARY in line for line in f)
+    return EXAMPLES_CRAWL_VERSION.read_text(encoding="utf-8").strip() == SOLIDWORKS_API_VERSION
 
 
-# Gate on the crawled HTML, not the manifest: the manifest is committed, so gating
-# on it never skips, and these assertions then run against a corpus whose pages do
-# not exist -- reporting a failure where the honest answer is "not available here".
-# Same for a corpus crawled for a different doc version.
+# Gate on the local crawl output, not the metadata: the metadata is committed, so
+# gating on it never skips, and these assertions then run against a corpus whose
+# pages do not exist -- reporting a failure where the honest answer is "not
+# available here". Same for a corpus crawled for a different doc version.
 pytestmark = [
     pytest.mark.skipif(
         not EXAMPLES_HTML.is_dir() or not any(EXAMPLES_HTML.rglob("*.htm*")),
@@ -45,7 +47,7 @@ pytestmark = [
     ),
     pytest.mark.skipif(
         not _corpus_is_current_version(),
-        reason=f"Phase 70 corpus not crawled for {SOLIDWORKS_API_BOUNDARY}; re-run phases 70-120",
+        reason=f"Phase 70 corpus not crawled for {SOLIDWORKS_API_VERSION} (no matching output/crawl_version.txt); re-run phases 70-120",
     ),
 ]
 

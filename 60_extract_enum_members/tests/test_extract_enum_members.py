@@ -97,6 +97,30 @@ class TestEnumMemberExtractor(unittest.TestCase):
         self.assertEqual(parser.type_name, "swEmpty_e")
         self.assertEqual(len(parser.enum_members), 0)
 
+    def test_see_also_ignores_2027_header_chrome(self) -> None:
+        """The 2027 header repeats 'See Also' as a link and adds breadcrumbs; only the body's See Also section counts."""
+        html = """
+        <html>
+        <div id="pagetop">
+            <span id="pagetitle">swDocumentTypes_e Enumeration</span>
+            <a href="#seealsobookmark">See Also</a>
+            <table id="pagetopbreadcrumbs"><tr><td>
+                <a href="SolidWorks.Interop.swconst~SolidWorks.Interop.swconst_namespace.html">SolidWorks.Interop.swconst Namespace</a> : swDocumentTypes_e Enumeration
+            </td></tr></table>
+        </div>
+        <div id="mainbody">
+            <h1>Members</h1>
+            <h1>See Also</h1>
+            <a href="SolidWorks.Interop.swconst~SolidWorks.Interop.swconst_namespace.html">SolidWorks.Interop.swconst Namespace</a>
+        </div>
+        </html>
+        """
+
+        parser = EnumMemberExtractor()
+        parser.feed(html)
+
+        self.assertEqual(len(parser.see_also), 1)
+
 
 class TestFileFiltering(unittest.TestCase):
     """Test filtering enum files from other files."""

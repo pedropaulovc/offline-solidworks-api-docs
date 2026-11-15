@@ -262,7 +262,7 @@ class TestApiDocsSpider:
         assert f"{SOLIDWORKS_API_BASE_PATH}/page4.htm" in urls
 
     def test_type_node_member_lists_map_to_single_members_page(self) -> None:
-        """A 2027 type node's Methods/Properties children become one _members.html request, unexpanded."""
+        """A 2027 type node: one page fetch, Overview duplicate skipped, Methods/Properties -> one _members page."""
         type_page = f"{SOLIDWORKS_API_BASE_PATH}/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFoo"
         type_node = {
             "url": f"{type_page}.html?id=4.1.7",
@@ -288,7 +288,31 @@ class TestApiDocsSpider:
         assert request_urls.count(members_url) == 2  # scheduler dedupes the identical URL
         assert not any("_methods" in u or "_properties" in u or "~Bar" in u for u in request_urls)
         assert expand_toc_url("4.1.7.1") not in request_urls
-        assert expand_toc_url("4.1.7.0") in request_urls
+
+        # The Overview child points at the type page again; fetch it once, don't expand it.
+        type_page_requests = [u for u in request_urls if u.startswith(f"{SOLIDWORKS_BASE_URL}{type_page}.html")]
+        assert type_page_requests == [f"{SOLIDWORKS_BASE_URL}{type_page}.html?id=4.1.7"]
+        assert expand_toc_url("4.1.7.0") not in request_urls
+
+    def test_folder_pages_are_not_deduped_by_path(self) -> None:
+        """help_list.htm backs every folder node; each id must still be expanded."""
+        listing = {
+            "children": [
+                {"url": f"{SOLIDWORKS_API_BASE_PATH}/help_list.htm?id=4.1"},
+                {"url": f"{SOLIDWORKS_API_BASE_PATH}/help_list.htm?id=4.2"},
+            ]
+        }
+        response = Mock(spec=Response)
+        response.text = json.dumps(listing)
+        response.url = expand_toc_url("4")
+        response.status = 200
+        response.headers = {}
+        response.body = response.text.encode()
+
+        request_urls = [r.url for r in self.spider.parse(response) if not isinstance(r, dict)]
+
+        assert expand_toc_url("4.1") in request_urls
+        assert expand_toc_url("4.2") in request_urls
 
     def test_extract_urls_from_json_no_data(self) -> None:
         """Test extract_urls_from_json handles empty data gracefully"""

@@ -106,15 +106,38 @@ class TestMemberDetailsExtractor:
         <div id="pagetop">
             <span id="pagetitle">CheckAgainstExistingFile Method (ISWDesignCheck)</span>
         </div>
-        <div id="pagebody">
+        <div id="pagebody"><div id="mainbody">
             <br> Validates an active document.
             <h1>.NET Syntax</h1>
-        </div>
+        </div></div>
         """
         parser = MemberDetailsExtractor()
         parser.feed(html)
 
         assert "Validates an active document" in parser.get_description()
+
+    def test_description_skips_2027_header_chrome(self):
+        """2027 pages put See Also links, filter widgets and breadcrumbs before #mainbody; none of it is description."""
+        html = """
+        <div id="pagetop">
+            <span id="pagetitle">GetTitle Method (IModelDoc2)</span>
+            <a href="#seealsobookmark">See Also</a>
+            <label id="collapseAllLabel">Collapse All</label>
+            <label id="CSLabel">Language Filter: C#</label>
+            <table id="pagetopbreadcrumbs"><tr><td>
+                <a href="SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks_namespace.html">SolidWorks.Interop.sldworks Namespace</a> : IModelDoc2 Interface
+            </td></tr></table>
+        </div>
+        <div id="pagebody"><div id="mainbody">
+            Gets the document title.
+            <h1>.NET Syntax</h1>
+        </div></div>
+        """
+        parser = MemberDetailsExtractor()
+        parser.feed(html)
+
+        description = parser.get_description()
+        assert description.strip() == "Gets the document title."
 
     def test_extract_signature(self):
         """Test extraction of C# signature (without return type)."""
@@ -459,7 +482,7 @@ class TestIntegration:
                 <span id="pagetitle">GetTitle Method (IModelDoc2)</span>
             </div>
 
-            <div id="pagebody">
+            <div id="pagebody"><div id="mainbody">
                 <br> Gets the document title.
 
                 <h1>.NET Syntax</h1>
@@ -514,7 +537,7 @@ class TestIntegration:
                 <span id="pagetitle">ErrorCode Property (IFaultEntity)</span>
             </div>
 
-            <div id="pagebody">
+            <div id="pagebody"><div id="mainbody">
                 <br> Gets the error for the fault for the specified entity.
 
                 <h1>.NET Syntax</h1>

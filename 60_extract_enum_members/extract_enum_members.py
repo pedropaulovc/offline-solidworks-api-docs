@@ -34,6 +34,7 @@ class EnumMemberExtractor(HTMLParser):
 
         # State tracking
         self.in_pagetitle: bool = False
+        self.in_mainbody: bool = False
         self.in_see_also_section: bool = False
         self.in_see_also_link: bool = False
         self.current_seealso_href: str | None = None
@@ -53,6 +54,12 @@ class EnumMemberExtractor(HTMLParser):
         # Detect page title
         if tag == "span" and attrs_dict.get("id") == "pagetitle":
             self.in_pagetitle = True
+            return
+
+        # Section headers only count inside the page body; the header chrome
+        # before <div id="mainbody"> repeats "See Also"/"Members" as links.
+        if tag == "div" and attrs_dict.get("id") == "mainbody":
+            self.in_mainbody = True
             return
 
         # Detect links in See Also section (collect every cross-reference link)
@@ -155,11 +162,11 @@ class EnumMemberExtractor(HTMLParser):
             self.type_name = text.replace(" Enumeration", "").strip()
 
         # Detect Members section header (only in h1 tags - but we simplify here)
-        if text == "Members":
+        if self.in_mainbody and text == "Members":
             self.in_members_section = True
 
         # Detect See Also section header (appears after the members table)
-        if text == "See Also":
+        if self.in_mainbody and text == "See Also":
             self.in_see_also_section = True
             self.in_members_section = False
 

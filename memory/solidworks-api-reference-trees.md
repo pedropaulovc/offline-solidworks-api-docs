@@ -45,7 +45,12 @@ still requests its page.
 
 Gotchas observed adding Toolbox (2026):
 - `DOWNLOAD_DELAY` is **0.1s** (not 2s as CLAUDE.md's "2-second delays" claims) — full crawl is
-  ~10-15 min (phase 10, 2250 pages) + ~8 min (phase 30, ~11.5k member pages), not hours.
+  ~10 min (phase 10, ~2,500 page fetches / 2,457 unique paths in 2027) + ~25 min (phase 30,
+  ~11.6k member pages), not hours.
+- 2027 layout gotchas (fixed in the spider/extractors): type nodes have an Overview child with the
+  same page path (dedupe by path, except the shared `help_list.htm` folder page); Methods/Properties
+  nodes replace the old Members node (map back to `<Type>_members.html`); header chrome (See Also,
+  language filter, breadcrumbs) sits before `<div id="mainbody">`, so extractors start there.
 - Phase 10/30 `--resume` does NOT skip already-downloaded URLs; it re-crawls. For a clean,
   consistent snapshot run **fresh** (no `--resume`), which clears + regenerates metadata.
 - `20_extract_types/metadata/api_members.xml` is gitignored (reproducible intermediate); the

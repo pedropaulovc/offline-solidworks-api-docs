@@ -18,7 +18,11 @@ from scrapy.exceptions import DropItem
 
 # Add project root to path for shared imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from shared.constants import SOLIDWORKS_API_FULL_BASE_URL, SOLIDWORKS_API_PATH_PREFIX
+from shared.constants import SOLIDWORKS_API_FULL_BASE_URL, SOLIDWORKS_API_PATH_PREFIX, SOLIDWORKS_API_VERSION
+
+# Doc year the local (gitignored) output/html corpus was crawled for. Saved pages
+# carry no year, so consumers that need a current-version corpus check this file.
+CRAWL_VERSION_FILE = Path(__file__).parent.parent / "output" / "crawl_version.txt"
 
 
 class HtmlSavePipeline:
@@ -27,6 +31,9 @@ class HtmlSavePipeline:
     def __init__(self) -> None:
         self.output_dir: Path = Path(__file__).parent.parent / "output" / "html"
         self.output_dir.mkdir(parents=True, exist_ok=True)
+
+    def open_spider(self, spider: Spider) -> None:
+        CRAWL_VERSION_FILE.write_text(f"{SOLIDWORKS_API_VERSION}\n", encoding="utf-8")
 
     def process_item(self, item: dict[str, Any], spider: Spider) -> dict[str, Any]:
         """Save HTML content to file"""
