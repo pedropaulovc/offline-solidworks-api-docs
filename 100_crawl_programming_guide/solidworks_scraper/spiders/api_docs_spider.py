@@ -9,6 +9,7 @@ This spider crawls the SolidWorks API Programming Guide documentation by:
 
 import hashlib
 import json
+import sys
 from collections.abc import Generator
 from datetime import datetime
 from pathlib import Path
@@ -19,13 +20,17 @@ import scrapy
 from scrapy.http import Response
 from twisted.python.failure import Failure
 
+# Add project root to path for shared imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+from shared.constants import SOLIDWORKS_API_BOUNDARY, SOLIDWORKS_BASE_URL, expand_toc_url
+
 
 class ApiDocsSpider(scrapy.Spider):
     name = "api_docs"
     allowed_domains = ["help.solidworks.com"]
 
     # Starting URL - JSON TOC endpoint for Programming Guide (id=1)
-    start_urls = ["https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id=1"]
+    start_urls = [expand_toc_url(1)]
 
     # Custom settings for this spider
     custom_settings = {
@@ -35,8 +40,8 @@ class ApiDocsSpider(scrapy.Spider):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.crawled_urls: set[str] = set()
-        self.base_path: str = "/2026/english/api/"
-        self.base_url: str = "https://help.solidworks.com"
+        self.base_path: str = SOLIDWORKS_API_BOUNDARY
+        self.base_url: str = SOLIDWORKS_BASE_URL
 
         # Statistics tracking
         self.stats: dict[str, Any] = {
@@ -96,15 +101,11 @@ class ApiDocsSpider(scrapy.Spider):
                 query_params = parse_qs(parsed.query)
                 if "id" in query_params:
                     id_value = query_params["id"][0]
-                    expand_toc_url = (
-                        f"{self.base_url}/expandToc?version=2026&language=english&product=api&queryParam=?id={id_value}"
-                    )
+                    toc_url = expand_toc_url(id_value)
 
-                    self.logger.debug(f"Adding expandToc URL for id={id_value}: {expand_toc_url}")
+                    self.logger.debug(f"Adding expandToc URL for id={id_value}: {toc_url}")
 
-                    yield scrapy.Request(
-                        expand_toc_url, callback=self.parse, errback=self.handle_error, dont_filter=False
-                    )
+                    yield scrapy.Request(toc_url, callback=self.parse, errback=self.handle_error, dont_filter=False)
 
         except json.JSONDecodeError as e:
             self.logger.error(f"Failed to parse JSON from {response.url}: {e}")

@@ -9,9 +9,12 @@ import shutil
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from models import TypeInfo, Property, Method, EnumMember
 from markdown_generator import MarkdownGenerator
+
+from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
 
 
 def test_type_overview_generation():
@@ -251,7 +254,7 @@ def test_href_cross_reference_resolution():
     generator = MarkdownGenerator(output_base_path="test", grep_optimized=True, guide_links=guide_links)
 
     # In-bundle href from a type/member file (two levels deep) -> relative file link
-    text = ('See <see href="https://help.solidworks.com/2026/english/api/'
+    text = (f'See <see href="{SOLIDWORKS_API_FULL_BASE_URL}/'
             'sldworksapiprogguide/OVERVIEW/In-process_Methods.htm">In-process Methods</see>.')
     result = generator._simplify_cross_references(text, "../../")
     assert result == ('See [In-process Methods]'
@@ -263,9 +266,9 @@ def test_href_cross_reference_resolution():
                            '(<../docs/Programming with the SOLIDWORKS API/In-process Methods.md>).'), f"Got: {result_flat}"
 
     # href NOT in the bundle -> plain external link, no prefix
-    ext = 'See <see href="https://help.solidworks.com/2026/english/api/x/Unknown.htm">Unknown Page</see>.'
+    ext = f'See <see href="{SOLIDWORKS_API_FULL_BASE_URL}/x/Unknown.htm">Unknown Page</see>.'
     result_ext = generator._simplify_cross_references(ext, "../../")
-    assert result_ext == 'See [Unknown Page](https://help.solidworks.com/2026/english/api/x/Unknown.htm).', f"Got: {result_ext}"
+    assert result_ext == f'See [Unknown Page]({SOLIDWORKS_API_FULL_BASE_URL}/x/Unknown.htm).', f"Got: {result_ext}"
 
     print("[PASS] href cross-reference resolution")
 

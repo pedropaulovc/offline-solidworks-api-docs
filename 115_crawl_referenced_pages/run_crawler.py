@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Entry point for the referenced-pages closure crawl (Phase 115).
 
-Crawls every ``/2026/english/api/`` page the corpus links to but that phases
+Crawls every ``SOLIDWORKS_API_BOUNDARY`` page the corpus links to but that phases
 10/30/100 never fetched, following in-page ``/api`` links until closure.
 
 Usage:

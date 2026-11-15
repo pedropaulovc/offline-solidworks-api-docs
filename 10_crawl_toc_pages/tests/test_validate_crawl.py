@@ -13,6 +13,8 @@ from pathlib import Path
 
 import jsonlines
 
+from shared.constants import SOLIDWORKS_API_FULL_BASE_URL, expand_toc_url
+
 # validate_crawl.py lives in a numerically-prefixed dir that isn't importable by
 # name, so load it directly from its path.
 _VALIDATOR_PATH = Path(__file__).parent.parent / "validate_crawl.py"
@@ -36,7 +38,7 @@ def _write_records(tmp_path: Path, records: list[dict]) -> Path:
 def _content_record(name: str, suffix: str = ".html") -> dict:
     """A normal content-page record as the crawler writes it (note: ``url``)."""
     return {
-        "url": f"https://help.solidworks.com/2026/english/api/sldworksapi/{name}{suffix}",
+        "url": f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/{name}{suffix}",
         "file_path": f"output\\html\\sldworksapi\\{name}{suffix}",
         "content_hash": f"hash_{name}",
         "content_length": 5000,
@@ -48,10 +50,7 @@ def _content_record(name: str, suffix: str = ".html") -> dict:
 def _expandtoc_record(node_id: str) -> dict:
     """An expandToc API record — saved as .json, query-param boundary form."""
     return {
-        "url": (
-            "https://help.solidworks.com/expandToc?version=2026&language=english"
-            f"&product=api&queryParam=?id={node_id}"
-        ),
+        "url": expand_toc_url(node_id),
         "file_path": f"output\\html\\expandToc_id_{node_id}.json",
         "content_hash": f"toc_{node_id}",
         "content_length": 1000,

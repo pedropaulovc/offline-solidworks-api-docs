@@ -12,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import xml.etree.ElementTree as ET
 
+from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
 from shared.extraction_utils import add_see_also_element
 from shared.xmldoc_links import convert_links_to_see_refs, convert_to_full_url, href_to_see_ref, parse_href_to_cref
 
@@ -59,14 +60,14 @@ class TestConvertToFullUrl(unittest.TestCase):
         result = convert_to_full_url(href)
         self.assertEqual(
             result,
-            "https://help.solidworks.com/2026/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm",
+            f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm",
         )
 
     def test_relative_path_current_dir(self):
         """Test converting relative path in current directory."""
         href = "SomeFile.html"
         result = convert_to_full_url(href)
-        self.assertEqual(result, "https://help.solidworks.com/2026/english/api/sldworksapi/SomeFile.html")
+        self.assertEqual(result, f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/SomeFile.html")
 
     def test_full_url_unchanged(self):
         """Test that full URLs are returned unchanged."""
@@ -93,7 +94,7 @@ class TestConvertLinksToSeeRefs(unittest.TestCase):
         html = 'See <a href="../sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm">SOLIDWORKS Design</a> documentation.'
         result = convert_links_to_see_refs(html)
         self.assertIn(
-            '<see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm">SOLIDWORKS Design</see>',
+            f'<see href="{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm">SOLIDWORKS Design</see>',
             result,
         )
         self.assertNotIn("<a href=", result)

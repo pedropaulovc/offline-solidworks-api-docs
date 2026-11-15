@@ -21,6 +21,7 @@ from example_generator import ExampleGenerator, build_example_filenames
 from index_generator import IndexGenerator
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from shared.constants import SOLIDWORKS_API_FULL_BASE_URL, SOLIDWORKS_API_VERSION  # noqa: E402
 from shared.line_endings import normalize_tree  # noqa: E402
 from models import TypeInfo, ExampleContent, ExportStatistics
 
@@ -303,24 +304,8 @@ class ExportPipeline:
         print(f"  Copied {self.stats.programming_guide_files} programming guide files")
 
     def _api_base_url(self) -> str:
-        """Online help base URL (``https://help.solidworks.com/2026/english/api/``).
-
-        Derived from a guide manifest's ``original_url`` so the version year is not
-        hard-coded; falls back to the 2026 base if no manifest is available.
-        """
-        default = "https://help.solidworks.com/2026/english/api/"
-        for root in self.guide_roots:
-            manifest = Path(root).parent.parent / "metadata" / "files_created.jsonl"
-            if not manifest.exists():
-                continue
-            with open(manifest, encoding="utf-8") as f:
-                for line in f:
-                    url = json.loads(line).get("original_url", "")
-                    idx = url.find("/api/")
-                    if idx != -1:
-                        return f"https://help.solidworks.com{url[:idx + 5]}"
-            break
-        return default
+        """Online help base URL (e.g. ``https://help.solidworks.com/2027/english/api/``)."""
+        return f"{SOLIDWORKS_API_FULL_BASE_URL}/"
 
     @staticmethod
     def _md_destination(path: str) -> str:
@@ -504,7 +489,7 @@ docs/                             # Programming guide content
 Use `[[TypeName]]` or `[[TypeName::MemberName]]` format for type references.
 
 ---
-*SolidWorks API Help 2026 | For personal/educational use only*
+*SolidWorks API Help {SOLIDWORKS_API_VERSION} | For personal/educational use only*
 """
 
         with open(readme_path, 'w', encoding='utf-8') as f:
@@ -588,6 +573,15 @@ Use `[[TypeName]]` or `[[TypeName::MemberName]]` format for type references.
         return example_to_category
 
 
+def find_functional_categories_html(project_root: Path) -> Path:
+    """Locate the Phase 10 FunctionalCategories page; its filename carries a hash of the TOC id query."""
+    crawl_dir = project_root / '10_crawl_toc_pages/output/html/sldworksapi'
+    candidates = sorted(crawl_dir.glob('FunctionalCategories-sldworksapi_*.html'))
+    if len(candidates) != 1:
+        raise FileNotFoundError(f"Expected one FunctionalCategories page in {crawl_dir}, found {len(candidates)}")
+    return candidates[0]
+
+
 def main():
     """Main entry point for the export pipeline."""
     # Determine project root (script is in 120_export_llm_docs/)
@@ -635,8 +629,8 @@ def main():
     )
     parser.add_argument(
         '--functional-categories',
-        default=str(project_root / '10_crawl_toc_pages/output/html/sldworksapi/FunctionalCategories-sldworksapi_2cd1902c_2cd1902c.htmll.html'),
-        help='Path to FunctionalCategories HTML file'
+        default=None,
+        help='Path to FunctionalCategories HTML file (default: the Phase 10 crawl copy)'
     )
     parser.add_argument(
         '--output',
@@ -645,6 +639,8 @@ def main():
     )
 
     args = parser.parse_args()
+
+    functional_categories_html = args.functional_categories or str(find_functional_categories_html(project_root))
 
     # Create and run pipeline
     pipeline = ExportPipeline(output_base=args.output)
@@ -655,7 +651,7 @@ def main():
         phase60_path=args.phase60,
         phase80_path=args.phase80,
         phase110_path=args.phase110,
-        functional_categories_html=args.functional_categories,
+        functional_categories_html=functional_categories_html,
         phase115_path=args.phase115
     )
 

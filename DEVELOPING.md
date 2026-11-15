@@ -337,7 +337,7 @@ uv run pre-commit run --all-files
 **urls_crawled.jsonl** - One record per crawled page:
 ```json
 {
-  "url": "https://help.solidworks.com/2026/english/api/sldworksapi/...",
+  "url": "https://help.solidworks.com/2027/english/api/sldworksapi/...",
   "timestamp": "2025-11-14T10:30:00Z",
   "file_path": "output/html/sldworksapi/...",
   "content_hash": "sha256:abc123...",
@@ -398,7 +398,7 @@ Key settings in crawler `settings.py` files:
 - **User Agent**: Chrome browser to ensure proper access
 - **Crawl Delay**: 2 seconds (respectful crawling)
 - **Concurrent Requests**: 1 (polite single-threaded)
-- **URL Boundary**: `/2026/english/api/` (stays within API docs)
+- **URL Boundary**: `/2027/english/api/` (stays within API docs; `SOLIDWORKS_API_BOUNDARY` in `shared/constants.py`)
 - **Robots.txt**: Respected by default
 
 ### Python Project
@@ -536,7 +536,7 @@ Planned features for future development:
 
 ### Technical Boundaries
 
-- Must stay within `/2026/english/api/` URL boundary
+- Must stay within `/2027/english/api/` URL boundary
 - Content extracted from `__NEXT_DATA__` JSON (helpText field)
 - Minimum 95% success rate for validation
 - Expected ~460 TOC pages, ~11,500 member pages

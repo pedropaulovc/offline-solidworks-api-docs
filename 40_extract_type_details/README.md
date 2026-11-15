@@ -122,7 +122,7 @@ The parser uses Python's `HTMLParser` to:
 
 ## Expected Results
 
-From a full crawl of SolidWorks 2026 API documentation:
+From a full crawl of SolidWorks API documentation:
 
 - **Total type files processed**: ~1674
 - **Types extracted**: ~1674

@@ -265,7 +265,7 @@ validator.print_report()
 
 ## Expected Results
 
-From a complete SolidWorks 2026 API documentation crawl:
+From a complete SolidWorks API documentation crawl:
 
 - **Assemblies**: ~10 (sldworks, swconst, swcommands, etc.)
 - **Types**: ~2000+ (interfaces, enums, classes)

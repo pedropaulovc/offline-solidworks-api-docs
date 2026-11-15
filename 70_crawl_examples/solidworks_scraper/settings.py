@@ -7,7 +7,12 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+import sys
 from pathlib import Path
+
+# Add project root to path for shared imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from shared.constants import SOLIDWORKS_API_BOUNDARY
 
 BOT_NAME = "solidworks_scraper"
 
@@ -134,7 +139,7 @@ DUPEFILTER_DEBUG = True
 
 # URL boundaries configuration
 ALLOWED_DOMAINS = ["help.solidworks.com"]
-BASE_URL_PATH = "/2026/english/api/"
+BASE_URL_PATH = SOLIDWORKS_API_BOUNDARY
 
 # HTTP error handling - retry on common errors
 RETRY_ENABLED = True

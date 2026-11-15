@@ -19,9 +19,12 @@ import jsonlines
 REPO_ROOT = Path(__file__).parent.parent.resolve()
 PHASE_DIR = Path(__file__).parent.resolve()
 sys.path.insert(0, str(REPO_ROOT / "110_extract_docs_md"))
+sys.path.insert(0, str(REPO_ROOT))
 from html_to_markdown import HtmlToMarkdownConverter  # noqa: E402
 
-API_PREFIX = "2026/english/api/"
+from shared.constants import SOLIDWORKS_API_PATH_PREFIX  # noqa: E402
+
+API_PREFIX = SOLIDWORKS_API_PATH_PREFIX
 
 
 def markdown_relpath(url: str) -> str:

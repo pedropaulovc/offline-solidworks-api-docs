@@ -6,8 +6,55 @@ from pathlib import Path
 import pytest
 from scrapy.http import Request, Response
 
+from solidworks_scraper import pipelines
 from solidworks_scraper.pipelines import HtmlSavePipeline, ValidationPipeline
 from solidworks_scraper.spiders.examples_spider import ExamplesSpider
+
+from shared.constants import SOLIDWORKS_API_FULL_BASE_URL, SOLIDWORKS_API_VERSION
+
+
+@pytest.fixture
+def marker_pipeline(tmp_path, monkeypatch):
+    """HtmlSavePipeline writing its corpus and version marker under tmp_path."""
+    marker = tmp_path / "crawl_version.txt"
+    monkeypatch.setattr(pipelines, "CRAWL_VERSION_FILE", marker)
+    pipeline = HtmlSavePipeline()
+    pipeline.output_dir = tmp_path / "html"
+    pipeline.output_dir.mkdir()
+    return pipeline, marker
+
+
+def test_version_marker_written_only_after_clean_finish(marker_pipeline, spider):
+    pipeline, marker = marker_pipeline
+
+    pipeline.open_spider(spider)
+    (pipeline.output_dir / "page.htm").write_text("x")
+    assert not marker.exists()  # partial corpus while crawling
+
+    pipeline.spider_closed(spider, "finished")
+    assert marker.read_text().strip() == SOLIDWORKS_API_VERSION
+
+
+def test_version_marker_absent_after_interrupted_crawl(marker_pipeline, spider):
+    pipeline, marker = marker_pipeline
+    marker.write_text(f"{SOLIDWORKS_API_VERSION}\n")
+
+    pipeline.open_spider(spider)
+    pipeline.spider_closed(spider, "shutdown")
+
+    assert not marker.exists()
+
+
+def test_version_marker_not_written_over_older_corpus(marker_pipeline, spider):
+    """A --resume run on last year's pages mixes years; the corpus must not be marked current."""
+    pipeline, marker = marker_pipeline
+    marker.write_text("1999\n")
+    (pipeline.output_dir / "old.htm").write_text("x")
+
+    pipeline.open_spider(spider)
+    pipeline.spider_closed(spider, "finished")
+
+    assert not marker.exists()
 
 
 @pytest.fixture
@@ -35,14 +82,14 @@ def test_html_save_pipeline_url_to_file_path():
     # Simple URL (no query params): the original .htm extension is preserved.
     # This is required by phase 80 (parse_examples.py), which reads example files
     # via rglob('*.htm'); rewriting to .html would make it find zero examples.
-    url = "https://help.solidworks.com/2026/english/api/sldworksapi/test.htm"
+    url = f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/test.htm"
     path = pipeline.url_to_file_path(url)
     assert "sldworksapi" in str(path)
     assert str(path).endswith("test.htm")
 
     # URL with query parameters: a deterministic hash is appended for uniqueness
     # and the filename is normalized to .html.
-    url_with_query = "https://help.solidworks.com/2026/english/api/sldworksapi/test.htm?id=123"
+    url_with_query = f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/test.htm?id=123"
     path_with_query = pipeline.url_to_file_path(url_with_query)
     path_str = str(path_with_query)
     assert "sldworksapi" in path_str

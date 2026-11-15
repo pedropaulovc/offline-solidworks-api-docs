@@ -19,6 +19,10 @@ from pathlib import Path
 
 import jsonlines
 
+# Add project root to path for shared imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from shared.constants import SOLIDWORKS_API_BOUNDARY, SOLIDWORKS_API_VERSION
+
 
 class CrawlValidator:
     """Validates crawl completeness and integrity"""
@@ -176,11 +180,13 @@ class CrawlValidator:
                         total_size += obj["content_length"]
 
                     # Check URL is within boundary. Two in-boundary forms exist:
-                    # the path form (.../2026/english/api/...) for content pages and
-                    # the expandToc API form (?version=2026&...&product=api) the
+                    # the path form (.../<year>/english/api/...) for content pages and
+                    # the expandToc API form (?version=<year>&...&product=api) the
                     # crawler uses to discover the TOC tree.
-                    in_path_boundary = "/2026/english/api/" in (url or "")
-                    in_expandtoc_api = "/expandToc?" in (url or "") and "version=2026" in (url or "")
+                    in_path_boundary = SOLIDWORKS_API_BOUNDARY in (url or "")
+                    in_expandtoc_api = "/expandToc?" in (url or "") and f"version={SOLIDWORKS_API_VERSION}" in (
+                        url or ""
+                    )
                     if url and not (in_path_boundary or in_expandtoc_api):
                         self.warnings.append(f"URL outside boundary: {url}")
 

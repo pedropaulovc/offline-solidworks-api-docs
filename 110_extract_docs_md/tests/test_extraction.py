@@ -9,6 +9,8 @@ import pytest
 from toc_builder import TocNode, TocTreeBuilder
 from html_to_markdown import HtmlToMarkdownConverter
 
+from shared.constants import SOLIDWORKS_API_BASE_PATH
+
 
 class TestTocTreeBuilder:
     """Test TOC tree building functionality."""
@@ -199,14 +201,14 @@ def sample_expandtoc_dir(tmp_path):
         "id": "1",
         "parentId": "-1",
         "name": "Getting Started",
-        "url": "/2026/english/api/help_list.htm?id=1",
+        "url": f"{SOLIDWORKS_API_BASE_PATH}/help_list.htm?id=1",
         "isLeaf": False,
         "children": [
             {
                 "id": "1.0",
                 "parentId": "1",
                 "name": "Overview",
-                "url": "/2026/english/api/sldworksapiprogguide/GettingStarted/Overview.htm?id=1.0",
+                "url": f"{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/GettingStarted/Overview.htm?id=1.0",
                 "isLeaf": True,
                 "Expanded": False,
                 "Selected": False,
@@ -215,7 +217,7 @@ def sample_expandtoc_dir(tmp_path):
                 "id": "1.1",
                 "parentId": "1",
                 "name": "Installation",
-                "url": "/2026/english/api/sldworksapiprogguide/GettingStarted/Installation.htm?id=1.1",
+                "url": f"{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/GettingStarted/Installation.htm?id=1.1",
                 "isLeaf": True,
                 "Expanded": False,
                 "Selected": False,
@@ -234,7 +236,7 @@ def sample_expandtoc_dir(tmp_path):
         "id": "1.0",
         "parentId": "1",
         "name": "Overview",
-        "url": "/2026/english/api/sldworksapiprogguide/GettingStarted/Overview.htm?id=1.0",
+        "url": f"{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/GettingStarted/Overview.htm?id=1.0",
         "isLeaf": True,
         "Expanded": False,
         "Selected": False,
@@ -248,7 +250,7 @@ def sample_expandtoc_dir(tmp_path):
         "id": "1.1",
         "parentId": "1",
         "name": "Installation",
-        "url": "/2026/english/api/sldworksapiprogguide/GettingStarted/Installation.htm?id=1.1",
+        "url": f"{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/GettingStarted/Installation.htm?id=1.1",
         "isLeaf": True,
         "Expanded": False,
         "Selected": False,

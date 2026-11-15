@@ -13,7 +13,9 @@ import pytest
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from shared.constants import SOLIDWORKS_API_BOUNDARY, SOLIDWORKS_API_FULL_BASE_URL
 from scrapy.exceptions import DropItem
 from solidworks_scraper.pipelines import (
     DuplicateCheckPipeline,
@@ -43,25 +45,25 @@ class TestHtmlSavePipeline:
     def test_url_to_file_path_conversion(self) -> None:
         """Test URL to file path conversion"""
         # Test simple URL
-        url1 = "https://help.solidworks.com/2026/english/api/sldworksapi/test.html"
+        url1 = f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/test.html"
         path1 = self.pipeline.url_to_file_path(url1)
         assert "sldworksapi" in str(path1)
         assert path1.name == "test.html"
 
         # Test URL with query parameters
-        url2 = "https://help.solidworks.com/2026/english/api/test.html?id=123&format=p"
+        url2 = f"{SOLIDWORKS_API_FULL_BASE_URL}/test.html?id=123&format=p"
         path2 = self.pipeline.url_to_file_path(url2)
         assert "test_" in path2.name  # Should have hash appended
         assert path2.suffix == ".html"
 
         # Test URL without extension
-        url3 = "https://help.solidworks.com/2026/english/api/folder/page"
+        url3 = f"{SOLIDWORKS_API_FULL_BASE_URL}/folder/page"
         path3 = self.pipeline.url_to_file_path(url3)
         assert path3.suffix == ".html"
 
     def test_url_to_file_path_deterministic(self) -> None:
         """Test that URL to file path conversion is deterministic"""
-        url = "https://help.solidworks.com/2026/english/api/test.html?id=123&format=p"
+        url = f"{SOLIDWORKS_API_FULL_BASE_URL}/test.html?id=123&format=p"
 
         # Call multiple times and ensure same result
         path1 = self.pipeline.url_to_file_path(url)
@@ -83,7 +85,7 @@ class TestHtmlSavePipeline:
 
         # Create test item
         item = {
-            "url": "https://help.solidworks.com/2026/english/api/test.html",
+            "url": f"{SOLIDWORKS_API_FULL_BASE_URL}/test.html",
             "content": "<html><body>Test content</body></html>",
         }
 
@@ -150,7 +152,7 @@ class TestMetadataLogPipeline:
             manifest = json.load(f)
 
         assert manifest["crawler_version"] == "1.0.0"
-        assert manifest["boundary"] == "/2026/english/api/"
+        assert manifest["boundary"] == SOLIDWORKS_API_BOUNDARY
         assert manifest["crawl_delay_seconds"] == 2
 
     def test_process_item_logs_metadata(self) -> None:

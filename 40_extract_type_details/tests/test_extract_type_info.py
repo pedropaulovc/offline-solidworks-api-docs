@@ -8,6 +8,8 @@ from pathlib import Path
 
 from extract_type_info import TypeInfoExtractor, extract_namespace_from_filename, is_type_file
 
+from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
+
 
 class TestTypeInfoExtractor(unittest.TestCase):
     """Test the TypeInfoExtractor HTML parser."""
@@ -31,6 +33,47 @@ class TestTypeInfoExtractor(unittest.TestCase):
 
         self.assertEqual(parser.type_name, "IAdvancedHoleFeatureData")
         self.assertIn("Advanced Hole feature data", parser.get_description())
+
+    def test_delegate_title_drops_kind_and_assembly(self) -> None:
+        """2027 delegate pages title as 'Name Delegate (Assembly)'; the type name is just 'Name'."""
+        html = """
+        <html>
+        <div id="pagetop">
+            <span id="pagetitle">DAssemblyDocEvents_ActiveConfigChangeNotifyEventHandler Delegate (SolidWorks.Interop.sldworks)</span>
+        </div>
+        </html>
+        """
+
+        parser = TypeInfoExtractor()
+        parser.feed(html)
+
+        self.assertEqual(parser.type_name, "DAssemblyDocEvents_ActiveConfigChangeNotifyEventHandler")
+
+    def test_description_skips_2027_header_chrome(self) -> None:
+        """2027 pages put See Also/Members links, filter widgets and breadcrumbs before #mainbody; none of it is description."""
+        html = """
+        <html>
+        <div id="pagetop">
+            <span id="pagetitle">IAdvancedHoleFeatureData Interface</span>
+            <a href="#seealsobookmark">See Also</a>
+            <a href="SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IAdvancedHoleFeatureData_members.html">Members</a>
+            <label id="expandAllLabel">Expand All</label>
+            <label id="CSLabel">Language Filter: C#</label>
+            <table id="pagetopbreadcrumbs"><tr><td>
+                <a href="SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks_namespace.html">SolidWorks.Interop.sldworks Namespace</a> : IAdvancedHoleFeatureData Interface
+            </td></tr></table>
+        </div>
+        <div id="pagebody"><div id="mainbody">
+            Allows access to the Advanced Hole feature data.
+            <h1>.NET Syntax</h1>
+        </div></div>
+        </html>
+        """
+
+        parser = TypeInfoExtractor()
+        parser.feed(html)
+
+        self.assertEqual(parser.get_description().strip(), "Allows access to the Advanced Hole feature data.")
 
     def test_description_with_links_converted_to_see_cref(self) -> None:
         """Test that links in description are converted to XMLDoc <see cref> format (IDocumentSpecification bug)."""
@@ -255,7 +298,7 @@ class TestTypeInfoExtractor(unittest.TestCase):
 
         # Should convert non-type link to XMLDoc see href
         self.assertIn(
-            '<see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm">',
+            f'<see href="{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm">',
             description,
         )
         # Should preserve link text

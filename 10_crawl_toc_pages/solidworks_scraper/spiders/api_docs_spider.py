@@ -9,6 +9,8 @@ This spider crawls the SolidWorks API documentation by:
 
 import hashlib
 import json
+import re
+import sys
 from collections.abc import Generator
 from datetime import datetime
 from pathlib import Path
@@ -19,24 +21,49 @@ import scrapy
 from scrapy.http import Response
 from twisted.python.failure import Failure
 
+# Add project root to path for shared imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+from shared.constants import SOLIDWORKS_API_BOUNDARY, SOLIDWORKS_BASE_URL, expand_toc_url
+
 
 class ApiDocsSpider(scrapy.Spider):
     name = "api_docs"
     allowed_domains = ["help.solidworks.com"]
 
-    # Root TOC node ids to seed the crawl. Each is a top-level SOLIDWORKS API
-    # reference (see help.solidworks.com/2026/english/api/SWHelp_List.html):
-    #   2  = core SOLIDWORKS API (SolidWorks.Interop.sldworks, swconst, ...)
-    #   13 = Toolbox API (SolidWorks.Interop.swbrowser, sldtoolboxconfigureaddin)
-    # All roots share the /2026/english/api/ boundary, so the recursive expandToc
-    # logic and URL boundary check below handle every subtree unchanged.
-    TOC_ROOT_IDS = ["2", "13"]
+    # Root TOC node ids to seed the crawl (top-level nodes, parentId=-1, of the
+    # SOLIDWORKS API reference at help.solidworks.com/<year>/english/api/SWHelp_List.html).
+    # These ids are version-specific and must be re-mapped on every yearly bump.
+    #
+    # 2027 flattened the TOC: the per-product wrapper nodes of 2026 (id=2 core
+    # API with children 2.0..2.11, id=13 Toolbox) are gone and their former
+    # children are now top-level nodes:
+    #   core SOLIDWORKS API:
+    #     2  = Functional Categories (leaf)
+    #     3  = Release Notes (leaf)
+    #     4  = SolidWorks.Interop.sldworks Namespace (4.0 Overview, 4.1 Interfaces,
+    #          4.2 Delegates, 4.3..4.11 swmotionstudy, swdimxpert, swpublished,
+    #          sw3dprinter, dsgnchk, swhtmlcontrol, swscanto3d, swconst, swcommands)
+    #   Toolbox API:
+    #     44 = Welcome (leaf), 45 = Release Notes (leaf), 46 = Getting Started,
+    #     47 = sldtoolboxconfigureaddin Namespace, 48 = swbrowser Namespace
+    # The Programming Guide (id=1) is crawled separately by Phase 100.
+    # A root's expandToc response is the node itself (with its own url), so leaf
+    # roots still yield their page request via extract_urls_from_json. All roots
+    # share the SOLIDWORKS_API_BOUNDARY, so the recursive expandToc logic and URL
+    # boundary check below handle every subtree unchanged.
+    TOC_ROOT_IDS = ["2", "3", "4", "44", "45", "46", "47", "48"]
+
+    # 2027 also expands every type into "Methods"/"Properties" TOC nodes that list
+    # each member page, and dropped the type's "Members" node. Member pages are
+    # Phase 30's job, and Phase 20 parses the combined `<Type>_members.html` page,
+    # which still exists on the server but is no longer linked from the TOC. So a
+    # member-list node is replaced by its type's `_members.html` page (keyed by
+    # the parent type node id, so Methods and Properties dedupe to one request)
+    # and its member subtree is not expanded.
+    MEMBER_LIST_PATH = re.compile(r"_(?:methods|properties)\.html$")
 
     # Starting URLs - JSON TOC endpoints, one per root node
-    start_urls = [
-        f"https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id={toc_id}"
-        for toc_id in TOC_ROOT_IDS
-    ]
+    start_urls = [expand_toc_url(toc_id) for toc_id in TOC_ROOT_IDS]
 
     # Custom settings for this spider
     custom_settings = {
@@ -46,8 +73,12 @@ class ApiDocsSpider(scrapy.Spider):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.crawled_urls: set[str] = set()
-        self.base_path: str = "/2026/english/api/"
-        self.base_url: str = "https://help.solidworks.com"
+        # TOC id that first requested each page path. 2027 type nodes have an
+        # "Overview" child pointing at the same page with a different ?id=, which
+        # would otherwise save every type page twice.
+        self.page_path_owner: dict[str, str | None] = {}
+        self.base_path: str = SOLIDWORKS_API_BOUNDARY
+        self.base_url: str = SOLIDWORKS_BASE_URL
 
         # Statistics tracking
         self.stats: dict[str, Any] = {
@@ -85,7 +116,6 @@ class ApiDocsSpider(scrapy.Spider):
 
             self.logger.info(f"Found {len(urls)} URLs in JSON TOC")
 
-            # Create requests for each URL
             for url in urls:
                 # Convert relative URL to absolute
                 full_url = url
@@ -98,24 +128,31 @@ class ApiDocsSpider(scrapy.Spider):
                     self.logger.debug(f"Skipping URL outside boundary: {full_url}")
                     continue
 
+                query_params = parse_qs(parsed.query)
+                id_value = query_params["id"][0] if "id" in query_params else None
+
+                if self.MEMBER_LIST_PATH.search(parsed.path):
+                    members_request = self.members_page_request(parsed.path, id_value)
+                    if members_request is not None:
+                        yield members_request
+                    continue
+
+                if self.is_overview_duplicate(parsed.path, id_value):
+                    self.logger.debug(f"Skipping Overview duplicate of its parent page: {full_url}")
+                    continue
+                self.page_path_owner.setdefault(parsed.path, id_value)
+
                 # Yield request for the page itself
                 yield scrapy.Request(
                     full_url, callback=self.parse_page, errback=self.handle_error, meta={"original_url": full_url}
                 )
 
-                # Extract id parameter and create expandToc request
-                query_params = parse_qs(parsed.query)
-                if "id" in query_params:
-                    id_value = query_params["id"][0]
-                    expand_toc_url = (
-                        f"{self.base_url}/expandToc?version=2026&language=english&product=api&queryParam=?id={id_value}"
-                    )
+                if id_value is None:
+                    continue
 
-                    self.logger.debug(f"Adding expandToc URL for id={id_value}: {expand_toc_url}")
-
-                    yield scrapy.Request(
-                        expand_toc_url, callback=self.parse, errback=self.handle_error, dont_filter=False
-                    )
+                toc_url = expand_toc_url(id_value)
+                self.logger.debug(f"Adding expandToc URL for id={id_value}: {toc_url}")
+                yield scrapy.Request(toc_url, callback=self.parse, errback=self.handle_error, dont_filter=False)
 
         except json.JSONDecodeError as e:
             self.logger.error(f"Failed to parse JSON from {response.url}: {e}")
@@ -141,15 +178,51 @@ class ApiDocsSpider(scrapy.Spider):
 
         # Handle object (dict)
         elif isinstance(data, dict):
-            # Extract URL if present
-            if "url" in data and data["url"]:
-                urls.append(data["url"])
+            url = data.get("url")
+            if url:
+                urls.append(url)
+
+            # Member-list nodes stand in for their type's _members page; their
+            # per-member children are Phase 30's job.
+            if url and self.MEMBER_LIST_PATH.search(urlparse(url).path):
+                return urls
 
             # Recursively process children
-            if "children" in data and data["children"]:
+            if data.get("children"):
                 urls.extend(self.extract_urls_from_json(data["children"]))
 
         return urls
+
+    def is_overview_duplicate(self, path: str, id_value: str | None) -> bool:
+        """True for a node that repeats its parent node's page (the 2027 type "Overview" child).
+
+        Only direct children of the node that first requested the path are
+        skipped, page and subtree alike. Any other node sharing a path (e.g. a page
+        listed under two TOC branches) keeps its own fetch and expansion, so no
+        subtree depends on which response arrived first. help_list.htm is the
+        shared page of every folder node and is never a duplicate.
+        """
+        if path.endswith("/help_list.htm") or id_value is None or path not in self.page_path_owner:
+            return False
+        return id_value.rsplit(".", 1)[0] == self.page_path_owner[path]
+
+    def members_page_request(self, member_list_path: str, member_list_id: str | None) -> scrapy.Request | None:
+        """Request the `<Type>_members.html` page standing in for a Methods/Properties TOC node.
+
+        Returns None when the type's members page was already requested (Methods and
+        Properties siblings, or a nested member-list node under the same type)."""
+        members_path = self.MEMBER_LIST_PATH.sub("_members.html", member_list_path)
+        if members_path in self.page_path_owner:
+            return None
+        type_id = member_list_id.rsplit(".", 1)[0] if member_list_id else None
+        self.page_path_owner[members_path] = type_id
+
+        members_url = f"{self.base_url}{members_path}"
+        if type_id:
+            members_url = f"{members_url}?id={type_id}"
+        return scrapy.Request(
+            members_url, callback=self.parse_page, errback=self.handle_error, meta={"original_url": members_url}
+        )
 
     def parse_page(self, response: Response) -> Generator[dict[str, Any], None, None]:
         """Parse and save a documentation page"""

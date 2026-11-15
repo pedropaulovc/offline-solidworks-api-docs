@@ -28,6 +28,8 @@ from shared.extraction_utils import (
 )
 from shared.xmldoc_links import convert_links_to_see_refs, href_to_see_ref
 
+TITLE_KIND_SUFFIX = re.compile(r"\s+(?:Interface|Class|Enumeration|Delegate)\b.*$")
+
 
 class TypeInfoExtractor(HTMLParser):
     """HTML parser to extract type information from SolidWorks API documentation."""
@@ -60,7 +62,6 @@ class TypeInfoExtractor(HTMLParser):
         self.seen_pagetitle: bool = False
         self.seen_first_h1: bool = False
         self.description_parts: list[str] = []
-        self.description_depth: int = 0
 
         # For collecting remarks content
         self.remarks_parts: list[str] = []
@@ -74,6 +75,13 @@ class TypeInfoExtractor(HTMLParser):
             self.in_pagetitle = True
             return
 
+        # The description starts at the page body. Everything between the page
+        # title and <div id="mainbody"> is page chrome (See Also/Members links,
+        # expand/collapse and language-filter widgets, breadcrumbs).
+        if tag == "div" and attrs_dict.get("id") == "mainbody" and self.seen_pagetitle:
+            self.in_description = True
+            return
+
         # Track when we're inside an h1 tag (for section detection)
         if tag == "h1":
             self.in_h1 = True
@@ -81,12 +89,10 @@ class TypeInfoExtractor(HTMLParser):
             if self.seen_pagetitle and not self.seen_first_h1:
                 self.seen_first_h1 = True
                 self.in_description = False
-                self.description_depth = 0
             return
 
         # Collect all HTML tags in description section (like we do for remarks)
         if self.in_description and not self.in_pagetitle:
-            self.description_depth += 1
             # Reconstruct HTML tags for description
             attrs_str = ""
             if attrs:
@@ -131,13 +137,10 @@ class TypeInfoExtractor(HTMLParser):
         if tag == "span" and self.in_pagetitle:
             self.in_pagetitle = False
             self.seen_pagetitle = True
-            self.in_description = True
-            self.description_depth = 0
             return
 
         # Track closing tags in description section
         if self.in_description and not self.in_pagetitle:
-            self.description_depth -= 1
             self.description_parts.append(f"</{tag}>")
 
         # Handle end of link in example section
@@ -182,8 +185,9 @@ class TypeInfoExtractor(HTMLParser):
 
         # Capture type name from pagetitle
         if self.in_pagetitle and text:
-            # Remove " Interface", " Class", or " Enumeration" suffix if present
-            self.type_name = text.replace(" Interface", "").replace(" Class", "").replace(" Enumeration", "").strip()
+            # Strip the kind suffix: "IFoo Interface", "swBar_e Enumeration",
+            # "DFooEventHandler Delegate (SolidWorks.Interop.sldworks)"
+            self.type_name = TITLE_KIND_SUFFIX.sub("", text).strip()
 
         # Capture description (text between pagetitle and first h1)
         # Use original data (not stripped) to preserve spacing

@@ -11,6 +11,7 @@ This spider crawls example pages from the SolidWorks API documentation by:
 
 import hashlib
 import json
+import sys
 import xml.etree.ElementTree as ET
 from collections.abc import Generator
 from datetime import datetime
@@ -21,6 +22,10 @@ from urllib.parse import urlparse
 import scrapy
 from scrapy.http import Response
 from twisted.python.failure import Failure
+
+# Add project root to path for shared imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
 
 
 class ExamplesSpider(scrapy.Spider):
@@ -35,7 +40,7 @@ class ExamplesSpider(scrapy.Spider):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.crawled_urls: set[str] = set()
-        self.base_url: str = "https://help.solidworks.com/2026/english/api"
+        self.base_url: str = SOLIDWORKS_API_FULL_BASE_URL
 
         # Statistics tracking
         self.stats: dict[str, Any] = {

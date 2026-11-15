@@ -6,6 +6,7 @@ from pathlib import Path
 import jsonlines
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from link_targets import (
     ReferenceSource,
@@ -20,14 +21,16 @@ from link_targets import (
     normalize_request_url,
 )
 
-BASE = "https://help.solidworks.com/2026/english/api"
+from shared.constants import SOLIDWORKS_API_BASE_PATH, SOLIDWORKS_API_FULL_BASE_URL, SOLIDWORKS_API_PATH_PREFIX
+
+BASE = SOLIDWORKS_API_FULL_BASE_URL
 
 
 def test_canonical_key_case_and_slash_insensitive():
     # Case and double slashes collapse to one identity.
     a = canonical_key(f"{BASE}/sldworksapiprogguide/OVERVIEW/In-process_Methods.htm")
     b = canonical_key(f"{BASE}/sldworksapiprogguide//Overview/In-process_Methods.htm")
-    assert a == b == "2026/english/api/sldworksapiprogguide/overview/in-process_methods.htm"
+    assert a == b == f"{SOLIDWORKS_API_PATH_PREFIX}sldworksapiprogguide/overview/in-process_methods.htm"
 
 
 def test_canonical_key_decodes_percent_escapes():
@@ -40,7 +43,7 @@ def test_canonical_key_decodes_percent_escapes():
 
 def test_canonical_key_rejects_non_pages():
     assert canonical_key(f"{BASE}/swconst/DP.gif") is None          # not .htm/.html
-    assert canonical_key("https://example.com/2026/english/api/x.htm") is None  # wrong host tree
+    assert canonical_key(f"https://example.com{SOLIDWORKS_API_BASE_PATH}/x.htm") is None  # wrong host tree
     assert canonical_key("") is None
 
 
@@ -105,7 +108,7 @@ def test_seed_excludes_bundle_docs_not_merely_crawled(tmp_path):
     # files_created manifest keyed by original_url (path form, as Phase 110 stores it).
     manifest = tmp_path / "files_created.jsonl"
     with jsonlines.open(manifest, mode="w") as w:
-        w.write({"original_url": "/2026/english/api/sldworksapiprogguide/Bitmasks.htm"})
+        w.write({"original_url": f"{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/Bitmasks.htm"})
     bundle = build_bundle_doc_keys([manifest])
     assert canonical_key(f"{BASE}/sldworksapiprogguide/Bitmasks.htm") in bundle
 

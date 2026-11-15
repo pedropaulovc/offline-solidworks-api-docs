@@ -95,6 +95,13 @@ class MemberDetailsExtractor(HTMLParser):
             self.in_pagetitle = True
             return
 
+        # The description starts at the page body. Everything between the page
+        # title and <div id="mainbody"> is page chrome (See Also link,
+        # expand/collapse and language-filter widgets, breadcrumbs).
+        if tag == "div" and attrs_dict.get("id") == "mainbody" and self.seen_pagetitle:
+            self.in_description = True
+            return
+
         # Track when we're inside an h1 tag (for section detection)
         if tag == "h1":
             self.in_h1 = True
@@ -206,7 +213,6 @@ class MemberDetailsExtractor(HTMLParser):
         if tag == "span" and self.in_pagetitle:
             self.in_pagetitle = False
             self.seen_pagetitle = True
-            self.in_description = True
             return
 
         # Track closing tags in description section

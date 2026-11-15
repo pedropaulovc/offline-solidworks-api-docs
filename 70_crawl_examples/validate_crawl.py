@@ -24,6 +24,10 @@ from typing import Any
 
 import jsonlines
 
+# Add project root to path for shared imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from shared.constants import SOLIDWORKS_API_BASE_PATH
+
 # Set UTF-8 encoding for stdout on Windows
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8")
@@ -164,8 +168,8 @@ class CrawlValidator:
                 for obj in reader:
                     url = obj.get("url", "")
                     # Extract the path portion to match against source URLs
-                    if "/2026/english/api" in url:
-                        path = url.split("/2026/english/api")[1]
+                    if SOLIDWORKS_API_BASE_PATH in url:
+                        path = url.split(SOLIDWORKS_API_BASE_PATH)[1]
                         crawled_urls.add(path)
 
         # Calculate coverage

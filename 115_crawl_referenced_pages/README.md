@@ -2,7 +2,7 @@
 
 Closes the "dead link" gap left by the TOC-driven crawls. Phases 10/30/100 only
 fetch pages reachable from the `expandToc` table of contents, so any page under
-`/2026/english/api/` that the docs *link to* but that isn't in a TOC (e.g.
+`/2027/english/api/` (`SOLIDWORKS_API_BOUNDARY`) that the docs *link to* but that isn't in a TOC (e.g.
 `swconst` System Options / Document Properties setting pages, a handful of
 `sldworksapiprogguide/Miscellaneous` topics) is never crawled and surfaces in the
 Phase 120 export as a bare external link.

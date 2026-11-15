@@ -123,10 +123,10 @@ This is a multi-phase pipeline project for creating offline, searchable versions
 4. **Copyright Compliant**: HTML content gitignored, users crawl themselves
 
 ### Important URLs
-- **Documentation Base**: `https://help.solidworks.com/2026/english/api/`
-- **Crawler Start URL**: `https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id=2`
-- **expandToc API Pattern**: `https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id={id_value}`
-- **Human-Friendly Entry Point**: `https://help.solidworks.com/2026/english/api/sldworksapiprogguide/Welcome.htm?id=0`
+- **Documentation Base**: `https://help.solidworks.com/2027/english/api/`
+- **Crawler Start URLs**: `https://help.solidworks.com/expandToc?version=2027&language=english&product=api&queryParam=?id={root}` for each root in `TOC_ROOT_IDS` (2027: 2, 3, 4 core API; 44-48 Toolbox API)
+- **expandToc API Pattern**: `https://help.solidworks.com/expandToc?version=2027&language=english&product=api&queryParam=?id={id_value}`
+- **Human-Friendly Entry Point**: `https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Welcome.htm?id=0`
 
 ## Development Guidelines
 
@@ -176,17 +176,22 @@ uv run pytest 10_crawl_toc_pages/tests/ -v
 - ⏱️ Respectful crawling (2-second delays)
 
 ### Technical
-- Must stay within `/2026/english/api/` boundary
+- Must stay within `/2027/english/api/` boundary
 - Content extracted from `__NEXT_DATA__` JSON (helpText field)
 - Minimum 95% success rate for validation
-- Expected ~2250 content pages from complete crawl (core SOLIDWORKS API + Toolbox API)
+- Expected ~2,500 Phase 10 page fetches (2,457 unique content paths in the 2027 crawl: core SOLIDWORKS API + Toolbox API); Phase 30 adds ~11,560 member pages
 
 ## Known Issues & Considerations
 
 1. **Large HTML Files**: Some documentation pages are >500KB
 2. **expandToc API**: Recursive discovery of nested TOC sections via JSON API
 3. **Session Management**: Currently stateless, may need cookies in future
-4. **Version Updates**: URLs contain year (2026), needs updating annually
+4. **Version Updates**: The doc year lives in ONE place, `SOLIDWORKS_API_VERSION` in
+   `shared/constants.py`; every phase derives URLs, path prefixes, regexes and boundaries from it.
+   Bump it annually AND re-map `TOC_ROOT_IDS` in
+   `10_crawl_toc_pages/solidworks_scraper/spiders/api_docs_spider.py`: top-level TOC ids are not
+   stable across versions (2027 flattened 2026's `id=2`/`id=13` wrappers into ids 2-4 and 44-48;
+   see `memory/solidworks-api-reference-trees.md`).
 
 ## Future Enhancement Ideas
 

@@ -1,20 +1,20 @@
 {
   "statistics": {
     "total_assemblies": 12,
-    "total_types": 1529,
-    "total_properties": 3514,
-    "total_methods": 8043,
-    "total_enum_members": 10492,
-    "types_with_descriptions": 1523,
-    "types_with_remarks": 394,
-    "types_with_examples": 457,
-    "examples_added": 623,
-    "examples_cataloged": 2839,
-    "guide_pages": 323,
-    "members_with_signatures": 11557,
+    "total_types": 1891,
+    "total_properties": 3515,
+    "total_methods": 8049,
+    "total_enum_members": 10758,
+    "types_with_descriptions": 1885,
+    "types_with_remarks": 713,
+    "types_with_examples": 538,
+    "examples_added": 634,
+    "examples_cataloged": 2902,
+    "guide_pages": 334,
+    "members_with_signatures": 11564,
     "properties_with_params": 106,
-    "methods_with_params": 4971,
-    "total_parameters_documented": 15153
+    "methods_with_params": 4975,
+    "total_parameters_documented": 15161
   },
   "output_files": {
     "SolidWorks.Interop.sldtoolboxconfigureaddin": "90_export_xmldoc/output/SolidWorks.Interop.sldtoolboxconfigureaddin.xml",

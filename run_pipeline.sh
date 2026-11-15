@@ -2,7 +2,8 @@
 #
 # Full pipeline orchestrator for the offline SOLIDWORKS API docs project.
 #
-# Runs every phase in order (10 -> 200) against the live 2026 docs, stopping on
+# Runs every phase in order (10 -> 200) against the live docs for the version in
+# shared/constants.py (SOLIDWORKS_API_VERSION), stopping on
 # the first hard failure. Each phase's main step is fatal (the run aborts);
 # validation steps are advisory (logged, never fatal). All output is tee'd to a
 # timestamped log under ./logs/.

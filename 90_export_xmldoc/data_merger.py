@@ -438,8 +438,11 @@ class DataMerger:
                 remarks = remarks.replace('<![CDATA[', '').replace(']]>', '')
                 type_info.remarks = remarks
 
-            # Load examples
-            type_info.examples.extend(parse_example_references(type_elem))
+            # Load examples; a type can appear in several records (one per crawled
+            # copy of its page), so skip refs already attached.
+            for example in parse_example_references(type_elem):
+                if example not in type_info.examples:
+                    type_info.examples.append(example)
 
             # Load See Also cross-references
             see_also = parse_see_also(type_elem)

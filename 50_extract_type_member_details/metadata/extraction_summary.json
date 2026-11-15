@@ -1,11 +1,11 @@
 {
-  "total_files_processed": 11557,
-  "members_extracted": 11557,
-  "members_with_parameters": 5077,
-  "members_with_return_values": 9170,
+  "total_files_processed": 11564,
+  "members_extracted": 11564,
+  "members_with_parameters": 5081,
+  "members_with_return_values": 9183,
   "members_with_examples": 3234,
-  "members_with_remarks": 6508,
+  "members_with_remarks": 6509,
   "errors": 0,
-  "output_file": "50_extract_type_member_details\\metadata\\api_member_details.xml",
+  "output_file": "50_extract_type_member_details/metadata/api_member_details.xml",
   "error_files": []
 }

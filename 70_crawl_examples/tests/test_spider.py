@@ -8,6 +8,8 @@ from scrapy.http import HtmlResponse, Request
 
 from solidworks_scraper.spiders.examples_spider import ExamplesSpider
 
+from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
+
 
 @pytest.fixture
 def spider():
@@ -37,7 +39,7 @@ def test_spider_initialization(spider):
     """Test that spider initializes correctly"""
     assert spider.name == "examples"
     assert "help.solidworks.com" in spider.allowed_domains
-    assert spider.base_url == "https://help.solidworks.com/2026/english/api"
+    assert spider.base_url == SOLIDWORKS_API_FULL_BASE_URL
 
 
 def test_load_urls_converts_relative_to_absolute():
@@ -66,7 +68,7 @@ def test_load_urls_converts_relative_to_absolute():
         urls = spider._load_urls()
 
         assert len(urls) == 1
-        assert urls[0] == "https://help.solidworks.com/2026/english/api/sldworksapi/test.htm"
+        assert urls[0] == f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/test.htm"
 
     finally:
         temp_path.unlink()
@@ -199,7 +201,7 @@ def test_parse_page_extracts_title(spider):
     </html>
     """
 
-    url = "https://help.solidworks.com/2026/english/api/sldworksapi/test.htm"
+    url = f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/test.htm"
     request = Request(url)
     response = HtmlResponse(
         url=url,
@@ -228,7 +230,7 @@ def test_parse_page_handles_missing_next_data(spider):
     </html>
     """
 
-    url = "https://help.solidworks.com/2026/english/api/sldworksapi/test.htm"
+    url = f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/test.htm"
     request = Request(url)
     response = HtmlResponse(
         url=url,

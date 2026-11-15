@@ -239,7 +239,7 @@ with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
 
 ## Expected Results
 
-From a complete SolidWorks 2026 API documentation crawl:
+From a complete SolidWorks API documentation crawl:
 
 ### XMLDoc Package
 - **File count**: ~10 XML files (one per assembly)

@@ -90,7 +90,7 @@ ROBOTSTXT_OBEY = True           # Respect robots.txt
 
 # URL boundaries
 ALLOWED_DOMAINS = ["help.solidworks.com"]
-BASE_URL_PATH = "/2026/english/api/"
+BASE_URL_PATH = SOLIDWORKS_API_BOUNDARY  # "/2027/english/api/", from shared/constants.py
 
 # Only download HTML
 DEFAULT_REQUEST_HEADERS = {
@@ -102,11 +102,12 @@ DEFAULT_REQUEST_HEADERS = {
 
 To modify crawl behavior, edit:
 
-1. **Starting URL**: In `api_docs_spider.py`, modify `start_urls`
-   - Current: `https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id=2`
-   - Change version, language, or starting id as needed
-2. **URL Boundaries**: In `api_docs_spider.py`, adjust `base_path`
-   - Current: `/2026/english/api/`
+1. **Starting URLs**: In `api_docs_spider.py`, modify `TOC_ROOT_IDS` (one expandToc seed per root id)
+   - Current roots (2027): `2, 3, 4` (core API) and `44..48` (Toolbox API), e.g.
+     `https://help.solidworks.com/expandToc?version=2027&language=english&product=api&queryParam=?id=4`
+   - Version/language come from `shared/constants.py` (`expand_toc_url()`)
+2. **URL Boundaries**: derived from `SOLIDWORKS_API_BOUNDARY` in `shared/constants.py`
+   - Current: `/2027/english/api/`
 3. **Crawl Delay**: In `settings.py`, change `DOWNLOAD_DELAY`
 4. **Concurrent Requests**: In `settings.py`, modify `CONCURRENT_REQUESTS`
 
@@ -118,7 +119,7 @@ The SolidWorks documentation site uses a JSON API called `expandToc` to serve it
 
 **Request Format:**
 ```
-https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id=<N>
+https://help.solidworks.com/expandToc?version=2027&language=english&product=api&queryParam=?id=<N>
 ```
 
 **Response Structure:**
@@ -127,7 +128,7 @@ https://help.solidworks.com/expandToc?version=2026&language=english&product=api&
   "children": [
     {
       "name": "Page Title",
-      "url": "/2026/english/api/sldworksapi/SomeClass.htm?id=123",
+      "url": "/2027/english/api/sldworksapi/SomeClass.htm?id=123",
       "children": [
         // Nested pages...
       ]
@@ -164,7 +165,10 @@ The crawler extracts only the `helpText` field, which contains clean HTML withou
 The main spider (`api_docs_spider.py`) implements a two-stage crawling approach:
 
 ### Stage 1: Table of Contents Discovery
-- **Start URL**: `https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id=2`
+- **Start URLs**: one `expandToc` request per id in `TOC_ROOT_IDS` (2027: `2, 3, 4, 44, 45, 46, 47, 48`),
+  e.g. `https://help.solidworks.com/expandToc?version=2027&language=english&product=api&queryParam=?id=4`.
+  A root's response is the node itself, so leaf roots (e.g. id=2 Functional Categories) still yield
+  their page.
 - Fetches JSON structure containing all documentation page URLs
 - Recursively extracts URLs from nested `children` arrays
 - Creates expandToc requests for each page's `id` parameter to discover nested pages
@@ -176,7 +180,7 @@ The main spider (`api_docs_spider.py`) implements a two-stage crawling approach:
 - Saves only the helpText HTML (no navigation, headers, or other page chrome)
 
 ### URL Processing
-- Enforces boundary checking (stays within `/2026/english/api/`)
+- Enforces boundary checking (stays within `/2027/english/api/`)
 - Filters out non-HTML resources (CSS, JS, images)
 - Tracks visited URLs to prevent duplicates
 
@@ -244,7 +248,7 @@ output/html/
 One JSON object per line, containing:
 ```json
 {
-  "url": "https://help.solidworks.com/2026/english/api/sldworksapi/...",
+  "url": "https://help.solidworks.com/2027/english/api/sldworksapi/...",
   "timestamp": "2025-11-14T10:30:00Z",
   "file_path": "output/html/sldworksapi/...",
   "content_hash": "sha256:...",
@@ -366,15 +370,16 @@ If you need faster crawling (use with caution):
 
 When a new SolidWorks version is released:
 
-1. **Update expandToc URL** in `api_docs_spider.py`:
-   - Change `version=2026` to `version=2027` in `start_urls`
-2. **Update base path** in `api_docs_spider.py`:
-   - Change `self.base_path = "/2026/english/api/"` to `"/2027/english/api/"`
-3. **Update manifest** in `pipelines.py`:
-   - Update `start_url` and `boundary` in `MetadataLogPipeline.init_manifest()`
-4. **Clear previous crawl data**:
+1. **Bump the version** in `shared/constants.py`: set `SOLIDWORKS_API_VERSION` to the new year.
+   Every spider, pipeline, validator and exporter derives its URLs, path prefix and boundary
+   from it.
+2. **Re-map `TOC_ROOT_IDS`** in `api_docs_spider.py`: top-level TOC ids change between
+   versions (2027 flattened 2026's `id=2` core / `id=13` Toolbox wrappers into ids `2, 3, 4`
+   and `44..48`). Probe `expandToc?...&queryParam=?id=N` for each top-level id (a browser
+   User-Agent is required) and list every core-API and Toolbox root.
+3. **Clear previous crawl data**:
    - Delete or archive `output/` and `metadata/` directories
-5. **Run fresh crawl and validate**
+4. **Run fresh crawl and validate**
 
 ## 📝 Notes
 

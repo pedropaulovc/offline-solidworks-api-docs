@@ -2,7 +2,7 @@
 
 **Enhanced IntelliSense and AI-Assisted Development for SolidWorks API**
 
-This project provides two comprehensive documentation packages for the SolidWorks API:
+This project provides two comprehensive documentation packages for the SolidWorks API, generated from the SOLIDWORKS 2027 API Help:
 
 1. **XMLDoc Package** - Visual Studio IntelliSense support with tooltips, parameter info, and examples
 2. **LLM Documentation Package** - AI-optimized markdown documentation for use with Claude, ChatGPT, and other LLMs
@@ -59,23 +59,23 @@ This project provides two comprehensive documentation packages for the SolidWork
 
 ## What's Included
 
-### XMLDoc Package (~2 MB compressed, ~15 MB uncompressed)
+### XMLDoc Package (~5 MB compressed, ~44 MB uncompressed)
 
 Contains XML files providing IntelliSense documentation for all SolidWorks API assemblies, plus companion semantic catalogs:
 
-- **Comprehensive coverage**: 2,518 types, 11,523 members
+- **Comprehensive coverage**: 1,891 types (including 1,000 enumerations and 325 event delegates), 11,564 members, 10,758 enum members
 - **Full descriptions**: Type and member documentation
 - **Parameter details**: Complete parameter information
 - **Return values**: Detailed return type documentation
-- **Code examples**: 3,708+ examples (VBA, C#, VB.NET, C++)
+- **Code examples**: 2,902 examples (VBA, C#, VB.NET, C++)
 - **Remarks**: Usage notes and best practices
 - **Complete signatures**: Namespaced `sw:signature` elements retain return types, parameter types, and property accessors
 - **Multilingual examples**: `SolidWorks.Interop.examples.xml` catalogs VBA, VB.NET, C++ COM, and C# examples with language metadata
 - **Programming guide**: `SolidWorks.Interop.guides.xml` embeds the programming/how-to Markdown pages
 
-### LLM Documentation Package (~50 MB compressed, ~200 MB uncompressed)
+### LLM Documentation Package (~13 MB compressed, ~81 MB uncompressed)
 
-Contains 26,902 markdown files optimized for AI consumption:
+Contains 16,697 markdown files optimized for AI consumption:
 
 #### Folder Structure
 
@@ -83,7 +83,7 @@ Contains 26,902 markdown files optimized for AI consumption:
 📁 solidworks-docs/ (extracted from `SolidWorks.Interop.llms.v{version}.zip`)
 ├── 📄 README.md                    # Guide for using with LLMs
 │
-├── 📁 types/                       # API Types (1,563 types)
+├── 📁 types/                       # API Types (891 interfaces, classes, delegates)
 │   ├── 📁 IModelDoc2/              # One folder per type
 │   │   ├── _overview.md            # Type description, remarks, counts
 │   │   ├── CreateArc.md            # Individual method documentation
@@ -94,27 +94,25 @@ Contains 26,902 markdown files optimized for AI consumption:
 │   ├── 📁 ISldWorks/
 │   │   ├── _overview.md
 │   │   └── ... (methods and properties)
-│   └── ... (1,563 type folders)
+│   └── ... (891 type folders)
 │
-├── 📁 enums/                       # Enumerations (955 enums)
-│   ├── 📁 swDocumentTypes_e/
-│   │   ├── _overview.md
-│   │   ├── swDocPART.md            # Part document type
-│   │   ├── swDocASSEMBLY.md        # Assembly document type
-│   │   └── swDocDRAWING.md         # Drawing document type
-│   └── ... (955 enum folders)
+├── 📁 enums/                       # Enumerations (1,000 enums)
+│   ├── swDocumentTypes_e.md        # One file per enum, all members inline
+│   └── ... (1,000 enum files)
 │
 ├── 📁 index/                       # Navigation & Discovery
 │   ├── by_category.md              # Types by functional category
 │   ├── by_assembly.md              # Types by .NET assembly
+│   ├── by_member_name.md           # All members sorted by name
+│   ├── members_by_type.md          # Every member of every type
 │   └── statistics.md               # Quick stats and largest types
 │
-├── 📁 examples/                    # Code Examples (3,708 examples)
+├── 📁 examples/                    # Code Examples (2,902 examples)
 │   ├── Create_Advanced_Hole_Example_CSharp.md
 │   ├── Create_Assembly_Example_VBA.md
 │   └── ... (all examples, flat structure)
 │
-└── 📁 docs/                        # Programming Guide (125 pages)
+└── 📁 docs/                        # Programming Guide + referenced API pages (334 pages)
     ├── Overview.md
     ├── SOLIDWORKS Partner Program.md
     └── 📁 Programming with the SOLIDWORKS API/
@@ -125,7 +123,7 @@ Contains 26,902 markdown files optimized for AI consumption:
 
 #### Key Features
 
-- **File-per-member**: Each method, property, and enum gets its own file (easy to grep/search)
+- **File-per-member**: Each method and property gets its own file; each enum is one file (easy to grep/search)
 - **YAML frontmatter**: Machine-readable metadata in every file
 - **Simplified links**: `[[IModelDoc2]]` instead of XML-style cross-references
 - **Flat structure**: `types/TypeName/` instead of deep nesting
@@ -163,7 +161,7 @@ claude --context /path/to/SolidWorks.LLM.Docs
 grep -r "CreateArc" types/IModelDoc2/
 
 # Find methods in a specific category
-grep -l "category: Assembly Interfaces" types/*/_.overview.md
+grep -l "category: Assembly Interfaces" types/*/_overview.md
 
 # Search examples for specific topics
 grep -r "advanced hole" examples/
@@ -226,23 +224,24 @@ Once installed, you'll see documentation when:
 
 ### Coverage Statistics
 
-- **Types**: 2,518 total
-  - With descriptions: ~1,568 (93%)
-  - With examples: ~561 (33%)
-  - With remarks: ~455 (27%)
+- **Types**: 1,891 total (891 interfaces/classes/delegates, 1,000 enumerations)
+  - With descriptions: 1,885 (99.7%)
+  - With examples: 538 (28%)
+  - With remarks: 713 (38%)
 
-- **Members**: 11,523 total
-  - Methods with parameters: ~8,000+
-  - Properties with descriptions: ~3,000+
-  - All with return value documentation
+- **Members**: 11,564 total
+  - Methods: 8,049 (4,975 with parameters)
+  - Properties: 3,515
+  - Parameters documented: 15,161
+  - Enum members: 10,758
 
-- **Examples**: 3,708 total
-  - C#: ~1,100
-  - VBA: ~1,000
-  - VB.NET: ~900
-  - C++: ~700
+- **Examples**: 2,902 total
+  - VBA: ~1,230
+  - C#: ~820
+  - VB.NET: ~800
+  - C++: ~60
 
-- **Programming Guide**: 125 pages
+- **Programming Guide**: 334 pages (guide plus referenced API help pages)
   - Tutorials and walkthroughs
   - Best practices
   - Architecture documentation
@@ -284,7 +283,7 @@ Contributions welcome! See [DEVELOPING.md](DEVELOPING.md) for:
 
 ## Additional Resources
 
-- **SolidWorks API Help**: https://help.solidworks.com/2026/english/api/
+- **SolidWorks API Help**: https://help.solidworks.com/2027/english/api/
 - **Issues & Feedback**: https://github.com/pedropaulovc/offline-solidworks-api-docs/issues
 - **Developer Guide**: [DEVELOPING.md](DEVELOPING.md)
 
@@ -301,4 +300,4 @@ Built with respect for Dassault Systèmes' documentation and the developer commu
 ---
 
 **Version**: Check [releases](https://github.com/pedropaulovc/offline-solidworks-api-docs/releases) for latest version
-**Last Updated**: 2025-11-23
+**Last Updated**: 2026-11-15 (SOLIDWORKS 2027 API Help)
