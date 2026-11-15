@@ -1,16 +1,16 @@
 {
   "statistics": {
-    "total_types": 1529,
-    "types_with_descriptions": 1523,
-    "types_with_remarks": 394,
-    "types_with_examples": 457,
-    "total_properties": 3514,
-    "total_methods": 8043,
-    "total_enum_members": 10492,
-    "total_examples": 2839,
+    "total_types": 1891,
+    "types_with_descriptions": 1891,
+    "types_with_remarks": 713,
+    "types_with_examples": 536,
+    "total_properties": 3515,
+    "total_methods": 8049,
+    "total_enum_members": 10758,
+    "total_examples": 2902,
     "functional_categories": 39,
-    "markdown_files_generated": 15931,
-    "programming_guide_files": 323
+    "markdown_files_generated": 16363,
+    "programming_guide_files": 334
   },
-  "output_location": "C:\\src\\offline-solidworks-api-docs\\120_export_llm_docs\\output"
+  "output_location": "/home/pedro/src/offline-solidworks-api-docs/120_export_llm_docs/output"
 }

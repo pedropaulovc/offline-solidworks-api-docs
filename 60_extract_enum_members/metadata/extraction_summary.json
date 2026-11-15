@@ -1,8 +1,8 @@
 {
-  "total_files_processed": 964,
-  "enums_with_members": 963,
+  "total_files_processed": 1001,
+  "enums_with_members": 1000,
   "enums_without_members": 1,
   "errors": 0,
-  "output_file": "60_extract_enum_members\\metadata\\enum_members.xml",
+  "output_file": "60_extract_enum_members/metadata/enum_members.xml",
   "error_files": []
 }

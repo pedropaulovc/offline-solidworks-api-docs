@@ -1,10 +1,10 @@
 {
-  "seed_pages": 194,
-  "excluded_pages": 16622,
-  "total_pages": 196,
-  "successful_pages": 196,
+  "seed_pages": 256,
+  "excluded_pages": 17049,
+  "total_pages": 194,
+  "successful_pages": 194,
   "failed_pages": 0,
-  "skipped_pages": 3,
-  "discovered_via_links": 5,
+  "skipped_pages": 68,
+  "discovered_via_links": 6,
   "reason": "finished"
 }
