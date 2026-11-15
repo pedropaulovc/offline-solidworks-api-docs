@@ -59,7 +59,7 @@ This project provides two comprehensive documentation packages for the SolidWork
 
 ## What's Included
 
-### XMLDoc Package (~5.5 MB compressed, ~56 MB uncompressed)
+### XMLDoc Package (~5 MB compressed, ~44 MB uncompressed)
 
 Contains XML files providing IntelliSense documentation for all SolidWorks API assemblies, plus companion semantic catalogs:
 
@@ -73,7 +73,7 @@ Contains XML files providing IntelliSense documentation for all SolidWorks API a
 - **Multilingual examples**: `SolidWorks.Interop.examples.xml` catalogs VBA, VB.NET, C++ COM, and C# examples with language metadata
 - **Programming guide**: `SolidWorks.Interop.guides.xml` embeds the programming/how-to Markdown pages
 
-### LLM Documentation Package (~15 MB compressed, ~82 MB uncompressed)
+### LLM Documentation Package (~13 MB compressed, ~81 MB uncompressed)
 
 Contains 16,697 markdown files optimized for AI consumption:
 
@@ -225,7 +225,7 @@ Once installed, you'll see documentation when:
 ### Coverage Statistics
 
 - **Types**: 1,891 total (891 interfaces/classes/delegates, 1,000 enumerations)
-  - With descriptions: 1,891 (100%)
+  - With descriptions: 1,885 (99.7%)
   - With examples: 538 (28%)
   - With remarks: 713 (38%)
 
