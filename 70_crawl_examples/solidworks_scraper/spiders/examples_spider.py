@@ -48,6 +48,11 @@ class ExamplesSpider(scrapy.Spider):
             "successful_pages": 0,
             "failed_pages": 0,
             "skipped_pages": 0,
+            # Holes in the corpus that are not download failures (see
+            # HtmlSavePipeline.spider_closed): pages that could not be written, and
+            # example-URL sources that could not be read.
+            "save_failures": 0,
+            "url_source_failures": 0,
             "urls_from_types": 0,
             "urls_from_members": 0,
             "urls_from_legacy": 0,
@@ -130,6 +135,7 @@ class ExamplesSpider(scrapy.Spider):
 
         except Exception as e:
             self.logger.error(f"Failed to parse XML file {xml_file}: {e}")
+            self.stats["url_source_failures"] += 1
             return urls
 
     def start_requests(self) -> Generator[scrapy.Request, None, None]:

@@ -83,6 +83,35 @@ def test_version_marker_not_current_after_callback_exception(marker_pipeline, sp
     assert marker.read_text().strip() != SOLIDWORKS_API_VERSION
 
 
+def test_version_marker_not_current_after_save_failure(marker_pipeline, spider):
+    """A page whose write raises leaves a hole, whatever LOG_LEVEL hides from the log counters."""
+    pipeline, marker = marker_pipeline
+    pipeline.open_spider(spider)
+    url = f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/Some_Example.htm"
+    pipeline.url_to_file_path(url).mkdir(parents=True)  # a directory where the page file should go
+
+    item = pipeline.process_item({"url": url, "content": "<html>example</html>"}, spider)
+    pipeline.spider_closed(spider, "finished")
+
+    assert "save_error" in item
+    assert spider.stats["save_failures"] == 1
+    assert marker.read_text().strip() != SOLIDWORKS_API_VERSION
+
+
+def test_version_marker_not_current_after_url_source_failure(marker_pipeline, spider, tmp_path):
+    """A malformed example-URL source shrinks the crawl's URL list; that corpus is not complete."""
+    pipeline, marker = marker_pipeline
+    bad_xml = tmp_path / "api_types.xml"
+    bad_xml.write_text("<Types><Type>")
+    spider._load_urls_from_file(bad_xml, "types")
+    pipeline.open_spider(spider)
+
+    pipeline.spider_closed(spider, "finished")
+
+    assert spider.stats["url_source_failures"] == 1
+    assert marker.read_text().strip() != SOLIDWORKS_API_VERSION
+
+
 def test_older_corpus_marker_is_dropped(marker_pipeline, spider):
     """A --resume run on last year's pages mixes years; no year may claim the corpus afterwards."""
     pipeline, marker = marker_pipeline

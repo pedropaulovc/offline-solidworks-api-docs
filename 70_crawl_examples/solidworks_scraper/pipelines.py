@@ -45,15 +45,22 @@ def read_marker_year() -> str | None:
     return CRAWL_VERSION_FILE.read_text(encoding="utf-8").strip().removesuffix(PARTIAL_SUFFIX) or None
 
 
-def crawl_failure_count(spider: Spider) -> int:
-    """Pages the crawl could not save: errback failures plus callback exceptions and
-    logged errors (e.g. save failures) recorded in the crawler's stats."""
-    failures = spider.stats["failed_pages"]
+def crawl_failures(spider: Spider) -> dict[str, int]:
+    """Nonzero counts of events that leave holes in the corpus, by kind.
+
+    Each kind is counted once at its source (not via log counters, which depend on
+    LOG_LEVEL and count unrelated errors): failed downloads (errback), callback
+    exceptions, page saves that raised, and example-URL sources that failed to load.
+    """
+    counts = {
+        "failed downloads": spider.stats["failed_pages"],
+        "save failures": spider.stats["save_failures"],
+        "URL source failures": spider.stats["url_source_failures"],
+    }
     crawler = getattr(spider, "crawler", None)  # absent on spiders built outside a crawler
-    if crawler is None:
-        return failures
-    stats = crawler.stats
-    return failures + stats.get_value("spider_exceptions/count", 0) + stats.get_value("log_count/ERROR", 0)
+    if crawler is not None:
+        counts["callback exceptions"] = crawler.stats.get_value("spider_exceptions/count", 0)
+    return {kind: count for kind, count in counts.items() if count}
 
 
 class HtmlSavePipeline:
@@ -90,11 +97,12 @@ class HtmlSavePipeline:
             return
         # "finished" only means the scheduler drained; failed downloads, callback
         # exceptions and save errors all leave holes in the corpus.
-        failures = crawl_failure_count(spider)
+        failures = crawl_failures(spider)
         if failures:
+            summary = ", ".join(f"{count} {kind}" for kind, count in failures.items())
             spider.logger.warning(
-                f"{failures} crawl failure(s); {CRAWL_VERSION_FILE.name} stays '{SOLIDWORKS_API_VERSION}{PARTIAL_SUFFIX}'. "
-                "Fix the failures and re-run (--resume) to mark the corpus complete."
+                f"Crawl incomplete ({summary}); {CRAWL_VERSION_FILE.name} stays "
+                f"'{SOLIDWORKS_API_VERSION}{PARTIAL_SUFFIX}'. Fix them and re-run (--resume) to mark the corpus complete."
             )
             return
         CRAWL_VERSION_FILE.write_text(f"{SOLIDWORKS_API_VERSION}\n", encoding="utf-8")
@@ -118,11 +126,9 @@ class HtmlSavePipeline:
         # Generate file path from URL
         file_path = self.url_to_file_path(url)
 
-        # Ensure parent directory exists
-        file_path.parent.mkdir(parents=True, exist_ok=True)
-
         # Save HTML content
         try:
+            file_path.parent.mkdir(parents=True, exist_ok=True)
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(content)
 
@@ -132,6 +138,7 @@ class HtmlSavePipeline:
 
         except Exception as e:
             spider.logger.error(f"Failed to save HTML for {url}: {e}")
+            spider.stats["save_failures"] += 1
             item["save_error"] = str(e)
 
         return item
