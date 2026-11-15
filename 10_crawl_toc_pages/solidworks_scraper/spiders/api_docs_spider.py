@@ -73,10 +73,10 @@ class ApiDocsSpider(scrapy.Spider):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.crawled_urls: set[str] = set()
-        # TOC id that first requested each page path. 2027 type nodes have an
-        # "Overview" child pointing at the same page with a different ?id=, which
-        # would otherwise save every type page twice.
-        self.page_path_owner: dict[str, str | None] = {}
+        # TOC ids that requested each page path. 2027 type nodes have an "Overview"
+        # child pointing at the same page with a different ?id=, which would
+        # otherwise save every type page twice.
+        self.page_path_requesters: dict[str, set[str | None]] = {}
         self.base_path: str = SOLIDWORKS_API_BOUNDARY
         self.base_url: str = SOLIDWORKS_BASE_URL
 
@@ -140,7 +140,7 @@ class ApiDocsSpider(scrapy.Spider):
                 if self.is_overview_duplicate(parsed.path, id_value):
                     self.logger.debug(f"Skipping Overview duplicate of its parent page: {full_url}")
                     continue
-                self.page_path_owner.setdefault(parsed.path, id_value)
+                self.page_path_requesters.setdefault(parsed.path, set()).add(id_value)
 
                 # Yield request for the page itself
                 yield scrapy.Request(
@@ -196,15 +196,16 @@ class ApiDocsSpider(scrapy.Spider):
     def is_overview_duplicate(self, path: str, id_value: str | None) -> bool:
         """True for a node that repeats its parent node's page (the 2027 type "Overview" child).
 
-        Only direct children of the node that first requested the path are
-        skipped, page and subtree alike. Any other node sharing a path (e.g. a page
-        listed under two TOC branches) keeps its own fetch and expansion, so no
-        subtree depends on which response arrived first. help_list.htm is the
-        shared page of every folder node and is never a duplicate.
+        Only direct children of a node that requested the same path are skipped,
+        page and subtree alike. Every requesting id is kept, so a page listed under
+        two TOC branches has the Overview child of each branch skipped regardless of
+        which response arrived first; the branches themselves keep their own fetch
+        and expansion. help_list.htm is the shared page of every folder node and is
+        never a duplicate.
         """
-        if path.endswith("/help_list.htm") or id_value is None or path not in self.page_path_owner:
+        if path.endswith("/help_list.htm") or id_value is None:
             return False
-        return id_value.rsplit(".", 1)[0] == self.page_path_owner[path]
+        return id_value.rsplit(".", 1)[0] in self.page_path_requesters.get(path, set())
 
     def members_page_request(self, member_list_path: str, member_list_id: str | None) -> scrapy.Request | None:
         """Request the `<Type>_members.html` page standing in for a Methods/Properties TOC node.
@@ -212,10 +213,10 @@ class ApiDocsSpider(scrapy.Spider):
         Returns None when the type's members page was already requested (Methods and
         Properties siblings, or a nested member-list node under the same type)."""
         members_path = self.MEMBER_LIST_PATH.sub("_members.html", member_list_path)
-        if members_path in self.page_path_owner:
+        if members_path in self.page_path_requesters:
             return None
         type_id = member_list_id.rsplit(".", 1)[0] if member_list_id else None
-        self.page_path_owner[members_path] = type_id
+        self.page_path_requesters[members_path] = {type_id}
 
         members_url = f"{self.base_url}{members_path}"
         if type_id:

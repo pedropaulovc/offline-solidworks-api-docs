@@ -29,20 +29,45 @@ def test_version_marker_written_only_after_clean_finish(marker_pipeline, spider)
 
     pipeline.open_spider(spider)
     (pipeline.output_dir / "page.htm").write_text("x")
-    assert not marker.exists()  # partial corpus while crawling
+    assert marker.read_text().strip() != SOLIDWORKS_API_VERSION  # partial corpus while crawling
 
     pipeline.spider_closed(spider, "finished")
     assert marker.read_text().strip() == SOLIDWORKS_API_VERSION
 
 
-def test_version_marker_absent_after_interrupted_crawl(marker_pipeline, spider):
+def test_version_marker_not_current_after_interrupted_crawl(marker_pipeline, spider):
     pipeline, marker = marker_pipeline
     marker.write_text(f"{SOLIDWORKS_API_VERSION}\n")
 
     pipeline.open_spider(spider)
     pipeline.spider_closed(spider, "shutdown")
 
-    assert not marker.exists()
+    assert marker.read_text().strip() != SOLIDWORKS_API_VERSION
+
+
+def test_resume_after_interrupt_restores_version_marker(marker_pipeline, spider):
+    """An interrupted crawl leaves this year's pages; a --resume run that finishes marks them current."""
+    pipeline, marker = marker_pipeline
+    pipeline.open_spider(spider)
+    (pipeline.output_dir / "page.htm").write_text("x")
+    pipeline.spider_closed(spider, "shutdown")
+
+    resumed = HtmlSavePipeline()
+    resumed.output_dir = pipeline.output_dir
+    resumed.open_spider(spider)
+    resumed.spider_closed(spider, "finished")
+
+    assert marker.read_text().strip() == SOLIDWORKS_API_VERSION
+
+
+def test_version_marker_not_current_when_pages_failed(marker_pipeline, spider):
+    pipeline, marker = marker_pipeline
+    pipeline.open_spider(spider)
+    spider.stats["failed_pages"] = 3
+
+    pipeline.spider_closed(spider, "finished")
+
+    assert marker.read_text().strip() != SOLIDWORKS_API_VERSION
 
 
 def test_version_marker_not_written_over_older_corpus(marker_pipeline, spider):
@@ -54,7 +79,7 @@ def test_version_marker_not_written_over_older_corpus(marker_pipeline, spider):
     pipeline.open_spider(spider)
     pipeline.spider_closed(spider, "finished")
 
-    assert not marker.exists()
+    assert marker.read_text().strip() == "1999"
 
 
 @pytest.fixture

@@ -23,16 +23,26 @@ from shared.constants import SOLIDWORKS_API_FULL_BASE_URL, SOLIDWORKS_API_PATH_P
 
 # Doc year the local (gitignored) output/html corpus was crawled for. Saved pages
 # carry no year, so consumers that need a current-version corpus check this file.
-# It only exists after a crawl finished cleanly on a corpus holding nothing but
-# this year's pages.
+# It reads exactly "<year>" only after a crawl finished with no failed pages on a
+# corpus holding nothing but that year's pages. While a crawl runs (or after one
+# is interrupted) it reads "<year> partial", so a --resume run knows the existing
+# pages are this year's and can complete the corpus.
 CRAWL_VERSION_FILE = Path(__file__).parent.parent / "output" / "crawl_version.txt"
+PARTIAL_SUFFIX = " partial"
 
 
 class CorpusVersion(Enum):
     """Whether output/html holds only current-year pages when a crawl starts."""
 
-    CURRENT = "current"  # empty, or marked with SOLIDWORKS_API_VERSION
+    CURRENT = "current"  # empty, or marked (complete or partial) with SOLIDWORKS_API_VERSION
     MIXED = "mixed"  # older or unknown pages a --resume run would mix with new ones
+
+
+def read_marker_year() -> str | None:
+    """Year recorded in the marker, whether the crawl it describes completed or not."""
+    if not CRAWL_VERSION_FILE.exists():
+        return None
+    return CRAWL_VERSION_FILE.read_text(encoding="utf-8").strip().removesuffix(PARTIAL_SUFFIX) or None
 
 
 class HtmlSavePipeline:
@@ -50,16 +60,22 @@ class HtmlSavePipeline:
         return pipeline
 
     def open_spider(self, spider: Spider) -> None:
-        marker = CRAWL_VERSION_FILE.read_text(encoding="utf-8").strip() if CRAWL_VERSION_FILE.exists() else None
         corpus_empty = not any(self.output_dir.rglob("*.htm*"))
-        self.corpus_version = (
-            CorpusVersion.CURRENT if corpus_empty or marker == SOLIDWORKS_API_VERSION else CorpusVersion.MIXED
-        )
-        # Until this crawl finishes, the corpus is partial: drop the marker.
-        CRAWL_VERSION_FILE.unlink(missing_ok=True)
+        if not corpus_empty and read_marker_year() != SOLIDWORKS_API_VERSION:
+            # Older or unmarked pages: leave the marker as it is (never this
+            # year's complete marker), so the corpus stays non-current until a
+            # fresh crawl clears it.
+            self.corpus_version = CorpusVersion.MIXED
+            return
+
+        self.corpus_version = CorpusVersion.CURRENT
+        CRAWL_VERSION_FILE.write_text(f"{SOLIDWORKS_API_VERSION}{PARTIAL_SUFFIX}\n", encoding="utf-8")
 
     def spider_closed(self, spider: Spider, reason: str) -> None:
         if reason != "finished" or self.corpus_version is not CorpusVersion.CURRENT:
+            return
+        # "finished" only means the scheduler drained; failed downloads leave holes.
+        if getattr(spider, "stats", {}).get("failed_pages", 0):
             return
         CRAWL_VERSION_FILE.write_text(f"{SOLIDWORKS_API_VERSION}\n", encoding="utf-8")
 

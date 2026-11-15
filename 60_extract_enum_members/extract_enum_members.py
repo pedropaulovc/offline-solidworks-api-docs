@@ -12,9 +12,9 @@ import re
 import sys
 import xml.dom.minidom as minidom
 import xml.etree.ElementTree as ET
+from enum import Enum
 from html.parser import HTMLParser
 from pathlib import Path
-from enum import Enum
 from typing import Any
 
 # Add parent directory to path for shared module imports
