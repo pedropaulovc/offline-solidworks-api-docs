@@ -3,7 +3,7 @@ Tests for harvest_legacy_examples.py (orphan-example recovery).
 
 These tests exercise the pure parsing/normalization logic against a synthetic
 __NEXT_DATA__ fixture modeled on the 2017 IChainPatternFeatureData type page,
-which links Modify_Chain_Pattern_Feature_Example_* (de-linked in 2026). No
+which links Modify_Chain_Pattern_Feature_Example_* (de-linked in newer versions). No
 network access is required.
 """
 
@@ -12,8 +12,13 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import harvest_legacy_examples as h
+
+from shared.constants import SOLIDWORKS_API_FULL_BASE_URL, SOLIDWORKS_API_VERSION
+
+API = SOLIDWORKS_API_FULL_BASE_URL
 
 
 def _make_page(help_text: str) -> str:
@@ -62,19 +67,19 @@ def test_extract_example_hrefs_only_from_example_section():
 
 
 def test_to_version():
-    url = "https://help.solidworks.com/2026/english/api/sldworksapi/Foo.html"
+    url = f"{API}/sldworksapi/Foo.html"
     assert h.to_version(url, "2017") == "https://help.solidworks.com/2017/english/api/sldworksapi/Foo.html"
 
 
 def test_subdir_of():
-    url = "https://help.solidworks.com/2026/english/api/sldworksapi/Foo.html"
+    url = f"{API}/sldworksapi/Foo.html"
     assert h.subdir_of(url) == "sldworksapi"
 
 
 def test_normalize_example_url():
     assert (
-        h.normalize_example_url("Modify_Chain_Pattern_Feature_Example_CSharp.htm", "sldworksapi", "2026")
-        == "https://help.solidworks.com/2026/english/api/sldworksapi/Modify_Chain_Pattern_Feature_Example_CSharp.htm"
+        h.normalize_example_url("Modify_Chain_Pattern_Feature_Example_CSharp.htm", "sldworksapi", SOLIDWORKS_API_VERSION)
+        == f"{API}/sldworksapi/Modify_Chain_Pattern_Feature_Example_CSharp.htm"
     )
 
 
@@ -82,30 +87,32 @@ def test_iter_type_page_urls_filters(tmp_path):
     jsonl = tmp_path / "toc.jsonl"
     lines = [
         # Type page (kept)
-        {"url": "https://help.solidworks.com/2026/english/api/sldworksapi/A.Interop~A.Interop.IFoo.html?id=1"},
+        {"url": f"{API}/sldworksapi/A.Interop~A.Interop.IFoo.html?id=1"},
         # Members page (dropped)
-        {"url": "https://help.solidworks.com/2026/english/api/sldworksapi/A.Interop~A.Interop.IFoo_members.html?id=1.0"},
+        {"url": f"{API}/sldworksapi/A.Interop~A.Interop.IFoo_members.html?id=1.0"},
         # Example page (dropped: no '~')
-        {"url": "https://help.solidworks.com/2026/english/api/sldworksapi/Foo_Example_CSharp.htm"},
+        {"url": f"{API}/sldworksapi/Foo_Example_CSharp.htm"},
         # FunctionalCategories (dropped)
-        {"url": "https://help.solidworks.com/2026/english/api/sldworksapi/FunctionalCategories~x.html"},
+        {"url": f"{API}/sldworksapi/FunctionalCategories~x.html"},
     ]
     jsonl.write_text("\n".join(json.dumps(x) for x in lines), encoding="utf-8")
 
     urls = h.iter_type_page_urls(jsonl)
-    assert urls == ["https://help.solidworks.com/2026/english/api/sldworksapi/A.Interop~A.Interop.IFoo.html"]
+    assert urls == [f"{API}/sldworksapi/A.Interop~A.Interop.IFoo.html"]
 
 
 def test_end_to_end_parse_pipeline():
-    """helpText -> example hrefs -> normalized 2026 URLs (the recovery core)."""
-    type_url = "https://help.solidworks.com/2026/english/api/sldworksapi/X~X.IChainPatternFeatureData.html"
+    """helpText -> example hrefs -> normalized current-version URLs (the recovery core)."""
+    type_url = f"{API}/sldworksapi/X~X.IChainPatternFeatureData.html"
     page = _make_page(HELP_TEXT)
 
     help_text = h.extract_help_text(page)
     subdir = h.subdir_of(type_url)
-    recovered = {h.normalize_example_url(fn, subdir, "2026") for fn in h.extract_example_hrefs(help_text)}
+    recovered = {
+        h.normalize_example_url(fn, subdir, SOLIDWORKS_API_VERSION) for fn in h.extract_example_hrefs(help_text)
+    }
 
     assert (
-        "https://help.solidworks.com/2026/english/api/sldworksapi/Modify_Chain_Pattern_Feature_Example_CSharp.htm"
+        f"{API}/sldworksapi/Modify_Chain_Pattern_Feature_Example_CSharp.htm"
         in recovered
     )

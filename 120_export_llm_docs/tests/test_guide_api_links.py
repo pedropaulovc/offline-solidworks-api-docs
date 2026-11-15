@@ -13,10 +13,15 @@ import tempfile
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from models import TypeInfo, Property, Method, EnumMember
 from markdown_generator import parse_api_ref_url
 from export_pipeline import ExportPipeline
+
+from shared.constants import SOLIDWORKS_API_BASE_PATH, SOLIDWORKS_API_FULL_BASE_URL
+
+API_ROOT = f"{SOLIDWORKS_API_FULL_BASE_URL}/"
 
 
 SLD = "SolidWorks.interop.sldworks~SolidWorks.interop.sldworks"
@@ -86,7 +91,7 @@ def test_rewrite_resolves_member_typo_to_md():
         )
 
         ExportPipeline(str(tmp))._rewrite_guide_api_links(
-            _make_types(), "https://help.solidworks.com/2026/english/api/", {}, {})
+            _make_types(), API_ROOT, {}, {})
 
         text = guide.read_text(encoding="utf-8")
         assert "(../../types/IWizardHoleFeatureData2/InitializeHole.md)" in text
@@ -109,14 +114,14 @@ def test_rewrite_type_only_and_enum_and_external():
         )
 
         ExportPipeline(str(tmp))._rewrite_guide_api_links(
-            _make_types(), "https://help.solidworks.com/2026/english/api/", {}, {})
+            _make_types(), API_ROOT, {}, {})
 
         text = guide.read_text(encoding="utf-8")
         assert "[type](../../types/IFeature/_overview.md)" in text
         assert "[method](../../types/IFeature/GetDefinition.md)" in text
         assert "[enum](../../enums/swFeatureNameID_e.md)" in text
         # Unresolved target -> canonical online page, not a dead relative path.
-        assert ("[missing](https://help.solidworks.com/2026/english/api/sldworksapi/"
+        assert (f"[missing]({API_ROOT}sldworksapi/"
                 f"{SLD}.INotShipped~DoThing.html)") in text
 
 
@@ -129,11 +134,11 @@ def test_missing_member_falls_back_to_online_page():
             f"[gone](../../sldworksapi/{SLD}.IFeature~ObsoleteMethod.html)\n",
         )
         ExportPipeline(str(tmp))._rewrite_guide_api_links(
-            _make_types(), "https://help.solidworks.com/2026/english/api/", {}, {})
+            _make_types(), API_ROOT, {}, {})
 
         text = guide.read_text(encoding="utf-8")
         assert "_overview.md" not in text
-        assert ("[gone](https://help.solidworks.com/2026/english/api/sldworksapi/"
+        assert (f"[gone]({API_ROOT}sldworksapi/"
                 f"{SLD}.IFeature~ObsoleteMethod.html)") in text
 
 
@@ -146,7 +151,7 @@ def test_reference_link_with_fragment_resolves():
             f"[m](../../sldworksapi/{SLD}.IFeature~GetDefinition.html#remarks)\n",
         )
         ExportPipeline(str(tmp))._rewrite_guide_api_links(
-            _make_types(), "https://help.solidworks.com/2026/english/api/", {}, {})
+            _make_types(), API_ROOT, {}, {})
 
         assert "[m](../../types/IFeature/GetDefinition.md)" in guide.read_text(encoding="utf-8")
 
@@ -163,11 +168,11 @@ def test_basename_only_unresolved_recovers_assembly_from_folder():
             encoding="utf-8",
         )
         ExportPipeline(str(tmp))._rewrite_guide_api_links(
-            _make_types(), "https://help.solidworks.com/2026/english/api/", {}, {})
+            _make_types(), API_ROOT, {}, {})
 
         text = ref.read_text(encoding="utf-8")
         assert "api//" not in text
-        assert "https://help.solidworks.com/2026/english/api/sldworksapi/" in text
+        assert f"{API_ROOT}sldworksapi/" in text
 
 
 def test_rewrite_leaves_unshipped_non_reference_links_untouched():
@@ -178,7 +183,7 @@ def test_rewrite_leaves_unshipped_non_reference_links_untouched():
         guide = _write_guide(tmp, original)
 
         ExportPipeline(str(tmp))._rewrite_guide_api_links(
-            _make_types(), "https://help.solidworks.com/2026/english/api/", {}, {})
+            _make_types(), API_ROOT, {}, {})
 
         assert guide.read_text(encoding="utf-8") == original
 
@@ -198,11 +203,11 @@ def test_rewrite_resolves_guide_and_example_page_links():
         )
 
         guide_links = {"dp_units.htm": "docs/swconst/DP_Units.md"}
-        examples = {"https://help.solidworks.com/2026/english/api/swdimxpertapi/"
+        examples = {f"{API_ROOT}swdimxpertapi/"
                     "Get_DimXpert_Example_CSharp.htm": object()}
 
         ExportPipeline(str(tmp))._rewrite_guide_api_links(
-            _make_types(), "https://help.solidworks.com/2026/english/api/", guide_links, examples)
+            _make_types(), API_ROOT, guide_links, examples)
 
         text = page.read_text(encoding="utf-8")
         assert "[example](../../examples/Get_DimXpert_Example_CSharp.md)" in text
@@ -221,7 +226,7 @@ def test_rewrite_carries_fragment_onto_resolved_page_link():
         page.write_text("see [section](DP_Units.htm#remarks)\n", encoding="utf-8")
 
         ExportPipeline(str(tmp))._rewrite_guide_api_links(
-            _make_types(), "https://help.solidworks.com/2026/english/api/",
+            _make_types(), API_ROOT,
             {"dp_units.htm": "docs/swconst/DP_Units.md"}, {})
 
         assert "[section](DP_Units.md#remarks)" in page.read_text(encoding="utf-8")
@@ -240,7 +245,7 @@ def test_guide_link_key_decodes_percent_escapes():
     from markdown_generator import guide_link_key
 
     encoded = guide_link_key("SolidWorks_API_Add-Ins%2c_Project_Templates%2c_and_Wizards.htm")
-    literal = guide_link_key("/2026/english/api/sldworksapiprogguide/Overview/"
+    literal = guide_link_key(f"{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/Overview/"
                              "SolidWorks_API_Add-Ins,_Project_Templates,_and_Wizards.htm?id=1.2.3.0")
     assert encoded == literal
 
@@ -251,7 +256,7 @@ def test_see_href_reattaches_fragment_to_resolved_target():
     from markdown_generator import simplify_cross_references
 
     out = simplify_cross_references(
-        '<see href="https://help.solidworks.com/2026/english/api/swconst/DP_Units.htm#remarks">Units</see>',
+        f'<see href="{API_ROOT}swconst/DP_Units.htm#remarks">Units</see>',
         {"dp_units.htm": "docs/swconst/DP_Units.md"},
         rel_prefix="../../",
     )
@@ -262,7 +267,7 @@ def test_see_href_without_fragment_is_unchanged():
     from markdown_generator import simplify_cross_references
 
     out = simplify_cross_references(
-        '<see href="https://help.solidworks.com/2026/english/api/swconst/DP_Units.htm">Units</see>',
+        f'<see href="{API_ROOT}swconst/DP_Units.htm">Units</see>',
         {"dp_units.htm": "docs/swconst/DP_Units.md"},
         rel_prefix="../../",
     )

@@ -8,6 +8,8 @@ from pathlib import Path
 
 from extract_type_info import TypeInfoExtractor, extract_namespace_from_filename, is_type_file
 
+from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
+
 
 class TestTypeInfoExtractor(unittest.TestCase):
     """Test the TypeInfoExtractor HTML parser."""
@@ -255,7 +257,7 @@ class TestTypeInfoExtractor(unittest.TestCase):
 
         # Should convert non-type link to XMLDoc see href
         self.assertIn(
-            '<see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm">',
+            f'<see href="{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm">',
             description,
         )
         # Should preserve link text

@@ -5,14 +5,14 @@ Harvest example links from legacy SOLIDWORKS API doc versions.
 Why this exists
 ---------------
 The pipeline discovers example pages *only* by following the ``<a ..._Example_...htm>``
-links found in the "Example" section of the CURRENT (2026) type/member help-text.
+links found in the "Example" section of the CURRENT (``SOLIDWORKS_API_VERSION``) type/member help-text.
 Example pages are not nodes in the TOC tree, so an example is reachable only if some
 crawled page links to it.
 
 SOLIDWORKS sometimes drops those cross-reference links in newer doc versions while
 leaving the example pages live on the server. For instance the 2017
 ``IChainPatternFeatureData`` type page links ``Modify_Chain_Pattern_Feature_Example_*``,
-but the 2026 page does not -- even though ``Modify_Chain_Pattern_Feature_Example_CSharp.htm``
+but the 2026 page did not -- even though ``Modify_Chain_Pattern_Feature_Example_CSharp.htm``
 still returns HTTP 200. Those now-orphaned examples are invisible to link-graph discovery
 and therefore missing from the final bundle.
 
@@ -36,8 +36,11 @@ from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+from shared.constants import SOLIDWORKS_API_VERSION  # noqa: E402
+
 USER_AGENT = "Mozilla/5.0 (compatible; offline-solidworks-api-docs/1.0)"
-DEFAULT_VERSION = "2026"
+DEFAULT_VERSION = SOLIDWORKS_API_VERSION
 DEFAULT_LEGACY_VERSIONS = ["2017"]
 
 

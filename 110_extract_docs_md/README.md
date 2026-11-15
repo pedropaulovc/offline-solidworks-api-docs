@@ -190,7 +190,7 @@ Each line contains information about a converted file:
 {
   "node_id": "1.2.1.6",
   "node_name": "Context-Sensitive SOLIDWORKS API Help",
-  "original_url": "/2026/english/api/sldworksapiprogguide/GettingStarted/ContextSensitiveHelp.htm?id=1.2.1.6",
+  "original_url": "/2027/english/api/sldworksapiprogguide/GettingStarted/ContextSensitiveHelp.htm?id=1.2.1.6",
   "original_html": "output/html/sldworksapiprogguide/GettingStarted/ContextSensitiveHelp_abc123_abc123.html",
   "markdown_path": "110_extract_docs_md/output/markdown/Types of SOLIDWORKS API Applications/SOLIDWORKS Macros/Context-Sensitive SOLIDWORKS API Help/Context-Sensitive SOLIDWORKS API Help.md",
   "content_hash": "sha256_hash_here",

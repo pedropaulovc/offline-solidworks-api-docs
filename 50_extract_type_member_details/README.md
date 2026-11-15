@@ -123,7 +123,7 @@ The parser uses Python's `HTMLParser` to:
 
 ## Expected Results
 
-From a full crawl of SolidWorks 2026 API documentation:
+From a full crawl of SolidWorks API documentation:
 
 - **Total member files processed**: ~5,000-10,000
 - **Members extracted**: ~5,000-10,000

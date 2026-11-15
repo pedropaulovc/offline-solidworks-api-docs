@@ -5,6 +5,7 @@ Pipelines for processing and storing crawled SolidWorks API example pages.
 import hashlib
 import json
 import re
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -14,6 +15,10 @@ import jsonlines
 from itemadapter import ItemAdapter
 from scrapy import Spider
 from scrapy.exceptions import DropItem
+
+# Add project root to path for shared imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from shared.constants import SOLIDWORKS_API_FULL_BASE_URL, SOLIDWORKS_API_PATH_PREFIX
 
 
 class HtmlSavePipeline:
@@ -66,8 +71,8 @@ class HtmlSavePipeline:
         path = parsed.path.strip("/")
 
         # Remove the base path prefix
-        if path.startswith("2026/english/api/"):
-            path = path[len("2026/english/api/") :]
+        if path.startswith(SOLIDWORKS_API_PATH_PREFIX):
+            path = path[len(SOLIDWORKS_API_PATH_PREFIX) :]
 
         # Remove query parameters from filename but keep them for uniqueness
         # by appending a deterministic hash if query params exist
@@ -119,7 +124,7 @@ class MetadataLogPipeline:
             "crawler_version": "1.0.0",
             "source_file": "40_extract_type_details/metadata/api_types.xml",
             "urls_file": "70_crawl_examples/metadata/example_urls.txt",
-            "base_url": "https://help.solidworks.com/2026/english/api",
+            "base_url": SOLIDWORKS_API_FULL_BASE_URL,
             "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
             "respect_robots_txt": False,
             "crawl_delay_seconds": 0.1,

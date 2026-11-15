@@ -9,6 +9,8 @@ and <see href> tags for IntelliSense documentation.
 import re
 from html.parser import HTMLParser
 
+from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
+
 
 # Block-level tags that introduce a paragraph break (blank line) in markdown.
 _PARAGRAPH_TAGS = {"p", "div", "blockquote"}
@@ -222,7 +224,7 @@ def convert_links_to_see_refs(html: str) -> str:
     Non-type references (guide pages):
     <a href="../sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm">SOLIDWORKS Design</a>
     becomes:
-    <see href="https://help.solidworks.com/2026/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm">SOLIDWORKS Design</see>
+    <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm">SOLIDWORKS Design</see>
     """
     # Pattern to match anchor tags with SolidWorks API links
     # Matches: <a href="Assembly~Namespace.Type~Member.html">LinkText</a>
@@ -271,7 +273,7 @@ def href_to_see_ref(href: str) -> tuple[str, str]:
     - "SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IComponent2~GetCorresponding.html"
       -> ("cref", "SolidWorks.Interop.sldworks.IComponent2.GetCorresponding")
     - "../sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm"
-      -> ("href", "https://help.solidworks.com/2026/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm")
+      -> ("href", "https://help.solidworks.com/2027/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm")
     """
     cref = parse_href_to_cref(href)
     if cref:
@@ -336,7 +338,7 @@ def convert_to_full_url(href: str) -> str:
 
     Examples:
     - "../sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm"
-      -> "https://help.solidworks.com/2026/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm"
+      -> "https://help.solidworks.com/2027/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm"
     - "https://example.com/page.htm" (already full)
       -> "https://example.com/page.htm"
     """
@@ -345,13 +347,13 @@ def convert_to_full_url(href: str) -> str:
         return href
 
     # Base URL for SolidWorks API documentation
-    base_url = "https://help.solidworks.com/2026/english/api/sldworksapi/"
+    base_url = f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/"
 
     # Handle relative paths
     if href.startswith("../"):
         # Remove leading ../ and construct from api/ level
         clean_href = href.replace("../", "", 1)
-        return f"https://help.solidworks.com/2026/english/api/{clean_href}"
+        return f"{SOLIDWORKS_API_FULL_BASE_URL}/{clean_href}"
     else:
         # Relative to current directory (sldworksapi)
         return f"{base_url}{href}"

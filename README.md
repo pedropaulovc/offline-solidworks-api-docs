@@ -284,7 +284,7 @@ Contributions welcome! See [DEVELOPING.md](DEVELOPING.md) for:
 
 ## Additional Resources
 
-- **SolidWorks API Help**: https://help.solidworks.com/2026/english/api/
+- **SolidWorks API Help**: https://help.solidworks.com/2027/english/api/
 - **Issues & Feedback**: https://github.com/pedropaulovc/offline-solidworks-api-docs/issues
 - **Developer Guide**: [DEVELOPING.md](DEVELOPING.md)
 

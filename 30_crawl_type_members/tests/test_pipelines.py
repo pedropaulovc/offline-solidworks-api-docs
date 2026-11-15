@@ -9,6 +9,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
 from solidworks_scraper.pipelines import (
     DuplicateCheckPipeline,
     HtmlSavePipeline,
@@ -49,7 +50,7 @@ class TestHtmlSavePipeline:
         pipeline = HtmlSavePipeline()
         pipeline.output_dir = tmp_path
 
-        url = "https://help.solidworks.com/2026/english/api/sldworksapi/Test~Method.html"
+        url = f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/Test~Method.html"
         file_path = pipeline.url_to_file_path(url)
 
         assert file_path.name == "Test~Method.html"
@@ -60,7 +61,7 @@ class TestHtmlSavePipeline:
         pipeline = HtmlSavePipeline()
         pipeline.output_dir = tmp_path
 
-        url = "https://help.solidworks.com/2026/english/api/test/Method.html?format=p&value=1"
+        url = f"{SOLIDWORKS_API_FULL_BASE_URL}/test/Method.html?format=p&value=1"
         file_path = pipeline.url_to_file_path(url)
 
         # Should include hash of query params

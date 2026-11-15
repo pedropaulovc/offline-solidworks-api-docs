@@ -9,6 +9,7 @@ This spider crawls the SolidWorks API documentation by:
 
 import hashlib
 import json
+import sys
 from collections.abc import Generator
 from datetime import datetime
 from pathlib import Path
@@ -19,24 +20,40 @@ import scrapy
 from scrapy.http import Response
 from twisted.python.failure import Failure
 
+# Add project root to path for shared imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+from shared.constants import SOLIDWORKS_API_BOUNDARY, SOLIDWORKS_BASE_URL, expand_toc_url
+
 
 class ApiDocsSpider(scrapy.Spider):
     name = "api_docs"
     allowed_domains = ["help.solidworks.com"]
 
-    # Root TOC node ids to seed the crawl. Each is a top-level SOLIDWORKS API
-    # reference (see help.solidworks.com/2026/english/api/SWHelp_List.html):
-    #   2  = core SOLIDWORKS API (SolidWorks.Interop.sldworks, swconst, ...)
-    #   13 = Toolbox API (SolidWorks.Interop.swbrowser, sldtoolboxconfigureaddin)
-    # All roots share the /2026/english/api/ boundary, so the recursive expandToc
-    # logic and URL boundary check below handle every subtree unchanged.
-    TOC_ROOT_IDS = ["2", "13"]
+    # Root TOC node ids to seed the crawl (top-level nodes, parentId=-1, of the
+    # SOLIDWORKS API reference at help.solidworks.com/<year>/english/api/SWHelp_List.html).
+    # These ids are version-specific and must be re-mapped on every yearly bump.
+    #
+    # 2027 flattened the TOC: the per-product wrapper nodes of 2026 (id=2 core
+    # API with children 2.0..2.11, id=13 Toolbox) are gone and their former
+    # children are now top-level nodes:
+    #   core SOLIDWORKS API:
+    #     2  = Functional Categories (leaf)
+    #     3  = Release Notes (leaf)
+    #     4  = SolidWorks.Interop.sldworks Namespace (4.0 Overview, 4.1 Interfaces,
+    #          4.2 Delegates, 4.3..4.11 swmotionstudy, swdimxpert, swpublished,
+    #          sw3dprinter, dsgnchk, swhtmlcontrol, swscanto3d, swconst, swcommands)
+    #   Toolbox API:
+    #     44 = Welcome (leaf), 45 = Release Notes (leaf), 46 = Getting Started,
+    #     47 = sldtoolboxconfigureaddin Namespace, 48 = swbrowser Namespace
+    # The Programming Guide (id=1) is crawled separately by Phase 100.
+    # A root's expandToc response is the node itself (with its own url), so leaf
+    # roots still yield their page request via extract_urls_from_json. All roots
+    # share the SOLIDWORKS_API_BOUNDARY, so the recursive expandToc logic and URL
+    # boundary check below handle every subtree unchanged.
+    TOC_ROOT_IDS = ["2", "3", "4", "44", "45", "46", "47", "48"]
 
     # Starting URLs - JSON TOC endpoints, one per root node
-    start_urls = [
-        f"https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id={toc_id}"
-        for toc_id in TOC_ROOT_IDS
-    ]
+    start_urls = [expand_toc_url(toc_id) for toc_id in TOC_ROOT_IDS]
 
     # Custom settings for this spider
     custom_settings = {
@@ -46,8 +63,8 @@ class ApiDocsSpider(scrapy.Spider):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.crawled_urls: set[str] = set()
-        self.base_path: str = "/2026/english/api/"
-        self.base_url: str = "https://help.solidworks.com"
+        self.base_path: str = SOLIDWORKS_API_BOUNDARY
+        self.base_url: str = SOLIDWORKS_BASE_URL
 
         # Statistics tracking
         self.stats: dict[str, Any] = {
@@ -107,15 +124,11 @@ class ApiDocsSpider(scrapy.Spider):
                 query_params = parse_qs(parsed.query)
                 if "id" in query_params:
                     id_value = query_params["id"][0]
-                    expand_toc_url = (
-                        f"{self.base_url}/expandToc?version=2026&language=english&product=api&queryParam=?id={id_value}"
-                    )
+                    toc_url = expand_toc_url(id_value)
 
-                    self.logger.debug(f"Adding expandToc URL for id={id_value}: {expand_toc_url}")
+                    self.logger.debug(f"Adding expandToc URL for id={id_value}: {toc_url}")
 
-                    yield scrapy.Request(
-                        expand_toc_url, callback=self.parse, errback=self.handle_error, dont_filter=False
-                    )
+                    yield scrapy.Request(toc_url, callback=self.parse, errback=self.handle_error, dont_filter=False)
 
         except json.JSONDecodeError as e:
             self.logger.error(f"Failed to parse JSON from {response.url}: {e}")

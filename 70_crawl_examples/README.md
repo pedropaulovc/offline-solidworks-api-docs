@@ -146,7 +146,7 @@ One JSON object per line:
 
 ```json
 {
-  "url": "https://help.solidworks.com/2026/english/api/sldworksapi/example.htm",
+  "url": "https://help.solidworks.com/2027/english/api/sldworksapi/example.htm",
   "timestamp": "2024-11-15T10:30:00",
   "file_path": "05_crawl_examples/output/html/sldworksapi/example.html",
   "content_hash": "abc123...",
@@ -369,7 +369,7 @@ The crawler typically uses:
 - [Phase 1 README](../10_crawl_toc_pages/README.md) - TOC crawler
 - [Phase 3 README](../03_extract_type_info/README.md) - Type info extraction
 - [Scrapy Documentation](https://docs.scrapy.org/) - Scrapy framework
-- [SolidWorks API Help](https://help.solidworks.com/2026/english/api/) - Source documentation
+- [SolidWorks API Help](https://help.solidworks.com/2027/english/api/) - Source documentation
 
 ---
 

@@ -16,16 +16,38 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from link_targets import build_saved_page_keys, canonical_key  # noqa: E402
 
+from shared.constants import SOLIDWORKS_API_BOUNDARY, SOLIDWORKS_API_FULL_BASE_URL  # noqa: E402
+
 EXAMPLES_META = REPO_ROOT / "70_crawl_examples/metadata/urls_crawled.jsonl"
 EXAMPLES_HTML = REPO_ROOT / "70_crawl_examples/output/html"
+
+
+def _corpus_is_current_version() -> bool:
+    """True when the Phase 70 crawl log was recorded for SOLIDWORKS_API_VERSION.
+
+    After a doc-year bump the local corpus still holds the previous year's URLs
+    until phases 70-120 are re-run; its pages are then outside the current
+    boundary, so the assertions below have nothing honest to check."""
+    if not EXAMPLES_META.exists():
+        return False
+    with open(EXAMPLES_META, encoding="utf-8") as f:
+        return any(SOLIDWORKS_API_BOUNDARY in line for line in f)
+
 
 # Gate on the crawled HTML, not the manifest: the manifest is committed, so gating
 # on it never skips, and these assertions then run against a corpus whose pages do
 # not exist -- reporting a failure where the honest answer is "not available here".
-pytestmark = pytest.mark.skipif(
-    not EXAMPLES_HTML.is_dir() or not any(EXAMPLES_HTML.rglob("*.htm*")),
-    reason="crawled HTML not present (output/ is gitignored); run phases 10-110 first",
-)
+# Same for a corpus crawled for a different doc version.
+pytestmark = [
+    pytest.mark.skipif(
+        not EXAMPLES_HTML.is_dir() or not any(EXAMPLES_HTML.rglob("*.htm*")),
+        reason="crawled HTML not present (output/ is gitignored); run phases 10-110 first",
+    ),
+    pytest.mark.skipif(
+        not _corpus_is_current_version(),
+        reason=f"Phase 70 corpus not crawled for {SOLIDWORKS_API_BOUNDARY}; re-run phases 70-120",
+    ),
+]
 
 
 @pytest.fixture(scope="module")
@@ -81,7 +103,7 @@ EXAMPLE_PAGE = (
     / "Get_DimXpert_Features_and_Annotations_in_a_Model_Example_CSharp.htm"
 )
 EXAMPLE_URL = (
-    "https://help.solidworks.com/2026/english/api/swdimxpertapi/"
+    f"{SOLIDWORKS_API_FULL_BASE_URL}/swdimxpertapi/"
     "Get_DimXpert_Features_and_Annotations_in_a_Model_Example_CSharp.htm"
 )
 
@@ -101,7 +123,7 @@ def test_relative_links_are_discovered_from_the_real_corpus():
 
     seed = build_seed([ReferenceSource(EXAMPLE_PAGE, base_url=EXAMPLE_URL)], set())
 
-    base = "https://help.solidworks.com/2026/english/api/swdimxpertapi/"
+    base = f"{SOLIDWORKS_API_FULL_BASE_URL}/swdimxpertapi/"
     for module in ("Main", "FeatureData", "AnnotationData"):
         assert f"{base}DimXpert_{module}_Module_CSharp.htm" in seed
 
@@ -112,7 +134,7 @@ def test_relatively_linked_pages_reach_the_bundle(spider):
     already shipping once this phase has run. Complements the discovery test above,
     which is what actually guards the scan."""
     seed_keys = {canonical_key(u) for u in spider.seed}
-    base = "https://help.solidworks.com/2026/english/api/swdimxpertapi/"
+    base = f"{SOLIDWORKS_API_FULL_BASE_URL}/swdimxpertapi/"
     for module in ("Main", "FeatureData", "AnnotationData"):
         key = canonical_key(f"{base}DimXpert_{module}_Module_CSharp.htm")
         assert key in seed_keys or key in spider.bundle_keys, f"{module} neither seeded nor bundled"

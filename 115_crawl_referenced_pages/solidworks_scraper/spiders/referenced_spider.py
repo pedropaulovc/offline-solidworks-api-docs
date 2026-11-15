@@ -1,6 +1,6 @@
 """Referenced-pages closure spider.
 
-Crawls every page under ``/2026/english/api/`` that the extracted corpus links to
+Crawls every page under ``SOLIDWORKS_API_BOUNDARY`` that the extracted corpus links to
 but that phases 10/30/100 never fetched, following in-page ``/api`` links until the
 set is closed. Pages already crawled by other phases are pre-seeded as "seen" so
 the closure stops at the corpus boundary instead of re-crawling the reference tree.
@@ -26,6 +26,8 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 import sys
 
 sys.path.insert(0, str(REPO_ROOT / "115_crawl_referenced_pages"))
+sys.path.insert(0, str(REPO_ROOT))
+from shared.constants import SOLIDWORKS_API_FULL_BASE_URL  # noqa: E402
 from link_targets import (  # noqa: E402
     ReferenceSource,
     build_bundle_doc_keys,
@@ -43,7 +45,7 @@ from link_targets import (  # noqa: E402
 # under swconst/. Guide-link resolution is by basename, so crawling the swconst
 # page satisfies the (basename-identical) sldworksapi reference.
 _EXTRA_SEED_URLS = [
-    "https://help.solidworks.com/2026/english/api/swconst/DP_ImageQuality.htm",
+    f"{SOLIDWORKS_API_FULL_BASE_URL}/swconst/DP_ImageQuality.htm",
 ]
 
 # Pages already crawled by earlier phases -- the closure boundary (link-following

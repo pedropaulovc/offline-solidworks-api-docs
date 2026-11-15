@@ -1,6 +1,6 @@
 """Seed and boundary computation for the referenced-pages closure crawl.
 
-Phase 115 crawls every page under ``/2026/english/api/`` that the rest of the
+Phase 115 crawls every page under ``SOLIDWORKS_API_BOUNDARY`` that the rest of the
 corpus links to but that no earlier phase crawled. This module is the pure,
 network-free core:
 
@@ -23,6 +23,7 @@ their sibling code pages -- resolves and is seeded.
 """
 
 import re
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
@@ -30,14 +31,17 @@ from urllib.parse import unquote, urljoin, urlparse
 
 import jsonlines
 
-HOST = "https://help.solidworks.com"
-API_PREFIX = "2026/english/api/"
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from shared.constants import SOLIDWORKS_API_PATH_PREFIX, SOLIDWORKS_BASE_URL  # noqa: E402
+
+HOST = SOLIDWORKS_BASE_URL
+API_PREFIX = SOLIDWORKS_API_PATH_PREFIX
 PAGE_SUFFIXES = (".htm", ".html")
 
 # Absolute page URLs under the /api boundary, e.g.
-# https://help.solidworks.com/2026/english/api/swconst/DP_Dimensions.htm
+# https://help.solidworks.com/2027/english/api/swconst/DP_Dimensions.htm
 _ABS_API_URL = re.compile(
-    r"https?://help\.solidworks\.com/2026/english/api/[^\s\"'<>)\]]+?\.html?",
+    r"https?://help\.solidworks\.com/" + re.escape(API_PREFIX) + r"[^\s\"'<>)\]]+?\.html?",
     re.IGNORECASE,
 )
 
@@ -74,7 +78,7 @@ def canonical_key(url: str) -> str | None:
 
     parsed = urlparse(url)
     # Accept absolute help.solidworks.com URLs and host-relative paths (e.g. the
-    # ``/2026/...`` form stored in Phase 110's manifest); reject other hosts.
+    # ``/<year>/...`` form stored in Phase 110's manifest); reject other hosts.
     if parsed.netloc and parsed.netloc != "help.solidworks.com":
         return None
 

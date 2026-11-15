@@ -95,8 +95,8 @@ uv run python 100_crawl_programming_guide/validate_crawl.py --verbose
 ```python
 class ApiDocsSpider(scrapy.Spider):
     name = "api_docs"
-    # Starting URL for Programming Guide (id=1)
-    start_urls = ["https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id=1"]
+    # Starting URL for Programming Guide (id=1); version comes from shared/constants.py
+    start_urls = [expand_toc_url(1)]  # .../expandToc?version=2027&...&queryParam=?id=1
 ```
 
 ## 🧪 Testing
@@ -135,7 +135,7 @@ Each line contains metadata about a crawled page:
 
 ```json
 {
-  "url": "https://help.solidworks.com/2026/english/api/...",
+  "url": "https://help.solidworks.com/2027/english/api/...",
   "file_path": "output/html/...",
   "content_hash": "sha256_hash",
   "content_length": 12345,
@@ -162,7 +162,7 @@ Overall crawl statistics:
 
 ### Stage 1: TOC Discovery
 
-1. Fetch initial TOC from: `https://help.solidworks.com/expandToc?version=2026&language=english&product=api&queryParam=?id=1`
+1. Fetch initial TOC from: `https://help.solidworks.com/expandToc?version=2027&language=english&product=api&queryParam=?id=1`
 2. Recursively extract all URLs from the `children` array in the JSON response
 3. For each URL with an `id` parameter, create additional expandToc requests
 4. Build complete page list via recursive discovery
@@ -187,7 +187,7 @@ Overall crawl statistics:
 All crawled URLs must be within the boundary:
 
 ```
-/2026/english/api/
+/2027/english/api/   (SOLIDWORKS_API_BOUNDARY in shared/constants.py)
 ```
 
 URLs outside this path are automatically skipped.

@@ -11,8 +11,17 @@ from scrapy.http import HtmlResponse, Response
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from solidworks_scraper.spiders.api_docs_spider import ApiDocsSpider
+
+from shared.constants import (
+    SOLIDWORKS_API_BASE_PATH,
+    SOLIDWORKS_API_FULL_BASE_URL,
+    SOLIDWORKS_API_VERSION,
+    SOLIDWORKS_BASE_URL,
+    expand_toc_url,
+)
 
 
 class TestApiDocsSpider:
@@ -35,10 +44,10 @@ class TestApiDocsSpider:
         # Test that spider only processes URLs within the boundary
         from urllib.parse import urlparse
 
-        good_url = "https://help.solidworks.com/2026/english/api/sldworks/test.html"
+        good_url = f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworks/test.html"
         bad_url1 = "https://help.solidworks.com/2025/english/api/test.html"  # Wrong year
-        bad_url2 = "https://help.solidworks.com/2026/french/api/test.html"  # Wrong language
-        bad_url3 = "https://help.solidworks.com/2026/english/docs/test.html"  # Not API
+        bad_url2 = f"{SOLIDWORKS_BASE_URL}/{SOLIDWORKS_API_VERSION}/french/api/test.html"  # Wrong language
+        bad_url3 = f"{SOLIDWORKS_BASE_URL}/{SOLIDWORKS_API_VERSION}/english/docs/test.html"  # Not API
 
         # Check boundary logic
         assert urlparse(good_url).path.startswith(self.spider.base_path)
@@ -62,7 +71,7 @@ class TestApiDocsSpider:
         next_data_json = {"props": {"pageProps": {"helpContentData": {"helpText": help_text_content}}}}
 
         mock_response = Mock(spec=HtmlResponse)
-        mock_response.url = "https://help.solidworks.com/2026/english/api/test.html?id=123"
+        mock_response.url = f"{SOLIDWORKS_API_FULL_BASE_URL}/test.html?id=123"
         mock_response.status = 200
         mock_response.headers = {"Content-Type": b"text/html; charset=utf-8"}
         mock_response.body = b"<html><body>Test</body></html>"
@@ -97,7 +106,7 @@ class TestApiDocsSpider:
         """Test that non-HTML content is skipped"""
         # Create mock response with non-HTML content type
         mock_response = Mock(spec=Response)
-        mock_response.url = "https://help.solidworks.com/2026/english/api/test.pdf"
+        mock_response.url = f"{SOLIDWORKS_API_FULL_BASE_URL}/test.pdf"
         mock_response.headers = {"Content-Type": b"application/pdf"}
 
         # Parse the page
@@ -111,7 +120,7 @@ class TestApiDocsSpider:
         """Test that pages outside boundary are skipped"""
         # Create mock response outside boundary
         mock_response = Mock(spec=Response)
-        mock_response.url = "https://help.solidworks.com/2026/english/docs/test.html"
+        mock_response.url = f"{SOLIDWORKS_BASE_URL}/{SOLIDWORKS_API_VERSION}/english/docs/test.html"
         mock_response.headers = {"Content-Type": b"text/html"}
 
         # Parse the page
@@ -126,7 +135,7 @@ class TestApiDocsSpider:
         # Create mock failure
         mock_failure = Mock()
         mock_failure.request = Mock()
-        mock_failure.request.url = "https://help.solidworks.com/2026/english/api/error.html"
+        mock_failure.request.url = f"{SOLIDWORKS_API_FULL_BASE_URL}/error.html"
         mock_failure.value = Exception("Connection timeout")
 
         # Handle the error
@@ -142,16 +151,19 @@ class TestApiDocsSpider:
 
     def test_start_requests(self) -> None:
         """Test that start URLs are correctly configured"""
-        # One seed per root TOC node (core API id=2, Toolbox API id=13)
-        assert len(self.spider.start_urls) == 2
+        # One seed per root TOC node. The 2027 TOC is flattened: core API
+        # roots are ids 2, 3, 4; Toolbox API roots are ids 44-48.
+        expected_ids = ["2", "3", "4", "44", "45", "46", "47", "48"]
+        assert len(self.spider.start_urls) == len(ApiDocsSpider.TOC_ROOT_IDS) == 8
+        assert self.spider.start_urls == [expand_toc_url(i) for i in ApiDocsSpider.TOC_ROOT_IDS]
         for start_url in self.spider.start_urls:
             assert "expandToc" in start_url
-            assert "version=2026" in start_url
+            assert f"version={SOLIDWORKS_API_VERSION}" in start_url
             assert "language=english" in start_url
             assert "product=api" in start_url
-        # Both root nodes must be seeded
-        assert any("id=2" in url for url in self.spider.start_urls)
-        assert any("id=13" in url for url in self.spider.start_urls)
+        # Every root node must be seeded (exact id match: id=4 must not match id=44)
+        for node_id in expected_ids:
+            assert sum(url.endswith(f"?id={node_id}") for url in self.spider.start_urls) == 1, node_id
 
     def test_spider_statistics_tracking(self) -> None:
         """Test that spider tracks statistics correctly"""
@@ -165,7 +177,7 @@ class TestApiDocsSpider:
         next_data = {"props": {"pageProps": {"helpContentData": {"helpText": help_text}}}}
 
         mock_response = Mock(spec=HtmlResponse)
-        mock_response.url = "https://help.solidworks.com/2026/english/api/test.html?id=1"
+        mock_response.url = f"{SOLIDWORKS_API_FULL_BASE_URL}/test.html?id=1"
         mock_response.status = 200
         mock_response.headers = {"Content-Type": b"text/html"}
         mock_response.body = b"<html><body>Test</body></html>"
@@ -197,7 +209,7 @@ class TestApiDocsSpider:
         next_data = {"props": {"pageProps": {"helpContentData": {"helpText": help_text}}}}
 
         mock_response = Mock(spec=HtmlResponse)
-        mock_response.url = "https://help.solidworks.com/2026/english/api/duplicate.html"
+        mock_response.url = f"{SOLIDWORKS_API_FULL_BASE_URL}/duplicate.html"
         mock_response.status = 200
         mock_response.headers = {"Content-Type": b"text/html"}
         mock_response.body = b"<html><body>Test</body></html>"
@@ -228,10 +240,13 @@ class TestApiDocsSpider:
         # Test with nested structure
         json_data = {
             "children": [
-                {"url": "/2026/english/api/page1.htm"},
+                {"url": f"{SOLIDWORKS_API_BASE_PATH}/page1.htm"},
                 {
-                    "url": "/2026/english/api/page2.htm",
-                    "children": [{"url": "/2026/english/api/page3.htm"}, {"url": "/2026/english/api/page4.htm"}],
+                    "url": f"{SOLIDWORKS_API_BASE_PATH}/page2.htm",
+                    "children": [
+                        {"url": f"{SOLIDWORKS_API_BASE_PATH}/page3.htm"},
+                        {"url": f"{SOLIDWORKS_API_BASE_PATH}/page4.htm"},
+                    ],
                 },
             ]
         }
@@ -241,10 +256,10 @@ class TestApiDocsSpider:
 
         # Should get all 4 URLs
         assert len(urls) == 4
-        assert "/2026/english/api/page1.htm" in urls
-        assert "/2026/english/api/page2.htm" in urls
-        assert "/2026/english/api/page3.htm" in urls
-        assert "/2026/english/api/page4.htm" in urls
+        assert f"{SOLIDWORKS_API_BASE_PATH}/page1.htm" in urls
+        assert f"{SOLIDWORKS_API_BASE_PATH}/page2.htm" in urls
+        assert f"{SOLIDWORKS_API_BASE_PATH}/page3.htm" in urls
+        assert f"{SOLIDWORKS_API_BASE_PATH}/page4.htm" in urls
 
     def test_extract_urls_from_json_no_data(self) -> None:
         """Test extract_urls_from_json handles empty data gracefully"""

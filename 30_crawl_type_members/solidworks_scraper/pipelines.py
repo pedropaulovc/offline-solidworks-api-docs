@@ -5,6 +5,7 @@ Pipelines for processing and storing crawled SolidWorks API type member document
 import hashlib
 import json
 import re
+import sys
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -12,6 +13,10 @@ from urllib.parse import urlparse
 import jsonlines
 from itemadapter import ItemAdapter
 from scrapy import Spider
+
+# Add project root to path for shared imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from shared.constants import SOLIDWORKS_API_BOUNDARY, SOLIDWORKS_API_PATH_PREFIX
 
 
 class HtmlSavePipeline:
@@ -64,8 +69,8 @@ class HtmlSavePipeline:
         path = parsed.path.strip("/")
 
         # Remove the base path prefix
-        if path.startswith("2026/english/api/"):
-            path = path[len("2026/english/api/") :]
+        if path.startswith(SOLIDWORKS_API_PATH_PREFIX):
+            path = path[len(SOLIDWORKS_API_PATH_PREFIX) :]
 
         # Remove query parameters from filename but keep them for uniqueness
         # by appending a deterministic hash if query params exist
@@ -111,7 +116,7 @@ class MetadataLogPipeline:
             "phase": "30_crawl_type_members",
             "description": "Crawl type member (property and method) detail pages",
             "source": "20_extract_types/metadata/api_members.xml",
-            "boundary": "/2026/english/api/",
+            "boundary": SOLIDWORKS_API_BOUNDARY,
             "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
             "respect_robots_txt": False,
             "crawl_delay_seconds": 0.1,
