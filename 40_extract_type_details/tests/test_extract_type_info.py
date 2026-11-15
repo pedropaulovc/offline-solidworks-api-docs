@@ -34,6 +34,21 @@ class TestTypeInfoExtractor(unittest.TestCase):
         self.assertEqual(parser.type_name, "IAdvancedHoleFeatureData")
         self.assertIn("Advanced Hole feature data", parser.get_description())
 
+    def test_delegate_title_drops_kind_and_assembly(self) -> None:
+        """2027 delegate pages title as 'Name Delegate (Assembly)'; the type name is just 'Name'."""
+        html = """
+        <html>
+        <div id="pagetop">
+            <span id="pagetitle">DAssemblyDocEvents_ActiveConfigChangeNotifyEventHandler Delegate (SolidWorks.Interop.sldworks)</span>
+        </div>
+        </html>
+        """
+
+        parser = TypeInfoExtractor()
+        parser.feed(html)
+
+        self.assertEqual(parser.type_name, "DAssemblyDocEvents_ActiveConfigChangeNotifyEventHandler")
+
     def test_description_with_links_converted_to_see_cref(self) -> None:
         """Test that links in description are converted to XMLDoc <see cref> format (IDocumentSpecification bug)."""
         html = """

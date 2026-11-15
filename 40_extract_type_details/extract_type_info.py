@@ -28,6 +28,8 @@ from shared.extraction_utils import (
 )
 from shared.xmldoc_links import convert_links_to_see_refs, href_to_see_ref
 
+TITLE_KIND_SUFFIX = re.compile(r"\s+(?:Interface|Class|Enumeration|Delegate)\b.*$")
+
 
 class TypeInfoExtractor(HTMLParser):
     """HTML parser to extract type information from SolidWorks API documentation."""
@@ -182,8 +184,9 @@ class TypeInfoExtractor(HTMLParser):
 
         # Capture type name from pagetitle
         if self.in_pagetitle and text:
-            # Remove " Interface", " Class", or " Enumeration" suffix if present
-            self.type_name = text.replace(" Interface", "").replace(" Class", "").replace(" Enumeration", "").strip()
+            # Strip the kind suffix: "IFoo Interface", "swBar_e Enumeration",
+            # "DFooEventHandler Delegate (SolidWorks.Interop.sldworks)"
+            self.type_name = TITLE_KIND_SUFFIX.sub("", text).strip()
 
         # Capture description (text between pagetitle and first h1)
         # Use original data (not stripped) to preserve spacing
