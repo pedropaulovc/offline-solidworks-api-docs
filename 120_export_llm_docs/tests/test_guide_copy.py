@@ -1,6 +1,7 @@
 """Tests for how Phase 120 ships the guide Markdown under ``docs/``."""
 
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -73,14 +74,27 @@ def test_paths_differing_only_in_case_fail(tmp_path):
 
 
 def test_manifest_without_its_tree_is_skipped(tmp_path, capsys):
-    """After a fresh clone the committed manifest lists pages output/ does not have: the
-    root is skipped with a warning (as Phase 90 does), not a crash halfway through."""
+    """After a fresh clone there is a committed manifest but no output/ tree: the root
+    is skipped with a warning (as Phase 90 does), not a crash halfway through."""
     root = _guide_root(tmp_path / "115", {"swconst/DP_Units.md": "swconst/DP_Units.htm"})
-    (root / "swconst" / "DP_Units.md").unlink()
+    shutil.rmtree(root)
     pipeline = ExportPipeline(str(tmp_path / "out"))
 
     guide_pages = pipeline._load_guide_pages([str(root)])
 
     assert guide_pages == []
     assert pipeline._build_guide_links(guide_pages) == {}
-    assert "swconst/DP_Units.md" in capsys.readouterr().out
+    assert "no Markdown tree" in capsys.readouterr().out
+
+
+def test_tree_missing_a_listed_page_fails(tmp_path):
+    """A damaged or partly regenerated tree fails the export rather than shipping a
+    bundle without that phase's pages."""
+    root = _guide_root(tmp_path / "115", {
+        "swconst/DP_Units.md": "swconst/DP_Units.htm",
+        "swconst/SO_Export.md": "swconst/SO_Export.htm",
+    })
+    (root / "swconst" / "DP_Units.md").unlink()
+
+    with pytest.raises(FileNotFoundError, match="swconst/DP_Units.md"):
+        ExportPipeline(str(tmp_path / "out"))._load_guide_pages([str(root)])

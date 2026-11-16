@@ -102,6 +102,13 @@ class UrlRewriter:
                 relative_path = re.sub(r"\.html?$", ".md", relative_path, flags=re.IGNORECASE)
 
                 rewrite_count += 1
+                # Pages are laid out by TOC title, so paths often hold spaces and '#'
+                # ("Visual C#.md"). A '#' in a destination starts the fragment, so it is
+                # percent-encoded; a bare space or parenthesis ends a CommonMark
+                # destination, <...> does not.
+                relative_path = relative_path.replace("#", "%23")
+                if re.search(r"[ ()]", relative_path):
+                    relative_path = f"<{relative_path}>"
                 return f"[{link_text}]({relative_path})"
 
             # URL not found in our index, return original

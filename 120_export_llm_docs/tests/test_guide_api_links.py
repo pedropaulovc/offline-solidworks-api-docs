@@ -248,13 +248,16 @@ def test_unshipped_page_link_links_the_page_online():
 
 def test_unshipped_link_resolves_against_the_page_url_not_the_bundle_path():
     """Phase 110 lays pages out by TOC title, so a page's ``docs/`` folder says nothing
-    about where its relative links point; its help URL does. That holds for reference
-    pages too: a bare one is in the linking page's folder, not a folder named after
-    the TOC entry."""
+    about where its relative links point; its help URL does. That holds for a bare
+    reference link too, which is in the linking page's folder. A reference link that
+    names its assembly folder keeps the canonical URL, whatever its relative depth."""
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
         reference = f"{SLD}.INotShipped.html"
-        guide = _write_guide(tmp, f"[gone](../../swconst/NotShipped.htm) [type]({reference})\n")
+        guide = _write_guide(
+            tmp,
+            f"[gone](../../swconst/NotShipped.htm) [type]({reference}) [folder](../sldworksapi/{reference})\n",
+        )
         doc_path = guide.relative_to(tmp).as_posix()
         page_urls = {doc_path: f"{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/Overview/Hole.htm"}
 
@@ -262,7 +265,8 @@ def test_unshipped_link_resolves_against_the_page_url_not_the_bundle_path():
 
         assert guide.read_text(encoding="utf-8") == (
             f"[gone]({API_ROOT}swconst/NotShipped.htm) "
-            f"[type]({API_ROOT}sldworksapiprogguide/Overview/{reference})\n"
+            f"[type]({API_ROOT}sldworksapiprogguide/Overview/{reference}) "
+            f"[folder]({API_ROOT}sldworksapi/{reference})\n"
         )
 
 

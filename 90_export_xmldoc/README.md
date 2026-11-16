@@ -121,7 +121,7 @@ uv run python 90_export_xmldoc/generate_xmldoc.py --output-dir custom/path
 
 # Use explicit guide roots (repeatable; defaults to Phase 110 and 115 roots). Each must be a
 # phase's <phase>/output/markdown with its <phase>/metadata/files_created.jsonl manifest;
-# a root without one (or missing a page it lists) is skipped with a warning
+# a root without one is skipped with a warning, and one missing a page it lists fails
 uv run python 90_export_xmldoc/generate_xmldoc.py --guide-dir path/to/<phase>/output/markdown
 ```
 

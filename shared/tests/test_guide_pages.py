@@ -35,18 +35,35 @@ def test_guide_pages_come_from_the_manifest_only(tmp_path):
 
 
 def test_missing_manifest_raises(tmp_path):
+    root = tmp_path / "110" / "output" / "markdown"
+    root.mkdir(parents=True)
+
     with pytest.raises(GuidePagesUnavailable, match="no manifest"):
-        read_guide_pages(tmp_path / "110" / "output" / "markdown")
+        read_guide_pages(root)
 
 
 def test_manifest_without_its_tree_raises(tmp_path):
-    """The manifests are committed and output/ is gitignored: after a fresh clone the
-    manifest lists pages that are not there."""
+    """The manifests are committed and output/ is gitignored: after a fresh clone there
+    is a manifest but no tree. Callers skip such a root."""
     root = _write_manifest(tmp_path / "115", [
         {"original_url": "/2027/english/api/swconst/A.htm", "markdown_path": "115/output/markdown/swconst/A.md"},
     ])
 
-    with pytest.raises(GuidePagesUnavailable, match="swconst/A.md"):
+    with pytest.raises(GuidePagesUnavailable, match="no Markdown tree"):
+        read_guide_pages(root)
+
+
+def test_tree_missing_a_listed_page_fails(tmp_path):
+    """A tree that is there but lacks a listed page is damaged or partly regenerated;
+    skipping the whole root would quietly ship a bundle without that phase."""
+    root = _write_manifest(tmp_path / "115", [
+        {"original_url": "/2027/english/api/swconst/A.htm", "markdown_path": "115/output/markdown/swconst/A.md"},
+        {"original_url": "/2027/english/api/swconst/B.htm", "markdown_path": "115/output/markdown/swconst/B.md"},
+    ])
+    (root / "swconst").mkdir(parents=True)
+    (root / "swconst" / "A.md").write_text("# A\n", encoding="utf-8")
+
+    with pytest.raises(FileNotFoundError, match="swconst/B.md"):
         read_guide_pages(root)
 
 

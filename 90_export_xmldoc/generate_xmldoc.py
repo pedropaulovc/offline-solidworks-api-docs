@@ -383,8 +383,8 @@ class XMLDocGenerator:
 
         Only the pages each guide phase's manifest lists: a stray ``.md`` under a guide
         directory (left by an earlier run) is not part of the current output. A guide
-        directory without its manifest, or missing a listed page, is skipped with a
-        warning, as Phase 120 does.
+        directory without its manifest is skipped with a warning, as Phase 120 does; one
+        missing a page its manifest lists raises FileNotFoundError.
         """
         doc = ET.Element('doc')
         assembly = ET.SubElement(doc, 'assembly')

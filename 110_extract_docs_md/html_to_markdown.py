@@ -55,25 +55,32 @@ def relativize_chm_aliases(html: str, page_url: str) -> str:
     return _HREF.sub(repl, html)
 
 
+# Elements whose content html2text leaves out of the Markdown.
+_HIDDEN_TAGS = ("head", "script", "style")
+
+
+class _TextFound(Exception):
+    """Raised by :class:`_TextFinder` at the first visible text."""
+
+
 class _TextFinder(HTMLParser):
-    """Notes whether any text outside ``<script>``/``<style>`` is not whitespace."""
+    """Raises :class:`_TextFound` at the first non-whitespace text html2text would keep."""
 
     def __init__(self) -> None:
         super().__init__()
-        self.found = False
         self._hidden_depth = 0
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if tag in ("script", "style"):
+        if tag in _HIDDEN_TAGS:
             self._hidden_depth += 1
 
     def handle_endtag(self, tag: str) -> None:
-        if tag in ("script", "style") and self._hidden_depth:
+        if tag in _HIDDEN_TAGS and self._hidden_depth:
             self._hidden_depth -= 1
 
     def handle_data(self, data: str) -> None:
         if not self._hidden_depth and data.strip():
-            self.found = True
+            raise _TextFound
 
 
 def has_text(html: str) -> bool:
@@ -83,12 +90,16 @@ def has_text(html: str) -> bool:
     topics are one diagram) would be a single dangling ``![](x.gif)``; links to it
     are better left pointing at the help page, which shows the image. Decided on
     the HTML, not the Markdown, where a linked thumbnail or a layout table leaves
-    ``[](big.htm)`` or ``---`` behind.
+    ``[](big.htm)`` or ``---`` behind. Text in ``<head>`` (the ``<title>``),
+    ``<script>`` and ``<style>`` does not count: html2text drops it.
     """
     finder = _TextFinder()
-    finder.feed(html)
-    finder.close()
-    return finder.found
+    try:
+        finder.feed(html)
+        finder.close()
+    except _TextFound:
+        return True
+    return False
 
 
 class HtmlToMarkdownConverter:

@@ -175,9 +175,12 @@ class TestHtmlToMarkdownConverter:
             ('<table><tr><td><img src="a.gif"></td></tr></table>', False),
             ('<img src="a(1).gif">&nbsp;', False),
             ('<script>var shown = 1;</script><style>p {}</style><img src="a.gif">', False),
+            # html2text drops <head>, <title> included.
+            ('<html><head><title>Free Form Curves</title></head><body><img src="a.gif"></body></html>', False),
             ("", False),
             ('<img src="a.gif"><p>The symbol libraries.</p>', True),
             ("<h1>Title</h1>", True),
+            ("<html><head><title>T</title></head><body><p>Body text.</p></body></html>", True),
         ],
     )
     def test_has_text(self, html, expected):
@@ -193,7 +196,8 @@ class TestHtmlToMarkdownConverter:
 
     def test_rewriter_matches_guide_pages_case_insensitively(self):
         """An alias keeps the CHM's path case (``OVERVIEW/``), the TOC uses ``Overview/``;
-        the server treats them as one page, so the link still becomes the ``.md`` file."""
+        the server treats them as one page, so the link still becomes the ``.md`` file.
+        A destination with a space is angle-wrapped: bare, CommonMark would end it there."""
         target = f"{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/Overview/Type_Libraries.htm?id=1.2"
         rewriter = UrlRewriter({target: Path("out/Overview/Type Libraries.md")})
         page = f"https://help.solidworks.com{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/Overview/Page.htm"
@@ -203,7 +207,26 @@ class TestHtmlToMarkdownConverter:
         )
 
         assert count == 1
-        assert content == "[types](Type Libraries.md)"
+        assert content == "[types](<Type Libraries.md>)"
+
+    def test_rewriter_leaves_plain_destinations_bare(self):
+        target = f"{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/Overview/Type_Libraries.htm?id=1.2"
+        rewriter = UrlRewriter({target: Path("out/Overview/Type_Libraries.md")})
+        page = f"https://help.solidworks.com{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/Overview/Page.htm"
+
+        content, _ = rewriter.rewrite_urls("[types](Type_Libraries.htm)", page, Path("out/Overview/Page.md"))
+
+        assert content == "[types](Type_Libraries.md)"
+
+    def test_rewriter_encodes_hash_in_file_names(self):
+        """``Visual C#.md``: a bare '#' would start the fragment, leaving ``Visual C``."""
+        target = f"{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/GettingStarted/VisualCSharp.htm?id=1.3"
+        rewriter = UrlRewriter({target: Path("out/Apps/Visual C#.md")})
+        page = f"https://help.solidworks.com{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/GettingStarted/Page.htm"
+
+        content, _ = rewriter.rewrite_urls("[C#](VisualCSharp.htm)", page, Path("out/Apps/Overview.md"))
+
+        assert content == "[C#](<Visual C%23.md>)"
 
     def test_save_markdown(self, tmp_path):
         """Test saving Markdown file."""

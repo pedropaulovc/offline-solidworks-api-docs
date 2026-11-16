@@ -173,9 +173,10 @@ class ExportPipeline:
         programming guide and Phase 115's referenced-page closure).
 
         Only listed pages ship: a stray ``.md`` an earlier run left under a markdown
-        root is not part of the current output. A root whose manifest or pages are
-        missing (the manifests are committed, ``output/`` is not) is skipped with a
-        warning, as Phase 90 does; its ``<see href>`` references stay external.
+        root is not part of the current output. A root with no tree or no manifest (the
+        manifests are committed, ``output/`` is not) is skipped with a warning, as
+        Phase 90 does; its ``<see href>`` references stay external. A tree missing a
+        listed page raises FileNotFoundError.
         """
         guide_pages: List[GuidePage] = []
         for root in markdown_roots:
@@ -451,16 +452,17 @@ class ExportPipeline:
                         state["changed"] = True
                         return f"{head}{posixpath.relpath(target, guide_dir)}{tail}"
 
-                # Not in the bundle: link the online page, not a dead path. A relative
-                # link resolves against the linking page's URL when it is known.
-                online = self._online_page(url, page_url)
+                # Not in the bundle: link the online page, not a dead path. A reference
+                # page lives in its assembly folder, so a link naming that folder gives the
+                # canonical URL. A bare or parent-relative one resolves against the
+                # linking page's URL when known, else against the page's own folder.
+                folder_named = assembly not in ("", ".", "..")
+                online = None if folder_named else self._online_page(url, page_url)
                 if online is not None:
                     external += 1
                     state["changed"] = True
                     return f"{head}{self._md_destination(online)}{tail}"
-                # Otherwise rebuild the canonical URL. Same-directory references carry
-                # no assembly segment; recover it from the page's own folder.
-                asm = assembly or posixpath.basename(guide_dir)
+                asm = assembly if folder_named else posixpath.basename(guide_dir)
                 if not asm or asm == "docs":
                     return match.group(0)
                 basename = url.split('?')[0].split('#')[0].split('/')[-1]
