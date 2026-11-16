@@ -26,10 +26,13 @@ from scrapy.crawler import CrawlerProcess
 from scrapy.settings import Settings
 from scrapy.utils.project import get_project_settings
 
-# Add the scrapy project to path
+# Add the scrapy project and the repo root (for shared/) to path
 sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from solidworks_scraper.spiders.examples_spider import ExamplesSpider
+
+from shared.help_page_spider import CrawlMode, crawl_exit_code
 
 
 def setup_environment() -> tuple[Path, Path, Path]:
@@ -267,14 +270,15 @@ def main() -> None:
         process = CrawlerProcess(settings)
 
         # Add the spider to crawl
-        process.crawl(ExamplesSpider)
+        crawler = process.create_crawler(ExamplesSpider)
+        process.crawl(crawler)
 
         # Start the crawling process
         print("Starting crawl... (Press Ctrl+C to stop)\n")
         process.start()
 
         print("\n" + "=" * 50)
-        print("Crawl completed successfully!")
+        print("Crawl finished")
         print(f"End time: {datetime.now().isoformat()}")
         print("=" * 50)
 
@@ -284,6 +288,9 @@ def main() -> None:
         # Validate if requested
         if args.validate:
             validate_crawl(metadata_dir)
+
+        # A page lost after its retries, or a crawl stopped early, is a hole every later phase would inherit.
+        sys.exit(crawl_exit_code(crawler, CrawlMode.TEST if args.test else CrawlMode.FULL))
 
     except KeyboardInterrupt:
         print("\n\nCrawl interrupted by user.")

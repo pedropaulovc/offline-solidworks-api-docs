@@ -2,20 +2,23 @@
 Tests for the TypeMembersSpider
 """
 
+import json
 import xml.etree.ElementTree as ET
 
 import pytest
 from scrapy.http import HtmlResponse, Request
+from twisted.python.failure import Failure
 
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
+from shared.help_page_spider import RETRY_BACKOFF_SECONDS
 from solidworks_scraper.spiders import type_members_spider
 from solidworks_scraper.spiders.type_members_spider import TypeMembersSpider
 
 
 @pytest.fixture
-def spider():
-    """Create a spider instance for testing"""
-    return TypeMembersSpider()
+def spider(crawler_spider):
+    """Create a spider instance for testing, bound to a crawler so it can retry"""
+    return crawler_spider(TypeMembersSpider)
 
 
 @pytest.fixture
@@ -210,9 +213,10 @@ class TestTypeMembersSpider:
 
         items = list(spider.parse_page(response))
 
-        # Should skip
-        assert len(items) == 0
-        assert spider.stats["skipped_pages"] == 1
+        # A page without __NEXT_DATA__ is retried later, not skipped
+        assert items == []
+        assert spider.stats["skipped_pages"] == 0
+        assert spider.stats["failed_pages"] == 0
 
     def test_start_requests_generates_requests(self, spider, members_xml, sample_xml_content):
         """Test that start_requests generates correct requests"""
@@ -233,16 +237,16 @@ class TestTypeMembersSpider:
             f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/Test~TestProperty2.html",
         ]
 
-    def test_handle_error_logs_failure(self, spider):
-        """Test that handle_error logs failures correctly"""
-        from twisted.python.failure import Failure
+    def test_handle_error_retries_then_fails(self, spider, release_waiting):
+        """A download error reaching the errback is retried; once retries are exhausted it is a failed page"""
+        failure = Failure(Exception("Test error"))
+        failure.request = Request(url="https://help.solidworks.com/test")
 
-        # Create a mock failure
-        request = Request(url="https://help.solidworks.com/test")
-        error = Exception("Test error")
-        failure = Failure(error)
-        failure.request = request
+        assert list(spider.handle_error(failure)) == []
+        [retry] = release_waiting(spider, RETRY_BACKOFF_SECONDS)
+        assert spider.stats["failed_pages"] == 0
 
+        failure.request = retry.replace(meta={"retry_times": spider.crawler.settings.getint("RETRY_TIMES")})
         error_items = list(spider.handle_error(failure))
 
         assert len(error_items) == 1
@@ -275,3 +279,53 @@ class TestTypeMembersSpider:
         # Second time should return empty (already crawled)
         assert len(items) == 0
         assert spider.stats["total_pages"] == 1  # Only counted once
+
+
+# The 2027 full run lost this page: it came back once with helpContentData null in
+# __NEXT_DATA__, and parse_page crashed on it.
+INTERSECT_URL = (
+    f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/"
+    "SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ISurface~GetIntersectCurveCount2.html"
+)
+
+
+def member_page(help_content_data, meta=None) -> HtmlResponse:
+    next_data = json.dumps({"props": {"pageProps": {"helpContentData": help_content_data}}})
+    body = (
+        "<html><head><title>GetIntersectCurveCount2 Method (ISurface)</title></head><body>"
+        f'<script id="__NEXT_DATA__" type="application/json">{next_data}</script></body></html>'
+    )
+    return HtmlResponse(
+        url=INTERSECT_URL,
+        request=Request(INTERSECT_URL, meta=meta or {}),
+        body=body.encode("utf-8"),
+        headers={"Content-Type": "text/html; charset=utf-8"},
+    )
+
+
+def test_null_help_content_data_is_retried_and_the_retry_is_saved(spider, release_waiting):
+    assert list(spider.parse_page(member_page(None))) == []
+    [retry] = release_waiting(spider, RETRY_BACKOFF_SECONDS)
+
+    assert retry.url == INTERSECT_URL
+    assert retry.dont_filter
+
+    # The refetched page is not mistaken for an already-crawled duplicate
+    [item] = list(spider.parse_page(member_page({"helpText": "<p>GetIntersectCurveCount2</p>"}, retry.meta)))
+
+    assert item["url"] == INTERSECT_URL
+    assert item["content"] == "<p>GetIntersectCurveCount2</p>"
+    assert spider.stats["successful_pages"] == 1
+    assert spider.stats["total_pages"] == 1
+    assert spider.crawl_failures() == {}
+
+
+def test_null_help_content_data_fails_the_crawl_once_retries_are_exhausted(spider):
+    meta = {"retry_times": spider.crawler.settings.getint("RETRY_TIMES")}
+
+    [error] = list(spider.parse_page(member_page(None, meta)))
+
+    assert error == {"type": "error", "url": INTERSECT_URL, "error": "helpContentData is null"}
+    assert spider.stats["failed_pages"] == 1
+    assert spider.stats["skipped_pages"] == 0
+    assert spider.crawl_failures() == {"failed pages": 1}

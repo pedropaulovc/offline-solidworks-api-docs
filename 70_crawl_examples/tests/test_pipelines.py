@@ -3,7 +3,6 @@
 import importlib
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock
 
 import pytest
 from scrapy.http import HtmlResponse, Request, Response
@@ -83,8 +82,7 @@ def test_version_marker_not_current_when_pages_failed(marker_pipeline, spider):
 def test_version_marker_not_current_after_callback_exception(marker_pipeline, spider):
     """Exceptions in parse_page never reach the errback; the crawler's stats still record them."""
     pipeline, marker = marker_pipeline
-    spider.crawler = Mock()
-    spider.crawler.stats.get_value.side_effect = lambda key, default=None: 2 if key == "spider_exceptions/count" else 0
+    spider.crawler.stats.set_value("spider_exceptions/count", 2)
     pipeline.open_spider(spider)
 
     pipeline.spider_closed(spider, "finished")
@@ -124,19 +122,19 @@ def test_version_marker_not_current_after_url_source_failure(marker_pipeline, sp
 
 
 def test_version_marker_not_current_after_next_data_parse_failure(marker_pipeline, spider):
-    """A page whose __NEXT_DATA__ is not JSON is never saved; that corpus is not complete."""
+    """A page whose __NEXT_DATA__ is still not JSON after its retries is never saved; that corpus is not complete."""
     pipeline, marker = marker_pipeline
     url = f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/test.htm"
     body = b'<html><script id="__NEXT_DATA__" type="application/json">{not json</script></html>'
-    response = HtmlResponse(
-        url=url, request=Request(url), body=body, encoding="utf-8", headers={"Content-Type": "text/html"}
-    )
+    request = Request(url, meta={"retry_times": spider.crawler.settings.getint("RETRY_TIMES")})
+    response = HtmlResponse(url=url, request=request, body=body, encoding="utf-8", headers={"Content-Type": "text/html"})
     pipeline.open_spider(spider)
 
-    assert list(spider.parse_page(response)) == []
+    [error] = list(spider.parse_page(response))
     pipeline.spider_closed(spider, "finished")
 
-    assert spider.stats["parse_failures"] == 1
+    assert error["type"] == "error"
+    assert spider.stats["failed_pages"] == 1
     assert marker.read_text().strip() != SOLIDWORKS_API_VERSION
 
 
@@ -153,13 +151,13 @@ def test_older_corpus_marker_is_dropped(marker_pipeline, spider):
 
 
 @pytest.fixture
-def spider():
-    """A spider whose failure counters start clean.
+def spider(crawler_spider):
+    """A crawler-bound spider whose failure counters start clean.
 
     ExamplesSpider() loads the real phase 40/50 XML in __init__; a developer who has
     cleaned or regenerated those would otherwise start every marker test with
     url_source_failures > 0 and see pipeline failures that are really missing data."""
-    instance = ExamplesSpider()
+    instance = crawler_spider(ExamplesSpider)
     instance.stats["url_source_failures"] = 0
     return instance
 

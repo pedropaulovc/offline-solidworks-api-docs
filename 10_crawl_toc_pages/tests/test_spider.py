@@ -4,10 +4,13 @@ Tests for the SolidWorks API documentation spider.
 
 import json
 import sys
+import zlib
 from pathlib import Path
 from unittest.mock import Mock
 
-from scrapy.http import HtmlResponse, Response
+from scrapy.http import HtmlResponse, Request, Response, TextResponse
+from scrapy.spidermiddlewares.httperror import HttpError
+from twisted.python.failure import Failure
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -22,6 +25,7 @@ from shared.constants import (
     SOLIDWORKS_BASE_URL,
     expand_toc_url,
 )
+from shared.help_page_spider import RETRY_BACKOFF_SECONDS
 
 
 class TestApiDocsSpider:
@@ -130,24 +134,24 @@ class TestApiDocsSpider:
         assert len(items) == 0
         assert self.spider.stats["skipped_pages"] == 1  # First skip in this test
 
-    def test_handle_error(self) -> None:
-        """Test error handling"""
-        # Create mock failure
-        mock_failure = Mock()
-        mock_failure.request = Mock()
-        mock_failure.request.url = f"{SOLIDWORKS_API_FULL_BASE_URL}/error.html"
-        mock_failure.value = Exception("Connection timeout")
+    def test_handle_error(self, crawler_spider) -> None:
+        """An HTTP error status outside RETRY_HTTP_CODES is final"""
+        spider = crawler_spider(ApiDocsSpider)
+        url = f"{SOLIDWORKS_API_FULL_BASE_URL}/error.html"
+        request = Request(url)
+        failure = Failure(HttpError(Response(url, status=404, request=request), "Ignoring non-200 response"))
+        failure.request = request
 
         # Handle the error
-        items = list(self.spider.handle_error(mock_failure))
+        items = list(spider.handle_error(failure))
 
         # Check error item was created
         assert len(items) == 1
         error_item = items[0]
         assert error_item["type"] == "error"
-        assert error_item["url"] == mock_failure.request.url
-        assert "Connection timeout" in error_item["error"]
-        assert self.spider.stats["failed_pages"] == 1
+        assert error_item["url"] == url
+        assert error_item["error"] == "404 Not Found"
+        assert spider.stats["failed_pages"] == 1
 
     def test_start_requests(self) -> None:
         """Test that start URLs are correctly configured"""
@@ -348,3 +352,64 @@ class TestApiDocsSpider:
 
         # Test with dict without url or children
         assert self.spider.extract_urls_from_json({"name": "test"}) == []
+
+
+# The 2027 full run lost this page to a corrupt gzip body. HttpCompressionMiddleware
+# raises from process_response, so RetryMiddleware never retried it.
+DRAFT_FEATURE_URL = (
+    f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/"
+    "SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IDraftFeatureData2.html?id=4.1.114"
+)
+
+
+def decompression_failure(spider: ApiDocsSpider, meta: dict | None = None) -> Failure:
+    request = Request(DRAFT_FEATURE_URL, callback=spider.parse_page, errback=spider.handle_error, meta=meta or {})
+    failure = Failure(zlib.error("Error -3 while decompressing data: invalid stored block lengths"))
+    failure.request = request  # set by Scrapy's scraper before calling the errback
+    return failure
+
+
+def test_decompression_error_is_retried(crawler_spider, release_waiting) -> None:
+    spider = crawler_spider(ApiDocsSpider)
+
+    assert list(spider.handle_error(decompression_failure(spider))) == []
+    [retry] = release_waiting(spider, RETRY_BACKOFF_SECONDS)
+
+    assert retry.url == DRAFT_FEATURE_URL
+    assert retry.callback == spider.parse_page
+    assert retry.errback == spider.handle_error
+    assert retry.meta["retry_times"] == 1
+    assert spider.stats["failed_pages"] == 0
+
+
+def test_decompression_error_fails_the_crawl_once_retries_are_exhausted(crawler_spider) -> None:
+    spider = crawler_spider(ApiDocsSpider)
+    meta = {"retry_times": spider.crawler.settings.getint("RETRY_TIMES")}
+
+    [error] = list(spider.handle_error(decompression_failure(spider, meta)))
+
+    assert error == {
+        "type": "error",
+        "url": DRAFT_FEATURE_URL,
+        "error": "Error -3 while decompressing data: invalid stored block lengths",
+    }
+    assert spider.stats["failed_pages"] == 1
+    assert spider.crawl_failures() == {"failed pages": 1}
+
+
+def test_corrupt_toc_json_is_retried_not_dropped(crawler_spider, release_waiting) -> None:
+    """A truncated expandToc response would silently drop the node's whole subtree."""
+    spider = crawler_spider(ApiDocsSpider)
+    toc_url = expand_toc_url("4.1")
+
+    def toc_response(meta: dict) -> TextResponse:
+        request = Request(toc_url, callback=spider.parse, meta=meta)
+        return TextResponse(toc_url, body=b'{"children": [{"url": "/2027', encoding="utf-8", request=request)
+
+    assert list(spider.parse(toc_response({}))) == []
+    [retry] = release_waiting(spider, RETRY_BACKOFF_SECONDS)
+    assert retry.url == toc_url
+
+    [error] = list(spider.parse(toc_response({"retry_times": spider.crawler.settings.getint("RETRY_TIMES")})))
+    assert error["type"] == "error"
+    assert spider.stats["failed_pages"] == 1

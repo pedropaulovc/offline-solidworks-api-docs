@@ -119,3 +119,46 @@ def pytest_runtest_protocol(item: pytest.Item, nextitem: pytest.Item | None):  #
     if phase is not None:
         _assert_modules_belong_to(phase)
     return (yield)
+
+
+@pytest.fixture
+def crawler_spider():  # type: ignore[no-untyped-def]
+    """Factory for a spider bound to a configured Crawler (settings and stats), as in a real crawl.
+
+    Spider code that retries through ``get_retry_request`` or reads crawler stats needs
+    one; a bare ``Spider()`` has no ``crawler``. Nothing is downloaded: the reactor is
+    installed only because Scrapy's ``get_crawler`` checks the crawler settings against it.
+    Requests a spider schedules for later (``schedule_later``) wait on a fake clock and go
+    to a mock engine; ``release_waiting`` advances the one and reads the other.
+    """
+    from unittest.mock import Mock
+
+    from scrapy.utils.reactor import install_reactor, is_reactor_installed
+    from scrapy.utils.test import get_crawler
+    from twisted.internet.task import Clock
+
+    if not is_reactor_installed():
+        install_reactor("twisted.internet.asyncioreactor.AsyncioSelectorReactor")
+
+    def make(spidercls, **kwargs):  # type: ignore[no-untyped-def]
+        crawler = get_crawler(spidercls)
+        crawler.engine = Mock(spec=["crawl"])
+        spider = spidercls.from_crawler(crawler, **kwargs)
+        spider.clock = Clock()
+        return spider
+
+    return make
+
+
+@pytest.fixture
+def release_waiting():  # type: ignore[no-untyped-def]
+    """``release_waiting(spider, seconds)``: advance a ``crawler_spider``'s clock and return
+    the requests it handed to the engine meanwhile (retries, dead-link confirmations)."""
+
+    def release(spider, seconds):  # type: ignore[no-untyped-def]
+        spider.clock.advance(seconds)
+        released = [call.args[0] for call in spider.crawler.engine.crawl.call_args_list]
+        spider.crawler.engine.crawl.reset_mock()
+        return released
+
+    return release

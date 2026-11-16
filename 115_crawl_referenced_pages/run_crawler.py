@@ -22,6 +22,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from solidworks_scraper.spiders.referenced_spider import ReferencedSpider
 
+from shared.help_page_spider import crawl_exit_code
+
 
 def clear_previous(metadata_dir: Path, output_dir: Path) -> None:
     """Remove prior metadata/HTML so a fresh run doesn't append to old logs."""
@@ -52,13 +54,15 @@ def main() -> int:
 
     settings = get_project_settings()
     process = CrawlerProcess(settings)
-    process.crawl(ReferencedSpider)
+    crawler = process.create_crawler(ReferencedSpider)
+    process.crawl(crawler)
     process.start()
 
     urls_file = metadata_dir / "urls_crawled.jsonl"
     crawled = sum(1 for _ in open(urls_file)) if urls_file.exists() else 0
-    print(f"\nReferenced-pages crawl complete: {crawled} pages saved to {output_dir / 'html'}")
-    return 0
+    print(f"\nReferenced-pages crawl finished: {crawled} pages saved to {output_dir / 'html'}")
+    # A page lost after its retries, or a crawl stopped early, is a hole every later phase would inherit.
+    return crawl_exit_code(crawler)
 
 
 if __name__ == "__main__":

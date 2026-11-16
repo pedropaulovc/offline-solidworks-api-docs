@@ -1,5 +1,6 @@
 """Tests for the examples spider"""
 
+import json
 import tempfile
 from pathlib import Path
 
@@ -9,12 +10,13 @@ from scrapy.http import HtmlResponse, Request
 from solidworks_scraper.spiders.examples_spider import ExamplesSpider
 
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
+from shared.help_page_spider import DEAD_LINK_CONFIRMATION_DELAY_SECONDS
 
 
 @pytest.fixture
-def spider():
-    """Create a spider instance for testing"""
-    return ExamplesSpider()
+def spider(crawler_spider):
+    """Create a spider instance for testing, bound to a crawler so it can retry"""
+    return crawler_spider(ExamplesSpider)
 
 
 @pytest.fixture
@@ -220,7 +222,7 @@ def test_parse_page_extracts_title(spider):
 
 
 def test_parse_page_handles_missing_next_data(spider):
-    """Test that pages without __NEXT_DATA__ are skipped"""
+    """Test that pages without __NEXT_DATA__ are retried, not skipped"""
     html_content = """
     <!DOCTYPE html>
     <html>
@@ -240,8 +242,36 @@ def test_parse_page_handles_missing_next_data(spider):
         request=request,
         body=html_content.encode("utf-8"),
         encoding="utf-8",
+        headers={"Content-Type": "text/html; charset=utf-8"},
     )
 
     items = list(spider.parse_page(response))
-    assert len(items) == 0
+    assert items == []
+    assert spider.stats["skipped_pages"] == 0
+    assert spider.stats["failed_pages"] == 0
+
+
+def test_confirmed_dead_example_link_is_skipped_not_failed(spider, release_waiting):
+    """Some example links are dead (the server's "cannot be found" page on every fetch); once
+    a refetch confirms one, it is skipped and listed rather than failing the crawl."""
+    url = f"{SOLIDWORKS_API_FULL_BASE_URL}/swconst/ms-its:sldworksapi.chm::/Add_Component_and_Mate_Example_VB.htm"
+    next_data = json.dumps(
+        {"props": {"pageProps": {"helpContentData": {"ErrorTitle": "This page cannot be found."}}}}
+    )
+    body = f'<html><body><script id="__NEXT_DATA__" type="application/json">{next_data}</script></body></html>'
+
+    def page(meta):
+        return HtmlResponse(
+            url=url,
+            request=Request(url, meta=meta),
+            body=body.encode("utf-8"),
+            headers={"Content-Type": "text/html; charset=utf-8"},
+        )
+
+    assert list(spider.parse_page(page({}))) == []
+    [confirmation] = release_waiting(spider, DEAD_LINK_CONFIRMATION_DELAY_SECONDS)
+
+    assert list(spider.parse_page(page(confirmation.meta))) == []
     assert spider.stats["skipped_pages"] == 1
+    assert spider.stats["dead_links"] == [url]
+    assert spider.stats["failed_pages"] == 0
