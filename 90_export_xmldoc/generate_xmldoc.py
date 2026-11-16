@@ -22,6 +22,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from shared.guide_pages import read_guide_pages  # noqa: E402
 from shared.line_endings import normalize_tree  # noqa: E402
 from typing import Any
 
@@ -378,7 +379,11 @@ class XMLDocGenerator:
                 })
 
     def generate_guides_xmldoc(self) -> Path:
-        """Write conceptual/how-to Markdown pages into a companion XMLDoc."""
+        """Write conceptual/how-to Markdown pages into a companion XMLDoc.
+
+        Only the pages each guide phase's manifest lists: a stray ``.md`` under a guide
+        directory (left by an earlier run) is not part of the current output.
+        """
         doc = ET.Element('doc')
         assembly = ET.SubElement(doc, 'assembly')
         ET.SubElement(assembly, 'name').text = 'SolidWorks.Interop.guides'
@@ -387,13 +392,12 @@ class XMLDocGenerator:
 
         for index, guide_dir in enumerate(self.guide_dirs, start=1):
             root_label = f'root{index}'
-            for guide_path in sorted(guide_dir.rglob('*.md')):
-                relative_path = guide_path.relative_to(guide_dir).as_posix()
-                content = guide_path.read_text(encoding='utf-8')
+            for page in read_guide_pages(guide_dir):
+                content = page.file.read_text(encoding='utf-8')
                 guide = ET.SubElement(guides, sw_tag('guide'), {
-                    'id': f'{root_label}/{relative_path}',
-                    'title': self._guide_title(content, guide_path.stem),
-                    'source': relative_path,
+                    'id': f'{root_label}/{page.rel_path}',
+                    'title': self._guide_title(content, page.file.stem),
+                    'source': page.rel_path,
                     'root': root_label,
                 })
                 content_elem = ET.SubElement(guide, sw_tag('content'), {

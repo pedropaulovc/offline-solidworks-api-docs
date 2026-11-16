@@ -33,7 +33,7 @@ This phase combines data from multiple previous phases and generates XMLDoc file
    - `sw:example-ref` extensions linking API types to all recovered examples
 
 4. **Generates companion semantic catalogs**:
-   - `SolidWorks.Interop.guides.xml` embeds Phase 110/115 Markdown pages as CDATA
+   - `SolidWorks.Interop.guides.xml` embeds Phase 110/115 Markdown pages as CDATA: the pages each phase's `metadata/files_created.jsonl` lists, not whatever `.md` files sit in its output tree
    - `SolidWorks.Interop.examples.xml` contains all recovered examples with language, title, source URL, and API type references
 
 The `sw:` elements use the namespace `urn:solidworks:offline-xmldoc:1`. Standard IntelliSense consumers can continue reading the regular XMLDoc tags; custom consumers can read the extension elements for information not represented by the Microsoft XMLDoc format.

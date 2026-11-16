@@ -11,7 +11,8 @@ This phase consumes outputs from previous phases (20, 40, 50, 60, 80, 110) and p
 - **Phase 50** (`50_extract_type_member_details/metadata/api_member_details.xml`) - Member details (parameters, returns, remarks)
 - **Phase 60** (`60_extract_enum_members/metadata/enum_members.xml`) - Enumeration members
 - **Phase 80** (`80_parse_examples/output/examples.xml`) - Example code content
-- **Phase 110** (`110_extract_docs_md/output/markdown/`) - Programming guide markdown
+- **Phase 110** (`110_extract_docs_md/output/markdown/`) - Programming guide markdown, the pages its `metadata/files_created.jsonl` lists
+- **Phase 115** (`115_crawl_referenced_pages/output/markdown/`) - Referenced-page markdown, the pages its `metadata/files_created.jsonl` lists
 - **FunctionalCategories** (`10_crawl_toc_pages/output/html/.../FunctionalCategories...html`) - Category mappings for sldworks types
 
 ## Output Structure (Grep-Optimized)
@@ -64,7 +65,8 @@ output/
 5. **Index files**: Category/assembly organization preserved as queryable markdown
 6. **YAML frontmatter**: Every file has metadata (type, assembly, category, kind)
 7. **Simplified cross-references**: `[[IModelDoc2]]` instead of `<see cref="...">`
-8. **Resolved guide links**: API-reference links in the programming guide (e.g. `[IWizardHoleFeatureData2::InitializeHole](../../types/IWizardHoleFeatureData2/InitializeHole.md)`) are rewritten from the original `.html` reference pages to the shipping `types/`/`enums/` files — matched case-insensitively so source-doc typos still resolve; targets not in the bundle fall back to the online help page
+8. **Resolved guide links**: API-reference links in the programming guide (e.g. `[IWizardHoleFeatureData2::InitializeHole](../../types/IWizardHoleFeatureData2/InitializeHole.md)`) are rewritten from the original `.html` reference pages to the shipping `types/`/`enums/` files — matched case-insensitively so source-doc typos still resolve; targets not in the bundle fall back to the online help page. Links to guide, referenced and example pages resolve to their bundle copies the same way; one to a page the bundle lacks is resolved against the linking page's help URL (from the guide manifests) and points online instead of at a dead relative path
+9. **Manifest-listed guide pages only**: `docs/` holds exactly the pages Phase 110/115's `files_created.jsonl` list, never a stray `.md` an earlier run left in their trees. The export fails if two shipped paths differ only in case, since one would replace the other when unpacked on Windows or macOS
 
 ## Markdown Format
 

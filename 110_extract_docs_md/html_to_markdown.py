@@ -4,8 +4,16 @@ import hashlib
 import html2text
 import json
 import jsonlines
+import re
+import sys
 from pathlib import Path
 from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from shared.chm_aliases import relative_chm_alias  # noqa: E402
+
+_HREF = re.compile(r'(\bhref\s*=\s*")([^"]*)(")', re.IGNORECASE)
+_IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
 
 
 def new_html2text() -> html2text.HTML2Text:
@@ -24,6 +32,28 @@ def new_html2text() -> html2text.HTML2Text:
     h2t.unicode_snob = True  # Use unicode chars instead of ASCII
     h2t.skip_internal_links = False
     return h2t
+
+
+def relativize_chm_aliases(html: str, page_url: str) -> str:
+    """Rewrite CHM-alias ``href``s (``sldworksapi.chm::/X.html``) as links relative to
+    the page at ``page_url``, like its other relative links.
+
+    Left as written, an alias is a dead link in the Markdown and in everything built
+    from it (Phase 90's guides catalog copies the Markdown verbatim).
+    """
+    return _HREF.sub(
+        lambda m: f"{m.group(1)}{relative_chm_alias(m.group(2), page_url)}{m.group(3)}", html
+    )
+
+
+def has_text(markdown: str) -> bool:
+    """Whether a page's Markdown holds anything besides images.
+
+    The bundle ships no images, so an image-only page (a few ``Miscellaneous``
+    topics are one diagram) would be a single dangling ``![](x.gif)``; links to it
+    are better left pointing at the help page, which shows the image.
+    """
+    return bool(_IMAGE.sub("", markdown).strip())
 
 
 class HtmlToMarkdownConverter:
@@ -74,11 +104,12 @@ class HtmlToMarkdownConverter:
 
         return self.url_to_file_map.get(url)
 
-    def convert_html_to_markdown(self, html_path: Path) -> str:
+    def convert_html_to_markdown(self, html_path: Path, page_url: str) -> str:
         """Convert HTML file to Markdown.
 
         Args:
             html_path: Path to HTML file
+            page_url: The page's help URL or path, which its relative links are relative to
 
         Returns:
             Markdown content
@@ -86,7 +117,7 @@ class HtmlToMarkdownConverter:
         with html_path.open(encoding="utf-8") as f:
             html_content = f.read()
 
-        return new_html2text().handle(html_content)
+        return new_html2text().handle(relativize_chm_aliases(html_content, page_url))
 
     def sanitize_filename(self, name: str) -> str:
         """Sanitize filename by removing invalid characters.
@@ -151,13 +182,10 @@ class HtmlToMarkdownConverter:
 
 def main() -> None:
     """Test the HTML to Markdown converter."""
-    import sys
-
-    if len(sys.argv) > 1:
-        html_file = Path(sys.argv[1])
-    else:
-        print("Usage: python html_to_markdown.py <html_file>")
+    if len(sys.argv) != 3:
+        print("Usage: python html_to_markdown.py <html_file> <page_url>")
         sys.exit(1)
+    html_file = Path(sys.argv[1])
 
     if not html_file.exists():
         print(f"Error: File not found: {html_file}")
@@ -171,7 +199,7 @@ def main() -> None:
     )
 
     # Convert file
-    markdown = converter.convert_html_to_markdown(html_file)
+    markdown = converter.convert_html_to_markdown(html_file, sys.argv[2])
 
     # Print result
     print(markdown)

@@ -36,7 +36,8 @@ This phase crawls those pages so they ship in the bundle and cross-link as files
    corpus boundary instead of re-crawling the thousands of reference pages.
 3. **Extract** (`extract_markdown.py`): convert each crawled page to Markdown under
    `output/markdown/<path-under-api>.md`, writing a Phase-110-compatible
-   `metadata/files_created.jsonl` (`original_url` → `markdown_path`).
+   `metadata/files_created.jsonl` (`original_url` → `markdown_path`). CHM-alias links
+   become links relative to the page, like its other relative links.
 
 Phase 120 reads that manifest as a second guide source, copies the Markdown into
 the bundle `docs/`, and resolves the matching `<see href>` references to relative
@@ -59,13 +60,30 @@ uv run pytest 115_crawl_referenced_pages/tests/ -v
   the latter and the raw-HTML scan seeds ~2800 example pages the bundle already has.
 - A page referenced under `/api` that is *already* crawled by another phase but not
   exported as a doc (e.g. `FunctionalCategories-sldworksapi.html`), or that the server
-  answers with its "This page cannot be found." page (a dead link, e.g. the
-  `sldworksapi/DP_ImageQuality.htm` stub, `help_list.htm`,
-  `swconst/DP_Annotations-EdgeSymbols.htm`), stays an external link — it is out of
-  scope for this closure, not un-crawled. Such a page is refetched a minute later (the
-  server shows the same page during brief outages) and then skipped and listed under
-  `dead_links` in `metadata/crawl_stats.json`. Every one of the 63 pages the 2027 run
-  skipped returned that page when re-fetched (2026-11-16); 58 of them were unresolved
-  CHM aliases, 55 of pages the bundle already shipped and 3 of image-only
-  `sldworksapiprogguide/Miscellaneous` pages. Any other page without `helpText` fails
-  the crawl.
+  answers with its "This page cannot be found." page (a dead link), stays an external
+  link — it is out of scope for this closure, not un-crawled. Such a page is refetched
+  a minute later (the server shows the same page during brief outages) and then
+  skipped and listed under `dead_links` in `metadata/crawl_stats.json`. Any other page
+  without `helpText` fails the crawl.
+- The 2027 run lists 6 dead links, each of which returned the not-found page when
+  re-fetched (2026-11-16):
+  - `help_list.htm`, `sldworksapi/DP_ImageQuality.htm`,
+    `swconst/DP_Annotations-EdgeSymbols.htm`, `swconst/DP_Annotations-TransitionSymbols.htm`
+    and `toolboxapi/DifferencesBetweenUnManagedAndC++CLI.html`, which the run before
+    alias resolution also reported;
+  - `swconst/FileSaveAsSMGOptions.htm`, which no XML links. Its only link is a CHM
+    alias on `swconst/SO_Export.htm` (`swconst.chm::/FileSaveAsSMGOptions.htm`), so
+    the crawl requests this URL only now that aliases resolve.
+
+  Before CHM aliases were resolved the run skipped 63 pages: 58 were unresolved
+  aliases, which now resolve to pages the bundle already ships (55) or to the three
+  image-only pages below.
+- A crawled page whose Markdown is nothing but images
+  (`sldworksapiprogguide/Miscellaneous/FreeFormCurves.htm`,
+  `Geometric_Tolerance_Symbol_Libraries.htm`, `FeatureManager__InsertGussetFeature_image.htm`)
+  is not written: the bundle ships no images, so it would be a single dangling
+  `![](x.gif)`. Its links stay on the help page, which shows the image.
+  `metadata/extraction_summary.json` lists such pages under `image_only_pages`.
+- Extraction clears `output/markdown/` first, so a page that left the closure does not
+  keep its old file. Phases 90 and 120 also ship only the pages
+  `files_created.jsonl` lists.

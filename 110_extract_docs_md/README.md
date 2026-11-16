@@ -124,11 +124,15 @@ Main orchestrator that:
 - Tracks metadata and statistics
 
 **Process:**
-1. Load metadata from Phase 10
-2. Build TOC tree from expandToc files
-3. Traverse tree and convert each leaf node
-4. Save Markdown files in hierarchical structure
-5. Generate metadata and statistics
+1. Clear `output/markdown/`, so a page that left the TOC does not keep its old file
+   (Phases 90 and 120 ship only `files_created.jsonl`'s pages, but the tree should match too)
+2. Load metadata from Phase 10
+3. Build TOC tree from expandToc files
+4. Traverse tree and convert each leaf node; a page whose Markdown is nothing but
+   images is skipped (the bundle ships no images, so it would be one dangling
+   `![](x.gif)`; links to it stay on the help page, which shows the image)
+5. Save Markdown files in hierarchical structure
+6. Generate metadata and statistics
 
 ### 4. Validation Script (`validate_extraction.py`)
 
@@ -226,6 +230,12 @@ reshape the next page's markdown. Settings:
 - `ignore_images=False`: Preserve images
 - `ignore_emphasis=False`: Preserve formatting
 
+Before conversion, CHM-alias `href`s (`sldworksapi.chm::/SOLIDWORKS.Interop.sldworks~X.html`,
+`ms-its:swconst.chm::/DP_Units.htm`) are rewritten as links relative to the page, to the
+page the alias names (`../../sldworksapi/SOLIDWORKS.Interop.sldworks~X.html`), via
+`shared/chm_aliases.py`. As written they are dead links, and Phase 90 copies the
+Markdown into `SolidWorks.Interop.guides.xml` verbatim.
+
 ### Filename Sanitization
 
 Invalid characters are replaced with underscores:
@@ -273,8 +283,11 @@ All dependencies are managed via `pyproject.toml`.
 
 1. **TOC Pages**: Non-leaf nodes (TOC/index pages) are not converted, only content pages
 2. **Character Encoding**: Uses UTF-8 throughout, may need adjustment for other encodings
-3. **Link Preservation**: Links are preserved but may need adjustment for offline use
-4. **Image Handling**: Image references preserved but images themselves not downloaded
+3. **Link Preservation**: Links to other guide pages become relative `.md` paths; the
+   rest keep their help-site form, relative to the page's original URL. Phase 120
+   resolves those against the files it ships or the online help.
+4. **Image Handling**: Image references preserved but images themselves not downloaded.
+   A page with nothing but images is not written (see above).
 
 ## Troubleshooting
 

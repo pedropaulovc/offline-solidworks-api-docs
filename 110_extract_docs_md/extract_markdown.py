@@ -2,10 +2,11 @@
 
 import json
 import jsonlines
+import shutil
 from pathlib import Path
 from typing import Any
 
-from html_to_markdown import HtmlToMarkdownConverter
+from html_to_markdown import HtmlToMarkdownConverter, has_text
 from toc_builder import TocNode, TocTreeBuilder
 from url_rewriter import UrlRewriter
 
@@ -58,7 +59,9 @@ class MarkdownExtractor:
         print("Phase 11: Extract Documentation to Markdown")
         print("=" * 60)
 
-        # Create output directories
+        # Start from an empty tree: a page that drops out of the TOC must not leave its
+        # old Markdown behind, since Phases 90 and 120 ship what this run writes.
+        shutil.rmtree(self.output_dir, ignore_errors=True)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.metadata_dir.mkdir(parents=True, exist_ok=True)
 
@@ -147,7 +150,11 @@ class MarkdownExtractor:
 
         try:
             # Convert HTML to Markdown
-            markdown_content = self.converter.convert_html_to_markdown(html_file)
+            markdown_content = self.converter.convert_html_to_markdown(html_file, node.url)
+            if not has_text(markdown_content):
+                print(f"   [SKIP] {node.name} (images only)")
+                self.stats["skipped_files"] += 1
+                return
 
             # Determine output path
             # Use sanitized node name as filename
