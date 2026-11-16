@@ -11,7 +11,8 @@ import sys
 import re
 import shutil
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
+from urllib.parse import urljoin, urlparse
 from collections import defaultdict
 
 from functional_categories_parser import FunctionalCategoriesParser
@@ -21,10 +22,22 @@ from example_generator import ExampleGenerator, build_example_filenames
 from index_generator import IndexGenerator
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from shared.chm_aliases import resolve_chm_alias  # noqa: E402
-from shared.constants import SOLIDWORKS_API_FULL_BASE_URL, SOLIDWORKS_API_VERSION  # noqa: E402
+from shared.constants import (  # noqa: E402
+    SOLIDWORKS_API_BOUNDARY,
+    SOLIDWORKS_API_FULL_BASE_URL,
+    SOLIDWORKS_API_VERSION,
+    SOLIDWORKS_BASE_URL,
+)
+from shared.guide_pages import GuidePage, GuidePagesUnavailable, case_collisions, read_guide_pages  # noqa: E402
 from shared.line_endings import normalize_tree  # noqa: E402
+from shared.markdown_links import markdown_destination  # noqa: E402
 from models import TypeInfo, ExampleContent, ExportStatistics
+
+
+def _url_destination(url: str) -> str:
+    """:func:`markdown_destination` for a URL, whose ``#`` starts its fragment."""
+    base, hash_mark, fragment = url.partition("#")
+    return markdown_destination(base, hash_mark + fragment)
 
 
 class ExportPipeline:
@@ -110,7 +123,8 @@ class ExportPipeline:
 
         # Build the guide-link map so inline <see href> references to guide/referenced
         # pages that ship in the bundle become relative file links (docs/ folder).
-        guide_links = self._build_guide_links(self.guide_roots)
+        guide_pages = self._load_guide_pages(self.guide_roots)
+        guide_links = self._build_guide_links(guide_pages)
         print(f"  Resolved {len(guide_links)} guide/referenced pages for cross-linking")
 
         # Step 4: Generate API documentation
@@ -127,11 +141,14 @@ class ExportPipeline:
 
         # Step 7: Copy programming guide + referenced pages into docs/
         print("\n[7/9] Copying programming guide...")
-        for root in self.guide_roots:
-            self._copy_programming_guide(root)
+        page_urls = self._copy_guide_pages(guide_pages)
         # Resolve the API-reference links Phase 110 left pointing at the original
         # ``.html`` pages so they target the ``types/``/``enums/`` files we ship.
-        self._rewrite_guide_api_links(types, self._api_base_url(), guide_links, data_loader.examples)
+        self._rewrite_guide_api_links(types, self._api_base_url(), guide_links, data_loader.examples,
+                                      page_urls)
+        # Every content file exists now: fail before the README and summary make the
+        # output look complete.
+        self._check_case_collisions()
 
         # Step 8: Generate output README for LLMs
         print("\n[8/9] Generating output README...")
@@ -158,30 +175,34 @@ class ExportPipeline:
             shutil.rmtree(self.output_base)
         self.output_base.mkdir(parents=True, exist_ok=True)
 
-    def _build_guide_links(self, markdown_roots: List[str]) -> Dict[str, str]:
+    def _load_guide_pages(self, markdown_roots: List[str]) -> List[GuidePage]:
+        """The pages each guide phase's ``files_created.jsonl`` lists (Phase 110's
+        programming guide and Phase 115's referenced-page closure).
+
+        Only listed pages ship: a stray ``.md`` an earlier run left under a markdown
+        root is not part of the current output. A root with no tree or no manifest (the
+        manifests are committed, ``output/`` is not) is skipped with a warning, as
+        Phase 90 does; its ``<see href>`` references stay external. A tree missing a
+        listed page raises FileNotFoundError.
+        """
+        guide_pages: List[GuidePage] = []
+        for root in markdown_roots:
+            try:
+                guide_pages += read_guide_pages(Path(root))
+            except GuidePagesUnavailable as e:
+                print(f"  Warning: {e}; those pages do not ship and links to them stay external")
+        return guide_pages
+
+    @staticmethod
+    def _build_guide_links(guide_pages: List[GuidePage]) -> Dict[str, str]:
         """Map guide/referenced-page URLs to their bundle-relative ``docs/`` paths.
 
-        Reads the ``files_created.jsonl`` beside each markdown root (Phase 110's
-        programming guide and Phase 115's referenced-page closure) and keys it by
-        :func:`guide_link_key` so ``<see href>`` references resolve to the copies
-        ``_copy_programming_guide`` places under ``docs/``. Missing manifests are
-        skipped (those references fall back to external links).
+        Keyed by :func:`guide_link_key` so ``<see href>`` references resolve to the
+        copies ``_copy_guide_pages`` places under ``docs/``.
         """
         from markdown_generator import guide_link_key
 
-        guide_links: Dict[str, str] = {}
-        for root in markdown_roots:
-            manifest = Path(root).parent.parent / "metadata" / "files_created.jsonl"
-            if not manifest.exists():
-                print(f"  Warning: guide manifest not found at {manifest}; those <see href> links stay external")
-                continue
-            with open(manifest, encoding="utf-8") as f:
-                for line in f:
-                    entry = json.loads(line)
-                    # markdown_path is repo-relative and always under ".../output/markdown/".
-                    rel = entry["markdown_path"].replace("\\", "/").split("output/markdown/", 1)[-1]
-                    guide_links[guide_link_key(entry["original_url"])] = f"docs/{rel}"
-        return guide_links
+        return {guide_link_key(page.original_url): f"docs/{page.rel_path}" for page in guide_pages}
 
     def _generate_api_docs(self, types: Dict[str, TypeInfo], data_loader: DataLoader,
                            example_categories: Dict[str, str], guide_links: Dict[str, str]):
@@ -276,52 +297,55 @@ class ExportPipeline:
 
         print(f"  Generated {len(examples)} example files in flat folder structure")
 
-    def _copy_programming_guide(self, phase110_path: str):
-        """Copy programming guide markdown from Phase 110."""
-        source_path = Path(phase110_path)
-        dest_path = self.output_base / "docs"
+    def _copy_guide_pages(self, guide_pages: List[GuidePage]) -> Dict[str, str]:
+        """Copy the guide pages into ``docs/``; return their ``docs/...`` path -> help path."""
+        page_urls: Dict[str, str] = {}
+        for page in guide_pages:
+            doc_path = f"docs/{page.rel_path}"
+            if doc_path in page_urls:
+                raise ValueError(
+                    f"{doc_path} is written by two guide pages: "
+                    f"{page_urls[doc_path]} and {page.original_url}"
+                )
+            dest = self.output_base / doc_path
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(page.file, dest)
+            page_urls[doc_path] = page.original_url
 
-        if not source_path.exists():
-            print(f"  Warning: Programming guide not found at {source_path}")
-            return
+        self.stats.programming_guide_files = len(page_urls)
+        print(f"  Copied {len(page_urls)} programming guide files")
+        return page_urls
 
-        # Copy all markdown files and directories except examples folder
-        for item in source_path.iterdir():
-            if item.name == 'examples':
-                continue  # Skip examples folder (we generate our own)
+    def _check_case_collisions(self) -> None:
+        """Fail when two shipped paths differ only in case.
 
-            dest = dest_path / item.name
-
-            if item.is_file():
-                dest.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(item, dest)
-                self.stats.programming_guide_files += 1
-            elif item.is_dir():
-                shutil.copytree(item, dest, dirs_exist_ok=True)
-                # Count files in copied directory
-                for md_file in dest.rglob('*.md'):
-                    self.stats.programming_guide_files += 1
-
-        print(f"  Copied {self.stats.programming_guide_files} programming guide files")
+        Unpacked on a case-insensitive file system (the Windows and macOS defaults),
+        one would silently replace the other.
+        """
+        paths = [path.relative_to(self.output_base).as_posix() for path in self.output_base.rglob("*")]
+        collisions = case_collisions(paths)
+        if collisions:
+            raise ValueError(f"Bundle paths differ only in case: {collisions}")
 
     def _api_base_url(self) -> str:
         """Online help base URL (e.g. ``https://help.solidworks.com/2027/english/api/``)."""
         return f"{SOLIDWORKS_API_FULL_BASE_URL}/"
 
     @staticmethod
-    def _md_destination(path: str) -> str:
-        """A Markdown link destination, angle-wrapped when it needs to be.
-
-        Phase 110 mirrors the guide's own hierarchy, so many targets are paths like
-        ``Programming with the SOLIDWORKS API/Add-ins/Toolbars.md``. A bare space
-        ends the destination in CommonMark, which would break the link -- ``<...>``
-        is how ``_render_see_also`` already handles it.
-        """
-        return f"<{path}>" if re.search(r"[ ()]", path) else path
+    def _online_page(link: str, page_url: Optional[str]) -> Optional[str]:
+        """The help URL a link on the page at ``page_url`` (a help path) opens, when it
+        is an API page and not already written that way; otherwise None."""
+        if page_url is None:
+            return None
+        online = urljoin(f"{SOLIDWORKS_BASE_URL}{page_url}", link)
+        if online == link or not urlparse(online).path.startswith(SOLIDWORKS_API_BOUNDARY):
+            return None
+        return online
 
     def _rewrite_guide_api_links(self, types: Dict[str, TypeInfo], base_url: str,
                                  guide_links: Dict[str, str],
-                                 examples: Dict[str, "ExampleContent"]) -> None:
+                                 examples: Dict[str, "ExampleContent"],
+                                 page_urls: Optional[Dict[str, str]] = None) -> None:
         """Resolve links in the copied programming guide and referenced pages.
 
         Phase 110/115 leave links pointing at the original ``.html`` pages (they
@@ -337,9 +361,13 @@ class ExportPipeline:
         The last two are usually written as bare relative hrefs
         (``DimXpert_Main_Module_CSharp.htm``, ``../swconst/DP_Units.htm``), which is
         why they are matched on basename, the same key ``<see href>`` resolution
-        uses. Reference links whose target does not ship are pointed at the online
-        help page instead of a dead relative path.
+        uses. A link whose target does not ship is pointed at the online help page
+        instead of a dead relative path. For a reference page the URL is built from
+        its assembly folder; for any other page it is the link resolved against the
+        linking page's own URL, from ``page_urls`` (``docs/...`` path -> help path).
+        Without that URL the link is left as written.
         """
+        page_urls = page_urls or {}
         import posixpath
         from markdown_generator import guide_link_key, parse_api_ref_url
 
@@ -371,34 +399,33 @@ class ExportPipeline:
         resolved = external = pages = 0
 
         for md_file in docs_root.rglob("*.md"):
-            guide_dir = posixpath.dirname(md_file.relative_to(self.output_base).as_posix())
+            doc_path = md_file.relative_to(self.output_base).as_posix()
+            guide_dir = posixpath.dirname(doc_path)
+            page_url = page_urls.get(doc_path)
             state = {"changed": False}
 
             def repl(match: "re.Match[str]") -> str:
                 nonlocal resolved, external, pages
-                head, raw_url, tail = match.group(1), match.group(2), match.group(3)
-                # A CHM alias left in the HTML (swconst.chm::/X.htm) names a page in
-                # the CHM's folder; resolve it to that page's online URL.
-                url = resolve_chm_alias(raw_url)
+                head, url, tail = match.group(1), match.group(2), match.group(3)
                 parsed = parse_api_ref_url(url)
                 if parsed is None:
                     # Not a reference page: a guide, referenced or example page,
                     # linked by bare basename. Point at the copy the bundle ships,
                     # carrying any #section across to the local file.
                     target = page_idx.get(guide_link_key(url))
-                    if target is None and url == raw_url:
-                        return match.group(0)
                     if target is None:
-                        # Not shipped: link the page the alias names online.
+                        # Not shipped: link the page online rather than a dead path.
+                        online = self._online_page(url, page_url)
+                        if online is None:
+                            return match.group(0)
                         external += 1
                         state["changed"] = True
-                        return f"{head}{self._md_destination(url)}{tail}"
+                        return f"{head}{_url_destination(online)}{tail}"
                     _, _, fragment = url.partition("#")
                     anchor = f"#{fragment}" if fragment else ""
-                    destination = f"{posixpath.relpath(target, guide_dir)}{anchor}"
                     pages += 1
                     state["changed"] = True
-                    return f"{head}{self._md_destination(destination)}{tail}"
+                    return f"{head}{markdown_destination(posixpath.relpath(target, guide_dir), anchor)}{tail}"
 
                 assembly, type_name, member_name = parsed
                 entry = type_idx.get(type_name.lower())
@@ -418,12 +445,19 @@ class ExportPipeline:
                     if target:
                         resolved += 1
                         state["changed"] = True
-                        return f"{head}{posixpath.relpath(target, guide_dir)}{tail}"
+                        return f"{head}{markdown_destination(posixpath.relpath(target, guide_dir))}{tail}"
 
-                # Not in the bundle: link the canonical online page, not a dead path.
-                # Same-directory references carry no assembly segment in the URL; recover
-                # it from the referenced page's own folder so the URL is not malformed.
-                asm = assembly or posixpath.basename(guide_dir)
+                # Not in the bundle: link the online page, not a dead path. A reference
+                # page lives in its assembly folder, so a link naming that folder gives the
+                # canonical URL. A bare or parent-relative one resolves against the
+                # linking page's URL when known, else against the page's own folder.
+                folder_named = assembly not in ("", ".", "..")
+                online = None if folder_named else self._online_page(url, page_url)
+                if online is not None:
+                    external += 1
+                    state["changed"] = True
+                    return f"{head}{_url_destination(online)}{tail}"
+                asm = assembly if folder_named else posixpath.basename(guide_dir)
                 if not asm or asm == "docs":
                     return match.group(0)
                 basename = url.split('?')[0].split('#')[0].split('/')[-1]

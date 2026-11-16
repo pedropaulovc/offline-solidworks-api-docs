@@ -9,6 +9,7 @@ inherently collision-free and greppable.
 """
 
 import json
+import shutil
 import sys
 from pathlib import Path
 from urllib.parse import urlparse
@@ -53,8 +54,13 @@ def main() -> int:
     )
     converter.load_metadata()
 
+    # Start from an empty tree: a page that drops out of the closure must not leave its
+    # old Markdown behind. A failed delete must stop the run, not leave stale pages.
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     created: list[dict] = []
+    image_only: list[str] = []
     converted = failed = 0
 
     with jsonlines.open(input_meta) as reader:
@@ -69,7 +75,12 @@ def main() -> int:
                 failed += 1
                 continue
             try:
-                markdown = converter.convert_html_to_markdown(html_file)
+                markdown = converter.convert_html_to_markdown(html_file, url)
+                if markdown is None:
+                    # Links to it stay on the help page, which shows the image.
+                    print(f"  [SKIP] {url} (images only)")
+                    image_only.append(urlparse(url).path)
+                    continue
                 out_path = output_dir / markdown_relpath(url)
                 meta = converter.save_markdown(markdown, out_path)
                 created.append({
@@ -97,6 +108,7 @@ def main() -> int:
         "phase": "115_crawl_referenced_pages",
         "converted_files": converted,
         "failed_files": failed,
+        "image_only_pages": sorted(image_only),
     }
     with open(PHASE_DIR / "metadata" / "extraction_summary.json", "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)

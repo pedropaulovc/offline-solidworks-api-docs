@@ -7,9 +7,13 @@ from pathlib import Path
 import pytest
 
 from toc_builder import TocNode, TocTreeBuilder
-from html_to_markdown import HtmlToMarkdownConverter
+from html_to_markdown import HtmlToMarkdownConverter, has_text
+from url_rewriter import UrlRewriter
 
 from shared.constants import SOLIDWORKS_API_BASE_PATH
+
+# A page two folders below /api, as Phase 110's guide pages are.
+PAGE_URL = f"{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/Overview/Page.htm"
 
 
 class TestTocTreeBuilder:
@@ -108,7 +112,7 @@ class TestHtmlToMarkdownConverter:
             metadata_file=Path("."),
             output_dir=tmp_path,
         )
-        markdown = converter.convert_html_to_markdown(html_file)
+        markdown = converter.convert_html_to_markdown(html_file, PAGE_URL)
 
         # Check conversion
         assert "# Test Title" in markdown
@@ -131,12 +135,102 @@ class TestHtmlToMarkdownConverter:
         def converter() -> HtmlToMarkdownConverter:
             return HtmlToMarkdownConverter(html_dir=tmp_path, metadata_file=Path("."), output_dir=tmp_path)
 
-        alone = converter().convert_html_to_markdown(page)
+        alone = converter().convert_html_to_markdown(page, PAGE_URL)
         after_other = converter()
-        after_other.convert_html_to_markdown(unclosed_table)
+        after_other.convert_html_to_markdown(unclosed_table, PAGE_URL)
 
-        assert after_other.convert_html_to_markdown(page) == alone
+        assert after_other.convert_html_to_markdown(page, PAGE_URL) == alone
         assert alone.startswith("a\n\n")
+
+    def test_chm_alias_links_become_page_relative(self, tmp_path):
+        """A CHM alias href is a dead link as written; it becomes the page-relative path
+        of the page it names, the same form as the page's ordinary relative links."""
+        page = tmp_path / "page.html"
+        page.write_text(
+            '<p><a href="sldworksapi.chm::/SOLIDWORKS.Interop.sldworks~X.html">X</a> '
+            '<a href="ms-its:swconst.chm::/DP_Units.htm#top">units</a> '
+            "<a href='swconst.chm::/DP_Quoted.htm'>quoted</a> "
+            "<a href=swconst.chm::/DP_Bare.htm>bare</a> "
+            '<a href="../swconst/DP_Dimensions.htm">dims</a></p>',
+            encoding="utf-8",
+        )
+        converter = HtmlToMarkdownConverter(html_dir=tmp_path, metadata_file=Path("."), output_dir=tmp_path)
+
+        markdown = converter.convert_html_to_markdown(page, PAGE_URL)
+
+        assert "chm::" not in markdown
+        assert "[X](../../sldworksapi/SOLIDWORKS.Interop.sldworks~X.html)" in markdown
+        assert "[units](../../swconst/DP_Units.htm#top)" in markdown
+        assert "[quoted](../../swconst/DP_Quoted.htm)" in markdown
+        assert "[bare](../../swconst/DP_Bare.htm)" in markdown
+        assert "[dims](../swconst/DP_Dimensions.htm)" in markdown
+
+    @pytest.mark.parametrize(
+        ("html", "expected"),
+        [
+            ('<p><img src="../IMAGE/SYM_LIBRARY.GIF"></p>\n\n', False),
+            # Shapes that leave text-like residue in the Markdown: a linked thumbnail,
+            # a layout table, a parenthesised file name, a non-breaking space.
+            ('<a href="big.htm"><img src="a.gif"></a>', False),
+            ('<table><tr><td><img src="a.gif"></td></tr></table>', False),
+            ('<img src="a(1).gif">&nbsp;', False),
+            ('<script>var shown = 1;</script><style>p {}</style><img src="a.gif">', False),
+            # html2text drops <head>, <title> included.
+            ('<html><head><title>Free Form Curves</title></head><body><img src="a.gif"></body></html>', False),
+            ("", False),
+            ('<img src="a.gif"><p>The symbol libraries.</p>', True),
+            ("<h1>Title</h1>", True),
+            ("<html><head><title>T</title></head><body><p>Body text.</p></body></html>", True),
+            # </head> may be omitted; <body> ends the head for html2text too.
+            ("<html><head><title>T</title><body><p>Body</p></body></html>", True),
+            # html2text hides everything after a stray </head>.
+            ("</head><p>Hidden</p>", False),
+        ],
+    )
+    def test_has_text(self, html, expected):
+        """Image-only pages would ship as a dangling image (the bundle has no images)."""
+        assert has_text(html) is expected
+
+    def test_image_only_page_converts_to_none(self, tmp_path):
+        page = tmp_path / "page.html"
+        page.write_text('<a href="big.htm"><img src="a.gif"></a>', encoding="utf-8")
+        converter = HtmlToMarkdownConverter(html_dir=tmp_path, metadata_file=Path("."), output_dir=tmp_path)
+
+        assert converter.convert_html_to_markdown(page, PAGE_URL) is None
+
+    def test_rewriter_matches_guide_pages_case_insensitively(self):
+        """An alias keeps the CHM's path case (``OVERVIEW/``), the TOC uses ``Overview/``;
+        the server treats them as one page, so the link still becomes the ``.md`` file.
+        A destination with a space is angle-wrapped: bare, CommonMark would end it there."""
+        target = f"{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/Overview/Type_Libraries.htm?id=1.2"
+        rewriter = UrlRewriter({target: Path("out/Overview/Type Libraries.md")})
+        page = f"https://help.solidworks.com{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/Overview/Page.htm"
+
+        content, count = rewriter.rewrite_urls(
+            "[types](../OVERVIEW/Type_Libraries.htm)", page, Path("out/Overview/Page.md")
+        )
+
+        assert count == 1
+        assert content == "[types](<Type Libraries.md>)"
+
+    def test_rewriter_leaves_plain_destinations_bare(self):
+        target = f"{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/Overview/Type_Libraries.htm?id=1.2"
+        rewriter = UrlRewriter({target: Path("out/Overview/Type_Libraries.md")})
+        page = f"https://help.solidworks.com{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/Overview/Page.htm"
+
+        content, _ = rewriter.rewrite_urls("[types](Type_Libraries.htm)", page, Path("out/Overview/Page.md"))
+
+        assert content == "[types](Type_Libraries.md)"
+
+    def test_rewriter_encodes_hash_in_file_names(self):
+        """``Visual C#.md``: a bare '#' would start the fragment, leaving ``Visual C``."""
+        target = f"{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/GettingStarted/VisualCSharp.htm?id=1.3"
+        rewriter = UrlRewriter({target: Path("out/Apps/Visual C#.md")})
+        page = f"https://help.solidworks.com{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/GettingStarted/Page.htm"
+
+        content, _ = rewriter.rewrite_urls("[C#](VisualCSharp.htm)", page, Path("out/Apps/Overview.md"))
+
+        assert content == "[C#](<Visual C%23.md>)"
 
     def test_save_markdown(self, tmp_path):
         """Test saving Markdown file."""
@@ -307,3 +401,57 @@ def sample_html_file(tmp_path):
     """
     html_file.write_text(html_content, encoding="utf-8")
     return html_file
+
+
+class TestMarkdownExtractor:
+    """End-to-end runs of the Phase 110 extractor."""
+
+    @staticmethod
+    def _write_inputs(phase100: Path) -> Path:
+        """A two-page programming guide: one text page, one image-only page."""
+        html_dir = phase100 / "output" / "html"
+        html_dir.mkdir(parents=True)
+        pages = {
+            "1.0": ("Overview", '<p>See <a href="sldworksapi.chm::/SOLIDWORKS.Interop.sldworks~X.html">X</a>.</p>'),
+            "1.1": ("Diagram", '<img src="../IMAGE/DIAGRAM.GIF">'),
+        }
+        children = []
+        crawled = []
+        for node_id, (name, html) in pages.items():
+            url = f"{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/Guide/{name}.htm?id={node_id}"
+            children.append({"id": node_id, "parentId": "1", "name": name, "url": url, "isLeaf": True})
+            (html_dir / f"{name}.html").write_text(html, encoding="utf-8")
+            crawled.append({"url": f"https://help.solidworks.com{url}", "file_path": f"output/html/{name}.html"})
+        root = {"id": "1", "parentId": "-1", "name": "Guide", "url": "", "isLeaf": False, "children": children}
+        (html_dir / "expandToc_id_1.json").write_text(json.dumps(root), encoding="utf-8")
+        metadata_file = phase100 / "metadata" / "urls_crawled.jsonl"
+        metadata_file.parent.mkdir()
+        metadata_file.write_text("".join(json.dumps(entry) + "\n" for entry in crawled), encoding="utf-8")
+        return metadata_file
+
+    def test_run_writes_only_this_runs_pages(self, tmp_path):
+        """A stale page from an earlier run is gone, an image-only page is not written,
+        and CHM aliases are resolved in what is."""
+        from extract_markdown import MarkdownExtractor
+
+        metadata_file = self._write_inputs(tmp_path / "100")
+        output_dir = tmp_path / "110" / "output" / "markdown"
+        output_dir.mkdir(parents=True)
+        (output_dir / "Stale.md").write_text("# From an earlier run\n", encoding="utf-8")
+        metadata_dir = tmp_path / "110" / "metadata"
+
+        MarkdownExtractor(
+            input_dir=tmp_path / "100" / "output" / "html",
+            metadata_file=metadata_file,
+            output_dir=output_dir,
+            metadata_dir=metadata_dir,
+        ).run()
+
+        assert sorted(p.relative_to(output_dir).as_posix() for p in output_dir.rglob("*.md")) == ["Overview.md"]
+        overview = (output_dir / "Overview.md").read_text(encoding="utf-8")
+        assert "(../../sldworksapi/SOLIDWORKS.Interop.sldworks~X.html)" in overview
+        with (metadata_dir / "files_created.jsonl").open(encoding="utf-8") as f:
+            assert [json.loads(line)["node_name"] for line in f] == ["Overview"]
+        stats = json.loads((metadata_dir / "extraction_stats.json").read_text(encoding="utf-8"))
+        assert stats["image_only_pages"] == [f"{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/Guide/Diagram.htm?id=1.1"]
+        assert stats["skipped_files"] == 0

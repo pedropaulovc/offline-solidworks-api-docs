@@ -33,7 +33,7 @@ This phase combines data from multiple previous phases and generates XMLDoc file
    - `sw:example-ref` extensions linking API types to all recovered examples
 
 4. **Generates companion semantic catalogs**:
-   - `SolidWorks.Interop.guides.xml` embeds Phase 110/115 Markdown pages as CDATA
+   - `SolidWorks.Interop.guides.xml` embeds Phase 110/115 Markdown pages as CDATA: the pages each phase's `metadata/files_created.jsonl` lists, not whatever `.md` files sit in its output tree
    - `SolidWorks.Interop.examples.xml` contains all recovered examples with language, title, source URL, and API type references
 
 The `sw:` elements use the namespace `urn:solidworks:offline-xmldoc:1`. Standard IntelliSense consumers can continue reading the regular XMLDoc tags; custom consumers can read the extension elements for information not represented by the Microsoft XMLDoc format.
@@ -119,8 +119,10 @@ uv run python 90_export_xmldoc/generate_xmldoc.py --verbose
 # Specify custom output directory
 uv run python 90_export_xmldoc/generate_xmldoc.py --output-dir custom/path
 
-# Use explicit guide roots (repeatable; defaults to Phase 110 and 115 roots)
-uv run python 90_export_xmldoc/generate_xmldoc.py --guide-dir path/to/markdown
+# Use explicit guide roots (repeatable; defaults to Phase 110 and 115 roots). Each must be a
+# phase's <phase>/output/markdown with its <phase>/metadata/files_created.jsonl manifest;
+# a root without one is skipped with a warning, and one missing a page it lists fails
+uv run python 90_export_xmldoc/generate_xmldoc.py --guide-dir path/to/<phase>/output/markdown
 ```
 
 ### Validate Generated Files

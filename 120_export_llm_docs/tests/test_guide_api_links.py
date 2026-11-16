@@ -216,41 +216,57 @@ def test_rewrite_resolves_guide_and_example_page_links():
         assert "[gone](../swconst/NotShipped.htm)" in text
 
 
-def test_chm_alias_reference_link_falls_back_to_the_chm_folder():
-    """FunctionalCategories links the DimXpert namespace page through a CHM alias. Not in
-    the bundle, it must link the page in swdimxpertapi/, not ``api/ms-its:...chm::/``."""
-    with tempfile.TemporaryDirectory() as td:
-        tmp = Path(td)
-        page = tmp / "docs" / "sldworksapi" / "FunctionalCategories-sldworksapi.md"
-        page.parent.mkdir(parents=True, exist_ok=True)
-        namespace_page = "SOLIDWORKS.Interop.swdimxpert~SOLIDWORKS.Interop.swdimxpert_namespace.html"
-        page.write_text(
-            f"[DimXpert Interfaces]({API_ROOT}ms-its:swdimxpertapi.chm::/{namespace_page})\n",
-            encoding="utf-8",
-        )
-
-        ExportPipeline(str(tmp))._rewrite_guide_api_links(_make_types(), API_ROOT, {}, {})
-
-        assert page.read_text(encoding="utf-8") == f"[DimXpert Interfaces]({API_ROOT}swdimxpertapi/{namespace_page})\n"
-
-
-def test_unshipped_chm_alias_links_the_page_online():
-    """A relative alias to a page the bundle lacks would be a dead relative link as written;
-    it links the page it names online instead. Shipped aliases resolve to the bundle file."""
+def test_unshipped_page_link_links_the_page_online():
+    """A relative link to a page the bundle lacks would be dead as written. Resolved
+    against the linking page's help URL, it links that page online instead; a shipped
+    page resolves to its bundle file, and links outside the API tree stay as written."""
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
         page = tmp / "docs" / "swconst" / "SO_Export.md"
         page.parent.mkdir(parents=True, exist_ok=True)
         page.write_text(
-            "[SMG](swconst.chm::/FileSaveAsSMGOptions.htm) and [colors](ms-its:swconst.chm::/SO_Colors.htm)\n",
+            "[SMG](FileSaveAsSMGOptions.htm) "
+            "[image](../sldworksapiprogguide/Miscellaneous/FreeFormCurves.htm#top) "
+            "[colors](SO_Colors.htm) "
+            "[web](https://example.com/x.htm) "
+            "[outside](../../../../Other.htm)\n",
             encoding="utf-8",
         )
+        page_urls = {"docs/swconst/SO_Export.md": f"{SOLIDWORKS_API_BASE_PATH}/swconst/SO_Export.htm"}
 
         ExportPipeline(str(tmp))._rewrite_guide_api_links(
-            _make_types(), API_ROOT, {"so_colors.htm": "docs/swconst/SO_Colors.md"}, {})
+            _make_types(), API_ROOT, {"so_colors.htm": "docs/swconst/SO_Colors.md"}, {}, page_urls)
 
         assert page.read_text(encoding="utf-8") == (
-            f"[SMG]({API_ROOT}swconst/FileSaveAsSMGOptions.htm) and [colors](SO_Colors.md)\n"
+            f"[SMG]({API_ROOT}swconst/FileSaveAsSMGOptions.htm) "
+            f"[image]({API_ROOT}sldworksapiprogguide/Miscellaneous/FreeFormCurves.htm#top) "
+            "[colors](SO_Colors.md) "
+            "[web](https://example.com/x.htm) "
+            "[outside](../../../../Other.htm)\n"
+        )
+
+
+def test_unshipped_link_resolves_against_the_page_url_not_the_bundle_path():
+    """Phase 110 lays pages out by TOC title, so a page's ``docs/`` folder says nothing
+    about where its relative links point; its help URL does. That holds for a bare
+    reference link too, which is in the linking page's folder. A reference link that
+    names its assembly folder keeps the canonical URL, whatever its relative depth."""
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        reference = f"{SLD}.INotShipped.html"
+        guide = _write_guide(
+            tmp,
+            f"[gone](../../swconst/NotShipped.htm) [type]({reference}) [folder](../sldworksapi/{reference})\n",
+        )
+        doc_path = guide.relative_to(tmp).as_posix()
+        page_urls = {doc_path: f"{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/Overview/Hole.htm"}
+
+        ExportPipeline(str(tmp))._rewrite_guide_api_links(_make_types(), API_ROOT, {}, {}, page_urls)
+
+        assert guide.read_text(encoding="utf-8") == (
+            f"[gone]({API_ROOT}swconst/NotShipped.htm) "
+            f"[type]({API_ROOT}sldworksapiprogguide/Overview/{reference}) "
+            f"[folder]({API_ROOT}sldworksapi/{reference})\n"
         )
 
 
@@ -298,7 +314,7 @@ def test_see_href_reattaches_fragment_to_resolved_target():
         {"dp_units.htm": "docs/swconst/DP_Units.md"},
         rel_prefix="../../",
     )
-    assert out == "[Units](<../../docs/swconst/DP_Units.md#remarks>)"
+    assert out == "[Units](../../docs/swconst/DP_Units.md#remarks)"
 
 
 def test_see_href_without_fragment_is_unchanged():
@@ -309,4 +325,18 @@ def test_see_href_without_fragment_is_unchanged():
         {"dp_units.htm": "docs/swconst/DP_Units.md"},
         rel_prefix="../../",
     )
-    assert out == "[Units](<../../docs/swconst/DP_Units.md>)"
+    assert out == "[Units](../../docs/swconst/DP_Units.md)"
+
+
+def test_see_href_to_a_guide_page_with_hash_and_spaces_in_its_name():
+    """``ComVisibleAttribute in VB.NET and C# Macros and Add-ins.md``: the file name's
+    '#' is percent-encoded so it does not start the fragment, and the spaces make the
+    destination angle-wrapped."""
+    from markdown_generator import simplify_cross_references
+
+    out = simplify_cross_references(
+        f'<see href="{API_ROOT}sldworksapiprogguide/Overview/ComVisibleAttribute_in_VSTA_macros.htm#use">CV</see>',
+        {"comvisibleattribute_in_vsta_macros.htm": "docs/Guide/ComVisibleAttribute in VB.NET and C# Macros.md"},
+        rel_prefix="../../",
+    )
+    assert out == "[CV](<../../docs/Guide/ComVisibleAttribute in VB.NET and C%23 Macros.md#use>)"

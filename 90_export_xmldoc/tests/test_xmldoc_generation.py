@@ -712,10 +712,20 @@ class TestExtendedXmlDoc:
         ]
 
     def test_guide_pages_are_embedded_as_markdown(self, temp_dir):
-        guide_dir = temp_dir / 'guide'
-        guide_dir.mkdir()
+        """Only the pages the guide phase's manifest lists ship; a stray file an earlier
+        run left in the Markdown tree does not."""
+        guide_dir = temp_dir / '110_extract_docs_md' / 'output' / 'markdown'
+        guide_dir.mkdir(parents=True)
         (guide_dir / 'Overview.md').write_text(
             '# API Overview\n\nUse the API guide.\n',
+            encoding='utf-8',
+        )
+        (guide_dir / 'Stale.md').write_text('# Stale\n', encoding='utf-8')
+        metadata_dir = temp_dir / '110_extract_docs_md' / 'metadata'
+        metadata_dir.mkdir()
+        (metadata_dir / 'files_created.jsonl').write_text(
+            '{"original_url": "/2027/english/api/sldworksapiprogguide/Overview.htm", '
+            '"markdown_path": "110_extract_docs_md/output/markdown/Overview.md"}\n',
             encoding='utf-8',
         )
 
@@ -734,14 +744,32 @@ class TestExtendedXmlDoc:
         output_files = generator.generate_all(merger)
 
         root = ET.parse(output_files['guides']).getroot()
-        guide = root.find(
+        guides = root.findall(
             ".//{urn:solidworks:offline-xmldoc:1}guide"
         )
-        assert guide is not None
-        assert guide.get('title') == 'API Overview'
-        assert 'Use the API guide.' in guide.findtext(
+        assert [guide.get('source') for guide in guides] == ['Overview.md']
+        assert guides[0].get('title') == 'API Overview'
+        assert 'Use the API guide.' in guides[0].findtext(
             '{urn:solidworks:offline-xmldoc:1}content'
         )
+
+    def test_guide_dir_without_manifest_is_skipped(self, temp_dir, capsys):
+        """A --guide-dir with no files_created.jsonl beside it warns instead of crashing."""
+        guide_dir = temp_dir / 'loose' / 'markdown'
+        guide_dir.mkdir(parents=True)
+        (guide_dir / 'Overview.md').write_text('# API Overview\n', encoding='utf-8')
+
+        generator = XMLDocGenerator(
+            output_dir=temp_dir,
+            metadata_dir=temp_dir,
+            guide_dirs=[guide_dir],
+            verbose=False,
+        )
+        output_file = generator.generate_guides_xmldoc()
+
+        root = ET.parse(output_file).getroot()
+        assert root.findall('.//{urn:solidworks:offline-xmldoc:1}guide') == []
+        assert 'no manifest' in capsys.readouterr().out
 
     def test_member_level_examples_are_cataloged(self, temp_dir):
         members_file = temp_dir / 'members.xml'

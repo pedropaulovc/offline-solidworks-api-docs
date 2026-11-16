@@ -54,10 +54,35 @@ not depend on how deep the linking page sits. The path inside the CHM keeps its 
 server matches paths case-insensitively, as do Phase 115's and Phase 120's in-bundle
 lookups.
 
+`relative_chm_alias(link, page_url)` gives the same page as a link relative to the page
+the alias is written on (`../swconst/DP_Dimensions.htm`), the form of that page's other
+relative links.
+
 Used where links leave the help HTML: `convert_to_full_url` (`<see href>` in phases
 40/50/60), the example URLs phases 40/50 record (as API-root paths, `/sldworksapi/X.htm`),
-Phase 70's legacy example harvester, Phase 115's link targets and Phase 120's guide-link
-rewrite.
+Phase 70's legacy example harvester, Phase 115's link targets, and the Phase 110/115
+HTML-to-Markdown conversion (`relative_chm_alias`), so neither the guide Markdown nor the
+Phase 90 guides catalog built from it carries an alias.
+
+### `guide_pages.py`
+
+`read_guide_pages(markdown_root)` returns the pages a guide phase (110, 115) lists in its
+`metadata/files_created.jsonl`, with each page's help path and path under the root.
+Phases 90 and 120 ship guide Markdown from this list, not from the files on disk, so a
+page an earlier run left in the tree never ships. A missing tree or manifest (a fresh
+clone: manifests are committed, `output/` is not) raises `GuidePagesUnavailable`, which
+both phases warn about and skip; a tree missing a listed page raises
+`FileNotFoundError`. `case_collisions(paths)` finds paths that differ only in case;
+Phase 120 fails the export on any, since unpacking the bundle on Windows or macOS would
+keep only one of each.
+
+### `markdown_links.py`
+
+`markdown_destination(path, fragment="")` builds the Markdown link destination for a
+bundle file path. Guide pages are named after TOC titles, so a `#` in the name is
+percent-encoded (it would start the fragment) and a path with a space or parenthesis is
+angle-wrapped. Phase 110's URL rewriter and Phase 120's guide-link rewrite, See Also and
+`<see href>` rendering all use it.
 
 ### `help_page_spider.py`
 

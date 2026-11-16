@@ -7,8 +7,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from shared.chm_aliases import chm_alias_page, resolve_chm_alias
-from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
+from shared.chm_aliases import chm_alias_page, relative_chm_alias, resolve_chm_alias
+from shared.constants import SOLIDWORKS_API_BASE_PATH, SOLIDWORKS_API_FULL_BASE_URL
 
 API = SOLIDWORKS_API_FULL_BASE_URL
 
@@ -72,3 +72,18 @@ def test_alias_names_a_page_under_the_api_root(link: str, page: str) -> None:
 def test_other_links_unchanged(link: str) -> None:
     assert chm_alias_page(link) is None
     assert resolve_chm_alias(link) == link
+    assert relative_chm_alias(link, f"{API}/swconst/SO_Export.htm") == link
+
+
+@pytest.mark.parametrize(
+    ("page_url", "relative"),
+    [
+        # Same folder as the page the alias names.
+        (f"{API}/swconst/SO_Export.htm", "DP_Units.htm#top"),
+        (f"{API}/sldworksapi/X.htm", "../swconst/DP_Units.htm#top"),
+        # A help path works as well as a URL; deeper pages climb further.
+        (f"{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/Overview/X.htm", "../../swconst/DP_Units.htm#top"),
+    ],
+)
+def test_relative_alias_is_relative_to_the_linking_page(page_url: str, relative: str) -> None:
+    assert relative_chm_alias("ms-its:swconst.chm::/DP_Units.htm#top", page_url) == relative

@@ -17,9 +17,11 @@ paths case-insensitively, and every in-bundle lookup (Phase 115's ``canonical_ke
 Phase 120's ``guide_link_key``) compares lowercased forms.
 """
 
+import posixpath
 import re
+from urllib.parse import urlparse
 
-from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
+from shared.constants import SOLIDWORKS_API_BOUNDARY, SOLIDWORKS_API_FULL_BASE_URL
 
 # ``<name>.chm::/<path>``; the separator is sometimes doubled (``::/``+``/``). The
 # name is word runs joined by ``.`` or ``-`` (so ``..chm`` and ``a..chm`` are no CHM)
@@ -50,3 +52,18 @@ def resolve_chm_alias(link: str) -> str:
     if page is None:
         return link
     return f"{SOLIDWORKS_API_FULL_BASE_URL}/{page}"
+
+
+def relative_chm_alias(link: str, page_url: str) -> str:
+    """A CHM alias in ``link`` as a link relative to the page it is written on; other
+    links unchanged.
+
+    ``page_url`` is that page's help URL or path. From ``.../api/swconst/X.htm``,
+    ``sldworksapi.chm::/Y.htm`` becomes ``../sldworksapi/Y.htm``: the same form as the
+    page's ordinary relative links, so later link resolution treats both alike.
+    """
+    page = chm_alias_page(link)
+    if page is None:
+        return link
+    page_dir = posixpath.dirname(urlparse(page_url).path)
+    return posixpath.relpath(f"{SOLIDWORKS_API_BOUNDARY}{page}", page_dir)

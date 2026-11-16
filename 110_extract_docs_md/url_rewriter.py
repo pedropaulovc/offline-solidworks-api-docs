@@ -1,9 +1,13 @@
 """Rewrite URLs in Markdown files to work with new hierarchical structure."""
 
 import re
+import sys
 from pathlib import Path
 from typing import Dict
 from urllib.parse import urljoin, urlparse
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from shared.markdown_links import markdown_destination  # noqa: E402
 
 
 class UrlRewriter:
@@ -21,10 +25,12 @@ class UrlRewriter:
         self._build_url_index()
 
     def _build_url_index(self) -> None:
-        """Build an index of URLs for efficient lookup."""
+        """Build an index of URLs for efficient lookup, keyed lowercase (see
+        :meth:`_find_markdown_file`)."""
         self.url_index: Dict[str, Path] = {}
 
         for url, md_path in self.url_to_markdown_map.items():
+            url = url.lower()
             # Store by full URL
             self.url_index[url] = md_path
 
@@ -100,7 +106,7 @@ class UrlRewriter:
                 relative_path = re.sub(r"\.html?$", ".md", relative_path, flags=re.IGNORECASE)
 
                 rewrite_count += 1
-                return f"[{link_text}]({relative_path})"
+                return f"[{link_text}]({markdown_destination(relative_path)})"
 
             # URL not found in our index, return original
             return match.group(0)
@@ -147,6 +153,10 @@ class UrlRewriter:
         Returns:
             Path to Markdown file or None if not found
         """
+        # Keys are lowercase: the help server matches paths case-insensitively, and
+        # links (CHM aliases above all) often spell a folder differently from the TOC.
+        url = url.lower()
+
         # Try exact match first
         if url in self.url_index:
             return self.url_index[url]

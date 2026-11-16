@@ -4,8 +4,17 @@ import hashlib
 import html2text
 import json
 import jsonlines
+import re
+import sys
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from shared.chm_aliases import relative_chm_alias  # noqa: E402
+
+# An href attribute: double-quoted (group 2), single-quoted (3) or unquoted (4).
+_HREF = re.compile(r"""(\bhref\s*=\s*)(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))""", re.IGNORECASE)
 
 
 def new_html2text() -> html2text.HTML2Text:
@@ -24,6 +33,83 @@ def new_html2text() -> html2text.HTML2Text:
     h2t.unicode_snob = True  # Use unicode chars instead of ASCII
     h2t.skip_internal_links = False
     return h2t
+
+
+def relativize_chm_aliases(html: str, page_url: str) -> str:
+    """Rewrite CHM-alias ``href``s (``sldworksapi.chm::/X.html``) as links relative to
+    the page at ``page_url``, like its other relative links. Double-quoted,
+    single-quoted and unquoted values alike; each keeps its quoting.
+
+    Left as written, an alias is a dead link in the Markdown and in everything built
+    from it (Phase 90's guides catalog copies the Markdown verbatim).
+    """
+
+    def repl(match: re.Match[str]) -> str:
+        attribute, double, single, bare = match.group(1, 2, 3, 4)
+        if double is not None:
+            return f'{attribute}"{relative_chm_alias(double, page_url)}"'
+        if single is not None:
+            return f"{attribute}'{relative_chm_alias(single, page_url)}'"
+        return f"{attribute}{relative_chm_alias(bare, page_url)}"
+
+    return _HREF.sub(repl, html)
+
+
+# Elements whose content html2text leaves out of the Markdown.
+_HIDDEN_TAGS = ("head", "script", "style")
+
+
+class _TextFound(Exception):
+    """Raised by :class:`_TextFinder` at the first visible text."""
+
+
+class _TextFinder(HTMLParser):
+    """Raises :class:`_TextFound` at the first non-whitespace text html2text would keep.
+
+    Tracks hidden content the way html2text's ``quiet`` counter does: each hidden
+    start tag adds one and each end tag takes one away (a stray ``</head>`` goes
+    negative and hides the rest, as there), and ``<body>`` resets it, since
+    ``</head>`` may be omitted.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._hidden_depth = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in _HIDDEN_TAGS:
+            self._hidden_depth += 1
+        if tag == "body":
+            self._hidden_depth = 0
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in _HIDDEN_TAGS:
+            self._hidden_depth -= 1
+        if tag == "body":
+            self._hidden_depth = 0
+
+    def handle_data(self, data: str) -> None:
+        if self._hidden_depth == 0 and data.strip():
+            raise _TextFound
+
+
+def has_text(html: str) -> bool:
+    """Whether a page's HTML holds any text, not just images and layout.
+
+    The bundle ships no images, so a page without text (a few ``Miscellaneous``
+    topics are one diagram) would be a single dangling ``![](x.gif)``; links to it
+    are better left pointing at the help page, which shows the image. Decided on
+    the HTML, not the Markdown, where a linked thumbnail or a layout table leaves
+    ``[](big.htm)`` or ``---`` behind. Text in ``<head>`` (the ``<title>``),
+    ``<script>`` and ``<style>`` does not count: html2text drops it.
+    """
+    finder = _TextFinder()
+    try:
+        finder.feed(html)
+        finder.close()
+    except _TextFound:
+        return True
+    return False
 
 
 class HtmlToMarkdownConverter:
@@ -74,19 +160,22 @@ class HtmlToMarkdownConverter:
 
         return self.url_to_file_map.get(url)
 
-    def convert_html_to_markdown(self, html_path: Path) -> str:
+    def convert_html_to_markdown(self, html_path: Path, page_url: str) -> str | None:
         """Convert HTML file to Markdown.
 
         Args:
             html_path: Path to HTML file
+            page_url: The page's help URL or path, which its relative links are relative to
 
         Returns:
-            Markdown content
+            Markdown content, or None for a page with no text (see :func:`has_text`)
         """
         with html_path.open(encoding="utf-8") as f:
             html_content = f.read()
 
-        return new_html2text().handle(html_content)
+        if not has_text(html_content):
+            return None
+        return new_html2text().handle(relativize_chm_aliases(html_content, page_url))
 
     def sanitize_filename(self, name: str) -> str:
         """Sanitize filename by removing invalid characters.
@@ -151,13 +240,10 @@ class HtmlToMarkdownConverter:
 
 def main() -> None:
     """Test the HTML to Markdown converter."""
-    import sys
-
-    if len(sys.argv) > 1:
-        html_file = Path(sys.argv[1])
-    else:
-        print("Usage: python html_to_markdown.py <html_file>")
+    if len(sys.argv) != 3:
+        print("Usage: python html_to_markdown.py <html_file> <page_url>")
         sys.exit(1)
+    html_file = Path(sys.argv[1])
 
     if not html_file.exists():
         print(f"Error: File not found: {html_file}")
@@ -171,7 +257,7 @@ def main() -> None:
     )
 
     # Convert file
-    markdown = converter.convert_html_to_markdown(html_file)
+    markdown = converter.convert_html_to_markdown(html_file, sys.argv[2])
 
     # Print result
     print(markdown)

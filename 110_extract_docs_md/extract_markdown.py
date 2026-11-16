@@ -2,6 +2,7 @@
 
 import json
 import jsonlines
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -43,11 +44,13 @@ class MarkdownExtractor:
 
         # Statistics. No run times: extraction_stats.json and manifest.json are
         # committed, and a timestamp would change them on every run.
-        self.stats = {
+        self.stats: dict[str, Any] = {
             "total_nodes": 0,
             "converted_files": 0,
-            "skipped_files": 0,
+            "skipped_files": 0,  # no HTML for the node
             "failed_files": 0,
+            # Pages with no text (only images), deliberately not written.
+            "image_only_pages": [],
         }
 
         # Metadata tracking
@@ -58,7 +61,10 @@ class MarkdownExtractor:
         print("Phase 11: Extract Documentation to Markdown")
         print("=" * 60)
 
-        # Create output directories
+        # Start from an empty tree: a page that drops out of the TOC must not leave its
+        # old Markdown behind. A failed delete must stop the run, not leave stale pages.
+        if self.output_dir.exists():
+            shutil.rmtree(self.output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.metadata_dir.mkdir(parents=True, exist_ok=True)
 
@@ -91,6 +97,7 @@ class MarkdownExtractor:
         print(f"  Total nodes: {self.stats['total_nodes']}")
         print(f"  Converted: {self.stats['converted_files']}")
         print(f"  Skipped: {self.stats['skipped_files']}")
+        print(f"  Images only (not written): {len(self.stats['image_only_pages'])}")
         print(f"  Failed: {self.stats['failed_files']}")
         print(f"  URLs rewritten: {self.stats.get('urls_rewritten', 0)}")
         print(f"  Output: {self.output_dir}")
@@ -147,7 +154,11 @@ class MarkdownExtractor:
 
         try:
             # Convert HTML to Markdown
-            markdown_content = self.converter.convert_html_to_markdown(html_file)
+            markdown_content = self.converter.convert_html_to_markdown(html_file, node.url)
+            if markdown_content is None:
+                print(f"   [SKIP] {node.name} (images only)")
+                self.stats["image_only_pages"].append(node.url)
+                return
 
             # Determine output path
             # Use sanitized node name as filename
