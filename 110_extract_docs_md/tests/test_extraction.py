@@ -116,6 +116,28 @@ class TestHtmlToMarkdownConverter:
         assert "Item 1" in markdown
         assert "Item 2" in markdown
 
+    def test_conversion_does_not_depend_on_previous_page(self, tmp_path):
+        """A page converts the same whether or not another page was converted first.
+
+        html2text keeps parser state across ``handle()`` calls: after a page that
+        leaves a ``<table>`` open, a shared instance renders the next page's paragraph
+        as a table cell (``a| y``), so markdown depended on conversion order.
+        """
+        unclosed_table = tmp_path / "a.html"
+        unclosed_table.write_text("<table><tr><td>x", encoding="utf-8")
+        page = tmp_path / "b.html"
+        page.write_text("<p>a</p><table><tr><td>y</td></tr></table>", encoding="utf-8")
+
+        def converter() -> HtmlToMarkdownConverter:
+            return HtmlToMarkdownConverter(html_dir=tmp_path, metadata_file=Path("."), output_dir=tmp_path)
+
+        alone = converter().convert_html_to_markdown(page)
+        after_other = converter()
+        after_other.convert_html_to_markdown(unclosed_table)
+
+        assert after_other.convert_html_to_markdown(page) == alone
+        assert alone.startswith("a\n\n")
+
     def test_save_markdown(self, tmp_path):
         """Test saving Markdown file."""
         output_dir = tmp_path / "output"

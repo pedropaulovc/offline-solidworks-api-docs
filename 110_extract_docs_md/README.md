@@ -218,7 +218,9 @@ Overall statistics:
 
 ### HTML to Markdown Conversion
 
-The converter uses `html2text` with these settings:
+The converter uses a fresh `html2text` instance per page (`new_html2text()`): the parser
+keeps state between calls, so a shared instance let an unclosed `<table>` on one page
+reshape the next page's markdown. Settings:
 - `body_width=0`: No line wrapping
 - `unicode_snob=True`: Use Unicode characters
 - `ignore_links=False`: Preserve links

@@ -8,6 +8,24 @@ from pathlib import Path
 from typing import Any
 
 
+def new_html2text() -> html2text.HTML2Text:
+    """An ``HTML2Text`` configured for the docs.
+
+    One per page: the parser keeps state across ``handle()`` calls (an unclosed
+    ``<table>`` on one page turned the next page's paragraphs into table cells), so
+    a shared instance made each page's markdown depend on the page converted before
+    it, and Phase 115's output on the order of ``urls_crawled.jsonl``.
+    """
+    h2t = html2text.HTML2Text()
+    h2t.ignore_links = False
+    h2t.ignore_images = False
+    h2t.ignore_emphasis = False
+    h2t.body_width = 0  # Don't wrap text
+    h2t.unicode_snob = True  # Use unicode chars instead of ASCII
+    h2t.skip_internal_links = False
+    return h2t
+
+
 class HtmlToMarkdownConverter:
     """Convert HTML files to Markdown format."""
 
@@ -28,15 +46,6 @@ class HtmlToMarkdownConverter:
         self.metadata_file = metadata_file
         self.output_dir = output_dir
         self.url_to_file_map: dict[str, Path] = {}
-
-        # Configure html2text
-        self.h2t = html2text.HTML2Text()
-        self.h2t.ignore_links = False
-        self.h2t.ignore_images = False
-        self.h2t.ignore_emphasis = False
-        self.h2t.body_width = 0  # Don't wrap text
-        self.h2t.unicode_snob = True  # Use unicode chars instead of ASCII
-        self.h2t.skip_internal_links = False
 
     def load_metadata(self) -> None:
         """Load URL to file path mappings from metadata."""
@@ -77,10 +86,7 @@ class HtmlToMarkdownConverter:
         with html_path.open(encoding="utf-8") as f:
             html_content = f.read()
 
-        # Convert to Markdown
-        markdown = self.h2t.handle(html_content)
-
-        return markdown
+        return new_html2text().handle(html_content)
 
     def sanitize_filename(self, name: str) -> str:
         """Sanitize filename by removing invalid characters.
