@@ -27,6 +27,7 @@ crawl set.
 import argparse
 import importlib.util
 import json
+import posixpath
 import re
 import sys
 import xml.etree.ElementTree as ET
@@ -38,13 +39,15 @@ from urllib.error import HTTPError, URLError
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
-from shared.constants import SOLIDWORKS_API_VERSION  # noqa: E402
+from shared.constants import SOLIDWORKS_API_VERSION, SOLIDWORKS_DOMAIN  # noqa: E402
 
 USER_AGENT = "Mozilla/5.0 (compatible; offline-solidworks-api-docs/1.0)"
 DEFAULT_VERSION = SOLIDWORKS_API_VERSION
 DEFAULT_LEGACY_VERSIONS = ["2017"]
 # The part of a help URL path below ``/<year>/<language>/api/``.
 _API_TREE_PATH = re.compile(r"^/\d{4}/[^/]+/api/(.+)$", re.IGNORECASE)
+# Any versioned help path; outside the API tree when _API_TREE_PATH does not match.
+_VERSIONED_PATH = re.compile(r"^/\d{4}/")
 
 
 def _load_type_info_extractor():
@@ -155,22 +158,36 @@ def subdir_of(url: str) -> str:
     return urlparse(url).path.split("/")[-2]
 
 
-def normalize_example_url(url: str, subdir: str, version: str) -> str:
-    """Canonical current-version URL of an example link found on a type page in ``subdir``.
+def _api_tree_path(url: str, subdir: str) -> str | None:
+    """The path below ``/api`` that an example link on a type page in ``subdir`` names,
+    or None when it points outside the help's API tree (another host or tree)."""
+    parsed = urlparse(url)
+    absolute = bool(parsed.scheme or parsed.netloc)
+    on_help_site = parsed.netloc.lower() == SOLIDWORKS_DOMAIN
+    in_api_tree = _API_TREE_PATH.match(parsed.path)
+    if in_api_tree and (on_help_site or not absolute):
+        return in_api_tree.group(1)
+    if absolute or _VERSIONED_PATH.match(parsed.path):
+        return None
+    # An API-root path (a resolved CHM alias, /sldworksapi/X.htm) or a link relative
+    # to the type page's folder (X.htm, ../sldworksapi/X.htm).
+    return posixpath.normpath(posixpath.join("/", subdir, parsed.path)).lstrip("/") or None
 
-    ``url`` comes from :func:`extract_example_hrefs`. A link into the API tree,
-    absolute in any year, scheme or casing (``http://.../2017/English/api/x/Y.htm``),
-    or an API-root path (a resolved CHM alias, ``/x/Y.htm``), keeps its folder. Any
-    other link keeps only its filename, joined to the type page's folder.
+
+def normalize_example_url(url: str, subdir: str, version: str) -> str | None:
+    """Canonical current-version URL of an example link found on a type page in ``subdir``,
+    or None for a link outside the help's API tree.
+
+    ``url`` comes from :func:`extract_example_hrefs`. Absolute help URLs may use any
+    scheme, year or casing (``http://.../2017/English/api/SldWorksAPI/X.htm``); the
+    result uses the canonical prefix and lowercase folders, as Phases 40/50 record
+    them. The file name keeps its case; :func:`main` compares case-insensitively.
     """
-    base = f"https://help.solidworks.com/{version}/english/api"
-    path = urlparse(url).path
-    in_api_tree = _API_TREE_PATH.search(path)
-    if in_api_tree:
-        return f"{base}/{in_api_tree.group(1)}"
-    if path.startswith("/"):
-        return f"{base}{path}"
-    return f"{base}/{subdir}/{path.split('/')[-1]}"
+    api_path = _api_tree_path(url, subdir)
+    if api_path is None:
+        return None
+    folders, _, filename = api_path.rpartition("/")
+    return f"https://help.solidworks.com/{version}/english/api/{posixpath.join(folders.lower(), filename)}"
 
 
 def load_known_example_urls(version: str) -> set[str]:
@@ -210,8 +227,24 @@ def harvest_from_type_page(
         if not help_text:
             continue
         for url in extract_example_hrefs(help_text):
-            found.add(normalize_example_url(url, subdir, version))
+            candidate = normalize_example_url(url, subdir, version)
+            if candidate:
+                found.add(candidate)
     return found
+
+
+def unknown_candidates(candidates: set[str], known: set[str]) -> list[str]:
+    """Candidates that are not already known, compared and deduplicated case-insensitively.
+
+    The server matches paths case-insensitively, so a differently cased link to a known
+    example (or to another candidate) is the same page and would be crawled twice.
+    """
+    known_keys = {url.lower() for url in known}
+    unknown: dict[str, str] = {}
+    for candidate in sorted(candidates):
+        if candidate.lower() not in known_keys:
+            unknown.setdefault(candidate.lower(), candidate)
+    return sorted(unknown.values())
 
 
 def main() -> int:
@@ -265,7 +298,7 @@ def main() -> int:
             if i % 200 == 0:
                 print(f"  ...scanned {i}/{len(type_urls)} type pages, {len(candidates)} candidates so far")
 
-    new_candidates = sorted(candidates - known)
+    new_candidates = unknown_candidates(candidates, known)
     print(f"  Harvested {len(candidates)} example URLs ({len(new_candidates)} not already known)")
 
     # 2) Keep only candidates that still resolve in the current version.

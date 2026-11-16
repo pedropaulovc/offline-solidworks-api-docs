@@ -11,6 +11,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
@@ -83,11 +85,46 @@ def test_normalize_example_url():
     )
 
 
-def test_absolute_legacy_href_is_canonicalized():
-    """A legacy href's scheme, year and path casing must not survive: the result has to
-    match the URLs phases 40/50 found, or the same example is crawled twice."""
-    href = "http://help.solidworks.com/2017/English/api/sldworksapi/X_Example_VB.htm"
-    assert h.normalize_example_url(href, "swconst", SOLIDWORKS_API_VERSION) == f"{API}/sldworksapi/X_Example_VB.htm"
+@pytest.mark.parametrize(
+    ("href", "url"),
+    [
+        # Scheme, year and language casing are canonicalized ...
+        ("http://help.solidworks.com/2017/English/api/sldworksapi/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
+        # ... and so is the folder's casing, as Phases 40/50 record it.
+        ("/2017/English/api/SldWorksAPI/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
+        # A relative link to another folder keeps that folder.
+        ("../sldworksapi/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
+        ("X_Example_VB.htm", "swconst/X_Example_VB.htm"),
+        # A resolved CHM alias is an API-root path.
+        ("/sldworksapi/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
+    ],
+)
+def test_example_links_are_canonicalized(href, url):
+    """The result has to match the URLs phases 40/50 found, or the same example is crawled twice."""
+    assert h.normalize_example_url(href, "swconst", SOLIDWORKS_API_VERSION) == f"{API}/{url}"
+
+
+@pytest.mark.parametrize(
+    "href",
+    [
+        "https://www.3ds.com/x/Foo_Example.htm",
+        "https://help.solidworks.com/2017/english/sldworks/Foo_Example.htm",
+        "/2017/english/sldworks/Foo_Example.htm",
+        "mailto:Foo_Example.htm",
+    ],
+)
+def test_links_outside_the_api_tree_are_dropped(href):
+    assert h.normalize_example_url(href, "swconst", SOLIDWORKS_API_VERSION) is None
+
+
+def test_unknown_candidates_ignore_case():
+    known = {f"{API}/sldworksapi/Known_Example_VB.htm"}
+    candidates = {
+        f"{API}/sldworksapi/known_example_vb.htm",
+        f"{API}/sldworksapi/New_Example_VB.htm",
+        f"{API}/sldworksapi/NEW_Example_VB.htm",
+    }
+    assert h.unknown_candidates(candidates, known) == [f"{API}/sldworksapi/NEW_Example_VB.htm"]
 
 
 def test_chm_alias_example_resolves_to_its_own_folder():
