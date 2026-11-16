@@ -95,8 +95,12 @@ def test_normalize_example_url():
         # A relative link to another folder keeps that folder.
         ("../sldworksapi/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
         ("X_Example_VB.htm", "swconst/X_Example_VB.htm"),
-        # A CHM alias names a page in the CHM's folder.
+        # A CHM alias names a page in the CHM's folder, in every form the help writes.
         ("ms-its:sldworksapi.chm::/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
+        ("mk:@MSITStore:sldworksapi.chm::/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
+        ("sldworksapi.chm::/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
+        ("../sldworksapi/SldWorksAPI.chm::/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
+        ("https://help.solidworks.com/2017/english/api/swconst/sldworksapi.chm::/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
         # Dot segments are resolved before the result is checked.
         ("/2017/english/api/sldworksapi/../swconst/X_Example_VB.htm", "swconst/X_Example_VB.htm"),
         ("./X_Example_VB.htm", "swconst/X_Example_VB.htm"),
@@ -114,6 +118,11 @@ def test_example_links_are_canonicalized(href, url):
         # Another host's link is dropped even when it looks like a CHM alias.
         "https://www.3ds.com/a.chm::/Foo_Example.htm",
         "ms-its:..chm::/Foo_Example.htm",
+        "ms-its:a..chm::/Foo_Example.htm",
+        # A CHM alias under another scheme, or in the help's non-API tree.
+        "mailto:a.chm::/Foo_Example.htm",
+        "javascript:a.chm::/Foo_Example.htm",
+        "https://help.solidworks.com/2017/english/SolidWorks/sldworks/sldworks.chm::/Foo_Example.htm",
         "https://help.solidworks.com/2017/english/sldworks/Foo_Example.htm",
         # Help paths at the host root, outside any versioned tree, absolute or not.
         "https://help.solidworks.com/Foo_Example.htm",

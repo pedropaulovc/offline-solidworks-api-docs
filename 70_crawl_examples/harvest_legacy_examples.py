@@ -33,7 +33,7 @@ import sys
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import ParseResult, urlparse
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
@@ -47,6 +47,9 @@ DEFAULT_VERSION = SOLIDWORKS_API_VERSION
 DEFAULT_LEGACY_VERSIONS = ["2017"]
 # A page below ``/<year>/<language>/api/``; group 1 is its path under /api.
 _API_TREE_PAGE = re.compile(r"^/\d{4}/[^/]+/api/(.+\.html?)$", re.IGNORECASE)
+_API_TREE_PREFIX = re.compile(r"^/\d{4}/[^/]+/api/", re.IGNORECASE)
+# Protocols compiled-help links are written with (ms-its:, its:, mk:@MSITStore:).
+_CHM_PROTOCOLS = ("ms-its", "its", "mk")
 
 
 def _load_type_info_extractor():
@@ -171,6 +174,17 @@ def subdir_of(url: str) -> str:
     return urlparse(url).path.split("/")[-2]
 
 
+def _is_help_chm_alias(parsed: ParseResult) -> bool:
+    """Whether a link holding a CHM alias has a form the help writes: bare
+    (``swconst.chm::/X.htm``, ``../sldworksapi/x.chm::/X.htm``), under a CHM protocol
+    (``ms-its:``, ``mk:@MSITStore:``), or an absolute help URL inside the API tree."""
+    if parsed.netloc:
+        return bool(_API_TREE_PREFIX.match(parsed.path))
+    scheme = parsed.scheme.lower()
+    # A bare alias parses with the CHM file name as its scheme.
+    return scheme in ("", *_CHM_PROTOCOLS) or scheme.endswith(".chm")
+
+
 def _api_tree_path(href: str, subdir: str) -> str | None:
     """The page below ``/api`` that an example link on a type page in ``subdir`` names,
     or None when it points anywhere else (another host or tree, a folder, an anchor)."""
@@ -178,6 +192,8 @@ def _api_tree_path(href: str, subdir: str) -> str | None:
     if parsed.netloc and parsed.netloc.lower() != SOLIDWORKS_DOMAIN:
         return None
     alias_page = chm_alias_page(href)
+    if alias_page and not _is_help_chm_alias(parsed):
+        return None
     if alias_page:
         parsed = urlparse(f"{SOLIDWORKS_API_BOUNDARY}{alias_page}")
     if parsed.scheme not in ("", "http", "https"):  # mailto:, javascript:, ...
