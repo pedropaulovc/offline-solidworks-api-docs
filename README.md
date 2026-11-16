@@ -300,4 +300,4 @@ Built with respect for Dassault Systèmes' documentation and the developer commu
 ---
 
 **Version**: Check [releases](https://github.com/pedropaulovc/offline-solidworks-api-docs/releases) for latest version
-**Last Updated**: 2026-11-15 (SOLIDWORKS 2027 API Help)
+**Last Updated**: 2026-11-16 (SOLIDWORKS 2027 API Help, release v4.0.0)

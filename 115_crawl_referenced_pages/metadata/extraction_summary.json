@@ -1,6 +1,10 @@
 {
   "phase": "115_crawl_referenced_pages",
-  "converted_files": 194,
+  "converted_files": 198,
   "failed_files": 0,
-  "timestamp": "2026-11-15T16:50:09.452959+00:00"
+  "image_only_pages": [
+    "/2027/english/api/sldworksapiprogguide/Miscellaneous/FeatureManager__InsertGussetFeature_image.htm",
+    "/2027/english/api/sldworksapiprogguide/Miscellaneous/FreeFormCurves.htm",
+    "/2027/english/api/sldworksapiprogguide/Miscellaneous/Geometric_Tolerance_Symbol_Libraries.htm"
+  ]
 }

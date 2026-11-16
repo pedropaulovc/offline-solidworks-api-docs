@@ -40,7 +40,7 @@ The release version is part of every distributable package filename:
 uv run python 200_export_full_release/export_releases.py
 
 # Export an explicit release version
-uv run python 200_export_full_release/export_releases.py --version v3.12.1 --verbose
+uv run python 200_export_full_release/export_releases.py --version v4.0.0 --verbose
 
 # Custom output directory
 uv run python 200_export_full_release/export_releases.py --output-dir custom/path

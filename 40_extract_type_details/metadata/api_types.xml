@@ -13,7 +13,7 @@
         <Name>ConfigureDialog_e</Name>
         <Assembly>SolidWorks.Interop.sw3dprinter</Assembly>
         <Namespace>SolidWorks.Interop.sw3dprinter</Namespace>
-        <Description><![CDATA[Disables buttons and fields on Print dialog. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Disables buttons and fields on Print dialog. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sw3dprinter_namespace">SolidWorks.Interop.sw3dprinter Namespace</See>
         </SeeAlso>
@@ -5667,7 +5667,7 @@ Perform Steps 1 through 3 only once for each working session. In other words, pe
                 <Url>/sldworksapi/Get_Features_of_Multibody_Sheet_Metal_Part_Example_VB.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[For details on how to get this object, see <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksAPIProgGuide.chm::/OVERVIEW/Accessing_Bodies_in_Body_Folders.htm">Accessing Bodies in Body Folders</see>.]]></Remarks>
+        <Remarks><![CDATA[For details on how to get this object, see <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Accessing_Bodies_in_Body_Folders.htm">Accessing Bodies in Body Folders</see>.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IBodyFolder_members">IBodyFolder Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -5795,7 +5795,7 @@ Perform Steps 1 through 3 only once for each working session. In other words, pe
                 <Url>/sldworksapi/Sort_Table_Example_CSharp.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/Sorting_Tables.htm">Sorting Tables</see> for more information.]]></Remarks>
+        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Sorting_Tables.htm">Sorting Tables</see> for more information.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IBomTableSortData_members">IBomTableSortData Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -6458,7 +6458,7 @@ A center mark set is a linear or circular pattern.]]></Remarks>
 
 - connected linkage
 
-Read <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
+Read <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
 
 Before calling IFeatureManager::CreateDefinition, you must pre-select the entities needed to populate the chain component pattern.
 
@@ -6660,7 +6660,7 @@ You must call <see cref="SolidWorks.Interop.sldworks.IFeatureManager.CreateFeatu
                 <Url>/sldworksapi/Create_Bidirectional_Circular_Pattern_Feature_Example_VB.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
+        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
 
 Before calling IFeatureManager::CreateDefinition, you must pre-select the entities needed to create the circular pattern feature.
 
@@ -7004,7 +7004,7 @@ The workflow to detect collisions:
                 <Url>/sldworksapi/Create_Submenus_in_the_CommandManager_Example_CSharp.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksAPIProgGuide.chm::/OVERVIEW/CommandManager_and_CommandGroups.htm">CommandManager and CommandGroups</see> to learn how to add and remove CommandGroups.]]></Remarks>
+        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/CommandManager_and_CommandGroups.htm">CommandManager and CommandGroups</see> to learn how to add and remove CommandGroups.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.ICommandGroup_members">ICommandGroup Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -7036,7 +7036,7 @@ The workflow to detect collisions:
         </Examples>
         <Remarks><![CDATA[Only one CommandManager can exist in an add-in application.
 
-See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksAPIProgGuide.chm::/OVERVIEW/CommandManager_and_CommandGroups.htm">CommandManager and CommandGroups</see> to learn how to create a CommandManager and add and remove CommandGroups.]]></Remarks>
+See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/CommandManager_and_CommandGroups.htm">CommandManager and CommandGroups</see> to learn how to create a CommandManager and add and remove CommandGroups.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.ICommandManager_members">ICommandManager Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -8111,7 +8111,7 @@ For more information, see the **SOLIDWORKS Design user-interface help > Weldment
                 <Url>/sldworksapi/Create_and_Access_Curve-driven_Pattern_Feature_Example_VB.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
+        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
 
 Before calling <see cref="SolidWorks.Interop.sldworks.IFeatureManager.CreateDefinition">IFeatureManager::CreateDefinition</see>, you must pre-select the entities needed to create the curve-driven pattern feature.
 
@@ -8659,7 +8659,7 @@ To activate the DSPBR appearance in the SOLIDWORKS Design user interface:
                 <Url>/sldworksapi/Create_Derived_Pattern_Feature_Example_VB.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
+        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
 
 Before calling IFeatureManager::CreateDefinition, you must pre-select the entities needed to create the derived pattern feature. Use <see cref="SOLIDWORKS.Interop.sldworks.IModelDocExtension.SelectByID2">IModelDocExtension::SelectByID2</see> to select the seed components and pattern feature in any order using Marks:
 
@@ -8825,7 +8825,7 @@ For more information, see the **SOLIDWORKS Design user-interface help > Assembli
                 <Url>/sldworksapi/Delete_and_Insert_Instances_in_Variable_Pattern_Feature_Example_VB.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
+        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
 
 The variable pattern feature uses a table to store the dimensions and values of pattern instances.
 
@@ -9015,7 +9015,7 @@ You must call <see cref="SolidWorks.Interop.sldworks.IFeatureManager.CreateFeatu
                 <Url>/swdimxpertapi/Get_DimXpert_Features_and_Annotations_in_a_Model_Example_CSharp.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[This interface accesses the DimXpert block tolerances that are specified in the <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/System_Options_And_Document_Properties.htm">SOLIDWORKS System Options and Document Properties dialog (Tools > Options > Document Properties > DimXpert)</see>.]]></Remarks>
+        <Remarks><![CDATA[This interface accesses the DimXpert block tolerances that are specified in the <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/System_Options_And_Document_Properties.htm">SOLIDWORKS System Options and Document Properties dialog (Tools > Options > Document Properties > DimXpert)</see>.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swdimxpert.IDimXpertBlockTolerances_members">IDimXpertBlockTolerances Members</See>
             <See cref="SolidWorks.Interop.swdimxpert_namespace">SolidWorks.Interop.swdimxpert Namespace</See>
@@ -10919,7 +10919,7 @@ To delete a distance mate, use <see cref="SolidWorks.Interop.sldworks.IModelDocE
                 <Url>/sldworksapi/Open_Assembly_Document_Example_VB.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[The following properties are not valid when opening a 3DEXPERIENCE file using <see href="https://help.solidworks.com/2027/english/api/sldworksapi/ms-its:sldworksapiprogguide.chm:://Overview/SOLIDWORKS_Connected.htm">SOLIDWORKS Design connected to the 3DEXPERIENCE platform</see>:
+        <Remarks><![CDATA[The following properties are not valid when opening a 3DEXPERIENCE file using <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/SOLIDWORKS_Connected.htm">SOLIDWORKS Design connected to the 3DEXPERIENCE platform</see>:
 
 - <see cref="SolidWorks.Interop.sldworks.IDocumentSpecification.FileName">IDocumentSpecification::FileName</see>
 
@@ -11085,7 +11085,7 @@ To delete a distance mate, use <see cref="SolidWorks.Interop.sldworks.IModelDocE
         </Examples>
         <Remarks><![CDATA[When the user clicks and drags the arrow of a handle, the length of that handle changes.
 
-An add-in application must create the handler for the manipulator. See <see cref="SOLIDWORKS.Interop.swpublished.ISwManipulatorHandler2">ISwManipulatorHandler2</see> and <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Manipulators.htm">Manipulators</see> for details.]]></Remarks>
+An add-in application must create the handler for the manipulator. See <see cref="SOLIDWORKS.Interop.swpublished.ISwManipulatorHandler2">ISwManipulatorHandler2</see> and <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Manipulators.htm">Manipulators</see> for details.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IDragArrowManipulator_members">IDragArrowManipulator Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -12426,7 +12426,7 @@ For more information about family tables, see the **SOLIDWORKS Design user-inter
                 <Url>/sldworksapi/Create_Fill_Pattern_Example_CSharp.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
+        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
 
 Before calling IFeatureManager::CreateDefinition, you must pre-select the entities needed to create the fill pattern feature.
 
@@ -13600,7 +13600,7 @@ Call <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.LoadFile4">ISldWorks::Load
                 <Url>/sldworksapi/Specify_IGES_Levels_and_Values,_Then_Import_IGES_File_Example_VB.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[**If user preference** **<see href="https://help.solidworks.com/2027/english/api/sldworksapi/ms-its:swconst.chm::/FileOpenOptionsGeneral.htm">swIGESImportShowLevel</see>** **is...**
+        <Remarks><![CDATA[**If user preference** **<see href="https://help.solidworks.com/2027/english/api/swconst/FileOpenOptionsGeneral.htm">swIGESImportShowLevel</see>** **is...**
 
 **Then the IGES translator...**
 
@@ -13661,7 +13661,7 @@ To specify levels and values when importing IGES data:
 
 3. Use <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.LoadFile4">ISldWorks::LoadFile4</see> to load the file.
 
-When IImportStepData is initialized, the current default environment setting, <see href="https://help.solidworks.com/2027/english/api/sldworksapi/ms-its:swconst.chm::/FileOpenOptionsGeneral.htm">swImportStepConfigData</see>, initializes IImportStepData::MapConfigurationData unless you explicitly set IImportStepData::MapConfigurationData. Then the IImportStepData::MapConfigurationData setting overrides swImportStepConfigData for this import only.]]></Remarks>
+When IImportStepData is initialized, the current default environment setting, <see href="https://help.solidworks.com/2027/english/api/swconst/FileOpenOptionsGeneral.htm">swImportStepConfigData</see>, initializes IImportStepData::MapConfigurationData unless you explicitly set IImportStepData::MapConfigurationData. Then the IImportStepData::MapConfigurationData setting overrides swImportStepConfigData for this import only.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IImportStepData_members">IImportStepData Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -14028,7 +14028,7 @@ Layers are only supported in SOLIDWORKS drawing documents.]]></Remarks>
                 <Url>/sldworksapi/Get_Library_Feature_Data_Example_CSharp.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/Library_Features_and_LibraryFeatureData_Objects.htm">Library Features and LibraryFeatureData Objects</see>.]]></Remarks>
+        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Library_Features_and_LibraryFeatureData_Objects.htm">Library Features and LibraryFeatureData Objects</see>.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.ILibraryFeatureData_members">ILibraryFeatureData Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -14214,7 +14214,7 @@ To delete a linear/linear coupler mate, use <see cref="SolidWorks.Interop.sldwor
                 <Url>/sldworksapi/Create_Bidir_Linear_Pattern_Example_CSharp.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
+        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
 
 Before calling <see cref="SolidWorks.Interop.sldworks.IFeatureManager.CreateDefinition">IFeatureManager::CreateDefinition</see>, you must pre-select the entities needed to create the linear pattern feature.
 
@@ -14343,7 +14343,7 @@ For more information, see the **Linear Patterns and the Linear Pattern PropertyM
                 <Url>/sldworksapi/Create_Local_Circular_Pattern_Example_CSharp.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
+        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
 
 Before calling IFeatureManager::CreateDefinition, you must pre-select the entities needed to create the local circular pattern feature.
 
@@ -14395,7 +14395,7 @@ You must call <see cref="SolidWorks.Interop.sldworks.IFeatureManager.CreateFeatu
                 <Url>/sldworksapi/Create_Local_Curve-driven_Pattern_Example_VB.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
+        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
 
 Before calling <see cref="SolidWorks.Interop.sldworks.IFeatureManager.CreateDefinition">IFeatureManager::CreateDefinition</see>, you must pre-select the entities needed to create the curve-driven component pattern feature.
 
@@ -14463,7 +14463,7 @@ For more information, see the **Assemblies > Basic Component Operations > Compon
                 <Url>/sldworksapi/Create_Local_Linear_Pattern_Example_CSharp.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
+        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
 
 Before calling <see cref="SolidWorks.Interop.sldworks.IFeatureManager.CreateDefinition">IFeatureManager::CreateDefinition</see>, you must pre-select the D1 and D2 end (and seed) reference entities to create the linear component pattern feature.
 
@@ -14564,7 +14564,7 @@ After calling IFeatureManager::CreateDefinition, you can further initialize the 
                 <Url>/sldworksapi/Create_Local_Sketch-driven_Pattern_Example_VB.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
+        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
 
 Before calling IFeatureManager::CreateDefinition, you must pre-select the entities needed to create the sketch-driven component pattern feature.
 
@@ -14899,7 +14899,7 @@ When the feature is creating multiple bodies, then the return value from the reb
 
 When the feature is modifying a body and the result is multiple bodies, then IMacroFeatureData::EditBodies should contain all of the resulting bodies.
 
-Whether creating multiple bodies or modifying a body that results in multiple bodies, call <see cref="SOLIDWORKS.Interop.sldworks.IMacroFeatureData.EnableMultiBodyConsume">IMacroFeatureData::EnableMultiBodyConsume</see> from the <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Macro_Features/Rebuild_Function.htm">rebuild</see> function to specify whether multiple bodies replace or append the original edit body in the FeatureManager design tree Solid Bodies folder.
+Whether creating multiple bodies or modifying a body that results in multiple bodies, call <see cref="SOLIDWORKS.Interop.sldworks.IMacroFeatureData.EnableMultiBodyConsume">IMacroFeatureData::EnableMultiBodyConsume</see> from the <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Macro_Features/Rebuild_Function.htm">rebuild</see> function to specify whether multiple bodies replace or append the original edit body in the FeatureManager design tree Solid Bodies folder.
 
 If your application allows the user to decide which bodies to keep, your application must determine what it means to select the bodies and subsequently store the selected bodies with the feature.
 
@@ -14907,7 +14907,7 @@ To edit a macro feature in a drawing, do not use <see cref="SOLIDWORKS.Interop.s
 
 If the user decides to cancel the changes made to the IMacroFeatureData object, then discard the IMacroFeatureData object. This action is equivalent to using IMacroFeatureData::ReleaseSelectionAccess.
 
-See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Macro_Features/Overview_of_Macro_Features.htm">Overview of Macro Features</see> for more information.]]></Remarks>
+See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Macro_Features/Overview_of_Macro_Features.htm">Overview of Macro Features</see> for more information.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IMacroFeatureData_members">IMacroFeatureData Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -14968,7 +14968,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
                 <Url>/sldworksapi/Insert_and_Use_Plane_with_Manipulator_Example_VB.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[An add-in application must create the handler for the manipulator. See <see cref="SOLIDWORKS.Interop.swpublished.ISwManipulatorHandler2">ISwManipulatorHandler2</see> and <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Manipulators.htm">Manipulators</see> for details.]]></Remarks>
+        <Remarks><![CDATA[An add-in application must create the handler for the manipulator. See <see cref="SOLIDWORKS.Interop.swpublished.ISwManipulatorHandler2">ISwManipulatorHandler2</see> and <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Manipulators.htm">Manipulators</see> for details.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IManipulator_members">IManipulator Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -16717,7 +16717,7 @@ Examine the examples to see the calls for these steps.]]></Remarks>
                 <Url>/sldworksapi/Anchor_a_Note_Example_CSharp.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[**Important**: <see href="https://help.solidworks.com/2027/english/api/sldworksapi/ms-its:sldworksapiprogguide.chm::/Overview/Compound_Note.htm">Compound notes</see> are no longer creatable through the SOLIDWORKS Design user interface. As such, they are a legacy annotation type. SOLIDWORKS APIs that work on compound notes should only be used with legacy SOLIDWORKS files. <see cref="SolidWorks.Interop.sldworks.ISketchBlockDefinition">ISketchBlockDefinition</see> and <see cref="SolidWorks.Interop.sldworks.ISketchBlockInstance">ISketchBlockInstance</see> can be used to mimic the functionality of compound notes. See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/ms-its:sldworksapiprogguide.chm::/Overview/Block_Definitions_and_Block_Instances.htm">Block Definitions and Block Instances</see>.]]></Remarks>
+        <Remarks><![CDATA[**Important**: <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/Compound_Note.htm">Compound notes</see> are no longer creatable through the SOLIDWORKS Design user interface. As such, they are a legacy annotation type. SOLIDWORKS APIs that work on compound notes should only be used with legacy SOLIDWORKS files. <see cref="SolidWorks.Interop.sldworks.ISketchBlockDefinition">ISketchBlockDefinition</see> and <see cref="SolidWorks.Interop.sldworks.ISketchBlockInstance">ISketchBlockInstance</see> can be used to mimic the functionality of compound notes. See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/Block_Definitions_and_Block_Instances.htm">Block Definitions and Block Instances</see>.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.INote_members">INote Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -16774,7 +16774,7 @@ Events are implemented with delegates in the Microsoft .NET Framework. See the <
         <Name>IPLMObjectSpecification</Name>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
         <Namespace>SolidWorks.Interop.sldworks</Namespace>
-        <Description><![CDATA[Allows access to a <see href="https://help.solidworks.com/2027/english/api/sldworksapi/ms-its:sldworksapiprogguide.chm:://Overview/SOLIDWORKS_Connected.htm">SOLIDWORKS Design connected to the 3DEXPERIENCE platform</see> document specification.
+        <Description><![CDATA[Allows access to a <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/SOLIDWORKS_Connected.htm">SOLIDWORKS Design connected to the 3DEXPERIENCE platform</see> document specification.
 
 **NOTE:** Click the **Members** link, located near the top of the topic, to see this interface's methods and properties.]]></Description>
         <Examples>
@@ -17473,7 +17473,7 @@ To delete this perpendicular mate, use <see cref="SolidWorks.Interop.sldworks.IM
                 <Url>/sldworksapi/Insert_and_Use_Plane_with_Manipulator_Example_VBNET.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[An add-in application must create the handler for the manipulator. See <see cref="SOLIDWORKS.Interop.swpublished.ISwManipulatorHandler2">ISwManipulatorHandler2</see> and <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Manipulators.htm">Manipulators</see> for details.]]></Remarks>
+        <Remarks><![CDATA[An add-in application must create the handler for the manipulator. See <see cref="SOLIDWORKS.Interop.swpublished.ISwManipulatorHandler2">ISwManipulatorHandler2</see> and <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Manipulators.htm">Manipulators</see> for details.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IPlaneManipulator_members">IPlaneManipulator Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -17816,7 +17816,7 @@ The limits on the number of controls on a PropertyManager page are:
 
 SOLIDWORKS does not allow suppressing components or features while a PropertyManager page is open.
 
-See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
+See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IPropertyManagerPage2_members">IPropertyManagerPage2 Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -17858,7 +17858,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
 
 - In a SOLIDWORKS VBA macro, you must reference the **SOLIDWORKS exposed type libraries for add-in use** type library specific to the <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.VersionHistory">version of SOLIDWORKS</see> that you are running.
 
-- In a SOLIDWORKS VB.NET or C# add-in, you must reference the **SOLIDWORKS.interop.swpublished** assembly and set ComVisibleAttribute to true (see <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET or C# Macros and Add-ins</see>).
+- In a SOLIDWORKS VB.NET or C# add-in, you must reference the **SOLIDWORKS.interop.swpublished** assembly and set ComVisibleAttribute to true (see <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET or C# Macros and Add-ins</see>).
 
 For all unimplemented methods of this object, the add-in application can return E_NOTIMPL.]]></Remarks>
         <SeeAlso>
@@ -17873,7 +17873,7 @@ For all unimplemented methods of this object, the add-in application can return 
         <Description><![CDATA[Allows you to access a <see cref="SOLIDWORKS.Interop.sldworks.IPropertyManagerPage2">PropertyManager page</see> ActiveX control.
 
 **NOTE:** Click the **Members** link, located near the top of the topic, to see this interface's methods and properties.]]></Description>
-        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information. See also <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Keystrokes_and_Accelerator_Keys_and_ActiveX_Modeless_Dialogs_and_PropertyManager_Pages.htm">Keystrokes and Accelerator Keys to Handle ActiveX Modeless Dialogs and PropertyManager pages.</see>]]></Remarks>
+        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information. See also <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Keystrokes_and_Accelerator_Keys_and_ActiveX_Modeless_Dialogs_and_PropertyManager_Pages.htm">Keystrokes and Accelerator Keys to Handle ActiveX Modeless Dialogs and PropertyManager pages.</see>]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IPropertyManagerPageActiveX_members">IPropertyManagerPageActiveX Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -17886,7 +17886,7 @@ For all unimplemented methods of this object, the add-in application can return 
         <Description><![CDATA[Allows you to access a <see cref="SolidWorks.Interop.sldworks.IPropertyManagerPage2">PropertyManager page</see> bitmap.
 
 **NOTE:** Click the **Members** link, located near the top of the topic, to see this interface's methods and properties.]]></Description>
-        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
+        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IPropertyManagerPageBitmap_members">IPropertyManagerPageBitmap Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -17901,7 +17901,7 @@ For all unimplemented methods of this object, the add-in application can return 
 **NOTE:** Click the **Members** link, located near the top of the topic, to see this interface's methods and properties.]]></Description>
         <Remarks><![CDATA[Bitmaps are 256 colors. The standard bitmap buttons are 23 pixels wide x 23 pixels high; however, you can make them larger.
 
-See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
+See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IPropertyManagerPageBitmapButton_members">IPropertyManagerPageBitmapButton Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -17918,7 +17918,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
 
 In SOLIDWORKS 2005 and earlier, buttons remained aligned vertically at an indented position when a user resized a PropertyManager page. In most instances, these buttons are now centered when a user resizes a PropertyManager page. However, if a button on a PropertyManager page was aligned at the very left edge of the page and it was the only button on that line, then it is assumed that it was intentionally placed at that position and it will stay at that position if a user resizes the page. Any text on the button will also be left justified inside the button. If a button has a bitmap as its label, then the button remains next to the label instead of being centered.
 
-See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
+See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IPropertyManagerPageButton_members">IPropertyManagerPageButton Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -17938,7 +17938,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
                 <Url>/sldworksapi/Set_Focus_on_PropertyManager_Page_Control_Example_VB.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
+        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IPropertyManagerPageCheckbox_members">IPropertyManagerPageCheckbox Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -17951,7 +17951,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
         <Description><![CDATA[Allows you to access a <see cref="SOLIDWORKS.Interop.sldworks.IPropertyManagerPage2">PropertyManager page</see> combo box control.
 
 **NOTE:** Click the **Members** link, located near the top of the topic, to see this interface's methods and properties.]]></Description>
-        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
+        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IPropertyManagerPageCombobox_members">IPropertyManagerPageCombobox Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -18003,7 +18003,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
 
 - <see cref="SOLIDWORKS.Interop.sldworks.IPropertyManagerPageWindowFromHandle">IPropertyManagerPageWindowFromHandle</see>
 
-See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
+See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IPropertyManagerPageControl_members">IPropertyManagerPageControl Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -18018,7 +18018,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
 **NOTE:** Click the **Members** link, located near the top of the topic, to see this interface's methods and properties.]]></Description>
         <Remarks><![CDATA[You can have a maximum of 15 controls per PropertyManager page group.
 
-See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
+See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IPropertyManagerPageGroup_members">IPropertyManagerPageGroup Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -18031,7 +18031,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
         <Description><![CDATA[Allows you to access a <see cref="SOLIDWORKS.Interop.sldworks.IPropertyManagerPage2">PropertyManager page</see> label control.
 
 **NOTE:** Click the **Members** link, located near the top of the topic, to see this interface's methods and properties.]]></Description>
-        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
+        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IPropertyManagerPageLabel_members">IPropertyManagerPageLabel Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -18056,7 +18056,7 @@ These methods support multi-selection:
 
 - <see cref="SOLIDWORKS.Interop.sldworks.IPropertyManagerPageListbox.SetSelectedItem">IPropertyManagerPageListbox::SetSelectedItem</see>
 
-See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
+See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IPropertyManagerPageListbox_members">IPropertyManagerPageListbox Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -18104,7 +18104,7 @@ For both types of number boxes, SOLIDWORKS automatically validates the values an
 
 **NOTE:** When a document's unit system is set to a non-metric setting, the dimension precision value (the number of digits displayed after a decimal point) is based on the number of digits specified. It is not based on the document's dimension precision settings.
 
-See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
+See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IPropertyManagerPageNumberbox_members">IPropertyManagerPageNumberbox Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -18117,7 +18117,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
         <Description><![CDATA[Allows you to access to a <see cref="SOLIDWORKS.Interop.sldworks.IPropertyManagerPageOption">PropertyManager page</see> radio button control.
 
 **NOTE:** Click the **Members** link, located near the top of the topic, to see this interface's methods and properties.]]></Description>
-        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
+        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IPropertyManagerPageOption_members">IPropertyManagerPageOption Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -18145,7 +18145,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
 
 - Clear selections item on the shortcut menu in the model view.
 
-See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
+See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IPropertyManagerPageSelectionbox_members">IPropertyManagerPageSelectionbox Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -18165,7 +18165,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
                 <Url>/sldworksapi/Set_Up_PropertyManager_Page_Slider_Control_Example_CPlusPlus_COM.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
+        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IPropertyManagerPageSlider_members">IPropertyManagerPageSlider Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -18178,7 +18178,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
         <Description><![CDATA[Allows you to access a <see cref="SOLIDWORKS.Interop.sldworks.IPropertyManagerPage2">PropertyManager page</see> tab control.
 
 **NOTE:** Click the **Members** link, located near the top of the topic, to see this interface's methods and properties.]]></Description>
-        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
+        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IPropertyManagerPageTab_members">IPropertyManagerPageTab Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -18198,7 +18198,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
                 <Url>/sldworksapi/Set_Focus_on_PropertyManager_Page_Control_Example_VB.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
+        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IPropertyManagerPageTextbox_members">IPropertyManagerPageTextbox Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -18227,7 +18227,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
 
 If SOLIDWORKS is unable to create a .NET control, it passes Status = false in the handler. When Status = false, the handler must return an action to take as defined in <see cref="SOLIDWORKS.Interop.swconst.swHandleWindowFromHandleCreationFailure_e">swHandleWindowFromHandleCreationFailure_e</see>.
 
-See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
+See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/Using_PropertyManagerPage2_and_the_Related_Objects.htm">Using PropertyManagerPage2 and the Related Objects</see> for more information.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IPropertyManagerPageWindowFromHandle_members">IPropertyManagerPageWindowFromHandle Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -19595,7 +19595,7 @@ To edit a normal cut feature:
                 <Url>/dsgnchkapi/Create_Checks_From_Document_Example_CSharp.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/Accessing_Add-ins.htm">Accessing SOLIDWORKS Add-in Objects</see>.]]></Remarks>
+        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/Accessing_Add-ins.htm">Accessing SOLIDWORKS Add-in Objects</see>.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.dsgnchk.ISWDesignCheck_members">ISWDesignCheck Members</See>
             <See cref="SolidWorks.Interop.dsgnchk_namespace">SolidWorks.Interop.dsgnchk Namespace</See>
@@ -19706,7 +19706,7 @@ CComBSTR fileName2 //This does not work]]></Remarks>
         <Name>ISaveTo3DExperienceOptions</Name>
         <Assembly>SolidWorks.Interop.sldworks</Assembly>
         <Namespace>SolidWorks.Interop.sldworks</Namespace>
-        <Description><![CDATA[Allows access to options for saving a document in <see href="https://help.solidworks.com/2027/english/api/sldworksapi/ms-its:sldworksapiprogguide.chm:://Overview/SOLIDWORKS_Connected.htm">SOLIDWORKS Design connected to the 3DEXPERIENCE platform</see>.
+        <Description><![CDATA[Allows access to options for saving a document in <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/SOLIDWORKS_Connected.htm">SOLIDWORKS Design connected to the 3DEXPERIENCE platform</see>.
 
 **NOTE:** Click the **Members** link, located near the top of the topic, to see this interface's methods and properties.]]></Description>
         <SeeAlso>
@@ -20736,7 +20736,7 @@ Partial edge fillet/chamfer
 
 For more information about fillets, see the **Fillets** topic in the SOLIDWORKS Design user-interface help.
 
-See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksAPIProgGuide.chm::/Miscellaneous/Accessing_Selections_that_Define_Features.htm">Accessing Selections that Define Features</see> for additional details.]]></Remarks>
+See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Miscellaneous/Accessing_Selections_that_Define_Features.htm">Accessing Selections that Define Features</see> for additional details.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.ISimpleFilletFeatureData2_members">ISimpleFilletFeatureData2 Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -21154,7 +21154,7 @@ component moves to the left, and the power consumption of the motor increases.]]
 
   - All notes and dimensions and the number of all notes and dimensions
 
-See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksAPIProgGuide.chm::/OVERVIEW/Block_Definitions_and_Block_Instances.htm">Block Definitions and Block Instances</see> for details.]]></Remarks>
+See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Block_Definitions_and_Block_Instances.htm">Block Definitions and Block Instances</see> for details.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.ISketchBlockDefinition_members">ISketchBlockDefinition Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -21227,7 +21227,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
 
 - Get block instances on a drawing sheet format and edit the sheet format using <see cref="SOLIDWORKS.Interop.sldworks.IDrawingDoc.EditTemplate">IDrawingDoc::EditTempate</see> and <see cref="SOLIDWORKS.Interop.sldworks.IModelDoc2.GetActiveSketch2">IModelDoc2::GetActiveSketch2</see> or <see cref="SOLIDWORKS.Interop.sldworks.IModelDoc2.IGetActiveSketch2">IModelDoc2::IGetActiveSketch2</see>, which gains access to the <see cref="SOLIDWORKS.Interop.sldworks.ISketch">sketch</see> that contains the block instances.
 
-See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksAPIProgGuide.chm::/OVERVIEW/Block_Definitions_and_Block_Instances.htm">Block Definitions and Block Instances</see> for details.]]></Remarks>
+See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Block_Definitions_and_Block_Instances.htm">Block Definitions and Block Instances</see> for details.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.ISketchBlockInstance_members">ISketchBlockInstance Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -21520,7 +21520,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
                 <Url>/sldworksapi/Get_Properties_of_Sketch-Pattern_Feature_Example_CSharp.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
+        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
 
 Before calling IFeatureManager::CreateDefinition, you must use <see cref="SOLIDWORKS.Interop.sldworks.IModelDocExtension.SelectByID2">IModelDocExtension::SelectByID2</see> to pre-select the entities needed to create the circular pattern feature.
 
@@ -23116,7 +23116,7 @@ The -10000 to 10000 parameter range is the modeling limit for the modeler. This 
         <Description><![CDATA[Allows applications to create SOLIDWORKS add-ins.
 
 **NOTE:** Click the **Members** link, located near the top of the topic, to see this interface's methods and properties.]]></Description>
-        <Remarks><![CDATA[To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET and C# Macros and Add-ins</see>.
+        <Remarks><![CDATA[To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET and C# Macros and Add-ins</see>.
 
 If you are creating a COM-style addin and are using an MFC CCmdTarget-derived object to implement ISwAddin, you must fully implement ITypeInfo as follows:
 
@@ -23143,9 +23143,9 @@ If you are creating a COM-style addin and are using an MFC CCmdTarget-derived ob
 
  EnableTypeLib();
 
-See also <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksAPIProgGuide.chm::/OVERVIEW/Using_SwAddin_to_Create_a_SOLIDWORKS_Addin.htm">Using SwAddin to Create a SOLIDWORKS Add-in</see>.
+See also <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Using_SwAddin_to_Create_a_SOLIDWORKS_Addin.htm">Using SwAddin to Create a SOLIDWORKS Add-in</see>.
 
-This interface is implemented by add-ins of SOLIDWORKS Partners who participate in the <see href="https://help.solidworks.com/2027/english/api/sldworksapi/ms-its:sldworksapiprogguide.chm::/GettingStarted/SolidWorks_Partner_Program_2.htm">SOLIDWORKS Partner Program</see>.]]></Remarks>
+This interface is implemented by add-ins of SOLIDWORKS Partners who participate in the <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/GettingStarted/SolidWorks_Partner_Program_2.htm">SOLIDWORKS Partner Program</see>.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swpublished.ISwAddin_members">ISwAddin Members</See>
             <See cref="SolidWorks.Interop.swpublished_namespace">SolidWorks.Interop.swpublished Namespace</See>
@@ -23158,7 +23158,7 @@ This interface is implemented by add-ins of SOLIDWORKS Partners who participate 
         <Description><![CDATA[Allows add-ins to remove dismissed messages from **Tools > Options > System Options > Messages/Errors/Warnings**.
 
 **NOTE:** Click the **Members** link, located near the top of the topic, to see this interface's methods and properties.]]></Description>
-        <Remarks><![CDATA[To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET and C# Macros and Add-ins</see>.
+        <Remarks><![CDATA[To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET and C# Macros and Add-ins</see>.
 
 See the **System Options - Messages/Errors/Warnings** topic in SOLIDWORKS help for more information about dismissed messages.]]></Remarks>
         <SeeAlso>
@@ -23173,7 +23173,7 @@ See the **System Options - Messages/Errors/Warnings** topic in SOLIDWORKS help f
         <Description><![CDATA[Gets information about an add-in's entities so that SOLIDWORKS can interact with those entities.
 
 **NOTE:** Click the **Members** link, located near the top of the topic, to see this interface's methods and properties.]]></Description>
-        <Remarks><![CDATA[To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET and C# Macros and Add-ins</see>.]]></Remarks>
+        <Remarks><![CDATA[To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET and C# Macros and Add-ins</see>.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swpublished.ISwAddinBroker_members">ISwAddinBroker Members</See>
             <See cref="SolidWorks.Interop.swpublished_namespace">SolidWorks.Interop.swpublished Namespace</See>
@@ -23193,7 +23193,7 @@ See the **System Options - Messages/Errors/Warnings** topic in SOLIDWORKS help f
                 <Url>/swpublishedapi/Create_Multi-row_Callouts_Example_VB.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET and C# Macros and Add-ins</see>.]]></Remarks>
+        <Remarks><![CDATA[To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET and C# Macros and Add-ins</see>.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swpublished.ISwCalloutHandler_members">ISwCalloutHandler Members</See>
             <See cref="SolidWorks.Interop.swpublished_namespace">SolidWorks.Interop.swpublished Namespace</See>
@@ -23238,7 +23238,7 @@ To use ISwColorContour1:
 
 This interface overrides the color and display functionality of the SOLIDWORKS Curvature tool. See SOLIDWORKS Help for details about the SOLIDWORKS Curvature tool.
 
-To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET and C# Macros and Add-ins</see>.]]></Remarks>
+To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET and C# Macros and Add-ins</see>.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swpublished.ISwColorContour1_members">ISwColorContour1 Members</See>
             <See cref="SolidWorks.Interop.swpublished_namespace">SolidWorks.Interop.swpublished Namespace</See>
@@ -23251,9 +23251,9 @@ To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see hre
         <Description><![CDATA[Allows applications to create macro features using COM.
 
 **NOTE:** Click the **Members** link, located near the top of the topic, to see this interface's methods and properties.]]></Description>
-        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksAPIProgGuide.chm::/Macro_Features/Exposed_COM_DLL_or_Executable.htm">Exposed COM DLL or Executable and Macro Features</see> and <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksAPIProgGuide.chm::/Macro_Features/Overview_of_Macro_Features.htm">Overview of Macro Features</see> for more information.
+        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Macro_Features/Exposed_COM_DLL_or_Executable.htm">Exposed COM DLL or Executable and Macro Features</see> and <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Macro_Features/Overview_of_Macro_Features.htm">Overview of Macro Features</see> for more information.
 
-To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET and C# Macros and Add-ins</see>.]]></Remarks>
+To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET and C# Macros and Add-ins</see>.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swpublished.ISwComFeature_members">ISwComFeature Members</See>
             <See cref="SolidWorks.Interop.swpublished_namespace">SolidWorks.Interop.swpublished Namespace</See>
@@ -23274,7 +23274,7 @@ To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see hre
                 <Url>/swhtmlcontrolapi/Show_Bubble_ToolTip_Example_VB.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[To access this API, include the following line of code in your application. See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/ms-its:sldworksAPIProgGuide.chm::/Overview/Quick_Tips_and_Bubble_ToolTips.htm">Quick Tips and Bubble ToolTips</see> for more information.
+        <Remarks><![CDATA[To access this API, include the following line of code in your application. See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/Quick_Tips_and_Bubble_ToolTips.htm">Quick Tips and Bubble ToolTips</see> for more information.
 
 CreateObject('SwHtmlControl.SwHtmlInterface')]]></Remarks>
         <SeeAlso>
@@ -23325,7 +23325,7 @@ CreateObject('SwHtmlControl.SwHtmlInterface')]]></Remarks>
                 <Url>/swpublishedapi/Create_Triad_Manipulator_Example_CSharp.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET and C# Macros and Add-ins</see>.
+        <Remarks><![CDATA[To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET and C# Macros and Add-ins</see>.
 
 The add-in application performs such actions as:
 
@@ -23337,7 +23337,7 @@ The add-in application performs such actions as:
 
 To create a manipulator, first create the SwManipulatorHandler2 object and then create the <see cref="SOLIDWORKS.Interop.sldworks.IManipulator">IManipulator</see> object.
 
-See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksAPIProgGuide.chm::/OVERVIEW/Manipulators.htm">Manipulators</see> for details.]]></Remarks>
+See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Manipulators.htm">Manipulators</see> for details.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swpublished.ISwManipulatorHandler2_members">ISwManipulatorHandler2 Members</See>
             <See cref="SolidWorks.Interop.swpublished_namespace">SolidWorks.Interop.swpublished Namespace</See>
@@ -23390,7 +23390,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
 
 3. SOLIDWORKS uses the license key to verify the entitlement of the SOLIDWORKS Partner and returns <see cref="SolidWorks.Interop.sldworks.ISwPEToken">ISwPEToken</see>.
 
- See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/ms-its:sldworksapiprogguide.chm::/GettingStarted/SolidWorks_Partner_Program_2.htm">SOLIDWORKS Partner Program</see>.]]></Remarks>
+ See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/GettingStarted/SolidWorks_Partner_Program_2.htm">SOLIDWORKS Partner Program</see>.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.ISwPEClassFactory_members">ISwPEClassFactory Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -23403,7 +23403,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
         <Description><![CDATA[Allows SOLIDWORKS Partners to create SOLIDWORKS add-ins that have been registered with the SOLIDWORKS Partner Program team.
 
 **NOTE:** Click the **Members** link, located near the top of the topic, to see this interface's methods and properties.]]></Description>
-        <Remarks><![CDATA[This interface and <see cref="SolidWorks.Interop.swpublished.ISwAddin">ISwAddin</see> are implemented in add-ins of SOLIDWORKS Partners who participate in the <see href="https://help.solidworks.com/2027/english/api/sldworksapi/ms-its:sldworksapiprogguide.chm::/GettingStarted/SolidWorks_Partner_Program_2.htm">SOLIDWORKS Partner Program</see>.]]></Remarks>
+        <Remarks><![CDATA[This interface and <see cref="SolidWorks.Interop.swpublished.ISwAddin">ISwAddin</see> are implemented in add-ins of SOLIDWORKS Partners who participate in the <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/GettingStarted/SolidWorks_Partner_Program_2.htm">SOLIDWORKS Partner Program</see>.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swpublished.ISwPEManager_members">ISwPEManager Members</See>
             <See cref="SolidWorks.Interop.swpublished_namespace">SolidWorks.Interop.swpublished Namespace</See>
@@ -23428,9 +23428,9 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
         <Description><![CDATA[Must be implemented by an add-in application to create Quick Tips for that add-in.
 
 **NOTE:** Click the **Members** link, located near the top of the topic, to see this interface's methods and properties.]]></Description>
-        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksAPIProgGuide.chm::/OVERVIEW/Quick_Tips_and_Bubble_ToolTips.htm">Quick Tips and Bubble ToolTips</see> for details.
+        <Remarks><![CDATA[See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Quick_Tips_and_Bubble_ToolTips.htm">Quick Tips and Bubble ToolTips</see> for details.
 
-To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET and C# Macros and Add-ins</see>.]]></Remarks>
+To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET and C# Macros and Add-ins</see>.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swpublished.ISwQuickTip_members">ISwQuickTip Members</See>
             <See cref="SolidWorks.Interop.swpublished_namespace">SolidWorks.Interop.swpublished Namespace</See>
@@ -23484,7 +23484,7 @@ To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see hre
                 <Url>/swpublishedapi/Automate_Add-in's_Undo_Commands_Example_VB.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET and C# Macros and Add-ins</see>.]]></Remarks>
+        <Remarks><![CDATA[To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/ComVisibleAttribute_in_VSTA_macros.htm">ComVisibleAttribute in VB.NET and C# Macros and Add-ins</see>.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swpublished.ISwUndoAPIHandler_members">ISwUndoAPIHandler Members</See>
             <See cref="SolidWorks.Interop.swpublished_namespace">SolidWorks.Interop.swpublished Namespace</See>
@@ -23534,7 +23534,7 @@ To use this interface in a SOLIDWORKS VB.NET or C# macro or add-in, see <see hre
                 <Url>/sldworksapi/Insert_Swept-cut_Thin-walled_Feature_Example_VB.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[To create a sweep feature, see <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/Sweep_Features_and_SweepFeatureData_Objects.htm">Sweep Features and SweepFeatureData Objects</see>.]]></Remarks>
+        <Remarks><![CDATA[To create a sweep feature, see <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Sweep_Features_and_SweepFeatureData_Objects.htm">Sweep Features and SweepFeatureData Objects</see>.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.ISweepFeatureData_members">ISweepFeatureData Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -23788,7 +23788,7 @@ You can also retrieve a ITableAnchor object from the <see cref="SOLIDWORKS.Inter
                 <Url>/sldworksapi/Create_Table_Pattern_Example_CSharp.htm</Url>
             </Example>
         </Examples>
-        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
+        <Remarks><![CDATA[Read <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Pattern_Features_and_their_Feature_Data_Objects.htm">Pattern Features and their Feature Data Objects</see>.
 
 Before calling IFeatureManager::CreateDefinition, you must pre-select the entities needed to create the table-driven pattern feature.
 
@@ -24154,7 +24154,7 @@ See the SOLIDWORKS Help for details about MBD.]]></Remarks>
 
 - Is functionally similar to the Thread PropertyManager in the SOLIDWORKS Design user interface.
 
-To create a Thread feature, see <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/Thread_Features_and_ThreadFeatureData_Objects.htm">Thread Features and ThreadFeatureData Objects</see>.
+To create a Thread feature, see <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Thread_Features_and_ThreadFeatureData_Objects.htm">Thread Features and ThreadFeatureData Objects</see>.
 
 For more information, see the **Thread PropertyManager** topic in the SOLIDWORKS Design user-interface help.]]></Remarks>
         <SeeAlso>
@@ -25137,7 +25137,7 @@ To delete a width mate, use <see cref="SolidWorks.Interop.sldworks.IModelDocExte
         </Examples>
         <Remarks><![CDATA[Valid types of slots are counterbore, countersink, or straight.
 
-See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/Hole_Wizard_Features_and_WizardHoleFeatureData2_Objects.htm">Hole Wizard Features and WizardHoleFeatureData2 Objects</see>.]]></Remarks>
+See <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/Hole_Wizard_Features_and_WizardHoleFeatureData2_Objects.htm">Hole Wizard Features and WizardHoleFeatureData2 Objects</see>.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.sldworks.IWizardHoleFeatureData2_members">IWizardHoleFeatureData2 Members</See>
             <See cref="SolidWorks.Interop.sldworks_namespace">SolidWorks.Interop.sldworks Namespace</See>
@@ -25267,7 +25267,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
         <Name>sw3DExperienceState_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[SOLIDWORKS Design connected to the 3DEXPERIENCE platform states. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[SOLIDWORKS Design connected to the 3DEXPERIENCE platform states. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -25294,7 +25294,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
         <Name>sw3DPMISaveOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[3D PMI (Product and Manufacturing Information) save options when comparing two different versions of the same model. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[3D PMI (Product and Manufacturing Information) save options when comparing two different versions of the same model. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -25330,7 +25330,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
         <Name>swActivateDocError_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Document activation errors. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Document activation errors. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[Bitmask]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
@@ -25345,17 +25345,17 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
             <Example>
                 <Name>Add Component and Mate</Name>
                 <Language>VBA</Language>
-                <Url>/swconst/ms-its:sldworksapi.chm::/Add_Component_and_Mate_Example_VB.htm</Url>
+                <Url>/sldworksapi/Add_Component_and_Mate_Example_VB.htm</Url>
             </Example>
             <Example>
                 <Name>Add Component and Mate</Name>
                 <Language>VB.NET</Language>
-                <Url>/swconst/ms-its:sldworksapi.chm::/Add_Component_and_Mate_Example_VBNET.htm</Url>
+                <Url>/sldworksapi/Add_Component_and_Mate_Example_VBNET.htm</Url>
             </Example>
             <Example>
                 <Name>Add Component and Mate</Name>
                 <Language>C#</Language>
-                <Url>/swconst/ms-its:sldworksapi.chm::/Add_Component_and_Mate_Example_CSharp.htm</Url>
+                <Url>/sldworksapi/Add_Component_and_Mate_Example_CSharp.htm</Url>
             </Example>
         </Examples>
         <SeeAlso>
@@ -25366,7 +25366,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
         <Name>swAddControlOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for PropertyManager page, group box, and tab controls. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for PropertyManager page, group box, and tab controls. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[Bitmask]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
@@ -25376,7 +25376,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
         <Name>swAddGroupBoxOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[PropertyManager page group box and tab controls. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[PropertyManager page group box and tab controls. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[Bitmask]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
@@ -25422,7 +25422,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
         <Name>swAddinBrokerBBoxOption_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Bounding box options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Bounding box options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[Bitmask]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
@@ -25441,7 +25441,7 @@ See <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworks
         <Name>swAdvSelectType_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Conditions of criteria for advanced component selection list. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Conditions of criteria for advanced component selection list. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -25648,7 +25648,7 @@ SINK_ENTRY_EX(ID_SLDWORKS_EVENTS, DIID_DSldWorksEvents, swAppActiveModelDocChang
 
 END_SINK_MAP()
 
-If developing a C++ application, use the enumerators to <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks">ISldWorks</see> events.]]></Remarks>
+If developing a C++ application, use the enumerators to <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks">ISldWorks</see> events.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -25832,7 +25832,7 @@ SINK_ENTRY_EX(ID_ASSEMBLYDOC_EVENTS, DIID_DAssemblyDocEvents, swAssemblyNewSelec
 
 END_SINK_MAP()
 
-If developing a C++ application, use the enumerators to <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.IAssemblyDoc">IAssemblyDoc</see> events (see the **Members** list in this topic).]]></Remarks>
+If developing a C++ application, use the enumerators to <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.IAssemblyDoc">IAssemblyDoc</see> events (see the **Members** list in this topic).]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -25877,7 +25877,7 @@ If developing a C++ application, use the enumerators to <see href="https://help.
         <Name>swAutoInsertCenterMarkTypes_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Types for which to insert center marks. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Types for which to insert center marks. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -25923,7 +25923,7 @@ If developing a C++ application, use the enumerators to <see href="https://help.
         <Name>swAutodimMark_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Selection mark values. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Selection mark values. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[These values are passed by <see cref="Solidworks.Interop.sldworks.IModelDocExtension.SelectByID2">IModelDocExtension::SelectByID2</see>.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
@@ -26015,7 +26015,7 @@ If developing a C++ application, use the enumerators to <see href="https://help.
         <Name>swBOMPartNumberSource_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Sources from numbers in BOM tables. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Sources from numbers in BOM tables. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -26051,7 +26051,7 @@ If developing a C++ application, use the enumerators to <see href="https://help.
         <Name>swBalloonItemNumbersOrder_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Balloon item ordering options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Balloon item ordering options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -26332,7 +26332,7 @@ For example, when you set IBomTableSortData::ItemGroups to the following array, 
         <Name>swBoundaryBossCurveInfluenceType_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Boundary feature curve influence types. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Boundary feature curve influence types. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -26359,7 +26359,7 @@ For example, when you set IBomTableSortData::ItemGroups to the following array, 
         <Name>swBoundingBoxOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Bounding box options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Bounding box options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -26422,7 +26422,7 @@ For example, when you set IBomTableSortData::ItemGroups to the following array, 
         <Name>swCADFamilyCfgOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[SOLIDWORKS Design connected to the 3DEXPERIENCE platform family configuration options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[SOLIDWORKS Design connected to the 3DEXPERIENCE platform family configuration options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -26512,7 +26512,7 @@ For example, when you set IBomTableSortData::ItemGroups to the following array, 
         <Name>swCenterMarkConnectionLine_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Visibility options for connection lines of center marks. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Visibility options for connection lines of center marks. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -26585,7 +26585,7 @@ For example, when you set IBomTableSortData::ItemGroups to the following array, 
         <Name>swCheckInterferenceOption_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Check interference options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Check interference options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -26603,7 +26603,7 @@ For example, when you set IBomTableSortData::ItemGroups to the following array, 
         <Name>swCheckSpellingOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Spell check options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Spell check options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -26648,7 +26648,7 @@ For example, when you set IBomTableSortData::ItemGroups to the following array, 
         <Name>swCloseReopenOption_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[File close and reopen options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[File close and reopen options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -26760,7 +26760,7 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Name>swCommandItemType_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Types of command items. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Types of command items. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -26769,7 +26769,7 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Name>swCommandTabButtonFlyoutStyle_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[CommandManager tab button flyout styles. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[CommandManager tab button flyout styles. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -26778,7 +26778,7 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Name>swCommandTabButtonTextDisplay_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[CommandManager tab button text display. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[CommandManager tab button text display. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -26814,7 +26814,7 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Name>swComponentIdentifier_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Component display options for the FeatureManager design tree. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Component display options for the FeatureManager design tree. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -26922,7 +26922,7 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Name>swConfigurationOptions2_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Option bits used when setting configuration options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Option bits used when setting configuration options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -26931,7 +26931,7 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Name>swConfigurationOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Option bits used when setting configuration options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Option bits used when setting configuration options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -27220,7 +27220,7 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Name>swCreateFeatureBodyOpts_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for creating bodies. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for creating bodies. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -27256,7 +27256,7 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Name>swCreateSectionViewAtOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options that affect the section view that is created. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options that affect the section view that is created. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -27274,7 +27274,7 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Name>swCreateWireBodyOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for creating wire bodies. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for creating wire bodies. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -27481,7 +27481,7 @@ Use the system-level string <see cref="SolidWorks.Interop.swconst.swUserPreferen
         <Name>swDeleteSelectionOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for deleting features. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for deleting features. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -28269,7 +28269,7 @@ swDimXpertMCM_RFS]]></Remarks>
         <Name>swDocTemplateTypes_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Document template types. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Document template types. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[These values can be OR'd together to indicate on which toolbar the document types should reside.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
@@ -28307,7 +28307,7 @@ swDimXpertMCM_RFS]]></Remarks>
         <Name>swDraftAnalysisOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Draft analysis options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Draft analysis options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -28316,7 +28316,7 @@ swDimXpertMCM_RFS]]></Remarks>
         <Name>swDraftAnalysisShow_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Show draft analsyis options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Show draft analsyis options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -28392,7 +28392,7 @@ SINK_ENTRY_EX(ID_DRAWINGDOC_EVENTS, DIID_DDrawingDocEvents, swDrawingNewSelectio
 
 END_SINK_MAP()
 
-If developing a C++ application, use the enumerators to <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/events.htm">register for notifications</see> for <see cref="SOLIDWORKS.Interop.sldworks.IDrawingDoc">IDrawingDoc</see> events.]]></Remarks>
+If developing a C++ application, use the enumerators to <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/events.htm">register for notifications</see> for <see cref="SOLIDWORKS.Interop.sldworks.IDrawingDoc">IDrawingDoc</see> events.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -28779,7 +28779,7 @@ SINK_ENTRY_EX(ID_FEATMGRVIEW_EVENTS, DIID_DFeatMgrViewEvents, swFMViewDeactivate
 
 END_SINK_MAP()
 
-If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/events.htm">register for notifications</see> for <see cref="SOLIDWORKS.Interop.sldworks.IFeatMgrView">IFeatMgrView</see> events.]]></Remarks>
+If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/events.htm">register for notifications</see> for <see cref="SOLIDWORKS.Interop.sldworks.IFeatMgrView">IFeatMgrView</see> events.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -28860,7 +28860,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swFeatureChamferOption_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Chamfer feature options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Chamfer feature options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -28878,7 +28878,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swFeatureEditStatus_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Editing status of feature. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Editing status of feature. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[Although swFeatureEditStatus_e is a bitmask, you currently cannot combine its mutually exclusive enumerators.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
@@ -28897,7 +28897,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swFeatureFillSurfaceOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Feature fill surface options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Feature fill surface options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[Some options might not work because the topology of the surface fill to be created might not permit them. In these cases, the options are ignored.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
@@ -28907,7 +28907,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swFeatureFilletOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Fillet/chamfer options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Fillet/chamfer options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -29033,7 +29033,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swFileLoadError_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[File load errors. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[File load errors. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -29042,7 +29042,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swFileLoadWarning_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[File load warnings for <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.OpenDoc6">ISldWorks::OpenDoc6</see>. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[File load warnings for <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.OpenDoc6">ISldWorks::OpenDoc6</see>. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -29051,7 +29051,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swFileSaveError_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[File save errors. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[File save errors. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[Not all of these return codes are fatal errors. The return code is a bitmask of different conditions that can occur during the operation, some of which are fatal and some are informational or warnings.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
@@ -29079,7 +29079,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swFileSaveWarning_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Values for **File, Save** warnings that can be returned from the <see cref="SOLIDWORKS.Interop.sldworks.IModelDoc2">IModelDoc2</see> Save methods. These warnings do not cause the **File, Save** operation to fail. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Values for **File, Save** warnings that can be returned from the <see cref="SOLIDWORKS.Interop.sldworks.IModelDoc2">IModelDoc2</see> Save methods. These warnings do not cause the **File, Save** operation to fail. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -29223,7 +29223,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swGetOpenFileNameOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for opening a file returned by <see cref="SolidWorks.Interop.sldworks.ISldWorks.GetOpenFileName2">ISldWorks::GetOpenFileName2</see>. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for opening a file returned by <see cref="SolidWorks.Interop.sldworks.ISldWorks.GetOpenFileName2">ISldWorks::GetOpenFileName2</see>. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -29664,7 +29664,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swImprintingFacesOpts_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Imprinting faces options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Imprinting faces options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -29700,7 +29700,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swInsertAnnotation_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Annotation types. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Annotation types. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -29709,7 +29709,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swInsertAssyOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Insert assembly into part options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Insert assembly into part options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -29718,7 +29718,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swInsertEdgeFlangeOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Sheet metal edge flange options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Sheet metal edge flange options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -29754,7 +29754,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swInsertPartOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Part insertion options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Part insertion options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -29763,7 +29763,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swInsertSlicingError_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Error codes for slicing insertion. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Error codes for slicing insertion. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -29899,7 +29899,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swLayerOverride_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Layer override types. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Layer override types. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -30144,7 +30144,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swMacroFeatureOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Placement of the macro feature in the FeatureManager design tree options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Placement of the macro feature in the FeatureManager design tree options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -30162,7 +30162,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swMacroFeatureSecurityOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Macro feature security options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Macro feature security options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -30189,7 +30189,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swManipulatorOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Manipulator options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Manipulator options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -30435,7 +30435,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swMirrorPartOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for creating a mirror part. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for creating a mirror part. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -30471,7 +30471,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swModelRebuildStatus_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Rebuild status of model. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Rebuild status of model. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -30563,7 +30563,7 @@ particular object.]]></Description>
         <Name>swMotionStudyType_e</Name>
         <Assembly>SolidWorks.Interop.swmotionstudy</Assembly>
         <Namespace>SolidWorks.Interop.swmotionstudy</Namespace>
-        <Description><![CDATA[Motion study types. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Motion study types. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swmotionstudy_namespace">SolidWorks.Interop.swmotionstudy Namespace</See>
         </SeeAlso>
@@ -30598,7 +30598,7 @@ SINK_ENTRY_EX(ID_MOUSE_EVENTS, DIID_DMouseEvents, swMouseLBtnDownNotify, MouseLB
 
 END_SINK_MAP()
 
-If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.IMouse">IMouse</see> events.]]></Remarks>
+If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.IMouse">IMouse</see> events.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -30634,7 +30634,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swMoveCopyOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Move/copy options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Move/copy options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -30697,7 +30697,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swNameType_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Names of types of entities. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Names of types of entities. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -30823,7 +30823,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swOpenDocOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[How to open documents using <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.OpenDoc6">ISldWorks::OpenDoc6</see>. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[How to open documents using <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.OpenDoc6">ISldWorks::OpenDoc6</see>. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31133,7 +31133,7 @@ SINK_ENTRY_EX(ID_PARTDOC_EVENTS, DIID_DPartDocEvents, swPartNewSelectionNotify, 
 
 END_SINK_MAP()
 
-If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/events.htm">register for notifications</see> for <see cref="SOLIDWORKS.Interop.sldworks.IPartDoc">IPartDoc</see> events.]]></Remarks>
+If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/events.htm">register for notifications</see> for <see cref="SOLIDWORKS.Interop.sldworks.IPartDoc">IPartDoc</see> events.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31241,7 +31241,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swPersistReferencedObjectStates_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Object codes for objects' persistent reference IDs. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Object codes for objects' persistent reference IDs. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31259,7 +31259,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swPointInferenceBrokerOption_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Inference points options from add-ins. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Inference points options from add-ins. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31277,7 +31277,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swPresentationOpts_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[SOLIDWORKS Presentation options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[SOLIDWORKS Presentation options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31358,7 +31358,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swPropMgrPageControlOnResizeOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[PropertyManager page control resize options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[PropertyManager page control resize options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31367,7 +31367,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swPropMgrPageLabelStyle_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[ProperyManager page control label styles. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[ProperyManager page control label styles. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31385,7 +31385,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swPropMgrPageListBoxStyle_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[PropertyManager page list box styles. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[PropertyManager page list box styles. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31394,7 +31394,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swPropMgrPageNumberBoxStyle_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[PropertyManager page number box styles. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[PropertyManager page number box styles. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[When the user selects an item in the attached drop-down list, SOLIDWORKS attempts to use that item as a value in the number box. Thus, the items in the attached drop-down list should be numeric values and optionally include their units. The add-in then gets a callback via IPropertyManagerPage2Handler9::OnNumberboxChanged as if the user had typed a value in the number box or clicked the up-arrow or down-arrow buttons to increment or decrement the value.
 
 If you do not want your add-in to directly use items in the attached drop-down list in the number box, but instead want it to react to the user selecting a computed or linked value in the number box, then use swPropMgrPageNumberBoxStyle_AvoidSelectionText.]]></Remarks>
@@ -31406,7 +31406,7 @@ If you do not want your add-in to directly use items in the attached drop-down l
         <Name>swPropMgrPageOptionStyle_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[PropertyManage page group option styles. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[PropertyManage page group option styles. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31415,7 +31415,7 @@ If you do not want your add-in to directly use items in the attached drop-down l
         <Name>swPropMgrPageSelectionBoxStyle_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[PropertyManager page selection box styles. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[PropertyManager page selection box styles. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31424,7 +31424,7 @@ If you do not want your add-in to directly use items in the attached drop-down l
         <Name>swPropMgrPageSliderStyle_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[PropertyManager page slider styles. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[PropertyManager page slider styles. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31433,7 +31433,7 @@ If you do not want your add-in to directly use items in the attached drop-down l
         <Name>swPropMgrPageTextBoxStyle_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[PropertyManager page textbox styles. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[PropertyManager page textbox styles. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31454,7 +31454,7 @@ An example of a property sheet is the dialog that is displayed when you click **
         <Name>swPropertyManagerButtonTypes_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[PropertyManager button types. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[PropertyManager button types. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31555,7 +31555,7 @@ An example of a property sheet is the dialog that is displayed when you click **
         <Name>swPropertyManagerPageOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for PropertyManager pages. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for PropertyManager pages. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31564,7 +31564,7 @@ An example of a property sheet is the dialog that is displayed when you click **
         <Name>swPropertyManagerPageShowOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for showing PropertyManager pages. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for showing PropertyManager pages. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31604,7 +31604,7 @@ SINK_ENTRY_EX(ID_SWPROPERTYSHEET_EVENTS, DIID_DSwPropertySheetEvents, swProperty
 
 END_SINK_MAP()
 
-If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/events.htm">register for notifications</see> for <see cref="SOLIDWORKS.Interop.sldworks.ISWPropertySheet">ISWPropertySheet</see> events.]]></Remarks>
+If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/events.htm">register for notifications</see> for <see cref="SOLIDWORKS.Interop.sldworks.ISWPropertySheet">ISWPropertySheet</see> events.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31667,7 +31667,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swRayPtsOpts_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Ray points options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Ray points options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31676,7 +31676,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swRayPtsResults_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Types of intersections and whether the rays are entering or exiting the body when they hit. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Types of intersections and whether the rays are entering or exiting the body when they hit. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31730,7 +31730,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swRebuildOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Rebuild options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Rebuild options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31757,7 +31757,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swRefPlaneReferenceConstraints_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Reference plane constraints. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Reference plane constraints. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -31946,7 +31946,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swRepairSketchOption_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for repairing sketches. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for repairing sketches. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -32018,7 +32018,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swRevolveOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Revolve feature options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Revolve feature options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -32080,7 +32080,7 @@ Edit revolve
         <Name>swRoutingComponentGroupingOption_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Routing components grouping options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Routing components grouping options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -32271,7 +32271,7 @@ Edit revolve
         <Name>swSaveAsOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Save As options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Save As options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <Remarks><![CDATA[These options only apply to saving to native SOLIDWORKS file formats. For example, to export a SOLIDWORKS file to a VRML file format, use <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.GetUserPreferenceToggle">ISldWorks::GetUserPreferenceToggle</see> and <see cref="SOLIDWORKS.Interop.sldworks.ISldWorks.SetUserPreferenceToggle">ISldWorks::SetUserPreferenceToggle</see> with swExportVrmlAllComponentsInSingleFile.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
@@ -32335,7 +32335,7 @@ Edit revolve
         <Name>swSaveWithReferencesOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for saving references while getting the <see cref="SolidWorks.Interop.sldworks.IAdvancedSaveAsOptions">IAdvancedSaveAsOptions</see> object; used by the Options parameter of <see cref="SolidWorks.Interop.sldworks.IModelDocExtension.GetAdvancedSaveAsOptions">IModelDocExtension::GetAdvancedSaveAsOptions</see>. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Options for saving references while getting the <see cref="SolidWorks.Interop.sldworks.IAdvancedSaveAsOptions">IAdvancedSaveAsOptions</see> object; used by the Options parameter of <see cref="SolidWorks.Interop.sldworks.IModelDocExtension.GetAdvancedSaveAsOptions">IModelDocExtension::GetAdvancedSaveAsOptions</see>. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -32434,7 +32434,7 @@ Edit revolve
         <Name>swSelectOption_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Selection options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Selection options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -33323,7 +33323,7 @@ IDs returned for members in this enumeration:
         <Name>swSetComponentIdentifierResult_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Set component identifier status. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Set component identifier status. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -33710,7 +33710,7 @@ IDs returned for members in this enumeration:
         <Name>swSketchFullyDefineRelationType_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Fully defined sketch relations. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Fully defined sketch relations. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -33801,7 +33801,7 @@ IDs returned for members in this enumeration:
         <Name>swSlicingTypes_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Types of slicing. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Types of slicing. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -34257,7 +34257,7 @@ See <see cref="SolidWorks.Interop.sldworks.IModelDocExtension.AddDimension">IMod
         <Name>swSweptFlangeError_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Swept flange creation errors. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Swept flange creation errors. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -34508,7 +34508,7 @@ SINK_ENTRY_EX(ID_TASKPANE_EVENTS, DIID_DTaskpaneViewEvents, swAppTaskPaneDeactiv
 
 END_SINK_MAP()
 
-If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.ITaskpaneView">ITaskpaneView</see> events.]]></Remarks>
+If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.ITaskpaneView">ITaskpaneView</see> events.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -34706,7 +34706,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swToolBoxPartType_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Toolbox part types. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Toolbox part types. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -34796,7 +34796,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swTranslationNotifyOptions_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Translation notification options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Translation notification options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -34832,7 +34832,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swTriadManipulatorDoNotShow_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Triad manipulator visibility options. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
+        <Description><![CDATA[Triad manipulator visibility options. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>.]]></Description>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -35210,7 +35210,7 @@ SINK_ENTRY_EX(ID_MODELVIEW_EVENTS, DIID_DModelViewEvents, swViewRepaintNotify, R
 
 END_SINK_MAP()
 
-If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.IModelView">IModelView</see> events.]]></Remarks>
+If developing a C++ application, use these enumerators to <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/events.htm">register for notifications</see> for the <see cref="SOLIDWORKS.Interop.sldworks.IModelView">IModelView</see> events.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
         </SeeAlso>
@@ -35309,17 +35309,17 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swWeldmentTrimExtendOptionType_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Options for weldment trim extensions. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>]]></Description>
+        <Description><![CDATA[Options for weldment trim extensions. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>]]></Description>
         <Examples>
             <Example>
                 <Name>Insert Weldment Features Example</Name>
                 <Language>VBA</Language>
-                <Url>/swconst/ms-its:sldworksapi.chm::/Insert_Weldment_Features_Example_VB.htm</Url>
+                <Url>/sldworksapi/Insert_Weldment_Features_Example_VB.htm</Url>
             </Example>
             <Example>
                 <Name>Insert Weldment Features Example</Name>
                 <Language>VB.NET</Language>
-                <Url>/swconst/ms-its:sldworksapi.chm::/Insert_Weldment_Features_Example_VBNET.htm</Url>
+                <Url>/sldworksapi/Insert_Weldment_Features_Example_VBNET.htm</Url>
             </Example>
         </Examples>
         <SeeAlso>
@@ -35457,7 +35457,7 @@ If developing a C++ application, use these enumerators to <see href="https://hel
         <Name>swZonalSectionViewZones_e</Name>
         <Assembly>SolidWorks.Interop.swconst</Assembly>
         <Namespace>SolidWorks.Interop.swconst</Namespace>
-        <Description><![CDATA[Intersection zones for section views. <see href="https://help.solidworks.com/2027/english/api/sldworksapi/sldworksapiprogguide.chm::/Overview/bitmasks.htm">Bitmask</see>]]></Description>
+        <Description><![CDATA[Intersection zones for section views. <see href="https://help.solidworks.com/2027/english/api/sldworksapiprogguide/Overview/bitmasks.htm">Bitmask</see>]]></Description>
         <Remarks><![CDATA[Descriptions of the intersection zones in relation to the number of sectioning planes appear in <see cref="SolidWorks.Interop.sldworks.ISectionViewData.SectionedZones">ISectionViewData::SectionedZones</see>.]]></Remarks>
         <SeeAlso>
             <See cref="SolidWorks.Interop.swconst_namespace">SolidWorks.Interop.swconst Namespace</See>
