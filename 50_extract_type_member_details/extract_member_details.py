@@ -18,6 +18,7 @@ from typing import Any
 # Add parent directory to path for shared module imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from shared.chm_aliases import chm_alias_page
 from shared.extraction_utils import (
     add_see_also_element,
     extract_member_name_from_filename,
@@ -463,8 +464,10 @@ class MemberDetailsExtractor(HTMLParser):
             name = link_text.strip()
             language = self._infer_language_from_filename(href)
 
-        # Prepend URL prefix
-        full_url = f"{self.url_prefix}{href}"
+        # Prepend URL prefix, the linking page's folder. A CHM alias names a page in
+        # another folder; record it under the API root like every other example URL.
+        alias_page = chm_alias_page(href)
+        full_url = f"/{alias_page}" if alias_page else f"{self.url_prefix}{href}"
 
         return {"Name": name, "Language": language, "Url": full_url}
 

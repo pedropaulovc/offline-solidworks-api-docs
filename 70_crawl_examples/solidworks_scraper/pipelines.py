@@ -20,7 +20,7 @@ from scrapy.exceptions import DropItem
 # Add project root to path for shared imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL, SOLIDWORKS_API_PATH_PREFIX, SOLIDWORKS_API_VERSION
-from shared.help_page_spider import HelpPageSpider
+from shared.help_page_spider import HelpPageSpider, sort_url_log
 
 # Doc year the local (gitignored) output/html corpus was crawled for. Saved pages
 # carry no year, so consumers that need a current-version corpus check this file.
@@ -221,6 +221,10 @@ class MetadataLogPipeline:
             spider.logger.error(f"Failed to log metadata: {e}")
 
         return item
+
+    def close_spider(self, spider: Spider) -> None:
+        """Sort the URL log, which was appended in download-completion order."""
+        sort_url_log(self.urls_file)
 
     def log_error(self, error_item: dict[str, Any]) -> None:
         """Log error information"""

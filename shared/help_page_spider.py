@@ -25,8 +25,10 @@ import bisect
 import json
 from collections.abc import Generator, Iterable
 from enum import Enum
+from pathlib import Path
 from typing import Any, Self
 
+import jsonlines
 import scrapy
 from scrapy import signals
 from scrapy.crawler import Crawler
@@ -85,8 +87,8 @@ class DeadLinkPolicy(Enum):
 
     # The docs' own TOC or member lists name the page: not finding it loses a page.
     FAIL = "fail"
-    # Cross-reference links, dozens of which point at pages the server never had
-    # (stale ms-its:*.chm:: links, help_list.htm, stubs like DP_ImageQuality.htm): a page
+    # Cross-reference links, a few of which point at pages the server does not have
+    # (help_list.htm, stubs like DP_ImageQuality.htm, pages dropped from the help): a page
     # still not found when refetched a minute later is skipped as a dead link.
     SKIP_CONFIRMED = "skip_confirmed"
 
@@ -343,3 +345,21 @@ def crawl_exit_code(crawler: Crawler, mode: CrawlMode = CrawlMode.FULL) -> int:
         print(f"\n[ERROR] Crawl lost pages ({spider.failure_summary()}); see metadata/errors.jsonl and the crawl log.")
         return 1
     return 0
+
+
+def sort_url_log(urls_file: Path) -> None:
+    """Rewrite a crawl's ``urls_crawled.jsonl`` with its records sorted by URL.
+
+    MetadataLogPipeline appends a record as each concurrent download finishes, so the
+    line order differs on every crawl. Called when the spider closes, so the committed
+    log changes only where a page did (a new hash, a lost or added URL), not wholesale.
+    """
+    if not urls_file.exists():
+        return
+    with jsonlines.open(urls_file) as reader:
+        records = list(reader)
+    records.sort(key=lambda record: record.get("url") or "")
+    staged = urls_file.with_suffix(".jsonl.sorting")
+    with jsonlines.open(staged, mode="w") as writer:  # the format the pipeline appends in
+        writer.write_all(records)
+    staged.replace(urls_file)

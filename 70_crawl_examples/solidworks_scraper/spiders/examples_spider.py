@@ -32,8 +32,8 @@ class ExamplesSpider(HelpPageSpider):
     name = "examples"
     allowed_domains = ["help.solidworks.com"]
 
-    # Example URLs come from cross-reference links, a few of which are dead
-    # (e.g. ms-its:sldworksapi.chm::/... links the server cannot find).
+    # Example URLs come from cross-reference links, which can name pages the
+    # server no longer has.
     dead_link_policy = DeadLinkPolicy.SKIP_CONFIRMED
 
     # Custom settings for this spider

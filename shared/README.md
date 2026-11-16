@@ -20,7 +20,8 @@ Utilities for converting HTML anchor tags to XMLDoc format for IntelliSense docu
   - Returns `None` for non-type references (guide pages)
 
 - `convert_to_full_url(href: str) -> str`
-  Converts relative URLs to full SolidWorks API documentation URLs
+  Converts relative URLs to full SolidWorks API documentation URLs, resolving CHM
+  aliases first (see `chm_aliases.py`)
 
 **Usage:**
 
@@ -37,6 +38,26 @@ result = convert_links_to_see_refs(html)
 ```bash
 uv run pytest shared/tests/ -v
 ```
+
+### `chm_aliases.py`
+
+`resolve_chm_alias(link)` rewrites a compiled-help alias link to the absolute URL of the
+web page it names; `chm_alias_page(link)` returns that page as a path under the API root.
+Many cross-file links still carry the CHM form, `ms-its:swconst.chm::/DP_Dimensions.htm`
+or `sldworksAPIProgGuide.chm::/OVERVIEW/Type_Libraries.htm`; the web help serves each
+CHM's pages from the folder under `/api` named after it, lowercased (`swconst/`,
+`sldworksapiprogguide/`). Joined onto the linking page's folder as written, the alias is
+a URL the server answers with its not-found page. An alias names the same page wherever
+it is written, so whatever precedes the CHM name (the linking folder, `../`, `ms-its:`,
+`mk:@MSITStore:`) is dropped and the page is placed under the API root; the result does
+not depend on how deep the linking page sits. The path inside the CHM keeps its case: the
+server matches paths case-insensitively, as do Phase 115's and Phase 120's in-bundle
+lookups.
+
+Used where links leave the help HTML: `convert_to_full_url` (`<see href>` in phases
+40/50/60), the example URLs phases 40/50 record (as API-root paths, `/sldworksapi/X.htm`),
+Phase 70's legacy example harvester, Phase 115's link targets and Phase 120's guide-link
+rewrite.
 
 ### `help_page_spider.py`
 
@@ -76,6 +97,10 @@ listed, sorted, under `dead_links` in the phase's `crawl_stats.json` and counted
 exit summary, so a page that newly turns up there shows in the committed metadata's
 diff. Everywhere else, and for any other error page, a not-found page is a failure like
 any page without help text.
+
+Each crawl phase's `MetadataLogPipeline` appends to `urls_crawled.jsonl` as downloads
+finish, so it calls `sort_url_log` when the spider closes: the committed log is ordered
+by URL, and a recrawl's diff shows only pages that changed.
 
 ## Design Principles
 

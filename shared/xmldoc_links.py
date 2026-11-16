@@ -9,6 +9,7 @@ and <see href> tags for IntelliSense documentation.
 import re
 from html.parser import HTMLParser
 
+from shared.chm_aliases import resolve_chm_alias
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
 
 
@@ -339,9 +340,13 @@ def convert_to_full_url(href: str) -> str:
     Examples:
     - "../sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm"
       -> "https://help.solidworks.com/2027/english/api/sldworksapiprogguide//Overview/SOLIDWORKS_Connected.htm"
+    - "sldworksAPIProgGuide.chm::/OVERVIEW/Type_Libraries.htm" (a CHM alias)
+      -> "https://help.solidworks.com/2027/english/api/sldworksapiprogguide/OVERVIEW/Type_Libraries.htm"
     - "https://example.com/page.htm" (already full)
       -> "https://example.com/page.htm"
     """
+    href = resolve_chm_alias(href)
+
     # If already a full URL, return as-is
     if href.startswith("http://") or href.startswith("https://"):
         return href

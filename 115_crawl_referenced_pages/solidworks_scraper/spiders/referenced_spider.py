@@ -115,7 +115,7 @@ class ReferencedSpider(HelpPageSpider):
     allowed_domains = ["help.solidworks.com"]
 
     # Seeds and followed links include dead links the server cannot find
-    # (help_list.htm, stale ms-its:*.chm:: links, stubs like DP_ImageQuality.htm).
+    # (help_list.htm, stubs like DP_ImageQuality.htm, pages dropped from the help).
     dead_link_policy = DeadLinkPolicy.SKIP_CONFIRMED
 
     custom_settings = {

@@ -10,7 +10,6 @@ inherently collision-free and greppable.
 
 import json
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -87,14 +86,17 @@ def main() -> int:
                 print(f"  [FAIL] {url} - {e}")
                 failed += 1
 
+    # urls_crawled.jsonl is sorted by URL, but sort here too so the committed manifest
+    # never depends on its input's order.
+    created.sort(key=lambda record: record["original_url"])
     with jsonlines.open(files_created_path, mode="w") as writer:
         writer.write_all(created)
 
+    # No timestamp: this file is committed, and a run time would change it on every run.
     summary = {
         "phase": "115_crawl_referenced_pages",
         "converted_files": converted,
         "failed_files": failed,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
     with open(PHASE_DIR / "metadata" / "extraction_summary.json", "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)

@@ -27,21 +27,29 @@ crawl set.
 import argparse
 import importlib.util
 import json
+import posixpath
+import re
 import sys
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import ParseResult, urlparse
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
-from shared.constants import SOLIDWORKS_API_VERSION  # noqa: E402
+from shared.chm_aliases import chm_alias_page  # noqa: E402
+from shared.constants import SOLIDWORKS_API_BOUNDARY, SOLIDWORKS_API_VERSION, SOLIDWORKS_DOMAIN  # noqa: E402
 
 USER_AGENT = "Mozilla/5.0 (compatible; offline-solidworks-api-docs/1.0)"
 DEFAULT_VERSION = SOLIDWORKS_API_VERSION
 DEFAULT_LEGACY_VERSIONS = ["2017"]
+# A page below ``/<year>/<language>/api/``; group 1 is its path under /api.
+_API_TREE_PAGE = re.compile(r"^/\d{4}/[^/]+/api/(.+\.html?)$", re.IGNORECASE)
+_API_TREE_PREFIX = re.compile(r"^/\d{4}/[^/]+/api/", re.IGNORECASE)
+# Protocols compiled-help links are written with (ms-its:, its:, mk:@MSITStore:).
+_CHM_PROTOCOLS = ("ms-its", "its", "mk")
 
 
 def _load_type_info_extractor():
@@ -100,15 +108,30 @@ def extract_help_text(page_html: str) -> str | None:
     )
 
 
+class _ExampleHrefCollector(TypeInfoExtractor):
+    """TypeInfoExtractor that also keeps each example link's href as written.
+
+    The ``Url`` it records drops that: a CHM alias becomes an API-root path, which
+    could not then be told apart from a host-root href.
+    """
+
+    def __init__(self) -> None:
+        super().__init__(url_prefix="")
+        self.hrefs: list[str] = []
+
+    def _parse_example_link(self, link_text: str, href: str) -> dict | None:
+        self.hrefs.append(href)
+        return super()._parse_example_link(link_text, href)
+
+
 def extract_example_hrefs(help_text: str) -> list[str]:
-    """Extract example-section link filenames from a type page's helpText."""
-    parser = TypeInfoExtractor(url_prefix="")
+    """Extract example-section link hrefs, as written, from a type page's helpText."""
+    parser = _ExampleHrefCollector()
     try:
         parser.feed(help_text)
     except Exception:
         return []
-    # Examples carry Url == href (url_prefix is empty); keep just the filename.
-    return [ex["Url"].split("/")[-1] for ex in parser.examples if ex.get("Url")]
+    return parser.hrefs
 
 
 def iter_type_page_urls(toc_jsonl: Path) -> list[str]:
@@ -151,8 +174,52 @@ def subdir_of(url: str) -> str:
     return urlparse(url).path.split("/")[-2]
 
 
-def normalize_example_url(filename: str, subdir: str, version: str) -> str:
-    return f"https://help.solidworks.com/{version}/english/api/{subdir}/{filename}"
+def _is_help_chm_alias(parsed: ParseResult) -> bool:
+    """Whether a link holding a CHM alias has a form the help writes: bare
+    (``swconst.chm::/X.htm``, ``../sldworksapi/x.chm::/X.htm``), under a CHM protocol
+    (``ms-its:``, ``mk:@MSITStore:``), or an absolute help URL inside the API tree."""
+    if parsed.netloc:
+        return bool(_API_TREE_PREFIX.match(parsed.path))
+    scheme = parsed.scheme.lower()
+    # A bare alias parses with the CHM file name as its scheme.
+    return scheme in ("", *_CHM_PROTOCOLS) or scheme.endswith(".chm")
+
+
+def _api_tree_path(href: str, subdir: str) -> str | None:
+    """The page below ``/api`` that an example link on a type page in ``subdir`` names,
+    or None when it points anywhere else (another host or tree, a folder, an anchor)."""
+    parsed = urlparse(href)
+    if parsed.netloc and parsed.netloc.lower() != SOLIDWORKS_DOMAIN:
+        return None
+    alias_page = chm_alias_page(href)
+    if alias_page and not _is_help_chm_alias(parsed):
+        return None
+    if alias_page:
+        parsed = urlparse(f"{SOLIDWORKS_API_BOUNDARY}{alias_page}")
+    if parsed.scheme not in ("", "http", "https"):  # mailto:, javascript:, ...
+        return None
+    # Resolve the link the way a browser on the type page would, dot segments
+    # included, then check where it landed.
+    page_folder = f"{SOLIDWORKS_API_BOUNDARY}{subdir}/"
+    in_api_tree = _API_TREE_PAGE.match(posixpath.normpath(posixpath.join(page_folder, parsed.path)))
+    return in_api_tree.group(1) if in_api_tree else None
+
+
+def normalize_example_url(href: str, subdir: str, version: str) -> str | None:
+    """Canonical current-version URL of an example link found on a type page in ``subdir``,
+    or None for a link outside the help's API tree.
+
+    ``href`` is as written on the page (see :func:`extract_example_hrefs`). CHM aliases
+    resolve to the page they name. Absolute help URLs may use any scheme, year or
+    casing (``http://.../2017/English/api/SldWorksAPI/X.htm``); the result uses the
+    canonical prefix and lowercase folders, as Phases 40/50 record them. The file
+    name keeps its case; :func:`main` compares case-insensitively.
+    """
+    api_path = _api_tree_path(href, subdir)
+    if api_path is None:
+        return None
+    folders, _, filename = api_path.rpartition("/")
+    return f"https://help.solidworks.com/{version}/english/api/{posixpath.join(folders.lower(), filename)}"
 
 
 def load_known_example_urls(version: str) -> set[str]:
@@ -191,9 +258,25 @@ def harvest_from_type_page(
         help_text = extract_help_text(page)
         if not help_text:
             continue
-        for filename in extract_example_hrefs(help_text):
-            found.add(normalize_example_url(filename, subdir, version))
+        for url in extract_example_hrefs(help_text):
+            candidate = normalize_example_url(url, subdir, version)
+            if candidate:
+                found.add(candidate)
     return found
+
+
+def unknown_candidates(candidates: set[str], known: set[str]) -> list[str]:
+    """Candidates that are not already known, compared and deduplicated case-insensitively.
+
+    The server matches paths case-insensitively, so a differently cased link to a known
+    example (or to another candidate) is the same page and would be crawled twice.
+    """
+    known_keys = {url.lower() for url in known}
+    unknown: dict[str, str] = {}
+    for candidate in sorted(candidates):
+        if candidate.lower() not in known_keys:
+            unknown.setdefault(candidate.lower(), candidate)
+    return sorted(unknown.values())
 
 
 def main() -> int:
@@ -247,7 +330,7 @@ def main() -> int:
             if i % 200 == 0:
                 print(f"  ...scanned {i}/{len(type_urls)} type pages, {len(candidates)} candidates so far")
 
-    new_candidates = sorted(candidates - known)
+    new_candidates = unknown_candidates(candidates, known)
     print(f"  Harvested {len(candidates)} example URLs ({len(new_candidates)} not already known)")
 
     # 2) Keep only candidates that still resolve in the current version.

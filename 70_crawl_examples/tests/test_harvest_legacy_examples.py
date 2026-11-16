@@ -11,6 +11,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
@@ -83,6 +85,88 @@ def test_normalize_example_url():
     )
 
 
+@pytest.mark.parametrize(
+    ("href", "url"),
+    [
+        # Scheme, year and language casing are canonicalized ...
+        ("http://help.solidworks.com/2017/English/api/sldworksapi/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
+        # ... and so is the folder's casing, as Phases 40/50 record it.
+        ("/2017/English/api/SldWorksAPI/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
+        # A relative link to another folder keeps that folder.
+        ("../sldworksapi/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
+        ("X_Example_VB.htm", "swconst/X_Example_VB.htm"),
+        # A CHM alias names a page in the CHM's folder, in every form the help writes.
+        ("ms-its:sldworksapi.chm::/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
+        ("mk:@MSITStore:sldworksapi.chm::/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
+        ("sldworksapi.chm::/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
+        ("../sldworksapi/SldWorksAPI.chm::/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
+        ("https://help.solidworks.com/2017/english/api/swconst/sldworksapi.chm::/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
+        # Dot segments are resolved before the result is checked.
+        ("/2017/english/api/sldworksapi/../swconst/X_Example_VB.htm", "swconst/X_Example_VB.htm"),
+        ("./X_Example_VB.htm", "swconst/X_Example_VB.htm"),
+    ],
+)
+def test_example_links_are_canonicalized(href, url):
+    """The result has to match the URLs phases 40/50 found, or the same example is crawled twice."""
+    assert h.normalize_example_url(href, "swconst", SOLIDWORKS_API_VERSION) == f"{API}/{url}"
+
+
+@pytest.mark.parametrize(
+    "href",
+    [
+        "https://www.3ds.com/x/Foo_Example.htm",
+        # Another host's link is dropped even when it looks like a CHM alias.
+        "https://www.3ds.com/a.chm::/Foo_Example.htm",
+        "ms-its:..chm::/Foo_Example.htm",
+        "ms-its:a..chm::/Foo_Example.htm",
+        # A CHM alias under another scheme, or in the help's non-API tree.
+        "mailto:a.chm::/Foo_Example.htm",
+        "javascript:a.chm::/Foo_Example.htm",
+        "https://help.solidworks.com/2017/english/SolidWorks/sldworks/sldworks.chm::/Foo_Example.htm",
+        "https://help.solidworks.com/2017/english/sldworks/Foo_Example.htm",
+        # Help paths at the host root, outside any versioned tree, absolute or not.
+        "https://help.solidworks.com/Foo_Example.htm",
+        "https://help.solidworks.com/sldworks/Foo_Example.htm",
+        "/sldworks/Foo_Example.htm",
+        "/2017/english/sldworks/Foo_Example.htm",
+        "mailto:Foo_Example.htm",
+        # Dot segments that climb out of /api.
+        "/2017/english/api/../sldworks/Foo_Example.htm",
+        "../../Foo_Example.htm",
+        # No page: an anchor, a query, the folder itself.
+        "#top",
+        "?x=1",
+        "./",
+        "",
+    ],
+)
+def test_links_outside_the_api_tree_are_dropped(href):
+    assert h.normalize_example_url(href, "swconst", SOLIDWORKS_API_VERSION) is None
+
+
+def test_unknown_candidates_ignore_case():
+    known = {f"{API}/sldworksapi/Known_Example_VB.htm"}
+    candidates = {
+        f"{API}/sldworksapi/known_example_vb.htm",
+        f"{API}/sldworksapi/New_Example_VB.htm",
+        f"{API}/sldworksapi/NEW_Example_VB.htm",
+    }
+    assert h.unknown_candidates(candidates, known) == [f"{API}/sldworksapi/NEW_Example_VB.htm"]
+
+
+def test_chm_alias_example_resolves_to_its_own_folder():
+    """An swconst page links an sldworksapi example through a CHM alias; it must not land in swconst/."""
+    help_text = (
+        '<span id="pagetitle">swMateType_e Enumeration</span>'
+        "<h1>Example</h1>"
+        '<a href="ms-its:sldworksapi.chm::/Add_Component_and_Mate_Example_VB.htm">Add Component and Mate (VBA)</a>'
+    )
+    recovered = {
+        h.normalize_example_url(url, "swconst", SOLIDWORKS_API_VERSION) for url in h.extract_example_hrefs(help_text)
+    }
+    assert recovered == {f"{API}/sldworksapi/Add_Component_and_Mate_Example_VB.htm"}
+
+
 def test_iter_type_page_urls_filters(tmp_path):
     jsonl = tmp_path / "toc.jsonl"
     lines = [
@@ -109,7 +193,7 @@ def test_end_to_end_parse_pipeline():
     help_text = h.extract_help_text(page)
     subdir = h.subdir_of(type_url)
     recovered = {
-        h.normalize_example_url(fn, subdir, SOLIDWORKS_API_VERSION) for fn in h.extract_example_hrefs(help_text)
+        h.normalize_example_url(url, subdir, SOLIDWORKS_API_VERSION) for url in h.extract_example_hrefs(help_text)
     }
 
     assert (

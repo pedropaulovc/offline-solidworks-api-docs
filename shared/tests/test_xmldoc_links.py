@@ -75,6 +75,24 @@ class TestConvertToFullUrl(unittest.TestCase):
         result = convert_to_full_url(href)
         self.assertEqual(result, "https://example.com/page.htm")
 
+    def test_chm_alias_resolves_to_the_page_it_names(self):
+        """A CHM alias is not a page in sldworksapi/; the server serves it under the CHM's folder."""
+        self.assertEqual(
+            convert_to_full_url("sldworksAPIProgGuide.chm::/OVERVIEW/Type_Libraries.htm"),
+            f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapiprogguide/OVERVIEW/Type_Libraries.htm",
+        )
+        self.assertEqual(
+            convert_to_full_url("ms-its:swconst.chm::/DP_Dimensions.htm"),
+            f"{SOLIDWORKS_API_FULL_BASE_URL}/swconst/DP_Dimensions.htm",
+        )
+
+    def test_chm_alias_in_see_href(self):
+        html = '<a href="ms-its:swconst.chm::/SO_Colors.htm">Colors</a>'
+        self.assertEqual(
+            convert_links_to_see_refs(html),
+            f'<see href="{SOLIDWORKS_API_FULL_BASE_URL}/swconst/SO_Colors.htm">Colors</see>',
+        )
+
 
 class TestConvertLinksToSeeRefs(unittest.TestCase):
     """Test converting HTML links to XMLDoc see refs."""

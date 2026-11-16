@@ -116,6 +116,20 @@ class TestMemberDetailsExtractor:
 
         assert "Validates an active document" in parser.get_description()
 
+    def test_chm_alias_example_url_points_at_the_example_folder(self):
+        """A CHM-alias example link is recorded under the CHM's folder, not the linking page's."""
+        html = """
+        <div id="pagetop"><span id="pagetitle">AddMate5 Method (IAssemblyDoc)</span></div>
+        <div id="pagebody"><div id="mainbody">
+            <h1>Example</h1>
+            <a href="ms-its:sldworksapi.chm::/Add_Component_and_Mate_Example_VB.htm">Add Component and Mate (VBA)</a>
+        </div></div>
+        """
+        parser = MemberDetailsExtractor(url_prefix="/swconst/")
+        parser.feed(html)
+
+        assert [ex["Url"] for ex in parser.examples] == ["/sldworksapi/Add_Component_and_Mate_Example_VB.htm"]
+
     def test_description_skips_2027_header_chrome(self):
         """2027 pages put See Also links, filter widgets and breadcrumbs before #mainbody; none of it is description."""
         html = """

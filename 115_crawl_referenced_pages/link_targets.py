@@ -32,6 +32,7 @@ from urllib.parse import unquote, urljoin, urlparse
 import jsonlines
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from shared.chm_aliases import resolve_chm_alias  # noqa: E402
 from shared.constants import SOLIDWORKS_API_PATH_PREFIX, SOLIDWORKS_BASE_URL  # noqa: E402
 
 HOST = SOLIDWORKS_BASE_URL
@@ -108,9 +109,13 @@ def normalize_request_url(url: str, base: str | None = None) -> str | None:
     under the boundary, collapsing accidental double slashes. Returns ``None``
     when it is not a crawlable ``/api`` page.
 
-    Original casing is preserved (the live site is case-sensitive); only the
-    matching *key* is lowercased.
+    A CHM alias (``ms-its:swconst.chm::/DP_Dimensions.htm``) resolves to the page it
+    names. Joined as written it never reaches the crawl: ``urljoin`` takes
+    ``ms-its:``/``swconst.chm:`` for a URL scheme and returns the alias unchanged.
+
+    Original casing is preserved; only the matching *key* is lowercased.
     """
+    url = resolve_chm_alias(url)
     absolute = urljoin(base, url) if base else url
     if absolute.startswith("/"):
         absolute = HOST + absolute
@@ -134,7 +139,7 @@ def iter_page_links(text: str, base: str | None = None) -> Iterable[str]:
     May yield the same page twice (once per form); callers dedupe by key.
     """
     for match in _ABS_API_URL.finditer(text):
-        yield match.group(0)
+        yield resolve_chm_alias(match.group(0))
 
     for raw in _HREF_ATTR.findall(text):
         resolved = normalize_request_url(raw, base=base)

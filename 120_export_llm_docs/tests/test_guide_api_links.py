@@ -216,6 +216,44 @@ def test_rewrite_resolves_guide_and_example_page_links():
         assert "[gone](../swconst/NotShipped.htm)" in text
 
 
+def test_chm_alias_reference_link_falls_back_to_the_chm_folder():
+    """FunctionalCategories links the DimXpert namespace page through a CHM alias. Not in
+    the bundle, it must link the page in swdimxpertapi/, not ``api/ms-its:...chm::/``."""
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        page = tmp / "docs" / "sldworksapi" / "FunctionalCategories-sldworksapi.md"
+        page.parent.mkdir(parents=True, exist_ok=True)
+        namespace_page = "SOLIDWORKS.Interop.swdimxpert~SOLIDWORKS.Interop.swdimxpert_namespace.html"
+        page.write_text(
+            f"[DimXpert Interfaces]({API_ROOT}ms-its:swdimxpertapi.chm::/{namespace_page})\n",
+            encoding="utf-8",
+        )
+
+        ExportPipeline(str(tmp))._rewrite_guide_api_links(_make_types(), API_ROOT, {}, {})
+
+        assert page.read_text(encoding="utf-8") == f"[DimXpert Interfaces]({API_ROOT}swdimxpertapi/{namespace_page})\n"
+
+
+def test_unshipped_chm_alias_links_the_page_online():
+    """A relative alias to a page the bundle lacks would be a dead relative link as written;
+    it links the page it names online instead. Shipped aliases resolve to the bundle file."""
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        page = tmp / "docs" / "swconst" / "SO_Export.md"
+        page.parent.mkdir(parents=True, exist_ok=True)
+        page.write_text(
+            "[SMG](swconst.chm::/FileSaveAsSMGOptions.htm) and [colors](ms-its:swconst.chm::/SO_Colors.htm)\n",
+            encoding="utf-8",
+        )
+
+        ExportPipeline(str(tmp))._rewrite_guide_api_links(
+            _make_types(), API_ROOT, {"so_colors.htm": "docs/swconst/SO_Colors.md"}, {})
+
+        assert page.read_text(encoding="utf-8") == (
+            f"[SMG]({API_ROOT}swconst/FileSaveAsSMGOptions.htm) and [colors](SO_Colors.md)\n"
+        )
+
+
 def test_rewrite_carries_fragment_onto_resolved_page_link():
     """A #section names a place within a page, so it must not change which page the
     link resolves to, and must survive onto the local target."""
