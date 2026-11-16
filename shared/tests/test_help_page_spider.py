@@ -2,6 +2,7 @@
 
 import gzip
 import json
+import logging
 import sys
 from pathlib import Path
 from typing import Any
@@ -10,27 +11,39 @@ import pytest
 from scrapy.downloadermiddlewares.httpcompression import HttpCompressionMiddleware
 from scrapy.http import HtmlResponse, Request, Response
 from scrapy.spidermiddlewares.httperror import HttpError
+from twisted.internet.task import Clock
 from twisted.python.failure import Failure
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL  # noqa: E402
-from shared.help_page_spider import HelpPageSpider, MissingHelpTextError, crawl_exit_code, read_help_text  # noqa: E402
+from shared.help_page_spider import (  # noqa: E402
+    NOT_FOUND_TITLE,
+    RETRY_BACKOFF_SECONDS,
+    RETRY_DELAY_META,
+    CrawlMode,
+    DeadLinkPolicy,
+    HelpPageSpider,
+    HelpTextProblem,
+    MissingHelpTextError,
+    RetryDelayMiddleware,
+    crawl_exit_code,
+    read_help_text,
+)
 
 URL = f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/Example.html"
+# What the live server returns for every page the 2027 run found without helpText
+# (68 pages in phases 70 and 115, re-fetched 2026-11-16, DP_ImageQuality.htm included).
 NOT_FOUND = {
-    "ErrorTitle": "This page cannot be found.",
-    "ErrorMessage": "The page might not exist or is temporarily unavailable.",
+    "ErrorTitle": NOT_FOUND_TITLE,
+    "ErrorMessage": "The page might not exist or is temporarily unavailable. Try again or try searching for the topic.",
+    "errorDetails": "on TreeExpand : HTML=help_list.htm?id= : V=2027 : L=english : P=api Error - ...",
 }
 
 
 class PagesSpider(HelpPageSpider):
     name = "help_pages"
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        self.stats = {"total_pages": 0, "successful_pages": 0, "failed_pages": 0, "skipped_pages": 0}
 
     def parse_page(self, response: Response) -> Any:
         help_text = yield from self.help_text_or_retry(response)
@@ -42,7 +55,7 @@ class PagesSpider(HelpPageSpider):
 
 class DeadLinksSpider(PagesSpider):
     name = "help_pages_dead_links"
-    dead_links_expected = True
+    dead_link_policy = DeadLinkPolicy.SKIP_CONFIRMED
 
 
 @pytest.fixture
@@ -96,31 +109,41 @@ def test_read_help_text_returns_help_html():
 
 
 @pytest.mark.parametrize(
-    "response, reason",
+    "response, problem, reason",
     [
-        (help_page(None), "helpContentData is null"),
-        (help_page({"helpText": ""}), "empty helpText"),
-        (next_data_page(None), "no __NEXT_DATA__ JSON"),
-        (next_data_page("{not json"), "unparseable __NEXT_DATA__ JSON"),
-        (next_data_page(json.dumps({"props": None})), "helpContentData is null"),
+        (help_page(None), HelpTextProblem.NULL_HELP_CONTENT, "helpContentData is null"),
+        (help_page({"helpText": ""}), HelpTextProblem.EMPTY_HELP_TEXT, "empty helpText"),
+        (next_data_page(None), HelpTextProblem.NO_NEXT_DATA, "no __NEXT_DATA__ JSON"),
+        (next_data_page("{not json"), HelpTextProblem.UNPARSEABLE_NEXT_DATA, "unparseable __NEXT_DATA__ JSON"),
+        (
+            next_data_page(json.dumps({"props": None})),
+            HelpTextProblem.MISSING_OBJECT,
+            "missing object in __NEXT_DATA__: props",
+        ),
+        (
+            next_data_page(json.dumps({"props": {"pageProps": {}}})),
+            HelpTextProblem.MISSING_OBJECT,
+            "missing object in __NEXT_DATA__: helpContentData",
+        ),
+        (help_page(NOT_FOUND), HelpTextProblem.NOT_FOUND_PAGE, "server not-found page"),
+        (
+            help_page({"ErrorTitle": "Something went wrong."}),
+            HelpTextProblem.SERVER_ERROR_PAGE,
+            "server error page: Something went wrong.",
+        ),
     ],
 )
-def test_read_help_text_reports_why_help_text_is_missing(response, reason):
-    with pytest.raises(MissingHelpTextError, match=reason) as missing:
-        read_help_text(response)
-    assert not missing.value.not_found
-
-
-def test_read_help_text_flags_the_server_not_found_page():
+def test_read_help_text_reports_why_help_text_is_missing(response, problem, reason):
     with pytest.raises(MissingHelpTextError) as missing:
-        read_help_text(help_page(NOT_FOUND))
-    assert missing.value.not_found
+        read_help_text(response)
+    assert missing.value.problem is problem
+    assert str(missing.value) == reason
 
 
 # --- response without help text ---------------------------------------------
 
 
-def test_null_help_content_data_is_retried(spider):
+def test_null_help_content_data_is_retried_after_a_delay(spider):
     """Phase 30 lost ISurface~GetIntersectCurveCount2.html to helpContentData: null (and crashed)."""
     [retry] = list(spider.parse_page(help_page(None)))
 
@@ -128,7 +151,11 @@ def test_null_help_content_data_is_retried(spider):
     assert retry.url == URL
     assert retry.dont_filter
     assert retry.meta["retry_times"] == 1
-    assert spider.stats == {"total_pages": 0, "successful_pages": 0, "failed_pages": 0, "skipped_pages": 0}
+    assert retry.meta[RETRY_DELAY_META] == RETRY_BACKOFF_SECONDS
+    assert spider.stats["total_pages"] == spider.stats["failed_pages"] == 0
+
+    [second] = list(spider.parse_page(help_page(None, meta=retry.meta)))
+    assert second.meta[RETRY_DELAY_META] == 2 * RETRY_BACKOFF_SECONDS
 
 
 def test_page_without_help_text_fails_once_retries_are_exhausted(spider):
@@ -142,7 +169,7 @@ def test_page_without_help_text_fails_once_retries_are_exhausted(spider):
 
 def test_not_found_page_fails_a_crawl_of_listed_pages(spider):
     """TOC and member-list crawls fetch pages the docs list, so even a confirmed not-found page is lost."""
-    assert isinstance(next(spider.parse_page(help_page(NOT_FOUND))), Request)
+    assert isinstance(next(spider.parse_page(help_page(NOT_FOUND, meta={"retry_times": 1}))), Request)
 
     [error] = list(spider.parse_page(help_page(NOT_FOUND, meta=exhausted(spider))))
 
@@ -150,22 +177,37 @@ def test_not_found_page_fails_a_crawl_of_listed_pages(spider):
     assert spider.stats["failed_pages"] == 1
 
 
-def test_confirmed_dead_link_is_skipped_where_dead_links_are_expected(crawler_spider):
+def test_dead_link_is_refetched_once_then_skipped_quietly(crawler_spider, caplog):
+    """The not-found page can be transient, so one delayed refetch confirms a dead link; no
+    RETRY_TIMES refetches, and no ERROR log line for an expected skip."""
     spider = crawler_spider(DeadLinksSpider)
-    assert isinstance(next(spider.parse_page(help_page(NOT_FOUND))), Request)  # may be a transient error page
+    [retry] = list(spider.parse_page(help_page(NOT_FOUND)))
+    assert retry.meta["retry_times"] == 1
+    assert retry.meta[RETRY_DELAY_META] == RETRY_BACKOFF_SECONDS
 
-    assert list(spider.parse_page(help_page(NOT_FOUND, meta=exhausted(spider)))) == []
+    with caplog.at_level(logging.WARNING):
+        assert list(spider.parse_page(help_page(NOT_FOUND, meta=retry.meta))) == []
+
     assert spider.stats["skipped_pages"] == 1
     assert spider.crawl_failures() == {}
+    assert not [r for r in caplog.records if r.levelno >= logging.ERROR]
+    assert spider.crawler.stats.get_value("retry/max_reached") is None
 
 
-def test_dead_link_tolerance_does_not_cover_transient_faults(crawler_spider):
+def test_dead_link_tolerance_covers_only_the_not_found_page(crawler_spider):
+    """Any other server error page, or no help text at all, is a transient fault even in link crawls."""
     spider = crawler_spider(DeadLinksSpider)
 
-    [error] = list(spider.parse_page(help_page(None, meta=exhausted(spider))))
+    assert isinstance(
+        next(spider.parse_page(help_page({"ErrorTitle": "Something went wrong."}, {"retry_times": 1}))), Request
+    )
+    [error_page] = list(spider.parse_page(help_page({"ErrorTitle": "Something went wrong."}, exhausted(spider))))
+    [null_page] = list(spider.parse_page(help_page(None, meta=exhausted(spider))))
 
-    assert error["type"] == "error"
-    assert spider.stats["failed_pages"] == 1
+    assert error_page["error"] == "server error page: Something went wrong."
+    assert null_page["error"] == "helpContentData is null"
+    assert spider.stats["failed_pages"] == 2
+    assert spider.stats["skipped_pages"] == 0
 
 
 def test_page_with_help_text_counts_once(spider):
@@ -187,6 +229,7 @@ def test_decompression_error_is_retried(spider):
     assert isinstance(retry, Request)
     assert retry.url == URL
     assert retry.meta["retry_times"] == 1
+    assert retry.meta[RETRY_DELAY_META] == RETRY_BACKOFF_SECONDS
     assert spider.stats["failed_pages"] == 0
     assert spider.crawler.stats.get_value("retry/count") == 1
 
@@ -201,6 +244,18 @@ def test_decompression_error_fails_once_retries_are_exhausted(spider):
     assert "decompressing data" in error["error"]
     assert spider.stats["failed_pages"] == 1
     assert spider.crawl_failures() == {"failed pages": 1}
+
+
+def test_download_error_retry_middleware_exhausted_is_not_retried_again(spider):
+    """RetryMiddleware already logged "Gave up retrying"; the errback must not retry or log it again."""
+    failure = Failure(TimeoutError("timed out"))
+    failure.request = Request(URL, meta=exhausted(spider))
+
+    [error] = list(spider.handle_error(failure))
+
+    assert error["type"] == "error"
+    assert spider.crawler.stats.get_value("retry/max_reached") is None
+    assert spider.crawler.stats.get_value("retry/count") is None
 
 
 def test_http_error_status_is_not_retried_again(spider):
@@ -222,7 +277,40 @@ def test_start_urls_get_the_errback(spider):
     assert request.callback == spider.parse
 
 
+# --- retry delay ------------------------------------------------------------
+
+
+def test_spider_registers_the_retry_delay_middleware(spider):
+    assert RetryDelayMiddleware in spider.crawler.settings.getdict("DOWNLOADER_MIDDLEWARES")
+
+
+def test_retry_delay_middleware_holds_a_retry_back():
+    middleware = RetryDelayMiddleware()
+    middleware.clock = Clock()
+
+    assert middleware.process_request(Request(URL), spider=None) is None  # first attempts go straight out
+
+    held = middleware.process_request(Request(URL, meta={RETRY_DELAY_META: 10}), spider=None)
+    middleware.clock.advance(9.9)
+    assert not held.called
+    middleware.clock.advance(0.1)
+    assert held.called
+    assert held.result is None  # then the request continues down the middleware chain
+
+
 # --- crawl outcome ----------------------------------------------------------
+
+
+def finished(spider: HelpPageSpider, reason: str = "finished") -> HelpPageSpider:
+    """Mark the crawl closed the way Crawler.crawl() and the engine do."""
+    spider.crawler.spider = spider
+    spider.crawler.stats.set_value("finish_reason", reason)
+    return spider
+
+
+def test_save_failures_count_as_lost_pages(spider):
+    spider.save_failed(URL, OSError("disk full"))
+    assert spider.crawl_failures() == {"save failures": 1}
 
 
 def test_callback_exceptions_count_as_lost_pages(spider):
@@ -230,12 +318,31 @@ def test_callback_exceptions_count_as_lost_pages(spider):
     assert spider.crawl_failures() == {"callback exceptions": 2}
 
 
+def test_failure_summary(spider):
+    spider.stats["failed_pages"] = 1
+    spider.save_failed(URL, OSError("disk full"))
+    assert spider.failure_summary() == "1 failed pages, 1 save failures"
+
+
 def test_crawl_exit_code(spider):
-    spider.crawler.spider = spider  # as Crawler.crawl() does
+    finished(spider)
     assert crawl_exit_code(spider.crawler) == 0
 
     spider.stats["failed_pages"] = 1
     assert crawl_exit_code(spider.crawler) == 1
+
+
+@pytest.mark.parametrize("reason", ["shutdown", "memusage_exceeded", "closespider_errorcount", None])
+def test_crawl_that_stopped_early_fails(spider, reason):
+    """Ctrl+C/SIGTERM, memory limits, and an engine that never opened drop queued pages without an errback."""
+    finished(spider, reason)
+    assert crawl_exit_code(spider.crawler) == 1
+
+
+def test_page_count_cap_is_complete_only_for_test_runs(spider):
+    finished(spider, "closespider_pagecount")
+    assert crawl_exit_code(spider.crawler, CrawlMode.TEST) == 0
+    assert crawl_exit_code(spider.crawler, CrawlMode.FULL) == 1
 
 
 def test_crawl_exit_code_when_the_spider_never_started(spider):

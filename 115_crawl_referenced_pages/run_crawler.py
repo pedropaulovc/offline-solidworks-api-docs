@@ -61,7 +61,7 @@ def main() -> int:
     urls_file = metadata_dir / "urls_crawled.jsonl"
     crawled = sum(1 for _ in open(urls_file)) if urls_file.exists() else 0
     print(f"\nReferenced-pages crawl finished: {crawled} pages saved to {output_dir / 'html'}")
-    # A page lost after its retries is a hole every later phase would inherit.
+    # A page lost after its retries, or a crawl stopped early, is a hole every later phase would inherit.
     return crawl_exit_code(crawler)
 
 

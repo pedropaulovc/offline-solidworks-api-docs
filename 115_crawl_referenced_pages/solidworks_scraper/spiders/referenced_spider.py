@@ -27,7 +27,7 @@ import sys
 sys.path.insert(0, str(REPO_ROOT / "115_crawl_referenced_pages"))
 sys.path.insert(0, str(REPO_ROOT))
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL  # noqa: E402
-from shared.help_page_spider import HelpPageSpider  # noqa: E402
+from shared.help_page_spider import DeadLinkPolicy, HelpPageSpider  # noqa: E402
 from link_targets import (  # noqa: E402
     ReferenceSource,
     build_bundle_doc_keys,
@@ -115,8 +115,8 @@ class ReferencedSpider(HelpPageSpider):
     allowed_domains = ["help.solidworks.com"]
 
     # Seeds and followed links include dead links the server cannot find
-    # (help_list.htm, stale ms-its:*.chm:: links, empty stubs like DP_ImageQuality).
-    dead_links_expected = True
+    # (help_list.htm, stale ms-its:*.chm:: links, stubs like DP_ImageQuality.htm).
+    dead_link_policy = DeadLinkPolicy.SKIP_CONFIRMED
 
     custom_settings = {
         "DEPTH_LIMIT": 0,  # bounded by the exclusion set + /api boundary instead
@@ -152,15 +152,13 @@ class ReferencedSpider(HelpPageSpider):
         # Closure boundary: pages crawled elsewhere OR already queued here.
         self.seen: set[str] = set(self.crawled_keys) | seed_keys
 
-        self.stats: dict[str, Any] = {
-            "seed_pages": len(self.seed),
-            "excluded_pages": len(self.crawled_keys),
-            "total_pages": 0,
-            "successful_pages": 0,
-            "failed_pages": 0,
-            "skipped_pages": 0,
-            "discovered_via_links": 0,
-        }
+        self.stats.update(
+            {
+                "seed_pages": len(self.seed),
+                "excluded_pages": len(self.crawled_keys),
+                "discovered_via_links": 0,
+            }
+        )
 
     def start_requests(self) -> Generator[scrapy.Request, None, None]:
         self.logger.info(

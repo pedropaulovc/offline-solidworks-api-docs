@@ -52,6 +52,10 @@ uv run pytest 115_crawl_referenced_pages/tests/ -v
   crawled by Phase 70, whose example pages Phase 120 emits as `examples/*.md`. Miss
   the latter and the raw-HTML scan seeds ~2800 example pages the bundle already has.
 - A page referenced under `/api` that is *already* crawled by another phase but not
-  exported as a doc (e.g. `FunctionalCategories-sldworksapi.html`), or that returns
-  no `helpText` (a source-side stub, e.g. `sldworksapi/DP_ImageQuality.htm`), stays
-  an external link — it is out of scope for this closure, not un-crawled.
+  exported as a doc (e.g. `FunctionalCategories-sldworksapi.html`), or that the server
+  answers with its "This page cannot be found." page (a dead link, e.g. the
+  `sldworksapi/DP_ImageQuality.htm` stub, `help_list.htm`, stale `ms-its:*.chm::` links),
+  stays an external link — it is out of scope for this closure, not un-crawled. Such a
+  page is refetched once (the server shows the same page during brief outages) and then
+  skipped; every one of the 63 pages the 2027 run skipped returned that page when
+  re-fetched (2026-11-16). Any other page without `helpText` fails the crawl.

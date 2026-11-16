@@ -80,14 +80,6 @@ class ApiDocsSpider(HelpPageSpider):
         self.base_path: str = SOLIDWORKS_API_BOUNDARY
         self.base_url: str = SOLIDWORKS_BASE_URL
 
-        # Statistics tracking
-        self.stats: dict[str, Any] = {
-            "total_pages": 0,
-            "successful_pages": 0,
-            "failed_pages": 0,
-            "skipped_pages": 0,
-        }
-
     def parse(self, response: Response) -> Generator[Any, None, None]:
         """
         Parse the JSON TOC response and extract all page URLs.

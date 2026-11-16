@@ -37,14 +37,6 @@ class TypeMembersSpider(HelpPageSpider):
         super().__init__(*args, **kwargs)
         self.crawled_urls: set[str] = set()
 
-        # Statistics tracking
-        self.stats: dict[str, Any] = {
-            "total_pages": 0,
-            "successful_pages": 0,
-            "failed_pages": 0,
-            "skipped_pages": 0,
-        }
-
         # Load URLs from file
         self.urls_to_crawl = self.load_urls()
 

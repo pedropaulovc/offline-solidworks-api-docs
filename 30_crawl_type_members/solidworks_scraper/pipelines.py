@@ -58,7 +58,7 @@ class HtmlSavePipeline:
             spider.logger.debug(f"Saved HTML to {file_path}")
 
         except Exception as e:
-            spider.logger.error(f"Failed to save HTML for {url}: {e}")
+            spider.save_failed(url, e)
             item["save_error"] = str(e)
 
         return item

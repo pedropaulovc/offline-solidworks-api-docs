@@ -52,12 +52,21 @@ the base class retries those instead of dropping the page:
   retries pages whose `__NEXT_DATA__` is missing or unparseable, or whose
   `helpContentData`/`helpText` is null or empty.
 
-Retries go through `get_retry_request`, so `RETRY_TIMES` bounds them. Once a page's
-retries are exhausted it counts in `failed_pages` and is logged to `errors.jsonl`;
-`crawl_exit_code(crawler)` then makes `run_crawler.py` exit 1, so `run_pipeline.sh` stops.
-The server's "This page cannot be found." page is retried too (it can be transient); where
-dead cross-reference links are expected (`dead_links_expected = True`, phases 70 and 115)
-a page that still shows it after its retries is skipped instead of failing the crawl.
+Retries go through `get_retry_request`, so `RETRY_TIMES` bounds them, and
+`RetryDelayMiddleware` (registered by the spider) holds retry *n* back for
+`RETRY_BACKOFF_SECONDS * n` seconds (5, 10, 15) so a short backend hiccup does not use
+up every attempt. Once a page's retries are exhausted it counts in `failed_pages` and is
+logged to `errors.jsonl`. Pages `HtmlSavePipeline` cannot write count in `save_failures`
+(`save_failed()`), and callback exceptions count too. `crawl_exit_code(crawler, mode)`
+makes `run_crawler.py` exit 1 when any of those happened or the crawl did not finish (it
+closed for any reason but `finished`; `--test` runs also accept `closespider_pagecount`),
+so `run_pipeline.sh` stops.
+
+Only the server's "This page cannot be found." page counts as a dead link, and only where
+`dead_link_policy = DeadLinkPolicy.SKIP_CONFIRMED` (phases 70 and 115, which follow
+cross-reference links): such a page is refetched once, after a delay, then skipped with a
+warning. Everywhere else, and for any other error page, it is a failure like any page
+without help text.
 
 ## Design Principles
 

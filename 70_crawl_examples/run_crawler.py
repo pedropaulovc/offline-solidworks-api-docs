@@ -32,7 +32,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from solidworks_scraper.spiders.examples_spider import ExamplesSpider
 
-from shared.help_page_spider import crawl_exit_code
+from shared.help_page_spider import CrawlMode, crawl_exit_code
 
 
 def setup_environment() -> tuple[Path, Path, Path]:
@@ -289,8 +289,8 @@ def main() -> None:
         if args.validate:
             validate_crawl(metadata_dir)
 
-        # A page lost after its retries is a hole every later phase would inherit.
-        sys.exit(crawl_exit_code(crawler))
+        # A page lost after its retries, or a crawl stopped early, is a hole every later phase would inherit.
+        sys.exit(crawl_exit_code(crawler, CrawlMode.TEST if args.test else CrawlMode.FULL))
 
     except KeyboardInterrupt:
         print("\n\nCrawl interrupted by user.")

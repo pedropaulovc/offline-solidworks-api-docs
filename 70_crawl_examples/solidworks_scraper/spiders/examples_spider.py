@@ -25,7 +25,7 @@ from scrapy.http import Response
 # Add project root to path for shared imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
-from shared.help_page_spider import HelpPageSpider
+from shared.help_page_spider import DeadLinkPolicy, HelpPageSpider
 
 
 class ExamplesSpider(HelpPageSpider):
@@ -34,7 +34,7 @@ class ExamplesSpider(HelpPageSpider):
 
     # Example URLs come from cross-reference links, a few of which are dead
     # (e.g. ms-its:sldworksapi.chm::/... links the server cannot find).
-    dead_links_expected = True
+    dead_link_policy = DeadLinkPolicy.SKIP_CONFIRMED
 
     # Custom settings for this spider
     custom_settings = {
@@ -46,21 +46,16 @@ class ExamplesSpider(HelpPageSpider):
         self.crawled_urls: set[str] = set()
         self.base_url: str = SOLIDWORKS_API_FULL_BASE_URL
 
-        # Statistics tracking
-        self.stats: dict[str, Any] = {
-            "total_pages": 0,
-            "successful_pages": 0,
-            "failed_pages": 0,
-            "skipped_pages": 0,
-            # Holes in the corpus that are not failed pages (see crawl_failures):
-            # pages that could not be written, and required example-URL sources
-            # that were missing or unreadable.
-            "save_failures": 0,
-            "url_source_failures": 0,
-            "urls_from_types": 0,
-            "urls_from_members": 0,
-            "urls_from_legacy": 0,
-        }
+        self.stats.update(
+            {
+                # A hole in the corpus that is not a page (see crawl_failures): a
+                # required example-URL source that was missing or unreadable.
+                "url_source_failures": 0,
+                "urls_from_types": 0,
+                "urls_from_members": 0,
+                "urls_from_legacy": 0,
+            }
+        )
 
         # XML source files from Phase 4 (type details) and Phase 5 (member details)
         self.type_xml_file = Path(__file__).parent.parent.parent.parent / "40_extract_type_details" / "metadata" / "api_types.xml"
@@ -201,13 +196,11 @@ class ExamplesSpider(HelpPageSpider):
         yield item
 
     def crawl_failures(self) -> dict[str, int]:
-        """Failed pages and callback exceptions, plus page saves that raised and
-        required example-URL sources that were missing or failed to load."""
-        counts = {
-            "save failures": self.stats["save_failures"],
-            "URL source failures": self.stats["url_source_failures"],
-        }
-        return super().crawl_failures() | {kind: count for kind, count in counts.items() if count}
+        """The base failures plus required example-URL sources that were missing or failed to load."""
+        failures = super().crawl_failures()
+        if self.stats["url_source_failures"]:
+            failures["URL source failures"] = self.stats["url_source_failures"]
+        return failures
 
     def closed(self, reason: str) -> None:
         """Called when the spider is closed"""

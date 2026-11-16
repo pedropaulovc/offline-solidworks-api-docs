@@ -80,9 +80,8 @@ class HtmlSavePipeline:
             return
         # "finished" only means the scheduler drained; failed pages, callback
         # exceptions and save errors all leave holes in the corpus.
-        failures = spider.crawl_failures()
-        if failures:
-            summary = ", ".join(f"{count} {kind}" for kind, count in failures.items())
+        if spider.crawl_failures():
+            summary = spider.failure_summary()
             spider.logger.warning(
                 f"Crawl incomplete ({summary}); {CRAWL_VERSION_FILE.name} stays "
                 f"'{SOLIDWORKS_API_VERSION}{PARTIAL_SUFFIX}'. Fix them and re-run (--resume) to mark the corpus complete."
@@ -120,8 +119,7 @@ class HtmlSavePipeline:
             spider.logger.debug(f"Saved HTML to {file_path}")
 
         except Exception as e:
-            spider.logger.error(f"Failed to save HTML for {url}: {e}")
-            spider.stats["save_failures"] += 1
+            spider.save_failed(url, e)
             item["save_error"] = str(e)
 
         return item
