@@ -65,25 +65,26 @@ uv run pytest 115_crawl_referenced_pages/tests/ -v
   a minute later (the server shows the same page during brief outages) and then
   skipped and listed under `dead_links` in `metadata/crawl_stats.json`. Any other page
   without `helpText` fails the crawl.
-- The 2027 run lists 6 dead links, each of which returned the not-found page when
-  re-fetched (2026-11-16):
+- The metadata committed on `main` predates CHM-alias resolution: its
+  `crawl_stats.json` reports 63 skipped pages, 58 of them unresolved aliases. A crawl
+  with the current code (as regenerated for release v4.0.0, PR #37) skips 6, each of
+  which returned the not-found page when re-fetched (2026-11-16):
   - `help_list.htm`, `sldworksapi/DP_ImageQuality.htm`,
     `swconst/DP_Annotations-EdgeSymbols.htm`, `swconst/DP_Annotations-TransitionSymbols.htm`
-    and `toolboxapi/DifferencesBetweenUnManagedAndC++CLI.html`, which the run before
-    alias resolution also reported;
+    and `toolboxapi/DifferencesBetweenUnManagedAndC++CLI.html`, which the earlier run
+    also reported;
   - `swconst/FileSaveAsSMGOptions.htm`, which no XML links. Its only link is a CHM
     alias on `swconst/SO_Export.htm` (`swconst.chm::/FileSaveAsSMGOptions.htm`), so
     the crawl requests this URL only now that aliases resolve.
 
-  Before CHM aliases were resolved the run skipped 63 pages: 58 were unresolved
-  aliases, which now resolve to pages the bundle already ships (55) or to the three
+  The 58 aliases resolve to pages the bundle already ships (55) or to the three
   image-only pages below.
-- A crawled page whose Markdown is nothing but images
+- A crawled page with no text, only images
   (`sldworksapiprogguide/Miscellaneous/FreeFormCurves.htm`,
   `Geometric_Tolerance_Symbol_Libraries.htm`, `FeatureManager__InsertGussetFeature_image.htm`)
   is not written: the bundle ships no images, so it would be a single dangling
-  `![](x.gif)`. Its links stay on the help page, which shows the image.
-  `metadata/extraction_summary.json` lists such pages under `image_only_pages`.
+  `![](x.gif)`. Its links stay on the help page, which shows the image. Extraction
+  lists such pages under `image_only_pages` in `metadata/extraction_summary.json`.
 - Extraction clears `output/markdown/` first, so a page that left the closure does not
   keep its old file. Phases 90 and 120 also ship only the pages
   `files_created.jsonl` lists.

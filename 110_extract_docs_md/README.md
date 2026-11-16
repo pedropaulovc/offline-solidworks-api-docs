@@ -128,9 +128,10 @@ Main orchestrator that:
    (Phases 90 and 120 ship only `files_created.jsonl`'s pages, but the tree should match too)
 2. Load metadata from Phase 10
 3. Build TOC tree from expandToc files
-4. Traverse tree and convert each leaf node; a page whose Markdown is nothing but
-   images is skipped (the bundle ships no images, so it would be one dangling
-   `![](x.gif)`; links to it stay on the help page, which shows the image)
+4. Traverse tree and convert each leaf node; a page with no text, only images, is
+   skipped (the bundle ships no images, so it would be one dangling `![](x.gif)`;
+   links to it stay on the help page, which shows the image). This is decided on the
+   HTML: in the Markdown a linked thumbnail or a layout table leaves text-like residue
 5. Save Markdown files in hierarchical structure
 6. Generate metadata and statistics
 
@@ -206,14 +207,16 @@ Each line contains information about a converted file:
 ### extraction_stats.json
 
 Overall statistics (no run timestamps, so a rerun on the same input leaves the committed
-file unchanged):
+file unchanged). `skipped_files` counts TOC nodes with no crawled HTML;
+`image_only_pages` lists pages deliberately not written:
 
 ```json
 {
   "total_nodes": 145,
   "converted_files": 125,
   "skipped_files": 0,
-  "failed_files": 0
+  "failed_files": 0,
+  "image_only_pages": []
 }
 ```
 
@@ -283,11 +286,12 @@ All dependencies are managed via `pyproject.toml`.
 
 1. **TOC Pages**: Non-leaf nodes (TOC/index pages) are not converted, only content pages
 2. **Character Encoding**: Uses UTF-8 throughout, may need adjustment for other encodings
-3. **Link Preservation**: Links to other guide pages become relative `.md` paths; the
-   rest keep their help-site form, relative to the page's original URL. Phase 120
-   resolves those against the files it ships or the online help.
+3. **Link Preservation**: Links to other guide pages become relative `.md` paths
+   (matched case-insensitively, as the help server matches paths); the rest keep their
+   help-site form, relative to the page's original URL. Phase 120 resolves those
+   against the files it ships or the online help.
 4. **Image Handling**: Image references preserved but images themselves not downloaded.
-   A page with nothing but images is not written (see above).
+   A page with no text, only images, is not written (see above).
 
 ## Troubleshooting
 

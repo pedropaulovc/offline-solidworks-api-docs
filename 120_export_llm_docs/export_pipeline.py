@@ -28,7 +28,7 @@ from shared.constants import (  # noqa: E402
     SOLIDWORKS_API_VERSION,
     SOLIDWORKS_BASE_URL,
 )
-from shared.guide_pages import GuidePage, case_collisions, manifest_path, read_guide_pages  # noqa: E402
+from shared.guide_pages import GuidePage, GuidePagesUnavailable, case_collisions, read_guide_pages  # noqa: E402
 from shared.line_endings import normalize_tree  # noqa: E402
 from models import TypeInfo, ExampleContent, ExportStatistics
 
@@ -139,6 +139,9 @@ class ExportPipeline:
         # ``.html`` pages so they target the ``types/``/``enums/`` files we ship.
         self._rewrite_guide_api_links(types, self._api_base_url(), guide_links, data_loader.examples,
                                       page_urls)
+        # Every content file exists now: fail before the README and summary make the
+        # output look complete.
+        self._check_case_collisions()
 
         # Step 8: Generate output README for LLMs
         print("\n[8/9] Generating output README...")
@@ -152,7 +155,6 @@ class ExportPipeline:
         # point every file has passed through, including those copied in verbatim.
         changed, scanned = normalize_tree(self.output_base)
         print(f"  Normalised line endings to CRLF: {changed} of {scanned} files rewritten")
-        self._check_case_collisions()
 
         print("\n" + "="*80)
         print("Export Complete!")
@@ -171,16 +173,16 @@ class ExportPipeline:
         programming guide and Phase 115's referenced-page closure).
 
         Only listed pages ship: a stray ``.md`` an earlier run left under a markdown
-        root is not part of the current output. A root without a manifest is skipped
-        (its ``<see href>`` references fall back to external links).
+        root is not part of the current output. A root whose manifest or pages are
+        missing (the manifests are committed, ``output/`` is not) is skipped with a
+        warning, as Phase 90 does; its ``<see href>`` references stay external.
         """
         guide_pages: List[GuidePage] = []
         for root in markdown_roots:
             try:
                 guide_pages += read_guide_pages(Path(root))
-            except FileNotFoundError:
-                print(f"  Warning: guide manifest not found at {manifest_path(Path(root))}; "
-                      "those pages do not ship and their <see href> links stay external")
+            except GuidePagesUnavailable as e:
+                print(f"  Warning: {e}; those pages do not ship and links to them stay external")
         return guide_pages
 
     @staticmethod
@@ -449,9 +451,15 @@ class ExportPipeline:
                         state["changed"] = True
                         return f"{head}{posixpath.relpath(target, guide_dir)}{tail}"
 
-                # Not in the bundle: link the canonical online page, not a dead path.
-                # Same-directory references carry no assembly segment in the URL; recover
-                # it from the referenced page's own folder so the URL is not malformed.
+                # Not in the bundle: link the online page, not a dead path. A relative
+                # link resolves against the linking page's URL when it is known.
+                online = self._online_page(url, page_url)
+                if online is not None:
+                    external += 1
+                    state["changed"] = True
+                    return f"{head}{self._md_destination(online)}{tail}"
+                # Otherwise rebuild the canonical URL. Same-directory references carry
+                # no assembly segment; recover it from the page's own folder.
                 asm = assembly or posixpath.basename(guide_dir)
                 if not asm or asm == "docs":
                     return match.group(0)

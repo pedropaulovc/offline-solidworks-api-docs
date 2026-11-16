@@ -20,7 +20,7 @@ REPO_ROOT = Path(__file__).parent.parent.resolve()
 PHASE_DIR = Path(__file__).parent.resolve()
 sys.path.insert(0, str(REPO_ROOT / "110_extract_docs_md"))
 sys.path.insert(0, str(REPO_ROOT))
-from html_to_markdown import HtmlToMarkdownConverter, has_text  # noqa: E402
+from html_to_markdown import HtmlToMarkdownConverter  # noqa: E402
 
 from shared.constants import SOLIDWORKS_API_PATH_PREFIX  # noqa: E402
 
@@ -55,8 +55,9 @@ def main() -> int:
     converter.load_metadata()
 
     # Start from an empty tree: a page that drops out of the closure must not leave its
-    # old Markdown behind, since Phases 90 and 120 ship what this run writes.
-    shutil.rmtree(output_dir, ignore_errors=True)
+    # old Markdown behind. A failed delete must stop the run, not leave stale pages.
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     created: list[dict] = []
     image_only: list[str] = []
@@ -75,7 +76,7 @@ def main() -> int:
                 continue
             try:
                 markdown = converter.convert_html_to_markdown(html_file, url)
-                if not has_text(markdown):
+                if markdown is None:
                     # Links to it stay on the help page, which shows the image.
                     print(f"  [SKIP] {url} (images only)")
                     image_only.append(urlparse(url).path)

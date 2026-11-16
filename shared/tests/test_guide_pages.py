@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from shared.guide_pages import GuidePage, case_collisions, read_guide_pages
+from shared.guide_pages import GuidePage, GuidePagesUnavailable, case_collisions, read_guide_pages
 
 
 def _write_manifest(phase_dir: Path, entries: list[dict]) -> Path:
@@ -25,7 +25,8 @@ def test_guide_pages_come_from_the_manifest_only(tmp_path):
         {"original_url": "/2027/english/api/swconst/A.htm", "markdown_path": "115\\output\\markdown\\swconst\\A.md"},
     ])
     (root / "swconst").mkdir(parents=True)
-    (root / "swconst" / "Stale.md").write_text("old\n", encoding="utf-8")
+    for name in ("A.md", "B.md", "Stale.md"):
+        (root / "swconst" / name).write_text(f"# {name}\n", encoding="utf-8")
 
     assert read_guide_pages(root) == [
         GuidePage("/2027/english/api/swconst/A.htm", "swconst/A.md", root / "swconst" / "A.md"),
@@ -34,8 +35,19 @@ def test_guide_pages_come_from_the_manifest_only(tmp_path):
 
 
 def test_missing_manifest_raises(tmp_path):
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(GuidePagesUnavailable, match="no manifest"):
         read_guide_pages(tmp_path / "110" / "output" / "markdown")
+
+
+def test_manifest_without_its_tree_raises(tmp_path):
+    """The manifests are committed and output/ is gitignored: after a fresh clone the
+    manifest lists pages that are not there."""
+    root = _write_manifest(tmp_path / "115", [
+        {"original_url": "/2027/english/api/swconst/A.htm", "markdown_path": "115/output/markdown/swconst/A.md"},
+    ])
+
+    with pytest.raises(GuidePagesUnavailable, match="swconst/A.md"):
+        read_guide_pages(root)
 
 
 def test_case_collisions():

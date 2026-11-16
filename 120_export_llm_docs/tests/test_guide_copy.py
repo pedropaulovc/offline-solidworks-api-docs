@@ -70,3 +70,17 @@ def test_paths_differing_only_in_case_fail(tmp_path):
 
     with pytest.raises(ValueError, match="differ only in case"):
         pipeline._check_case_collisions()
+
+
+def test_manifest_without_its_tree_is_skipped(tmp_path, capsys):
+    """After a fresh clone the committed manifest lists pages output/ does not have: the
+    root is skipped with a warning (as Phase 90 does), not a crash halfway through."""
+    root = _guide_root(tmp_path / "115", {"swconst/DP_Units.md": "swconst/DP_Units.htm"})
+    (root / "swconst" / "DP_Units.md").unlink()
+    pipeline = ExportPipeline(str(tmp_path / "out"))
+
+    guide_pages = pipeline._load_guide_pages([str(root)])
+
+    assert guide_pages == []
+    assert pipeline._build_guide_links(guide_pages) == {}
+    assert "swconst/DP_Units.md" in capsys.readouterr().out

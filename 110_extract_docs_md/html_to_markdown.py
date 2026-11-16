@@ -6,14 +6,15 @@ import json
 import jsonlines
 import re
 import sys
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from shared.chm_aliases import relative_chm_alias  # noqa: E402
 
-_HREF = re.compile(r'(\bhref\s*=\s*")([^"]*)(")', re.IGNORECASE)
-_IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
+# An href attribute: double-quoted (group 2), single-quoted (3) or unquoted (4).
+_HREF = re.compile(r"""(\bhref\s*=\s*)(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))""", re.IGNORECASE)
 
 
 def new_html2text() -> html2text.HTML2Text:
@@ -36,24 +37,58 @@ def new_html2text() -> html2text.HTML2Text:
 
 def relativize_chm_aliases(html: str, page_url: str) -> str:
     """Rewrite CHM-alias ``href``s (``sldworksapi.chm::/X.html``) as links relative to
-    the page at ``page_url``, like its other relative links.
+    the page at ``page_url``, like its other relative links. Double-quoted,
+    single-quoted and unquoted values alike; each keeps its quoting.
 
     Left as written, an alias is a dead link in the Markdown and in everything built
     from it (Phase 90's guides catalog copies the Markdown verbatim).
     """
-    return _HREF.sub(
-        lambda m: f"{m.group(1)}{relative_chm_alias(m.group(2), page_url)}{m.group(3)}", html
-    )
+
+    def repl(match: re.Match[str]) -> str:
+        attribute, double, single, bare = match.group(1, 2, 3, 4)
+        if double is not None:
+            return f'{attribute}"{relative_chm_alias(double, page_url)}"'
+        if single is not None:
+            return f"{attribute}'{relative_chm_alias(single, page_url)}'"
+        return f"{attribute}{relative_chm_alias(bare, page_url)}"
+
+    return _HREF.sub(repl, html)
 
 
-def has_text(markdown: str) -> bool:
-    """Whether a page's Markdown holds anything besides images.
+class _TextFinder(HTMLParser):
+    """Notes whether any text outside ``<script>``/``<style>`` is not whitespace."""
 
-    The bundle ships no images, so an image-only page (a few ``Miscellaneous``
+    def __init__(self) -> None:
+        super().__init__()
+        self.found = False
+        self._hidden_depth = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in ("script", "style"):
+            self._hidden_depth += 1
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in ("script", "style") and self._hidden_depth:
+            self._hidden_depth -= 1
+
+    def handle_data(self, data: str) -> None:
+        if not self._hidden_depth and data.strip():
+            self.found = True
+
+
+def has_text(html: str) -> bool:
+    """Whether a page's HTML holds any text, not just images and layout.
+
+    The bundle ships no images, so a page without text (a few ``Miscellaneous``
     topics are one diagram) would be a single dangling ``![](x.gif)``; links to it
-    are better left pointing at the help page, which shows the image.
+    are better left pointing at the help page, which shows the image. Decided on
+    the HTML, not the Markdown, where a linked thumbnail or a layout table leaves
+    ``[](big.htm)`` or ``---`` behind.
     """
-    return bool(_IMAGE.sub("", markdown).strip())
+    finder = _TextFinder()
+    finder.feed(html)
+    finder.close()
+    return finder.found
 
 
 class HtmlToMarkdownConverter:
@@ -104,7 +139,7 @@ class HtmlToMarkdownConverter:
 
         return self.url_to_file_map.get(url)
 
-    def convert_html_to_markdown(self, html_path: Path, page_url: str) -> str:
+    def convert_html_to_markdown(self, html_path: Path, page_url: str) -> str | None:
         """Convert HTML file to Markdown.
 
         Args:
@@ -112,11 +147,13 @@ class HtmlToMarkdownConverter:
             page_url: The page's help URL or path, which its relative links are relative to
 
         Returns:
-            Markdown content
+            Markdown content, or None for a page with no text (see :func:`has_text`)
         """
         with html_path.open(encoding="utf-8") as f:
             html_content = f.read()
 
+        if not has_text(html_content):
+            return None
         return new_html2text().handle(relativize_chm_aliases(html_content, page_url))
 
     def sanitize_filename(self, name: str) -> str:

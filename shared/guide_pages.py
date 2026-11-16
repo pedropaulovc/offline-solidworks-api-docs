@@ -27,13 +27,22 @@ def manifest_path(markdown_root: Path) -> Path:
     return markdown_root.parent.parent / "metadata" / "files_created.jsonl"
 
 
+class GuidePagesUnavailable(Exception):
+    """A guide root whose pages cannot be shipped: the Markdown tree or its manifest is
+    missing, or the manifest lists a page that is not in the tree (a manifest
+    committed while ``output/`` is gitignored, after a fresh clone)."""
+
+
 def read_guide_pages(markdown_root: Path) -> list[GuidePage]:
     """The pages the manifest beside ``markdown_root`` lists, sorted by ``rel_path``.
 
-    Raises FileNotFoundError when there is no manifest.
+    Raises GuidePagesUnavailable unless the manifest and every page it lists exist.
     """
+    manifest = manifest_path(markdown_root)
+    if not manifest.exists():
+        raise GuidePagesUnavailable(f"no manifest at {manifest}")
     pages = []
-    with open(manifest_path(markdown_root), encoding="utf-8") as f:
+    with open(manifest, encoding="utf-8") as f:
         for line in f:
             if not line.strip():
                 continue
@@ -41,6 +50,12 @@ def read_guide_pages(markdown_root: Path) -> list[GuidePage]:
             # markdown_path is repo-relative and always under ".../output/markdown/".
             rel = entry["markdown_path"].replace("\\", "/").split("output/markdown/", 1)[-1]
             pages.append(GuidePage(entry["original_url"], rel, markdown_root / rel))
+    missing = [page.rel_path for page in pages if not page.file.exists()]
+    if missing:
+        raise GuidePagesUnavailable(
+            f"{manifest} lists {len(missing)} page(s) not in {markdown_root} "
+            f"(e.g. {missing[0]}); rerun that phase"
+        )
     return sorted(pages, key=lambda page: page.rel_path)
 
 

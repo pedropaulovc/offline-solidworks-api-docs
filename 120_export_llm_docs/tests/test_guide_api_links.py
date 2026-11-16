@@ -248,16 +248,22 @@ def test_unshipped_page_link_links_the_page_online():
 
 def test_unshipped_link_resolves_against_the_page_url_not_the_bundle_path():
     """Phase 110 lays pages out by TOC title, so a page's ``docs/`` folder says nothing
-    about where its relative links point; its help URL does."""
+    about where its relative links point; its help URL does. That holds for reference
+    pages too: a bare one is in the linking page's folder, not a folder named after
+    the TOC entry."""
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
-        guide = _write_guide(tmp, "[gone](../../swconst/NotShipped.htm)\n")
+        reference = f"{SLD}.INotShipped.html"
+        guide = _write_guide(tmp, f"[gone](../../swconst/NotShipped.htm) [type]({reference})\n")
         doc_path = guide.relative_to(tmp).as_posix()
         page_urls = {doc_path: f"{SOLIDWORKS_API_BASE_PATH}/sldworksapiprogguide/Overview/Hole.htm"}
 
         ExportPipeline(str(tmp))._rewrite_guide_api_links(_make_types(), API_ROOT, {}, {}, page_urls)
 
-        assert guide.read_text(encoding="utf-8") == f"[gone]({API_ROOT}swconst/NotShipped.htm)\n"
+        assert guide.read_text(encoding="utf-8") == (
+            f"[gone]({API_ROOT}swconst/NotShipped.htm) "
+            f"[type]({API_ROOT}sldworksapiprogguide/Overview/{reference})\n"
+        )
 
 
 def test_rewrite_carries_fragment_onto_resolved_page_link():

@@ -753,6 +753,24 @@ class TestExtendedXmlDoc:
             '{urn:solidworks:offline-xmldoc:1}content'
         )
 
+    def test_guide_dir_without_manifest_is_skipped(self, temp_dir, capsys):
+        """A --guide-dir with no files_created.jsonl beside it warns instead of crashing."""
+        guide_dir = temp_dir / 'loose' / 'markdown'
+        guide_dir.mkdir(parents=True)
+        (guide_dir / 'Overview.md').write_text('# API Overview\n', encoding='utf-8')
+
+        generator = XMLDocGenerator(
+            output_dir=temp_dir,
+            metadata_dir=temp_dir,
+            guide_dirs=[guide_dir],
+            verbose=False,
+        )
+        output_file = generator.generate_guides_xmldoc()
+
+        root = ET.parse(output_file).getroot()
+        assert root.findall('.//{urn:solidworks:offline-xmldoc:1}guide') == []
+        assert 'no manifest' in capsys.readouterr().out
+
     def test_member_level_examples_are_cataloged(self, temp_dir):
         members_file = temp_dir / 'members.xml'
         members_file.write_text(

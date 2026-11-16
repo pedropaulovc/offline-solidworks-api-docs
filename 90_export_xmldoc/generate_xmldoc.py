@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from shared.guide_pages import read_guide_pages  # noqa: E402
+from shared.guide_pages import GuidePagesUnavailable, read_guide_pages  # noqa: E402
 from shared.line_endings import normalize_tree  # noqa: E402
 from typing import Any
 
@@ -382,7 +382,9 @@ class XMLDocGenerator:
         """Write conceptual/how-to Markdown pages into a companion XMLDoc.
 
         Only the pages each guide phase's manifest lists: a stray ``.md`` under a guide
-        directory (left by an earlier run) is not part of the current output.
+        directory (left by an earlier run) is not part of the current output. A guide
+        directory without its manifest, or missing a listed page, is skipped with a
+        warning, as Phase 120 does.
         """
         doc = ET.Element('doc')
         assembly = ET.SubElement(doc, 'assembly')
@@ -392,7 +394,12 @@ class XMLDocGenerator:
 
         for index, guide_dir in enumerate(self.guide_dirs, start=1):
             root_label = f'root{index}'
-            for page in read_guide_pages(guide_dir):
+            try:
+                pages = read_guide_pages(guide_dir)
+            except GuidePagesUnavailable as e:
+                print(f"Warning: {e}; its pages are left out of the guides catalog")
+                continue
+            for page in pages:
                 content = page.file.read_text(encoding='utf-8')
                 guide = ET.SubElement(guides, sw_tag('guide'), {
                     'id': f'{root_label}/{page.rel_path}',
@@ -839,7 +846,8 @@ Examples:
         '--guide-dir',
         type=Path,
         action='append',
-        help='Markdown guide directory to embed; may be repeated'
+        help=('A guide phase\'s <phase>/output/markdown to embed (the pages its '
+              '<phase>/metadata/files_created.jsonl lists); may be repeated'),
     )
 
     parser.add_argument(

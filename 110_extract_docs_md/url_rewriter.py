@@ -21,10 +21,12 @@ class UrlRewriter:
         self._build_url_index()
 
     def _build_url_index(self) -> None:
-        """Build an index of URLs for efficient lookup."""
+        """Build an index of URLs for efficient lookup, keyed lowercase (see
+        :meth:`_find_markdown_file`)."""
         self.url_index: Dict[str, Path] = {}
 
         for url, md_path in self.url_to_markdown_map.items():
+            url = url.lower()
             # Store by full URL
             self.url_index[url] = md_path
 
@@ -147,6 +149,10 @@ class UrlRewriter:
         Returns:
             Path to Markdown file or None if not found
         """
+        # Keys are lowercase: the help server matches paths case-insensitively, and
+        # links (CHM aliases above all) often spell a folder differently from the TOC.
+        url = url.lower()
+
         # Try exact match first
         if url in self.url_index:
             return self.url_index[url]
