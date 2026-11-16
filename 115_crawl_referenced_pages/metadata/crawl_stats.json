@@ -1,10 +1,19 @@
 {
-  "seed_pages": 251,
-  "excluded_pages": 17049,
-  "total_pages": 194,
-  "successful_pages": 194,
+  "total_pages": 207,
+  "successful_pages": 201,
   "failed_pages": 0,
-  "skipped_pages": 63,
-  "discovered_via_links": 6,
+  "skipped_pages": 6,
+  "save_failures": 0,
+  "dead_links": [
+    "https://help.solidworks.com/2027/english/api/help_list.htm",
+    "https://help.solidworks.com/2027/english/api/sldworksapi/DP_ImageQuality.htm",
+    "https://help.solidworks.com/2027/english/api/swconst/DP_Annotations-EdgeSymbols.htm",
+    "https://help.solidworks.com/2027/english/api/swconst/DP_Annotations-TransitionSymbols.htm",
+    "https://help.solidworks.com/2027/english/api/swconst/FileSaveAsSMGOptions.htm",
+    "https://help.solidworks.com/2027/english/api/toolboxapi/DifferencesBetweenUnManagedAndC++CLI.html"
+  ],
+  "seed_pages": 196,
+  "excluded_pages": 17049,
+  "discovered_via_links": 11,
   "reason": "finished"
 }
