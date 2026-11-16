@@ -22,8 +22,9 @@ import re
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
 
 # ``<name>.chm::/<path>``; the separator is sometimes doubled (``::/``+``/``). The
-# name stops at whatever precedes it: ``/``, a protocol's ``:``, ``@``, ``\``.
-_CHM_ALIAS = re.compile(r"([\w.-]+)\.chm::/+(.*)", re.IGNORECASE)
+# name starts with a word character (so ``..chm`` is no CHM) and stops at whatever
+# precedes it: ``/``, a protocol's ``:``, ``@``, ``\``.
+_CHM_ALIAS = re.compile(r"(\w[\w.-]*)\.chm::/+(.*)", re.IGNORECASE)
 
 
 def chm_alias_page(link: str) -> str | None:

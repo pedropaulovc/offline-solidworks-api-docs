@@ -45,8 +45,8 @@ from shared.constants import SOLIDWORKS_API_BOUNDARY, SOLIDWORKS_API_VERSION, SO
 USER_AGENT = "Mozilla/5.0 (compatible; offline-solidworks-api-docs/1.0)"
 DEFAULT_VERSION = SOLIDWORKS_API_VERSION
 DEFAULT_LEGACY_VERSIONS = ["2017"]
-# The part of a help URL path below ``/<year>/<language>/api/``.
-_API_TREE_PATH = re.compile(r"^/\d{4}/[^/]+/api/(.+)$", re.IGNORECASE)
+# A page below ``/<year>/<language>/api/``; group 1 is its path under /api.
+_API_TREE_PAGE = re.compile(r"^/\d{4}/[^/]+/api/(.+\.html?)$", re.IGNORECASE)
 
 
 def _load_type_info_extractor():
@@ -172,18 +172,20 @@ def subdir_of(url: str) -> str:
 
 
 def _api_tree_path(href: str, subdir: str) -> str | None:
-    """The path below ``/api`` that an example link on a type page in ``subdir`` names,
-    or None when it points outside the help's API tree (another host or tree)."""
+    """The page below ``/api`` that an example link on a type page in ``subdir`` names,
+    or None when it points anywhere else (another host or tree, a folder, an anchor)."""
+    parsed = urlparse(href)
+    if parsed.netloc and parsed.netloc.lower() != SOLIDWORKS_DOMAIN:
+        return None
     alias_page = chm_alias_page(href)
     if alias_page:
-        href = f"{SOLIDWORKS_API_BOUNDARY}{alias_page}"
-    parsed = urlparse(href)
-    if (parsed.scheme or parsed.netloc) and parsed.netloc.lower() != SOLIDWORKS_DOMAIN:
+        parsed = urlparse(f"{SOLIDWORKS_API_BOUNDARY}{alias_page}")
+    if parsed.scheme not in ("", "http", "https"):  # mailto:, javascript:, ...
         return None
     # Resolve the link the way a browser on the type page would, dot segments
     # included, then check where it landed.
     page_folder = f"{SOLIDWORKS_API_BOUNDARY}{subdir}/"
-    in_api_tree = _API_TREE_PATH.match(posixpath.normpath(posixpath.join(page_folder, parsed.path)))
+    in_api_tree = _API_TREE_PAGE.match(posixpath.normpath(posixpath.join(page_folder, parsed.path)))
     return in_api_tree.group(1) if in_api_tree else None
 
 

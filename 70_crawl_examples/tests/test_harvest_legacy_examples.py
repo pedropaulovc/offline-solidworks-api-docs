@@ -111,6 +111,9 @@ def test_example_links_are_canonicalized(href, url):
     "href",
     [
         "https://www.3ds.com/x/Foo_Example.htm",
+        # Another host's link is dropped even when it looks like a CHM alias.
+        "https://www.3ds.com/a.chm::/Foo_Example.htm",
+        "ms-its:..chm::/Foo_Example.htm",
         "https://help.solidworks.com/2017/english/sldworks/Foo_Example.htm",
         # Help paths at the host root, outside any versioned tree, absolute or not.
         "https://help.solidworks.com/Foo_Example.htm",
@@ -121,6 +124,11 @@ def test_example_links_are_canonicalized(href, url):
         # Dot segments that climb out of /api.
         "/2017/english/api/../sldworks/Foo_Example.htm",
         "../../Foo_Example.htm",
+        # No page: an anchor, a query, the folder itself.
+        "#top",
+        "?x=1",
+        "./",
+        "",
     ],
 )
 def test_links_outside_the_api_tree_are_dropped(href):

@@ -64,6 +64,8 @@ def test_alias_names_a_page_under_the_api_root(link: str, page: str) -> None:
         "/sldworksapi/Foo_Example_VB.htm",
         "Foo_Example_VB.htm",
         "https://example.com/page.htm",
+        # No CHM name, only dots.
+        "ms-its:..chm::/X.htm",
     ],
 )
 def test_other_links_unchanged(link: str) -> None:
