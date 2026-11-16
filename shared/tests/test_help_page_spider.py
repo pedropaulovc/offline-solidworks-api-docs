@@ -1,6 +1,7 @@
 """Tests for HelpPageSpider: transient faults are retried, and lost pages are counted, never dropped."""
 
 import gzip
+import importlib.util
 import json
 import logging
 import sys
@@ -35,6 +36,7 @@ from shared.help_page_spider import (  # noqa: E402
     MissingHelpTextError,
     crawl_exit_code,
     read_help_text,
+    sort_url_log,
 )
 
 URL = f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/Example.html"
@@ -414,3 +416,51 @@ def test_page_count_cap_is_complete_only_for_test_runs(spider):
 def test_crawl_exit_code_when_the_spider_never_started(spider):
     assert spider.crawler.spider is None
     assert crawl_exit_code(spider.crawler) == 1
+
+
+def test_sort_url_log_orders_records_by_url(tmp_path):
+    urls_file = tmp_path / "urls_crawled.jsonl"
+    records = [{"url": f"{SOLIDWORKS_API_FULL_BASE_URL}/{name}.htm", "title": f"Título {name}"} for name in "cab"]
+    urls_file.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in records), encoding="utf-8")
+
+    sort_url_log(urls_file)
+
+    lines = urls_file.read_text(encoding="utf-8").splitlines()
+    assert [json.loads(line)["url"].rsplit("/", 1)[1] for line in lines] == ["a.htm", "b.htm", "c.htm"]
+    assert lines[0] == json.dumps(records[1], ensure_ascii=False)  # same serialization the pipeline appends
+    assert [p.name for p in tmp_path.iterdir()] == ["urls_crawled.jsonl"]
+
+
+def test_sort_url_log_without_a_log_is_a_no_op(tmp_path):
+    sort_url_log(tmp_path / "urls_crawled.jsonl")
+    assert not any(tmp_path.iterdir())
+
+
+CRAWL_PHASES = [
+    "10_crawl_toc_pages",
+    "30_crawl_type_members",
+    "70_crawl_examples",
+    "100_crawl_programming_guide",
+    "115_crawl_referenced_pages",
+]
+
+
+@pytest.mark.parametrize("phase", CRAWL_PHASES)
+def test_every_crawl_phase_sorts_its_url_log_when_the_spider_closes(phase, tmp_path):
+    """Pages are logged as their downloads finish; the committed log must not depend on that order."""
+    spec = importlib.util.spec_from_file_location(
+        f"pipelines_{phase}", REPO_ROOT / phase / "solidworks_scraper" / "pipelines.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    # The metadata dir is resolved from the module's __file__; keep the tracked manifest untouched.
+    module.__file__ = str(tmp_path / "solidworks_scraper" / "pipelines.py")
+    pipeline = module.MetadataLogPipeline()
+    spider = PagesSpider()
+
+    for name in ["c", "a", "b"]:
+        pipeline.process_item({"url": f"{SOLIDWORKS_API_FULL_BASE_URL}/{name}.htm"}, spider)
+    pipeline.close_spider(spider)
+
+    with open(tmp_path / "metadata" / "urls_crawled.jsonl", encoding="utf-8") as f:
+        assert [json.loads(line)["url"][-5:] for line in f] == ["a.htm", "b.htm", "c.htm"]

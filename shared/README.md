@@ -77,6 +77,10 @@ exit summary, so a page that newly turns up there shows in the committed metadat
 diff. Everywhere else, and for any other error page, a not-found page is a failure like
 any page without help text.
 
+Each crawl phase's `MetadataLogPipeline` appends to `urls_crawled.jsonl` as downloads
+finish, so it calls `sort_url_log` when the spider closes: the committed log is ordered
+by URL, and a recrawl's diff shows only pages that changed.
+
 ## Design Principles
 
 - **Stateless**: All functions are pure and don't rely on global state

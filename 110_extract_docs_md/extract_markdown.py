@@ -2,7 +2,6 @@
 
 import json
 import jsonlines
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -42,13 +41,13 @@ class MarkdownExtractor:
             output_dir=output_dir,
         )
 
-        # Statistics
+        # Statistics. No run times: extraction_stats.json and manifest.json are
+        # committed, and a timestamp would change them on every run.
         self.stats = {
             "total_nodes": 0,
             "converted_files": 0,
             "skipped_files": 0,
             "failed_files": 0,
-            "start_time": datetime.now(timezone.utc).isoformat(),
         }
 
         # Metadata tracking
@@ -189,7 +188,6 @@ class MarkdownExtractor:
         print(f"   Saved: {files_created_path}")
 
         # Save extraction_stats.json
-        self.stats["end_time"] = datetime.now(timezone.utc).isoformat()
         stats_path = self.metadata_dir / "extraction_stats.json"
         with stats_path.open("w", encoding="utf-8") as f:
             json.dump(self.stats, f, indent=2)
@@ -202,7 +200,6 @@ class MarkdownExtractor:
             "description": "Convert HTML documentation to Markdown with hierarchical organization",
             "input_dir": str(self.input_dir),
             "output_dir": str(self.output_dir),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
             "stats": self.stats,
         }
 
