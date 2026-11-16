@@ -119,3 +119,23 @@ def pytest_runtest_protocol(item: pytest.Item, nextitem: pytest.Item | None):  #
     if phase is not None:
         _assert_modules_belong_to(phase)
     return (yield)
+
+
+@pytest.fixture
+def crawler_spider():  # type: ignore[no-untyped-def]
+    """Factory for a spider bound to a configured Crawler (settings and stats), as in a real crawl.
+
+    Spider code that retries through ``get_retry_request`` or reads crawler stats needs
+    one; a bare ``Spider()`` has no ``crawler``. Nothing is downloaded: the reactor is
+    installed only because Scrapy's ``get_crawler`` checks the crawler settings against it.
+    """
+    from scrapy.utils.reactor import install_reactor, is_reactor_installed
+    from scrapy.utils.test import get_crawler
+
+    if not is_reactor_installed():
+        install_reactor("twisted.internet.asyncioreactor.AsyncioSelectorReactor")
+
+    def make(spidercls, **kwargs):  # type: ignore[no-untyped-def]
+        return spidercls.from_crawler(get_crawler(spidercls), **kwargs)
+
+    return make

@@ -18,14 +18,14 @@ from urllib.parse import parse_qs, urlparse
 
 import scrapy
 from scrapy.http import Response
-from twisted.python.failure import Failure
 
 # Add project root to path for shared imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from shared.constants import SOLIDWORKS_API_BOUNDARY, SOLIDWORKS_BASE_URL, expand_toc_url
+from shared.help_page_spider import HelpPageSpider
 
 
-class ApiDocsSpider(scrapy.Spider):
+class ApiDocsSpider(HelpPageSpider):
     name = "api_docs"
     allowed_domains = ["help.solidworks.com"]
 
@@ -61,56 +61,55 @@ class ApiDocsSpider(scrapy.Spider):
         """
         try:
             data = json.loads(response.text)
+        except json.JSONDecodeError:
+            # A truncated or corrupt TOC response would drop the node's whole subtree.
+            yield from self.retry_or_fail(response.request, "unparseable expandToc JSON")
+            return
 
-            # Save the JSON response itself
-            item = {
-                "url": response.url,
-                "status_code": response.status,
-                "content": response.text,
-                "headers": dict(response.headers),
-                "content_hash": hashlib.sha256(response.body).hexdigest(),
-                "content_length": len(response.body),
-                "title": "expandToc JSON",
-            }
-            yield item
+        # Save the JSON response itself
+        item = {
+            "url": response.url,
+            "status_code": response.status,
+            "content": response.text,
+            "headers": dict(response.headers),
+            "content_hash": hashlib.sha256(response.body).hexdigest(),
+            "content_length": len(response.body),
+            "title": "expandToc JSON",
+        }
+        yield item
 
-            # Recursively extract all URLs from the JSON structure
-            urls = self.extract_urls_from_json(data)
+        # Recursively extract all URLs from the JSON structure
+        urls = self.extract_urls_from_json(data)
 
-            self.logger.info(f"Found {len(urls)} URLs in JSON TOC")
+        self.logger.info(f"Found {len(urls)} URLs in JSON TOC")
 
-            # Create requests for each URL
-            for url in urls:
-                # Convert relative URL to absolute
-                full_url = url
-                if url.startswith("/"):
-                    full_url = self.base_url + url
+        # Create requests for each URL
+        for url in urls:
+            # Convert relative URL to absolute
+            full_url = url
+            if url.startswith("/"):
+                full_url = self.base_url + url
 
-                # Check if URL is within our allowed boundary
-                parsed = urlparse(full_url)
-                if not parsed.path.startswith(self.base_path):
-                    self.logger.debug(f"Skipping URL outside boundary: {full_url}")
-                    continue
+            # Check if URL is within our allowed boundary
+            parsed = urlparse(full_url)
+            if not parsed.path.startswith(self.base_path):
+                self.logger.debug(f"Skipping URL outside boundary: {full_url}")
+                continue
 
-                # Yield request for the page itself
-                yield scrapy.Request(
-                    full_url, callback=self.parse_page, errback=self.handle_error, meta={"original_url": full_url}
-                )
+            # Yield request for the page itself
+            yield scrapy.Request(
+                full_url, callback=self.parse_page, errback=self.handle_error, meta={"original_url": full_url}
+            )
 
-                # Extract id parameter and create expandToc request
-                query_params = parse_qs(parsed.query)
-                if "id" in query_params:
-                    id_value = query_params["id"][0]
-                    toc_url = expand_toc_url(id_value)
+            # Extract id parameter and create expandToc request
+            query_params = parse_qs(parsed.query)
+            if "id" in query_params:
+                id_value = query_params["id"][0]
+                toc_url = expand_toc_url(id_value)
 
-                    self.logger.debug(f"Adding expandToc URL for id={id_value}: {toc_url}")
+                self.logger.debug(f"Adding expandToc URL for id={id_value}: {toc_url}")
 
-                    yield scrapy.Request(toc_url, callback=self.parse, errback=self.handle_error, dont_filter=False)
-
-        except json.JSONDecodeError as e:
-            self.logger.error(f"Failed to parse JSON from {response.url}: {e}")
-        except Exception as e:
-            self.logger.error(f"Error processing JSON TOC: {e}")
+                yield scrapy.Request(toc_url, callback=self.parse, errback=self.handle_error, dont_filter=False)
 
     def extract_urls_from_json(self, data: Any) -> list[str]:
         """
@@ -141,7 +140,7 @@ class ApiDocsSpider(scrapy.Spider):
 
         return urls
 
-    def parse_page(self, response: Response) -> Generator[dict[str, Any], None, None]:
+    def parse_page(self, response: Response) -> Generator[Any, None, None]:
         """Parse and save a documentation page"""
         # Check if this is actually HTML content
         content_type_bytes = response.headers.get("Content-Type", b"")
@@ -163,35 +162,12 @@ class ApiDocsSpider(scrapy.Spider):
             self.logger.debug(f"Already crawled: {response.url}")
             return
 
+        # Only helpText from __NEXT_DATA__'s helpContentData is saved; a page without
+        # it is retried, then counted as failed.
+        content = yield from self.help_text_or_retry(response)
+        if content is None:
+            return
         self.crawled_urls.add(response.url)
-        self.stats["total_pages"] += 1
-
-        # Extract __NEXT_DATA__ JSON from the page
-        json_text = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
-
-        if not json_text:
-            self.logger.warning(f"No __NEXT_DATA__ JSON found in {response.url}")
-            self.stats["skipped_pages"] += 1
-            return
-
-        # Parse JSON and extract only helpText from helpContentData
-        try:
-            data = json.loads(json_text)
-            help_content_data = data.get("props", {}).get("pageProps", {}).get("helpContentData", {})
-            help_text = help_content_data.get("helpText")
-
-            if not help_text:
-                self.logger.warning(f"No helpText found in {response.url}")
-                self.stats["skipped_pages"] += 1
-                return
-
-            # Use the HTML content directly
-            content = help_text
-
-        except json.JSONDecodeError as e:
-            self.logger.error(f"Failed to parse __NEXT_DATA__ JSON from {response.url}: {e}")
-            self.stats["skipped_pages"] += 1
-            return
 
         # Create item with JSON data
         item = {
@@ -215,21 +191,6 @@ class ApiDocsSpider(scrapy.Spider):
 
         # Yield the item to be processed by pipelines
         yield item
-
-    def handle_error(self, failure: Failure) -> Generator[dict[str, Any], None, None]:
-        """Handle failed requests"""
-        self.stats["failed_pages"] += 1
-        request_url = failure.request.url  # type: ignore[attr-defined]
-        self.logger.error(f"Failed to crawl {request_url}: {failure.value}")
-
-        # Create error item for logging
-        error_item: dict[str, Any] = {
-            "type": "error",
-            "url": request_url,
-            "error": str(failure.value),
-        }
-
-        yield error_item
 
     def closed(self, reason: str) -> None:
         """Called when the spider is closed"""

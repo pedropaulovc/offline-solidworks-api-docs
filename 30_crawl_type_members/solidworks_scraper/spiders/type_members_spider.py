@@ -17,14 +17,14 @@ from typing import Any
 
 import scrapy
 from scrapy.http import Response
-from twisted.python.failure import Failure
 
 # Add project root to path for shared imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL, make_absolute_url
+from shared.help_page_spider import HelpPageSpider
 
 
-class TypeMembersSpider(scrapy.Spider):
+class TypeMembersSpider(HelpPageSpider):
     name = "type_members"
     allowed_domains = ["help.solidworks.com"]
 
@@ -112,7 +112,7 @@ class TypeMembersSpider(scrapy.Spider):
                 meta={"original_url": url},
             )
 
-    def parse_page(self, response: Response) -> Generator[dict[str, Any], None, None]:
+    def parse_page(self, response: Response) -> Generator[Any, None, None]:
         """Parse and save a documentation page"""
         # Check if this is actually HTML content
         content_type_bytes = response.headers.get("Content-Type", b"")
@@ -127,35 +127,12 @@ class TypeMembersSpider(scrapy.Spider):
             self.logger.debug(f"Already crawled: {response.url}")
             return
 
+        # Only helpText from __NEXT_DATA__'s helpContentData is saved; a page without
+        # it is retried, then counted as failed.
+        content = yield from self.help_text_or_retry(response)
+        if content is None:
+            return
         self.crawled_urls.add(response.url)
-        self.stats["total_pages"] += 1
-
-        # Extract __NEXT_DATA__ JSON from the page
-        json_text = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
-
-        if not json_text:
-            self.logger.warning(f"No __NEXT_DATA__ JSON found in {response.url}")
-            self.stats["skipped_pages"] += 1
-            return
-
-        # Parse JSON and extract only helpText from helpContentData
-        try:
-            data = json.loads(json_text)
-            help_content_data = data.get("props", {}).get("pageProps", {}).get("helpContentData", {})
-            help_text = help_content_data.get("helpText")
-
-            if not help_text:
-                self.logger.warning(f"No helpText found in {response.url}")
-                self.stats["skipped_pages"] += 1
-                return
-
-            # Use the HTML content directly
-            content = help_text
-
-        except json.JSONDecodeError as e:
-            self.logger.error(f"Failed to parse __NEXT_DATA__ JSON from {response.url}: {e}")
-            self.stats["skipped_pages"] += 1
-            return
 
         # Create item with extracted HTML
         item = {
@@ -179,21 +156,6 @@ class TypeMembersSpider(scrapy.Spider):
 
         # Yield the item to be processed by pipelines
         yield item
-
-    def handle_error(self, failure: Failure) -> Generator[dict[str, Any], None, None]:
-        """Handle failed requests"""
-        self.stats["failed_pages"] += 1
-        request_url = failure.request.url  # type: ignore[attr-defined]
-        self.logger.error(f"Failed to crawl {request_url}: {failure.value}")
-
-        # Create error item for logging
-        error_item: dict[str, Any] = {
-            "type": "error",
-            "url": request_url,
-            "error": str(failure.value),
-        }
-
-        yield error_item
 
     def closed(self, reason: str) -> None:
         """Called when the spider is closed"""

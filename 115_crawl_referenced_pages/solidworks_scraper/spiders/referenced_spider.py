@@ -18,7 +18,6 @@ from typing import Any
 
 import scrapy
 from scrapy.http import Response
-from twisted.python.failure import Failure
 
 # spiders/ -> solidworks_scraper/ -> 115_crawl_referenced_pages/ -> repo root
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -28,6 +27,7 @@ import sys
 sys.path.insert(0, str(REPO_ROOT / "115_crawl_referenced_pages"))
 sys.path.insert(0, str(REPO_ROOT))
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL  # noqa: E402
+from shared.help_page_spider import HelpPageSpider  # noqa: E402
 from link_targets import (  # noqa: E402
     ReferenceSource,
     build_bundle_doc_keys,
@@ -110,9 +110,13 @@ def _reference_sources() -> list[ReferenceSource]:
     return sources
 
 
-class ReferencedSpider(scrapy.Spider):
+class ReferencedSpider(HelpPageSpider):
     name = "referenced_pages"
     allowed_domains = ["help.solidworks.com"]
+
+    # Seeds and followed links include dead links the server cannot find
+    # (help_list.htm, stale ms-its:*.chm:: links, empty stubs like DP_ImageQuality).
+    dead_links_expected = True
 
     custom_settings = {
         "DEPTH_LIMIT": 0,  # bounded by the exclusion set + /api boundary instead
@@ -177,25 +181,12 @@ class ReferencedSpider(scrapy.Spider):
             self.stats["skipped_pages"] += 1
             return
 
-        # Extract helpText from __NEXT_DATA__ (same shape as the guide pages).
-        json_text = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
-        if not json_text:
-            self.logger.warning(f"No __NEXT_DATA__ in {response.url}")
-            self.stats["skipped_pages"] += 1
-            return
-        try:
-            data = json.loads(json_text)
-            help_text = data.get("props", {}).get("pageProps", {}).get("helpContentData", {}).get("helpText")
-        except json.JSONDecodeError as e:
-            self.logger.error(f"Bad __NEXT_DATA__ JSON in {response.url}: {e}")
-            self.stats["skipped_pages"] += 1
-            return
-        if not help_text:
-            self.logger.warning(f"No helpText in {response.url}")
-            self.stats["skipped_pages"] += 1
+        # Extract helpText from __NEXT_DATA__ (same shape as the guide pages); a page
+        # without it is retried, then failed or skipped as a confirmed dead link.
+        help_text = yield from self.help_text_or_retry(response)
+        if help_text is None:
             return
 
-        self.stats["total_pages"] += 1
         self.stats["successful_pages"] += 1
         title = response.xpath("//title/text()").get()
         item = {
@@ -211,7 +202,7 @@ class ReferencedSpider(scrapy.Spider):
         self.logger.info(f"Crawled referenced page: {response.url} - {item['title']}")
 
         # Follow in-page /api links, expanding the closure to newly-referenced pages.
-        if self.stats["total_pages"] >= self.MAX_PAGES:
+        if self.stats["successful_pages"] >= self.MAX_PAGES:
             self.logger.warning(f"MAX_PAGES ({self.MAX_PAGES}) reached; stopping closure expansion")
             return
 
@@ -226,12 +217,6 @@ class ReferencedSpider(scrapy.Spider):
             self.seen.add(tkey)
             self.stats["discovered_via_links"] += 1
             yield scrapy.Request(target, callback=self.parse_page, errback=self.handle_error, meta={"origin": "link"})
-
-    def handle_error(self, failure: Failure) -> Generator[dict[str, Any], None, None]:
-        self.stats["failed_pages"] += 1
-        request_url = failure.request.url  # type: ignore[attr-defined]
-        self.logger.error(f"Failed to crawl {request_url}: {failure.value}")
-        yield {"type": "error", "url": request_url, "error": str(failure.value)}
 
     def closed(self, reason: str) -> None:
         self.stats["reason"] = reason

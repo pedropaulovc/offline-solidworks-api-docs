@@ -20,6 +20,7 @@ from scrapy.exceptions import DropItem
 # Add project root to path for shared imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL, SOLIDWORKS_API_PATH_PREFIX, SOLIDWORKS_API_VERSION
+from shared.help_page_spider import HelpPageSpider
 
 # Doc year the local (gitignored) output/html corpus was crawled for. Saved pages
 # carry no year, so consumers that need a current-version corpus check this file.
@@ -43,26 +44,6 @@ def read_marker_year() -> str | None:
     if not CRAWL_VERSION_FILE.exists():
         return None
     return CRAWL_VERSION_FILE.read_text(encoding="utf-8").strip().removesuffix(PARTIAL_SUFFIX) or None
-
-
-def crawl_failures(spider: Spider) -> dict[str, int]:
-    """Nonzero counts of events that leave holes in the corpus, by kind.
-
-    Each kind is counted once at its source (not via log counters, which depend on
-    LOG_LEVEL and count unrelated errors): failed downloads (errback), callback
-    exceptions, pages whose __NEXT_DATA__ failed to parse, page saves that raised,
-    and required example-URL sources that were missing or failed to load.
-    """
-    counts = {
-        "failed downloads": spider.stats["failed_pages"],
-        "parse failures": spider.stats["parse_failures"],
-        "save failures": spider.stats["save_failures"],
-        "URL source failures": spider.stats["url_source_failures"],
-    }
-    crawler = getattr(spider, "crawler", None)  # absent on spiders built outside a crawler
-    if crawler is not None:
-        counts["callback exceptions"] = crawler.stats.get_value("spider_exceptions/count", 0)
-    return {kind: count for kind, count in counts.items() if count}
 
 
 class HtmlSavePipeline:
@@ -94,12 +75,12 @@ class HtmlSavePipeline:
         self.corpus_version = CorpusVersion.CURRENT
         CRAWL_VERSION_FILE.write_text(f"{SOLIDWORKS_API_VERSION}{PARTIAL_SUFFIX}\n", encoding="utf-8")
 
-    def spider_closed(self, spider: Spider, reason: str) -> None:
+    def spider_closed(self, spider: HelpPageSpider, reason: str) -> None:
         if reason != "finished" or self.corpus_version is not CorpusVersion.CURRENT:
             return
-        # "finished" only means the scheduler drained; failed downloads, callback
+        # "finished" only means the scheduler drained; failed pages, callback
         # exceptions and save errors all leave holes in the corpus.
-        failures = crawl_failures(spider)
+        failures = spider.crawl_failures()
         if failures:
             summary = ", ".join(f"{count} {kind}" for kind, count in failures.items())
             spider.logger.warning(

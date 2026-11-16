@@ -21,16 +21,20 @@ from urllib.parse import urlparse
 
 import scrapy
 from scrapy.http import Response
-from twisted.python.failure import Failure
 
 # Add project root to path for shared imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
+from shared.help_page_spider import HelpPageSpider
 
 
-class ExamplesSpider(scrapy.Spider):
+class ExamplesSpider(HelpPageSpider):
     name = "examples"
     allowed_domains = ["help.solidworks.com"]
+
+    # Example URLs come from cross-reference links, a few of which are dead
+    # (e.g. ms-its:sldworksapi.chm::/... links the server cannot find).
+    dead_links_expected = True
 
     # Custom settings for this spider
     custom_settings = {
@@ -48,11 +52,9 @@ class ExamplesSpider(scrapy.Spider):
             "successful_pages": 0,
             "failed_pages": 0,
             "skipped_pages": 0,
-            # Holes in the corpus that are not download failures (see
-            # HtmlSavePipeline.spider_closed): pages whose __NEXT_DATA__ could not be
-            # parsed, pages that could not be written, and required example-URL
-            # sources that were missing or unreadable.
-            "parse_failures": 0,
+            # Holes in the corpus that are not failed pages (see crawl_failures):
+            # pages that could not be written, and required example-URL sources
+            # that were missing or unreadable.
             "save_failures": 0,
             "url_source_failures": 0,
             "urls_from_types": 0,
@@ -153,7 +155,7 @@ class ExamplesSpider(scrapy.Spider):
                 meta={"original_url": url},
             )
 
-    def parse_page(self, response: Response) -> Generator[dict[str, Any], None, None]:
+    def parse_page(self, response: Response) -> Generator[Any, None, None]:
         """Parse and save an example page"""
         # Check if this is actually HTML content
         content_type_bytes = response.headers.get("Content-Type", b"")
@@ -168,35 +170,12 @@ class ExamplesSpider(scrapy.Spider):
             self.logger.debug(f"Already crawled: {response.url}")
             return
 
+        # Only helpText from __NEXT_DATA__'s helpContentData is saved; a page without
+        # it is retried, then counted as failed (or skipped as a confirmed dead link).
+        content = yield from self.help_text_or_retry(response)
+        if content is None:
+            return
         self.crawled_urls.add(response.url)
-        self.stats["total_pages"] += 1
-
-        # Extract __NEXT_DATA__ JSON from the page
-        json_text = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
-
-        if not json_text:
-            self.logger.warning(f"No __NEXT_DATA__ JSON found in {response.url}")
-            self.stats["skipped_pages"] += 1
-            return
-
-        # Parse JSON and extract only helpText from helpContentData
-        try:
-            data = json.loads(json_text)
-            help_content_data = data.get("props", {}).get("pageProps", {}).get("helpContentData", {})
-            help_text = help_content_data.get("helpText")
-
-            if not help_text:
-                self.logger.warning(f"No helpText found in {response.url}")
-                self.stats["skipped_pages"] += 1
-                return
-
-            # Use the HTML content directly
-            content = help_text
-
-        except json.JSONDecodeError as e:
-            self.logger.error(f"Failed to parse __NEXT_DATA__ JSON from {response.url}: {e}")
-            self.stats["parse_failures"] += 1
-            return
 
         # Create item with JSON data
         item = {
@@ -221,20 +200,14 @@ class ExamplesSpider(scrapy.Spider):
         # Yield the item to be processed by pipelines
         yield item
 
-    def handle_error(self, failure: Failure) -> Generator[dict[str, Any], None, None]:
-        """Handle failed requests"""
-        self.stats["failed_pages"] += 1
-        request_url = failure.request.url  # type: ignore[attr-defined]
-        self.logger.error(f"Failed to crawl {request_url}: {failure.value}")
-
-        # Create error item for logging
-        error_item: dict[str, Any] = {
-            "type": "error",
-            "url": request_url,
-            "error": str(failure.value),
+    def crawl_failures(self) -> dict[str, int]:
+        """Failed pages and callback exceptions, plus page saves that raised and
+        required example-URL sources that were missing or failed to load."""
+        counts = {
+            "save failures": self.stats["save_failures"],
+            "URL source failures": self.stats["url_source_failures"],
         }
-
-        yield error_item
+        return super().crawl_failures() | {kind: count for kind, count in counts.items() if count}
 
     def closed(self, reason: str) -> None:
         """Called when the spider is closed"""
