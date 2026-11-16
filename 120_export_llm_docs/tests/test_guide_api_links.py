@@ -314,7 +314,7 @@ def test_see_href_reattaches_fragment_to_resolved_target():
         {"dp_units.htm": "docs/swconst/DP_Units.md"},
         rel_prefix="../../",
     )
-    assert out == "[Units](<../../docs/swconst/DP_Units.md#remarks>)"
+    assert out == "[Units](../../docs/swconst/DP_Units.md#remarks)"
 
 
 def test_see_href_without_fragment_is_unchanged():
@@ -325,4 +325,18 @@ def test_see_href_without_fragment_is_unchanged():
         {"dp_units.htm": "docs/swconst/DP_Units.md"},
         rel_prefix="../../",
     )
-    assert out == "[Units](<../../docs/swconst/DP_Units.md>)"
+    assert out == "[Units](../../docs/swconst/DP_Units.md)"
+
+
+def test_see_href_to_a_guide_page_with_hash_and_spaces_in_its_name():
+    """``ComVisibleAttribute in VB.NET and C# Macros and Add-ins.md``: the file name's
+    '#' is percent-encoded so it does not start the fragment, and the spaces make the
+    destination angle-wrapped."""
+    from markdown_generator import simplify_cross_references
+
+    out = simplify_cross_references(
+        f'<see href="{API_ROOT}sldworksapiprogguide/Overview/ComVisibleAttribute_in_VSTA_macros.htm#use">CV</see>',
+        {"comvisibleattribute_in_vsta_macros.htm": "docs/Guide/ComVisibleAttribute in VB.NET and C# Macros.md"},
+        rel_prefix="../../",
+    )
+    assert out == "[CV](<../../docs/Guide/ComVisibleAttribute in VB.NET and C%23 Macros.md#use>)"

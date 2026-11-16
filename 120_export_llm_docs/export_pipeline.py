@@ -30,7 +30,14 @@ from shared.constants import (  # noqa: E402
 )
 from shared.guide_pages import GuidePage, GuidePagesUnavailable, case_collisions, read_guide_pages  # noqa: E402
 from shared.line_endings import normalize_tree  # noqa: E402
+from shared.markdown_links import markdown_destination  # noqa: E402
 from models import TypeInfo, ExampleContent, ExportStatistics
+
+
+def _url_destination(url: str) -> str:
+    """:func:`markdown_destination` for a URL, whose ``#`` starts its fragment."""
+    base, hash_mark, fragment = url.partition("#")
+    return markdown_destination(base, hash_mark + fragment)
 
 
 class ExportPipeline:
@@ -335,17 +342,6 @@ class ExportPipeline:
             return None
         return online
 
-    @staticmethod
-    def _md_destination(path: str) -> str:
-        """A Markdown link destination, angle-wrapped when it needs to be.
-
-        Phase 110 mirrors the guide's own hierarchy, so many targets are paths like
-        ``Programming with the SOLIDWORKS API/Add-ins/Toolbars.md``. A bare space
-        ends the destination in CommonMark, which would break the link -- ``<...>``
-        is how ``_render_see_also`` already handles it.
-        """
-        return f"<{path}>" if re.search(r"[ ()]", path) else path
-
     def _rewrite_guide_api_links(self, types: Dict[str, TypeInfo], base_url: str,
                                  guide_links: Dict[str, str],
                                  examples: Dict[str, "ExampleContent"],
@@ -424,13 +420,12 @@ class ExportPipeline:
                             return match.group(0)
                         external += 1
                         state["changed"] = True
-                        return f"{head}{self._md_destination(online)}{tail}"
+                        return f"{head}{_url_destination(online)}{tail}"
                     _, _, fragment = url.partition("#")
                     anchor = f"#{fragment}" if fragment else ""
-                    destination = f"{posixpath.relpath(target, guide_dir)}{anchor}"
                     pages += 1
                     state["changed"] = True
-                    return f"{head}{self._md_destination(destination)}{tail}"
+                    return f"{head}{markdown_destination(posixpath.relpath(target, guide_dir), anchor)}{tail}"
 
                 assembly, type_name, member_name = parsed
                 entry = type_idx.get(type_name.lower())
@@ -450,7 +445,7 @@ class ExportPipeline:
                     if target:
                         resolved += 1
                         state["changed"] = True
-                        return f"{head}{posixpath.relpath(target, guide_dir)}{tail}"
+                        return f"{head}{markdown_destination(posixpath.relpath(target, guide_dir))}{tail}"
 
                 # Not in the bundle: link the online page, not a dead path. A reference
                 # page lives in its assembly folder, so a link naming that folder gives the
@@ -461,7 +456,7 @@ class ExportPipeline:
                 if online is not None:
                     external += 1
                     state["changed"] = True
-                    return f"{head}{self._md_destination(online)}{tail}"
+                    return f"{head}{_url_destination(online)}{tail}"
                 asm = assembly if folder_named else posixpath.basename(guide_dir)
                 if not asm or asm == "docs":
                     return match.group(0)

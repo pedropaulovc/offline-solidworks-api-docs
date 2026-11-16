@@ -1,9 +1,13 @@
 """Rewrite URLs in Markdown files to work with new hierarchical structure."""
 
 import re
+import sys
 from pathlib import Path
 from typing import Dict
 from urllib.parse import urljoin, urlparse
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from shared.markdown_links import markdown_destination  # noqa: E402
 
 
 class UrlRewriter:
@@ -102,14 +106,7 @@ class UrlRewriter:
                 relative_path = re.sub(r"\.html?$", ".md", relative_path, flags=re.IGNORECASE)
 
                 rewrite_count += 1
-                # Pages are laid out by TOC title, so paths often hold spaces and '#'
-                # ("Visual C#.md"). A '#' in a destination starts the fragment, so it is
-                # percent-encoded; a bare space or parenthesis ends a CommonMark
-                # destination, <...> does not.
-                relative_path = relative_path.replace("#", "%23")
-                if re.search(r"[ ()]", relative_path):
-                    relative_path = f"<{relative_path}>"
-                return f"[{link_text}]({relative_path})"
+                return f"[{link_text}]({markdown_destination(relative_path)})"
 
             # URL not found in our index, return original
             return match.group(0)

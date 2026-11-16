@@ -69,9 +69,20 @@ Phase 90 guides catalog built from it carries an alias.
 `read_guide_pages(markdown_root)` returns the pages a guide phase (110, 115) lists in its
 `metadata/files_created.jsonl`, with each page's help path and path under the root.
 Phases 90 and 120 ship guide Markdown from this list, not from the files on disk, so a
-page an earlier run left in the tree never ships. `case_collisions(paths)` finds paths
-that differ only in case; Phase 120 fails the export on any, since unpacking the bundle
-on Windows or macOS would keep only one of each.
+page an earlier run left in the tree never ships. A missing tree or manifest (a fresh
+clone: manifests are committed, `output/` is not) raises `GuidePagesUnavailable`, which
+both phases warn about and skip; a tree missing a listed page raises
+`FileNotFoundError`. `case_collisions(paths)` finds paths that differ only in case;
+Phase 120 fails the export on any, since unpacking the bundle on Windows or macOS would
+keep only one of each.
+
+### `markdown_links.py`
+
+`markdown_destination(path, fragment="")` builds the Markdown link destination for a
+bundle file path. Guide pages are named after TOC titles, so a `#` in the name is
+percent-encoded (it would start the fragment) and a path with a space or parenthesis is
+angle-wrapped. Phase 110's URL rewriter and Phase 120's guide-link rewrite, See Also and
+`<see href>` rendering all use it.
 
 ### `help_page_spider.py`
 

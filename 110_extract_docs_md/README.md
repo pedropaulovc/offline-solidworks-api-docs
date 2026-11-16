@@ -286,11 +286,14 @@ All dependencies are managed via `pyproject.toml`.
 
 1. **TOC Pages**: Non-leaf nodes (TOC/index pages) are not converted, only content pages
 2. **Character Encoding**: Uses UTF-8 throughout, may need adjustment for other encodings
-3. **Link Preservation**: Links to other guide pages become relative `.md` paths
-   (matched case-insensitively, as the help server matches paths; angle-wrapped,
-   `[x](<Add-ins/Toolbars.md>)`, when the path holds a space or parenthesis); the rest
-   keep their help-site form, relative to the page's original URL. Phase 120 resolves
-   those against the files it ships or the online help.
+3. **Link Preservation**: Links to other guide pages become relative `.md` paths,
+   matched case-insensitively, as the help server matches paths. The destination is
+   built by `shared/markdown_links.py` (as Phase 120's are), so it is not always the
+   literal file name: a `#` in the name is percent-encoded (`Visual C%23.md` for
+   `Visual C#.md`), and a path with a space or parenthesis is angle-wrapped
+   (`[x](<Add-ins/Add-in Toolbars.md>)`). The rest keep their help-site form, relative
+   to the page's original URL; Phase 120 resolves those against the files it ships or
+   the online help.
 4. **Image Handling**: Image references preserved but images themselves not downloaded.
    A page with no text, only images, is not written (see above).
 

@@ -6,11 +6,15 @@ Supports both monolithic (one file per type) and grep-optimized (file-per-member
 """
 
 import re
+import sys
 from pathlib import Path
 from typing import Dict, Optional, List
 import html
 
 from models import TypeInfo, ExampleContent, Member, Property, Method, EnumMember
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from shared.markdown_links import markdown_destination  # noqa: E402
 
 # ``../`` sequence from a generated file to the bundle root, used to build
 # relative links into ``docs/``. Type files live at ``types/{Name}/*.md`` (two
@@ -150,8 +154,8 @@ def simplify_cross_references(text: str, guide_links: Optional[Dict[str, str]] =
       become ``[[Label]]`` wiki-links (greppable API references).
     - ``<see href="URL">Label</see>`` becomes a relative markdown link to the
       programming-guide file when that page ships in the bundle
-      (``[Label](<rel_prefix + docs/…>)``), otherwise a plain external link
-      ``[Label](URL)``.
+      (``[Label](rel_prefix + docs/…)``, the destination built by
+      :func:`markdown_destination`), otherwise a plain external link ``[Label](URL)``.
 
     Args:
         text: Raw text containing ``<see …>`` tags.
@@ -178,7 +182,7 @@ def simplify_cross_references(text: str, guide_links: Optional[Dict[str, str]] =
         url, label = match.group(1), match.group(2)
         target = links.get(guide_link_key(url))
         if target:
-            return f'[{label}](<{rel_prefix}{target}{url_fragment(url)}>)'
+            return f'[{label}]({markdown_destination(rel_prefix + target, url_fragment(url))})'
         return f'[{label}]({url})'
 
     text = re.sub(r'<see href="([^"]*)">([^<]+)</see>', replace_href, text)
@@ -715,7 +719,7 @@ class MarkdownGenerator:
                 return f"- [[{ref.label}]]"
             target = self.guide_links.get(guide_link_key(ref.value))
             if target:
-                return f"- [{ref.label}](<{rel_prefix}{target}{url_fragment(ref.value)}>)"
+                return f"- [{ref.label}]({markdown_destination(rel_prefix + target, url_fragment(ref.value))})"
             return f"- [{ref.label}]({ref.value})"
 
         return ["## See Also\n", _block([render(ref) for ref in see_also])]

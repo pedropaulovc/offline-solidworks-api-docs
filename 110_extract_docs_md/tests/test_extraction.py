@@ -181,6 +181,10 @@ class TestHtmlToMarkdownConverter:
             ('<img src="a.gif"><p>The symbol libraries.</p>', True),
             ("<h1>Title</h1>", True),
             ("<html><head><title>T</title></head><body><p>Body text.</p></body></html>", True),
+            # </head> may be omitted; <body> ends the head for html2text too.
+            ("<html><head><title>T</title><body><p>Body</p></body></html>", True),
+            # html2text hides everything after a stray </head>.
+            ("</head><p>Hidden</p>", False),
         ],
     )
     def test_has_text(self, html, expected):

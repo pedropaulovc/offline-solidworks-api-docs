@@ -64,7 +64,13 @@ class _TextFound(Exception):
 
 
 class _TextFinder(HTMLParser):
-    """Raises :class:`_TextFound` at the first non-whitespace text html2text would keep."""
+    """Raises :class:`_TextFound` at the first non-whitespace text html2text would keep.
+
+    Tracks hidden content the way html2text's ``quiet`` counter does: each hidden
+    start tag adds one and each end tag takes one away (a stray ``</head>`` goes
+    negative and hides the rest, as there), and ``<body>`` resets it, since
+    ``</head>`` may be omitted.
+    """
 
     def __init__(self) -> None:
         super().__init__()
@@ -73,13 +79,17 @@ class _TextFinder(HTMLParser):
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         if tag in _HIDDEN_TAGS:
             self._hidden_depth += 1
+        if tag == "body":
+            self._hidden_depth = 0
 
     def handle_endtag(self, tag: str) -> None:
-        if tag in _HIDDEN_TAGS and self._hidden_depth:
+        if tag in _HIDDEN_TAGS:
             self._hidden_depth -= 1
+        if tag == "body":
+            self._hidden_depth = 0
 
     def handle_data(self, data: str) -> None:
-        if not self._hidden_depth and data.strip():
+        if self._hidden_depth == 0 and data.strip():
             raise _TextFound
 
 
