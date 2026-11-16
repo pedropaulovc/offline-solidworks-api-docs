@@ -246,11 +246,12 @@ class HelpPageSpider(scrapy.Spider):
         class, a HelpTextProblem value, an HTTP status); ``detail`` only goes to the log.
         """
         max_retry_times = request.meta.get("max_retry_times", self.crawler.settings.getint("RETRY_TIMES"))
+        # The one exhaustion check: page_failed logs the give-up, so get_retry_request
+        # never reaches its own "Gave up retrying" ERROR line.
         if request.meta.get("retry_times", 0) >= max_retry_times:
             return None
         retry = get_retry_request(request, spider=self, reason=reason, max_retry_times=max_retry_times)
-        if retry is None:
-            return None
+        assert retry is not None  # budget left, checked above
         delay = RETRY_BACKOFF_SECONDS * retry.meta["retry_times"]
         self.logger.warning(f"Retrying {request.url} in {delay}s: {detail or reason}")
         self.schedule_later(retry, delay)

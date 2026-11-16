@@ -302,7 +302,7 @@ def test_retryable_status_fails_once_retries_are_exhausted(spider):
 
     assert error["error"] == "503 Service Unavailable"
     assert spider.stats["failed_pages"] == 1
-    assert spider.crawler.stats.get_value("retry/max_reached") is None  # no second "Gave up" log
+    assert spider.crawler.stats.get_value("retry/max_reached") is None  # page_failed is the only give-up record
 
 
 def test_other_http_status_is_final(spider, release_waiting):
