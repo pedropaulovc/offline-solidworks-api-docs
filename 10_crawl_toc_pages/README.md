@@ -191,8 +191,8 @@ The main spider (`api_docs_spider.py`) implements a two-stage crawling approach:
 - Stores complete metadata for reproducibility
 
 ### Error Handling
-- Retries failed requests (up to `RETRY_TIMES`, 3), including transient faults Scrapy's
-  RetryMiddleware never sees: undecompressible bodies and pages whose `__NEXT_DATA__`
+- Retries failed requests (up to `RETRY_TIMES`, 3, waiting 5/10/15 s): download errors,
+  `RETRY_HTTP_CODES` statuses, undecompressible bodies, and pages whose `__NEXT_DATA__`
   has no `helpText` (see `shared/help_page_spider.py`)
 - A page still failing after its retries is counted in `failed_pages` and logged to
   `errors.jsonl`; the crawl continues, but `run_crawler.py` then exits 1

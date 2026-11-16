@@ -44,19 +44,24 @@ uv run pytest shared/tests/ -v
 115). help.solidworks.com occasionally answers with a corrupt body or an incomplete page;
 the base class retries those instead of dropping the page:
 
-- `handle_error` (the errback) retries errors raised while processing a response, such as
-  "Error -3 while decompressing data", which bypass Scrapy's RetryMiddleware. HTTP error
-  statuses and ignored requests are final; download errors RetryMiddleware already retried
-  are not retried again.
+- `handle_error` (the errback) retries download errors (timeouts, lost connections),
+  `RETRY_HTTP_CODES` statuses, and errors raised while processing a response, such as
+  "Error -3 while decompressing data". Other HTTP statuses and ignored requests are final.
+  Scrapy's RetryMiddleware is disabled, so every retry takes this one path.
 - `help_text_or_retry` (use as `help_text = yield from self.help_text_or_retry(response)`)
   retries pages whose `__NEXT_DATA__` is missing or unparseable, or whose
   `helpContentData`/`helpText` is null or empty.
 
-Retries go through `get_retry_request`, so `RETRY_TIMES` bounds them, and
-`RetryDelayMiddleware` (registered by the spider) holds retry *n* back for
-`RETRY_BACKOFF_SECONDS * n` seconds (5, 10, 15) so a short backend hiccup does not use
-up every attempt. Once a page's retries are exhausted it counts in `failed_pages` and is
-logged to `errors.jsonl`. Pages `HtmlSavePipeline` cannot write count in `save_failures`
+Retries go through `get_retry_request`, so `RETRY_TIMES` bounds them, and retry *n* is
+held back `RETRY_BACKOFF_SECONDS * n` seconds (5, 10, 15) so a short backend hiccup does
+not use up every attempt. The wait happens outside the downloader (`schedule_later`: a
+reactor timer, then `engine.crawl`, with the spider kept open while requests wait), so a
+waiting retry holds no `CONCURRENT_REQUESTS` slot. The retry stats key is a fixed reason
+(exception class, `HelpTextProblem` value, HTTP status); details such as the server's
+error title go to the log and `errors.jsonl`.
+
+Once a page's retries are exhausted it counts in `failed_pages` and is logged to
+`errors.jsonl`. Pages `HtmlSavePipeline` cannot write count in `save_failures`
 (`save_failed()`), and callback exceptions count too. `crawl_exit_code(crawler, mode)`
 makes `run_crawler.py` exit 1 when any of those happened or the crawl did not finish (it
 closed for any reason but `finished`; `--test` runs also accept `closespider_pagecount`),
@@ -64,9 +69,13 @@ so `run_pipeline.sh` stops.
 
 Only the server's "This page cannot be found." page counts as a dead link, and only where
 `dead_link_policy = DeadLinkPolicy.SKIP_CONFIRMED` (phases 70 and 115, which follow
-cross-reference links): such a page is refetched once, after a delay, then skipped with a
-warning. Everywhere else, and for any other error page, it is a failure like any page
-without help text.
+cross-reference links). The server shows the same page during outages, so such a page is
+refetched once a minute later (counted apart from the retry budget, so a page whose
+earlier attempts timed out still gets it) and only then skipped. Skipped dead links are
+listed, sorted, under `dead_links` in the phase's `crawl_stats.json` and counted in the
+exit summary, so a page that newly turns up there shows in the committed metadata's
+diff. Everywhere else, and for any other error page, a not-found page is a failure like
+any page without help text.
 
 ## Design Principles
 

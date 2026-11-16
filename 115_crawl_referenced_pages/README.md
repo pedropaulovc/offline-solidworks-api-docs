@@ -56,6 +56,7 @@ uv run pytest 115_crawl_referenced_pages/tests/ -v
   answers with its "This page cannot be found." page (a dead link, e.g. the
   `sldworksapi/DP_ImageQuality.htm` stub, `help_list.htm`, stale `ms-its:*.chm::` links),
   stays an external link — it is out of scope for this closure, not un-crawled. Such a
-  page is refetched once (the server shows the same page during brief outages) and then
-  skipped; every one of the 63 pages the 2027 run skipped returned that page when
-  re-fetched (2026-11-16). Any other page without `helpText` fails the crawl.
+  page is refetched a minute later (the server shows the same page during brief outages)
+  and then skipped and listed under `dead_links` in `metadata/crawl_stats.json`; every one
+  of the 63 pages the 2027 run skipped returned that page when re-fetched (2026-11-16).
+  Any other page without `helpText` fails the crawl.

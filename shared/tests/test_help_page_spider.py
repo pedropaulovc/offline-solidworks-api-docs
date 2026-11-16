@@ -8,10 +8,15 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from scrapy import signals
 from scrapy.downloadermiddlewares.httpcompression import HttpCompressionMiddleware
+from scrapy.downloadermiddlewares.retry import RetryMiddleware
+from scrapy.exceptions import DontCloseSpider
 from scrapy.http import HtmlResponse, Request, Response
 from scrapy.spidermiddlewares.httperror import HttpError
-from twisted.internet.task import Clock
+from scrapy.utils.conf import build_component_list
+from scrapy.utils.misc import load_object
+from twisted.internet.error import TimeoutError as DownloadTimeoutError
 from twisted.python.failure import Failure
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -19,15 +24,15 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL  # noqa: E402
 from shared.help_page_spider import (  # noqa: E402
+    DEAD_LINK_CONFIRMATION_DELAY_SECONDS,
+    NOT_FOUND_CONFIRMATIONS_META,
     NOT_FOUND_TITLE,
     RETRY_BACKOFF_SECONDS,
-    RETRY_DELAY_META,
     CrawlMode,
     DeadLinkPolicy,
     HelpPageSpider,
     HelpTextProblem,
     MissingHelpTextError,
-    RetryDelayMiddleware,
     crawl_exit_code,
     read_help_text,
 )
@@ -86,7 +91,7 @@ def help_page(help_content_data: Any, meta: dict | None = None) -> HtmlResponse:
 
 def decompression_failure(spider: HelpPageSpider, meta: dict | None = None) -> Failure:
     """The failure a corrupt gzip body produces: HttpCompressionMiddleware raises it from
-    process_response, which skips RetryMiddleware, so it reaches the errback unretried."""
+    process_response, so it reaches the errback, never RetryMiddleware."""
     body = bytearray(gzip.compress(b"<html>" + bytes(range(256)) * 50 + b"</html>"))
     body[10:16] = b"\x07" * 6
     request = Request(URL, meta=meta or {})
@@ -98,6 +103,13 @@ def decompression_failure(spider: HelpPageSpider, meta: dict | None = None) -> F
     else:
         pytest.fail("corrupt gzip body decompressed")
     failure.request = request  # set by Scrapy's scraper before calling the errback
+    return failure
+
+
+def http_failure(status: int, meta: dict | None = None) -> Failure:
+    request = Request(URL, meta=meta or {})
+    failure = Failure(HttpError(Response(URL, status=status, request=request), "Ignoring non-200 response"))
+    failure.request = request
     return failure
 
 
@@ -143,33 +155,48 @@ def test_read_help_text_reports_why_help_text_is_missing(response, problem, reas
 # --- response without help text ---------------------------------------------
 
 
-def test_null_help_content_data_is_retried_after_a_delay(spider):
+def test_null_help_content_data_is_retried_after_a_growing_delay(spider, release_waiting):
     """Phase 30 lost ISurface~GetIntersectCurveCount2.html to helpContentData: null (and crashed)."""
-    [retry] = list(spider.parse_page(help_page(None)))
+    assert list(spider.parse_page(help_page(None))) == []
+    assert release_waiting(spider, RETRY_BACKOFF_SECONDS - 0.1) == []
+    [retry] = release_waiting(spider, 0.1)
 
-    assert isinstance(retry, Request)
     assert retry.url == URL
     assert retry.dont_filter
     assert retry.meta["retry_times"] == 1
-    assert retry.meta[RETRY_DELAY_META] == RETRY_BACKOFF_SECONDS
     assert spider.stats["total_pages"] == spider.stats["failed_pages"] == 0
 
-    [second] = list(spider.parse_page(help_page(None, meta=retry.meta)))
-    assert second.meta[RETRY_DELAY_META] == 2 * RETRY_BACKOFF_SECONDS
+    assert list(spider.parse_page(help_page(None, meta=retry.meta))) == []
+    assert release_waiting(spider, 2 * RETRY_BACKOFF_SECONDS - 0.1) == []
+    [second] = release_waiting(spider, 0.1)
+    assert second.meta["retry_times"] == 2
 
 
-def test_page_without_help_text_fails_once_retries_are_exhausted(spider):
+def test_retry_stats_keys_are_fixed_reasons(spider):
+    """A server error title goes to the log and errors.jsonl, not into a stats key."""
+    list(spider.parse_page(help_page({"ErrorTitle": "Something went wrong."})))
+    list(spider.parse_page(help_page({"ErrorTitle": "Unexpected failure 0x2a"})))
+
+    assert spider.crawler.stats.get_value("retry/reason_count/server error page") == 2
+    [error] = list(spider.parse_page(help_page({"ErrorTitle": "Something went wrong."}, exhausted(spider))))
+    assert error["error"] == "server error page: Something went wrong."
+
+
+def test_page_without_help_text_fails_once_retries_are_exhausted(spider, release_waiting):
     [error] = list(spider.parse_page(help_page(None, meta=exhausted(spider))))
 
     assert error == {"type": "error", "url": URL, "error": "helpContentData is null"}
     assert spider.stats["failed_pages"] == 1
     assert spider.stats["total_pages"] == 1
     assert spider.crawl_failures() == {"failed pages": 1}
+    assert release_waiting(spider, 3600) == []
 
 
-def test_not_found_page_fails_a_crawl_of_listed_pages(spider):
-    """TOC and member-list crawls fetch pages the docs list, so even a confirmed not-found page is lost."""
-    assert isinstance(next(spider.parse_page(help_page(NOT_FOUND, meta={"retry_times": 1}))), Request)
+def test_not_found_page_fails_a_crawl_of_listed_pages(spider, release_waiting):
+    """TOC and member-list crawls fetch pages the docs list, so even a not-found page is lost."""
+    assert list(spider.parse_page(help_page(NOT_FOUND))) == []
+    [retry] = release_waiting(spider, RETRY_BACKOFF_SECONDS)
+    assert retry.meta["retry_times"] == 1
 
     [error] = list(spider.parse_page(help_page(NOT_FOUND, meta=exhausted(spider))))
 
@@ -177,30 +204,43 @@ def test_not_found_page_fails_a_crawl_of_listed_pages(spider):
     assert spider.stats["failed_pages"] == 1
 
 
-def test_dead_link_is_refetched_once_then_skipped_quietly(crawler_spider, caplog):
-    """The not-found page can be transient, so one delayed refetch confirms a dead link; no
-    RETRY_TIMES refetches, and no ERROR log line for an expected skip."""
+def test_dead_link_is_confirmed_a_minute_later_then_skipped_quietly(crawler_spider, release_waiting, caplog):
+    """The not-found page can be transient, so one refetch a minute later confirms a dead link;
+    the skip is listed in the stats, without an ERROR log line or a retry stats entry."""
     spider = crawler_spider(DeadLinksSpider)
-    [retry] = list(spider.parse_page(help_page(NOT_FOUND)))
-    assert retry.meta["retry_times"] == 1
-    assert retry.meta[RETRY_DELAY_META] == RETRY_BACKOFF_SECONDS
+    assert list(spider.parse_page(help_page(NOT_FOUND))) == []
+    assert release_waiting(spider, DEAD_LINK_CONFIRMATION_DELAY_SECONDS - 0.1) == []
+    [confirmation] = release_waiting(spider, 0.1)
+    assert confirmation.meta[NOT_FOUND_CONFIRMATIONS_META] == 1
+    assert confirmation.dont_filter
 
-    with caplog.at_level(logging.WARNING):
-        assert list(spider.parse_page(help_page(NOT_FOUND, meta=retry.meta))) == []
+    with caplog.at_level(logging.INFO):
+        assert list(spider.parse_page(help_page(NOT_FOUND, meta=confirmation.meta))) == []
 
+    assert release_waiting(spider, 3600) == []
     assert spider.stats["skipped_pages"] == 1
+    assert spider.stats["dead_links"] == [URL]
     assert spider.crawl_failures() == {}
     assert not [r for r in caplog.records if r.levelno >= logging.ERROR]
-    assert spider.crawler.stats.get_value("retry/max_reached") is None
+    assert spider.crawler.stats.get_value("retry/count") is None
+
+
+def test_dead_link_confirmation_does_not_share_the_retry_budget(crawler_spider, release_waiting):
+    """A page whose earlier attempts used up its retries (a timeout, a null page) still gets
+    its confirming refetch when it then shows the not-found page."""
+    spider = crawler_spider(DeadLinksSpider)
+
+    assert list(spider.parse_page(help_page(NOT_FOUND, meta=exhausted(spider)))) == []
+
+    [confirmation] = release_waiting(spider, DEAD_LINK_CONFIRMATION_DELAY_SECONDS)
+    assert confirmation.meta[NOT_FOUND_CONFIRMATIONS_META] == 1
+    assert spider.stats["skipped_pages"] == 0
 
 
 def test_dead_link_tolerance_covers_only_the_not_found_page(crawler_spider):
     """Any other server error page, or no help text at all, is a transient fault even in link crawls."""
     spider = crawler_spider(DeadLinksSpider)
 
-    assert isinstance(
-        next(spider.parse_page(help_page({"ErrorTitle": "Something went wrong."}, {"retry_times": 1}))), Request
-    )
     [error_page] = list(spider.parse_page(help_page({"ErrorTitle": "Something went wrong."}, exhausted(spider))))
     [null_page] = list(spider.parse_page(help_page(None, meta=exhausted(spider))))
 
@@ -208,6 +248,7 @@ def test_dead_link_tolerance_covers_only_the_not_found_page(crawler_spider):
     assert null_page["error"] == "helpContentData is null"
     assert spider.stats["failed_pages"] == 2
     assert spider.stats["skipped_pages"] == 0
+    assert spider.stats["dead_links"] == []
 
 
 def test_page_with_help_text_counts_once(spider):
@@ -219,19 +260,18 @@ def test_page_with_help_text_counts_once(spider):
 # --- errback ----------------------------------------------------------------
 
 
-def test_decompression_error_is_retried(spider):
+def test_decompression_error_is_retried_after_a_delay(spider, release_waiting):
     """Phase 10 lost IDraftFeatureData2.html?id=4.1.114 to 'Error -3 while decompressing data'."""
     failure = decompression_failure(spider)
     assert "decompressing data" in str(failure.value)
 
-    [retry] = list(spider.handle_error(failure))
+    assert list(spider.handle_error(failure)) == []
+    [retry] = release_waiting(spider, RETRY_BACKOFF_SECONDS)
 
-    assert isinstance(retry, Request)
     assert retry.url == URL
     assert retry.meta["retry_times"] == 1
-    assert retry.meta[RETRY_DELAY_META] == RETRY_BACKOFF_SECONDS
     assert spider.stats["failed_pages"] == 0
-    assert spider.crawler.stats.get_value("retry/count") == 1
+    assert spider.crawler.stats.get_value("retry/reason_count/zlib.error") == 1
 
 
 def test_decompression_error_fails_once_retries_are_exhausted(spider):
@@ -246,28 +286,31 @@ def test_decompression_error_fails_once_retries_are_exhausted(spider):
     assert spider.crawl_failures() == {"failed pages": 1}
 
 
-def test_download_error_retry_middleware_exhausted_is_not_retried_again(spider):
-    """RetryMiddleware already logged "Gave up retrying"; the errback must not retry or log it again."""
-    failure = Failure(TimeoutError("timed out"))
-    failure.request = Request(URL, meta=exhausted(spider))
+@pytest.mark.parametrize("failure", [http_failure(503), Failure(DownloadTimeoutError("timed out"))])
+def test_server_errors_and_download_errors_get_the_same_delayed_retries(spider, release_waiting, failure):
+    """RetryMiddleware is off: a 503 burst or a timeout is retried here, with the backoff."""
+    failure.request = Request(URL)
 
-    [error] = list(spider.handle_error(failure))
+    assert list(spider.handle_error(failure)) == []
+    assert release_waiting(spider, RETRY_BACKOFF_SECONDS - 0.1) == []
+    [retry] = release_waiting(spider, 0.1)
+    assert retry.meta["retry_times"] == 1
 
-    assert error["type"] == "error"
-    assert spider.crawler.stats.get_value("retry/max_reached") is None
-    assert spider.crawler.stats.get_value("retry/count") is None
 
+def test_retryable_status_fails_once_retries_are_exhausted(spider):
+    [error] = list(spider.handle_error(http_failure(503, meta=exhausted(spider))))
 
-def test_http_error_status_is_not_retried_again(spider):
-    """RetryMiddleware already retried RETRY_HTTP_CODES; any status reaching the errback is final."""
-    request = Request(URL)
-    failure = Failure(HttpError(Response(URL, status=404, request=request), "Ignoring non-200 response"))
-    failure.request = request
-
-    [error] = list(spider.handle_error(failure))
-
-    assert error["type"] == "error"
+    assert error["error"] == "503 Service Unavailable"
     assert spider.stats["failed_pages"] == 1
+    assert spider.crawler.stats.get_value("retry/max_reached") is None  # no second "Gave up" log
+
+
+def test_other_http_status_is_final(spider, release_waiting):
+    [error] = list(spider.handle_error(http_failure(404)))
+
+    assert error["error"] == "404 Not Found"
+    assert spider.stats["failed_pages"] == 1
+    assert release_waiting(spider, 3600) == []
 
 
 def test_start_urls_get_the_errback(spider):
@@ -277,25 +320,40 @@ def test_start_urls_get_the_errback(spider):
     assert request.callback == spider.parse
 
 
-# --- retry delay ------------------------------------------------------------
+# --- waiting requests -------------------------------------------------------
 
 
-def test_spider_registers_the_retry_delay_middleware(spider):
-    assert RetryDelayMiddleware in spider.crawler.settings.getdict("DOWNLOADER_MIDDLEWARES")
+def test_retry_middleware_is_disabled(spider):
+    middlewares = {
+        load_object(component)
+        for component in build_component_list(spider.crawler.settings.getwithbase("DOWNLOADER_MIDDLEWARES"))
+    }
+    assert RetryMiddleware not in middlewares
+    assert HttpCompressionMiddleware in middlewares
 
 
-def test_retry_delay_middleware_holds_a_retry_back():
-    middleware = RetryDelayMiddleware()
-    middleware.clock = Clock()
+def idle_keeps_open(spider: HelpPageSpider) -> bool:
+    results = spider.crawler.signals.send_catch_log(signals.spider_idle, spider=spider, dont_log=DontCloseSpider)
+    return any(isinstance(result, Failure) and result.check(DontCloseSpider) for _, result in results)
 
-    assert middleware.process_request(Request(URL), spider=None) is None  # first attempts go straight out
 
-    held = middleware.process_request(Request(URL, meta={RETRY_DELAY_META: 10}), spider=None)
-    middleware.clock.advance(9.9)
-    assert not held.called
-    middleware.clock.advance(0.1)
-    assert held.called
-    assert held.result is None  # then the request continues down the middleware chain
+def test_spider_stays_open_while_requests_wait(spider, release_waiting):
+    assert not idle_keeps_open(spider)
+
+    list(spider.parse_page(help_page(None)))
+    assert idle_keeps_open(spider)
+
+    release_waiting(spider, RETRY_BACKOFF_SECONDS)
+    assert not idle_keeps_open(spider)
+
+
+def test_closing_the_spider_cancels_waiting_requests(spider, release_waiting):
+    list(spider.parse_page(help_page(None)))
+
+    spider.crawler.signals.send_catch_log(signals.spider_closed, spider=spider, reason="shutdown")
+
+    assert release_waiting(spider, 3600) == []
+    assert not idle_keeps_open(spider)
 
 
 # --- crawl outcome ----------------------------------------------------------
@@ -330,6 +388,14 @@ def test_crawl_exit_code(spider):
 
     spider.stats["failed_pages"] = 1
     assert crawl_exit_code(spider.crawler) == 1
+
+
+def test_exit_summary_lists_skipped_dead_links(spider, capsys):
+    finished(spider)
+    spider.stats["dead_links"] = [URL]
+
+    assert crawl_exit_code(spider.crawler) == 0
+    assert "Skipped 1 dead links" in capsys.readouterr().out
 
 
 @pytest.mark.parametrize("reason", ["shutdown", "memusage_exceeded", "closespider_errorcount", None])

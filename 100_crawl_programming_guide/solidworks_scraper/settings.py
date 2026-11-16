@@ -143,8 +143,8 @@ DUPEFILTER_DEBUG = True
 ALLOWED_DOMAINS = ["help.solidworks.com"]
 BASE_URL_PATH = SOLIDWORKS_API_BOUNDARY
 
-# HTTP error handling - retry on common errors
-RETRY_ENABLED = True
+# Retries are issued by HelpPageSpider (shared/help_page_spider.py), which honors these two
+# settings, waits 5/10/15 s between attempts, and disables Scrapy's RetryMiddleware.
 RETRY_TIMES = 3
 RETRY_HTTP_CODES = [500, 502, 503, 504, 408, 429]
 

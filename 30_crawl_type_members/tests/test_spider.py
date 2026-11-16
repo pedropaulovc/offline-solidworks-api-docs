@@ -10,6 +10,7 @@ from scrapy.http import HtmlResponse, Request
 from twisted.python.failure import Failure
 
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL
+from shared.help_page_spider import RETRY_BACKOFF_SECONDS
 from solidworks_scraper.spiders import type_members_spider
 from solidworks_scraper.spiders.type_members_spider import TypeMembersSpider
 
@@ -212,10 +213,10 @@ class TestTypeMembersSpider:
 
         items = list(spider.parse_page(response))
 
-        # A page without __NEXT_DATA__ is retried, not skipped
-        assert len(items) == 1
-        assert isinstance(items[0], Request)
+        # A page without __NEXT_DATA__ is retried later, not skipped
+        assert items == []
         assert spider.stats["skipped_pages"] == 0
+        assert spider.stats["failed_pages"] == 0
 
     def test_start_requests_generates_requests(self, spider, members_xml, sample_xml_content):
         """Test that start_requests generates correct requests"""
@@ -236,13 +237,13 @@ class TestTypeMembersSpider:
             f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/Test~TestProperty2.html",
         ]
 
-    def test_handle_error_retries_then_fails(self, spider):
+    def test_handle_error_retries_then_fails(self, spider, release_waiting):
         """A download error reaching the errback is retried; once retries are exhausted it is a failed page"""
         failure = Failure(Exception("Test error"))
         failure.request = Request(url="https://help.solidworks.com/test")
 
-        [retry] = list(spider.handle_error(failure))
-        assert isinstance(retry, Request)
+        assert list(spider.handle_error(failure)) == []
+        [retry] = release_waiting(spider, RETRY_BACKOFF_SECONDS)
         assert spider.stats["failed_pages"] == 0
 
         failure.request = retry.replace(meta={"retry_times": spider.crawler.settings.getint("RETRY_TIMES")})
@@ -302,10 +303,10 @@ def member_page(help_content_data, meta=None) -> HtmlResponse:
     )
 
 
-def test_null_help_content_data_is_retried_and_the_retry_is_saved(spider):
-    [retry] = list(spider.parse_page(member_page(None)))
+def test_null_help_content_data_is_retried_and_the_retry_is_saved(spider, release_waiting):
+    assert list(spider.parse_page(member_page(None))) == []
+    [retry] = release_waiting(spider, RETRY_BACKOFF_SECONDS)
 
-    assert isinstance(retry, Request)
     assert retry.url == INTERSECT_URL
     assert retry.dont_filter
 

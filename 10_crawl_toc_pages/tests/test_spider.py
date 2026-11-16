@@ -25,6 +25,7 @@ from shared.constants import (
     SOLIDWORKS_BASE_URL,
     expand_toc_url,
 )
+from shared.help_page_spider import RETRY_BACKOFF_SECONDS
 
 
 class TestApiDocsSpider:
@@ -133,23 +134,24 @@ class TestApiDocsSpider:
         assert len(items) == 0
         assert self.spider.stats["skipped_pages"] == 1  # First skip in this test
 
-    def test_handle_error(self) -> None:
-        """An HTTP error status reaching the errback is final (RetryMiddleware retried RETRY_HTTP_CODES)"""
+    def test_handle_error(self, crawler_spider) -> None:
+        """An HTTP error status outside RETRY_HTTP_CODES is final"""
+        spider = crawler_spider(ApiDocsSpider)
         url = f"{SOLIDWORKS_API_FULL_BASE_URL}/error.html"
         request = Request(url)
         failure = Failure(HttpError(Response(url, status=404, request=request), "Ignoring non-200 response"))
         failure.request = request
 
         # Handle the error
-        items = list(self.spider.handle_error(failure))
+        items = list(spider.handle_error(failure))
 
         # Check error item was created
         assert len(items) == 1
         error_item = items[0]
         assert error_item["type"] == "error"
         assert error_item["url"] == url
-        assert "Ignoring non-200 response" in error_item["error"]
-        assert self.spider.stats["failed_pages"] == 1
+        assert error_item["error"] == "404 Not Found"
+        assert spider.stats["failed_pages"] == 1
 
     def test_start_requests(self) -> None:
         """Test that start URLs are correctly configured"""
@@ -367,12 +369,12 @@ def decompression_failure(spider: ApiDocsSpider, meta: dict | None = None) -> Fa
     return failure
 
 
-def test_decompression_error_is_retried(crawler_spider) -> None:
+def test_decompression_error_is_retried(crawler_spider, release_waiting) -> None:
     spider = crawler_spider(ApiDocsSpider)
 
-    [retry] = list(spider.handle_error(decompression_failure(spider)))
+    assert list(spider.handle_error(decompression_failure(spider))) == []
+    [retry] = release_waiting(spider, RETRY_BACKOFF_SECONDS)
 
-    assert isinstance(retry, Request)
     assert retry.url == DRAFT_FEATURE_URL
     assert retry.callback == spider.parse_page
     assert retry.errback == spider.handle_error
@@ -395,7 +397,7 @@ def test_decompression_error_fails_the_crawl_once_retries_are_exhausted(crawler_
     assert spider.crawl_failures() == {"failed pages": 1}
 
 
-def test_corrupt_toc_json_is_retried_not_dropped(crawler_spider) -> None:
+def test_corrupt_toc_json_is_retried_not_dropped(crawler_spider, release_waiting) -> None:
     """A truncated expandToc response would silently drop the node's whole subtree."""
     spider = crawler_spider(ApiDocsSpider)
     toc_url = expand_toc_url("4.1")
@@ -404,8 +406,8 @@ def test_corrupt_toc_json_is_retried_not_dropped(crawler_spider) -> None:
         request = Request(toc_url, callback=spider.parse, meta=meta)
         return TextResponse(toc_url, body=b'{"children": [{"url": "/2027', encoding="utf-8", request=request)
 
-    [retry] = list(spider.parse(toc_response({})))
-    assert isinstance(retry, Request)
+    assert list(spider.parse(toc_response({}))) == []
+    [retry] = release_waiting(spider, RETRY_BACKOFF_SECONDS)
     assert retry.url == toc_url
 
     [error] = list(spider.parse(toc_response({"retry_times": spider.crawler.settings.getint("RETRY_TIMES")})))
