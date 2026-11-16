@@ -24,6 +24,12 @@ This phase crawls those pages so they ship in the bundle and cross-link as files
 
    Generated `~` reference pages are dropped here, as in the closure: raw HTML links
    thousands of them and they are phase 20/30's territory.
+
+   CHM aliases (`ms-its:swconst.chm::/DP_Dimensions.htm`,
+   `sldworksAPIProgGuide.chm::/OVERVIEW/Type_Libraries.htm`) resolve to the page they
+   name, in the CHM's folder (`swconst/`, `sldworksapiprogguide/`), via
+   `shared/chm_aliases.py`. Phases 40/50/60 resolve them the same way in the `<see
+   href>` and example URLs they extract.
 2. **Closure** (`solidworks_scraper/spiders/referenced_spider.py`): crawl each seed
    page, follow its in-page `/api` links, and repeat until no new pages appear. The
    set of already-crawled pages is pre-seeded as "seen", so the closure stops at the
@@ -54,9 +60,12 @@ uv run pytest 115_crawl_referenced_pages/tests/ -v
 - A page referenced under `/api` that is *already* crawled by another phase but not
   exported as a doc (e.g. `FunctionalCategories-sldworksapi.html`), or that the server
   answers with its "This page cannot be found." page (a dead link, e.g. the
-  `sldworksapi/DP_ImageQuality.htm` stub, `help_list.htm`, stale `ms-its:*.chm::` links),
-  stays an external link — it is out of scope for this closure, not un-crawled. Such a
-  page is refetched a minute later (the server shows the same page during brief outages)
-  and then skipped and listed under `dead_links` in `metadata/crawl_stats.json`; every one
-  of the 63 pages the 2027 run skipped returned that page when re-fetched (2026-11-16).
-  Any other page without `helpText` fails the crawl.
+  `sldworksapi/DP_ImageQuality.htm` stub, `help_list.htm`,
+  `swconst/DP_Annotations-EdgeSymbols.htm`), stays an external link — it is out of
+  scope for this closure, not un-crawled. Such a page is refetched a minute later (the
+  server shows the same page during brief outages) and then skipped and listed under
+  `dead_links` in `metadata/crawl_stats.json`. Every one of the 63 pages the 2027 run
+  skipped returned that page when re-fetched (2026-11-16); 58 of them were unresolved
+  CHM aliases, 55 of pages the bundle already shipped and 3 of image-only
+  `sldworksapiprogguide/Miscellaneous` pages. Any other page without `helpText` fails
+  the crawl.

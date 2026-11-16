@@ -84,6 +84,33 @@ def test_iter_page_links_resolves_relative_hrefs_against_base():
     ]
 
 
+def test_iter_page_links_resolves_chm_aliases():
+    """CHM aliases name pages the bundle ships under the CHM's folder. As written they
+    were either crawled as dead ``sldworksapi/ms-its:...`` URLs or, relative, not seen."""
+    page = f"{BASE}/swconst/DP_Dimensions.htm"
+    text = (
+        f'<see href="{BASE}/sldworksapi/sldworksAPIProgGuide.chm::/OVERVIEW/Type_Libraries.htm">Type Libraries</see>'
+        '<a href="swconst.chm::/DP_DimensionTolerance.htm">tolerance</a>'
+        '<a href="ms-its:sldworksapi.chm::/Add_Component_and_Mate_Example_VB.htm">example</a>'
+    )
+    assert sorted(set(iter_page_links(text, base=page))) == [
+        f"{BASE}/sldworksapi/Add_Component_and_Mate_Example_VB.htm",
+        f"{BASE}/sldworksapiprogguide/OVERVIEW/Type_Libraries.htm",
+        f"{BASE}/swconst/DP_DimensionTolerance.htm",
+    ]
+
+
+def test_chm_alias_of_a_shipped_page_is_not_seeded(tmp_path):
+    """The alias and the TOC's copy are one page (the key ignores case), so it is not re-crawled."""
+    source = tmp_path / "api_types.xml"
+    source.write_text(
+        f'<see href="{BASE}/sldworksapi/sldworksapiprogguide.chm::/OVERVIEW/In-process_Methods.htm">x</see>',
+        encoding="utf-8",
+    )
+    shipped = {canonical_key(f"{BASE}/sldworksapiprogguide/Overview/In-process_Methods.htm")}
+    assert build_seed([ReferenceSource(source)], shipped) == []
+
+
 def test_exclusion_and_seed(tmp_path):
     # A crawled-URLs manifest marks one page as already covered.
     meta = tmp_path / "urls_crawled.jsonl"

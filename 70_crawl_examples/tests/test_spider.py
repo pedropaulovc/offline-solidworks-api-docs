@@ -254,7 +254,7 @@ def test_parse_page_handles_missing_next_data(spider):
 def test_confirmed_dead_example_link_is_skipped_not_failed(spider, release_waiting):
     """Some example links are dead (the server's "cannot be found" page on every fetch); once
     a refetch confirms one, it is skipped and listed rather than failing the crawl."""
-    url = f"{SOLIDWORKS_API_FULL_BASE_URL}/swconst/ms-its:sldworksapi.chm::/Add_Component_and_Mate_Example_VB.htm"
+    url = f"{SOLIDWORKS_API_FULL_BASE_URL}/sldworksapi/Dropped_Example_VB.htm"
     next_data = json.dumps(
         {"props": {"pageProps": {"helpContentData": {"ErrorTitle": "This page cannot be found."}}}}
     )

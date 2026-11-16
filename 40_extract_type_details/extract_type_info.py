@@ -19,6 +19,7 @@ from typing import Any
 # Add parent directory to path for shared module imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from shared.chm_aliases import resolve_chm_alias
 from shared.extraction_utils import (
     add_see_also_element,
     extract_namespace_from_filename,
@@ -251,8 +252,8 @@ class TypeInfoExtractor(HTMLParser):
             name = link_text.strip()
             language = self._infer_language_from_filename(href)
 
-        # Prepend URL prefix
-        full_url = f"{self.url_prefix}{href}"
+        # Prepend URL prefix; a CHM alias names a page in another folder
+        full_url = resolve_chm_alias(f"{self.url_prefix}{href}")
 
         return {"Name": name, "Language": language, "Url": full_url}
 

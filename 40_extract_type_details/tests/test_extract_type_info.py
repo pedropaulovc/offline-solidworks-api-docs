@@ -131,6 +131,24 @@ class TestTypeInfoExtractor(unittest.TestCase):
         self.assertEqual(parser.examples[0]["Url"], "/sldworksapi/Create_Advanced_Hole_Example_VB.htm")
         self.assertEqual(parser.examples[1]["Language"], "VB.NET")
 
+    def test_chm_alias_example_url_points_at_the_example_folder(self) -> None:
+        """An swconst page links sldworksapi examples through CHM aliases; recorded as
+        written (``/swconst/ms-its:sldworksapi.chm::/...``) Phase 70 crawled a dead page."""
+        html = """
+        <div id="pagetop"><span id="pagetitle">swMateType_e Enumeration</span></div>
+        <div id="mainbody">
+            <h1>Example</h1>
+            <a href="ms-its:sldworksapi.chm::/Add_Component_and_Mate_Example_VB.htm">Add Component and Mate (VBA)</a>
+        </div>
+        """
+
+        parser = TypeInfoExtractor(url_prefix="/swconst/")
+        parser.feed(html)
+
+        self.assertEqual(
+            [ex["Url"] for ex in parser.examples], ["/sldworksapi/Add_Component_and_Mate_Example_VB.htm"]
+        )
+
     def test_remarks_extraction(self) -> None:
         """Test extracting remarks section."""
         html = """

@@ -71,16 +71,27 @@ def test_to_version():
     assert h.to_version(url, "2017") == "https://help.solidworks.com/2017/english/api/sldworksapi/Foo.html"
 
 
-def test_subdir_of():
-    url = f"{API}/sldworksapi/Foo.html"
-    assert h.subdir_of(url) == "sldworksapi"
-
-
 def test_normalize_example_url():
+    type_url = f"{API}/sldworksapi/X~X.IChainPatternFeatureData.html"
     assert (
-        h.normalize_example_url("Modify_Chain_Pattern_Feature_Example_CSharp.htm", "sldworksapi", SOLIDWORKS_API_VERSION)
+        h.normalize_example_url("Modify_Chain_Pattern_Feature_Example_CSharp.htm", type_url, SOLIDWORKS_API_VERSION)
         == f"{API}/sldworksapi/Modify_Chain_Pattern_Feature_Example_CSharp.htm"
     )
+
+
+def test_chm_alias_example_resolves_to_its_own_folder():
+    """An swconst page links an sldworksapi example through a CHM alias; it must not land in swconst/."""
+    type_url = f"{API}/swconst/SOLIDWORKS.Interop.swconst~SOLIDWORKS.Interop.swconst.swMateType_e.html"
+    help_text = (
+        '<span id="pagetitle">swMateType_e Enumeration</span>'
+        "<h1>Example</h1>"
+        '<a href="ms-its:sldworksapi.chm::/Add_Component_and_Mate_Example_VB.htm">Add Component and Mate (VBA)</a>'
+    )
+    recovered = {
+        h.normalize_example_url(href, h.to_version(type_url, "2017"), SOLIDWORKS_API_VERSION)
+        for href in h.extract_example_hrefs(help_text)
+    }
+    assert recovered == {f"{API}/sldworksapi/Add_Component_and_Mate_Example_VB.htm"}
 
 
 def test_iter_type_page_urls_filters(tmp_path):
@@ -107,9 +118,8 @@ def test_end_to_end_parse_pipeline():
     page = _make_page(HELP_TEXT)
 
     help_text = h.extract_help_text(page)
-    subdir = h.subdir_of(type_url)
     recovered = {
-        h.normalize_example_url(fn, subdir, SOLIDWORKS_API_VERSION) for fn in h.extract_example_hrefs(help_text)
+        h.normalize_example_url(href, type_url, SOLIDWORKS_API_VERSION) for href in h.extract_example_hrefs(help_text)
     }
 
     assert (

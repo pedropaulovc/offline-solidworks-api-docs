@@ -21,6 +21,7 @@ from example_generator import ExampleGenerator, build_example_filenames
 from index_generator import IndexGenerator
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from shared.chm_aliases import resolve_chm_alias  # noqa: E402
 from shared.constants import SOLIDWORKS_API_FULL_BASE_URL, SOLIDWORKS_API_VERSION  # noqa: E402
 from shared.line_endings import normalize_tree  # noqa: E402
 from models import TypeInfo, ExampleContent, ExportStatistics
@@ -375,7 +376,10 @@ class ExportPipeline:
 
             def repl(match: "re.Match[str]") -> str:
                 nonlocal resolved, external, pages
-                head, url, tail = match.group(1), match.group(2), match.group(3)
+                head, tail = match.group(1), match.group(3)
+                # A CHM alias left in the HTML (swconst.chm::/X.htm) names a page in
+                # the CHM's folder; resolve it so the folder fallback below is right.
+                url = resolve_chm_alias(match.group(2))
                 parsed = parse_api_ref_url(url)
                 if parsed is None:
                     # Not a reference page: a guide, referenced or example page,

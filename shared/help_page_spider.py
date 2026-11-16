@@ -87,8 +87,8 @@ class DeadLinkPolicy(Enum):
 
     # The docs' own TOC or member lists name the page: not finding it loses a page.
     FAIL = "fail"
-    # Cross-reference links, dozens of which point at pages the server never had
-    # (stale ms-its:*.chm:: links, help_list.htm, stubs like DP_ImageQuality.htm): a page
+    # Cross-reference links, a few of which point at pages the server does not have
+    # (help_list.htm, stubs like DP_ImageQuality.htm, pages dropped from the help): a page
     # still not found when refetched a minute later is skipped as a dead link.
     SKIP_CONFIRMED = "skip_confirmed"
 

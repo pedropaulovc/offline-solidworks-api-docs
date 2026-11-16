@@ -31,7 +31,7 @@ import sys
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
@@ -101,14 +101,18 @@ def extract_help_text(page_html: str) -> str | None:
 
 
 def extract_example_hrefs(help_text: str) -> list[str]:
-    """Extract example-section link filenames from a type page's helpText."""
+    """Extract example-section link hrefs from a type page's helpText.
+
+    Relative to the type page: mostly a bare filename, but a CHM alias to another
+    folder's example comes back resolved (``../sldworksapi/X_Example_VB.htm``).
+    """
     parser = TypeInfoExtractor(url_prefix="")
     try:
         parser.feed(help_text)
     except Exception:
         return []
-    # Examples carry Url == href (url_prefix is empty); keep just the filename.
-    return [ex["Url"].split("/")[-1] for ex in parser.examples if ex.get("Url")]
+    # Examples carry Url == href (url_prefix is empty).
+    return [ex["Url"] for ex in parser.examples if ex.get("Url")]
 
 
 def iter_type_page_urls(toc_jsonl: Path) -> list[str]:
@@ -146,13 +150,9 @@ def to_version(url: str, version: str) -> str:
     return f"{parts.scheme}://{parts.netloc}{'/'.join(segments)}"
 
 
-def subdir_of(url: str) -> str:
-    """Return the api subdir (e.g. 'sldworksapi') for a type-page URL."""
-    return urlparse(url).path.split("/")[-2]
-
-
-def normalize_example_url(filename: str, subdir: str, version: str) -> str:
-    return f"https://help.solidworks.com/{version}/english/api/{subdir}/{filename}"
+def normalize_example_url(href: str, type_url: str, version: str) -> str:
+    """The current-version URL of an example ``href`` found on (a version of) ``type_url``."""
+    return to_version(urljoin(type_url, href), version)
 
 
 def load_known_example_urls(version: str) -> set[str]:
@@ -182,7 +182,6 @@ def harvest_from_type_page(
     type_url: str, legacy_versions: list[str], version: str
 ) -> set[str]:
     """Return current-version example URLs harvested from a single type page's legacy variants."""
-    subdir = subdir_of(type_url)
     found: set[str] = set()
     for legacy in legacy_versions:
         page = fetch(to_version(type_url, legacy))
@@ -191,8 +190,8 @@ def harvest_from_type_page(
         help_text = extract_help_text(page)
         if not help_text:
             continue
-        for filename in extract_example_hrefs(help_text):
-            found.add(normalize_example_url(filename, subdir, version))
+        for href in extract_example_hrefs(help_text):
+            found.add(normalize_example_url(href, type_url, version))
     return found
 
 
