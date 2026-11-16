@@ -39,14 +39,14 @@ from urllib.error import HTTPError, URLError
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
-from shared.constants import SOLIDWORKS_API_VERSION, SOLIDWORKS_DOMAIN  # noqa: E402
+from shared.constants import SOLIDWORKS_API_BOUNDARY, SOLIDWORKS_API_VERSION, SOLIDWORKS_DOMAIN  # noqa: E402
 
 USER_AGENT = "Mozilla/5.0 (compatible; offline-solidworks-api-docs/1.0)"
 DEFAULT_VERSION = SOLIDWORKS_API_VERSION
 DEFAULT_LEGACY_VERSIONS = ["2017"]
 # The part of a help URL path below ``/<year>/<language>/api/``.
 _API_TREE_PATH = re.compile(r"^/\d{4}/[^/]+/api/(.+)$", re.IGNORECASE)
-# Any versioned help path; outside the API tree when _API_TREE_PATH does not match.
+# A host path (``/<year>/...``), as opposed to an API-root path (``/sldworksapi/...``).
 _VERSIONED_PATH = re.compile(r"^/\d{4}/")
 
 
@@ -162,16 +162,18 @@ def _api_tree_path(url: str, subdir: str) -> str | None:
     """The path below ``/api`` that an example link on a type page in ``subdir`` names,
     or None when it points outside the help's API tree (another host or tree)."""
     parsed = urlparse(url)
-    absolute = bool(parsed.scheme or parsed.netloc)
-    on_help_site = parsed.netloc.lower() == SOLIDWORKS_DOMAIN
-    in_api_tree = _API_TREE_PATH.match(parsed.path)
-    if in_api_tree and (on_help_site or not absolute):
-        return in_api_tree.group(1)
-    if absolute or _VERSIONED_PATH.match(parsed.path):
+    if (parsed.scheme or parsed.netloc) and parsed.netloc.lower() != SOLIDWORKS_DOMAIN:
         return None
-    # An API-root path (a resolved CHM alias, /sldworksapi/X.htm) or a link relative
-    # to the type page's folder (X.htm, ../sldworksapi/X.htm).
-    return posixpath.normpath(posixpath.join("/", subdir, parsed.path)).lstrip("/") or None
+    # Resolve the link the way a browser on the type page would, dot segments
+    # included, then check where it landed. Host paths (/<year>/...) stand as
+    # written; an API-root path (a resolved CHM alias, /sldworksapi/X.htm) starts at
+    # /api; anything else is relative to the type page's folder.
+    base = f"{SOLIDWORKS_API_BOUNDARY}{subdir}/"
+    path = parsed.path
+    if path.startswith("/") and not _VERSIONED_PATH.match(path):
+        base, path = SOLIDWORKS_API_BOUNDARY, path.lstrip("/")
+    in_api_tree = _API_TREE_PATH.match(posixpath.normpath(posixpath.join(base, path)))
+    return in_api_tree.group(1) if in_api_tree else None
 
 
 def normalize_example_url(url: str, subdir: str, version: str) -> str | None:

@@ -97,6 +97,9 @@ def test_normalize_example_url():
         ("X_Example_VB.htm", "swconst/X_Example_VB.htm"),
         # A resolved CHM alias is an API-root path.
         ("/sldworksapi/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
+        # Dot segments are resolved before the result is checked.
+        ("/2017/english/api/sldworksapi/../swconst/X_Example_VB.htm", "swconst/X_Example_VB.htm"),
+        ("./X_Example_VB.htm", "swconst/X_Example_VB.htm"),
     ],
 )
 def test_example_links_are_canonicalized(href, url):
@@ -111,6 +114,9 @@ def test_example_links_are_canonicalized(href, url):
         "https://help.solidworks.com/2017/english/sldworks/Foo_Example.htm",
         "/2017/english/sldworks/Foo_Example.htm",
         "mailto:Foo_Example.htm",
+        # Dot segments that climb out of /api.
+        "/2017/english/api/../sldworks/Foo_Example.htm",
+        "../../Foo_Example.htm",
     ],
 )
 def test_links_outside_the_api_tree_are_dropped(href):
