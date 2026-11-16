@@ -162,15 +162,17 @@ def _api_tree_path(url: str, subdir: str) -> str | None:
     """The path below ``/api`` that an example link on a type page in ``subdir`` names,
     or None when it points outside the help's API tree (another host or tree)."""
     parsed = urlparse(url)
-    if (parsed.scheme or parsed.netloc) and parsed.netloc.lower() != SOLIDWORKS_DOMAIN:
+    absolute = bool(parsed.scheme or parsed.netloc)
+    if absolute and parsed.netloc.lower() != SOLIDWORKS_DOMAIN:
         return None
     # Resolve the link the way a browser on the type page would, dot segments
-    # included, then check where it landed. Host paths (/<year>/...) stand as
-    # written; an API-root path (a resolved CHM alias, /sldworksapi/X.htm) starts at
-    # /api; anything else is relative to the type page's folder.
+    # included, then check where it landed. Absolute URLs and host paths
+    # (/<year>/...) stand as written; a bare unversioned path is a resolved CHM
+    # alias (/sldworksapi/X.htm) and starts at /api; anything else is relative to
+    # the type page's folder.
     base = f"{SOLIDWORKS_API_BOUNDARY}{subdir}/"
     path = parsed.path
-    if path.startswith("/") and not _VERSIONED_PATH.match(path):
+    if not absolute and path.startswith("/") and not _VERSIONED_PATH.match(path):
         base, path = SOLIDWORKS_API_BOUNDARY, path.lstrip("/")
     in_api_tree = _API_TREE_PATH.match(posixpath.normpath(posixpath.join(base, path)))
     return in_api_tree.group(1) if in_api_tree else None

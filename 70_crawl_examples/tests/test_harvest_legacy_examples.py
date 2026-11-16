@@ -112,6 +112,9 @@ def test_example_links_are_canonicalized(href, url):
     [
         "https://www.3ds.com/x/Foo_Example.htm",
         "https://help.solidworks.com/2017/english/sldworks/Foo_Example.htm",
+        # Absolute help URLs at the host root, outside any versioned tree.
+        "https://help.solidworks.com/Foo_Example.htm",
+        "https://help.solidworks.com/sldworks/Foo_Example.htm",
         "/2017/english/sldworks/Foo_Example.htm",
         "mailto:Foo_Example.htm",
         # Dot segments that climb out of /api.
