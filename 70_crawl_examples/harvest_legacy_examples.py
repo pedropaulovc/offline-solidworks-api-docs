@@ -39,6 +39,7 @@ from urllib.error import HTTPError, URLError
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
+from shared.chm_aliases import chm_alias_page  # noqa: E402
 from shared.constants import SOLIDWORKS_API_BOUNDARY, SOLIDWORKS_API_VERSION, SOLIDWORKS_DOMAIN  # noqa: E402
 
 USER_AGENT = "Mozilla/5.0 (compatible; offline-solidworks-api-docs/1.0)"
@@ -46,8 +47,6 @@ DEFAULT_VERSION = SOLIDWORKS_API_VERSION
 DEFAULT_LEGACY_VERSIONS = ["2017"]
 # The part of a help URL path below ``/<year>/<language>/api/``.
 _API_TREE_PATH = re.compile(r"^/\d{4}/[^/]+/api/(.+)$", re.IGNORECASE)
-# A host path (``/<year>/...``), as opposed to an API-root path (``/sldworksapi/...``).
-_VERSIONED_PATH = re.compile(r"^/\d{4}/")
 
 
 def _load_type_info_extractor():
@@ -106,16 +105,30 @@ def extract_help_text(page_html: str) -> str | None:
     )
 
 
+class _ExampleHrefCollector(TypeInfoExtractor):
+    """TypeInfoExtractor that also keeps each example link's href as written.
+
+    The ``Url`` it records drops that: a CHM alias becomes an API-root path, which
+    could not then be told apart from a host-root href.
+    """
+
+    def __init__(self) -> None:
+        super().__init__(url_prefix="")
+        self.hrefs: list[str] = []
+
+    def _parse_example_link(self, link_text: str, href: str) -> dict | None:
+        self.hrefs.append(href)
+        return super()._parse_example_link(link_text, href)
+
+
 def extract_example_hrefs(help_text: str) -> list[str]:
-    """Extract example-section links from a type page's helpText, as TypeInfoExtractor
-    records them with an empty prefix: the href as written, or for a CHM alias the
-    API-root path of the page it names (``/sldworksapi/X_Example_VB.htm``)."""
-    parser = TypeInfoExtractor(url_prefix="")
+    """Extract example-section link hrefs, as written, from a type page's helpText."""
+    parser = _ExampleHrefCollector()
     try:
         parser.feed(help_text)
     except Exception:
         return []
-    return [ex["Url"] for ex in parser.examples if ex.get("Url")]
+    return parser.hrefs
 
 
 def iter_type_page_urls(toc_jsonl: Path) -> list[str]:
@@ -158,36 +171,33 @@ def subdir_of(url: str) -> str:
     return urlparse(url).path.split("/")[-2]
 
 
-def _api_tree_path(url: str, subdir: str) -> str | None:
+def _api_tree_path(href: str, subdir: str) -> str | None:
     """The path below ``/api`` that an example link on a type page in ``subdir`` names,
     or None when it points outside the help's API tree (another host or tree)."""
-    parsed = urlparse(url)
-    absolute = bool(parsed.scheme or parsed.netloc)
-    if absolute and parsed.netloc.lower() != SOLIDWORKS_DOMAIN:
+    alias_page = chm_alias_page(href)
+    if alias_page:
+        href = f"{SOLIDWORKS_API_BOUNDARY}{alias_page}"
+    parsed = urlparse(href)
+    if (parsed.scheme or parsed.netloc) and parsed.netloc.lower() != SOLIDWORKS_DOMAIN:
         return None
     # Resolve the link the way a browser on the type page would, dot segments
-    # included, then check where it landed. Absolute URLs and host paths
-    # (/<year>/...) stand as written; a bare unversioned path is a resolved CHM
-    # alias (/sldworksapi/X.htm) and starts at /api; anything else is relative to
-    # the type page's folder.
-    base = f"{SOLIDWORKS_API_BOUNDARY}{subdir}/"
-    path = parsed.path
-    if not absolute and path.startswith("/") and not _VERSIONED_PATH.match(path):
-        base, path = SOLIDWORKS_API_BOUNDARY, path.lstrip("/")
-    in_api_tree = _API_TREE_PATH.match(posixpath.normpath(posixpath.join(base, path)))
+    # included, then check where it landed.
+    page_folder = f"{SOLIDWORKS_API_BOUNDARY}{subdir}/"
+    in_api_tree = _API_TREE_PATH.match(posixpath.normpath(posixpath.join(page_folder, parsed.path)))
     return in_api_tree.group(1) if in_api_tree else None
 
 
-def normalize_example_url(url: str, subdir: str, version: str) -> str | None:
+def normalize_example_url(href: str, subdir: str, version: str) -> str | None:
     """Canonical current-version URL of an example link found on a type page in ``subdir``,
     or None for a link outside the help's API tree.
 
-    ``url`` comes from :func:`extract_example_hrefs`. Absolute help URLs may use any
-    scheme, year or casing (``http://.../2017/English/api/SldWorksAPI/X.htm``); the
-    result uses the canonical prefix and lowercase folders, as Phases 40/50 record
-    them. The file name keeps its case; :func:`main` compares case-insensitively.
+    ``href`` is as written on the page (see :func:`extract_example_hrefs`). CHM aliases
+    resolve to the page they name. Absolute help URLs may use any scheme, year or
+    casing (``http://.../2017/English/api/SldWorksAPI/X.htm``); the result uses the
+    canonical prefix and lowercase folders, as Phases 40/50 record them. The file
+    name keeps its case; :func:`main` compares case-insensitively.
     """
-    api_path = _api_tree_path(url, subdir)
+    api_path = _api_tree_path(href, subdir)
     if api_path is None:
         return None
     folders, _, filename = api_path.rpartition("/")

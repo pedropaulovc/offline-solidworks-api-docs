@@ -95,8 +95,8 @@ def test_normalize_example_url():
         # A relative link to another folder keeps that folder.
         ("../sldworksapi/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
         ("X_Example_VB.htm", "swconst/X_Example_VB.htm"),
-        # A resolved CHM alias is an API-root path.
-        ("/sldworksapi/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
+        # A CHM alias names a page in the CHM's folder.
+        ("ms-its:sldworksapi.chm::/X_Example_VB.htm", "sldworksapi/X_Example_VB.htm"),
         # Dot segments are resolved before the result is checked.
         ("/2017/english/api/sldworksapi/../swconst/X_Example_VB.htm", "swconst/X_Example_VB.htm"),
         ("./X_Example_VB.htm", "swconst/X_Example_VB.htm"),
@@ -112,9 +112,10 @@ def test_example_links_are_canonicalized(href, url):
     [
         "https://www.3ds.com/x/Foo_Example.htm",
         "https://help.solidworks.com/2017/english/sldworks/Foo_Example.htm",
-        # Absolute help URLs at the host root, outside any versioned tree.
+        # Help paths at the host root, outside any versioned tree, absolute or not.
         "https://help.solidworks.com/Foo_Example.htm",
         "https://help.solidworks.com/sldworks/Foo_Example.htm",
+        "/sldworks/Foo_Example.htm",
         "/2017/english/sldworks/Foo_Example.htm",
         "mailto:Foo_Example.htm",
         # Dot segments that climb out of /api.
