@@ -376,18 +376,23 @@ class ExportPipeline:
 
             def repl(match: "re.Match[str]") -> str:
                 nonlocal resolved, external, pages
-                head, tail = match.group(1), match.group(3)
+                head, raw_url, tail = match.group(1), match.group(2), match.group(3)
                 # A CHM alias left in the HTML (swconst.chm::/X.htm) names a page in
-                # the CHM's folder; resolve it so the folder fallback below is right.
-                url = resolve_chm_alias(match.group(2))
+                # the CHM's folder; resolve it to that page's online URL.
+                url = resolve_chm_alias(raw_url)
                 parsed = parse_api_ref_url(url)
                 if parsed is None:
                     # Not a reference page: a guide, referenced or example page,
                     # linked by bare basename. Point at the copy the bundle ships,
                     # carrying any #section across to the local file.
                     target = page_idx.get(guide_link_key(url))
-                    if not target:
+                    if target is None and url == raw_url:
                         return match.group(0)
+                    if target is None:
+                        # Not shipped: link the page the alias names online.
+                        external += 1
+                        state["changed"] = True
+                        return f"{head}{self._md_destination(url)}{tail}"
                     _, _, fragment = url.partition("#")
                     anchor = f"#{fragment}" if fragment else ""
                     destination = f"{posixpath.relpath(target, guide_dir)}{anchor}"

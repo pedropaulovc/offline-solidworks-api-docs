@@ -27,11 +27,12 @@ crawl set.
 import argparse
 import importlib.util
 import json
+import re
 import sys
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
@@ -42,6 +43,8 @@ from shared.constants import SOLIDWORKS_API_VERSION  # noqa: E402
 USER_AGENT = "Mozilla/5.0 (compatible; offline-solidworks-api-docs/1.0)"
 DEFAULT_VERSION = SOLIDWORKS_API_VERSION
 DEFAULT_LEGACY_VERSIONS = ["2017"]
+# The part of a help URL path below ``/<year>/<language>/api/``.
+_API_TREE_PATH = re.compile(r"^/\d{4}/[^/]+/api/(.+)$", re.IGNORECASE)
 
 
 def _load_type_info_extractor():
@@ -101,17 +104,14 @@ def extract_help_text(page_html: str) -> str | None:
 
 
 def extract_example_hrefs(help_text: str) -> list[str]:
-    """Extract example-section link hrefs from a type page's helpText.
-
-    Relative to the type page: mostly a bare filename, but a CHM alias to another
-    folder's example comes back resolved (``../sldworksapi/X_Example_VB.htm``).
-    """
+    """Extract example-section links from a type page's helpText, as TypeInfoExtractor
+    records them with an empty prefix: the href as written, or for a CHM alias the
+    API-root path of the page it names (``/sldworksapi/X_Example_VB.htm``)."""
     parser = TypeInfoExtractor(url_prefix="")
     try:
         parser.feed(help_text)
     except Exception:
         return []
-    # Examples carry Url == href (url_prefix is empty).
     return [ex["Url"] for ex in parser.examples if ex.get("Url")]
 
 
@@ -150,9 +150,27 @@ def to_version(url: str, version: str) -> str:
     return f"{parts.scheme}://{parts.netloc}{'/'.join(segments)}"
 
 
-def normalize_example_url(href: str, type_url: str, version: str) -> str:
-    """The current-version URL of an example ``href`` found on (a version of) ``type_url``."""
-    return to_version(urljoin(type_url, href), version)
+def subdir_of(url: str) -> str:
+    """Return the api subdir (e.g. 'sldworksapi') for a type-page URL."""
+    return urlparse(url).path.split("/")[-2]
+
+
+def normalize_example_url(url: str, subdir: str, version: str) -> str:
+    """Canonical current-version URL of an example link found on a type page in ``subdir``.
+
+    ``url`` comes from :func:`extract_example_hrefs`. A link into the API tree,
+    absolute in any year, scheme or casing (``http://.../2017/English/api/x/Y.htm``),
+    or an API-root path (a resolved CHM alias, ``/x/Y.htm``), keeps its folder. Any
+    other link keeps only its filename, joined to the type page's folder.
+    """
+    base = f"https://help.solidworks.com/{version}/english/api"
+    path = urlparse(url).path
+    in_api_tree = _API_TREE_PATH.search(path)
+    if in_api_tree:
+        return f"{base}/{in_api_tree.group(1)}"
+    if path.startswith("/"):
+        return f"{base}{path}"
+    return f"{base}/{subdir}/{path.split('/')[-1]}"
 
 
 def load_known_example_urls(version: str) -> set[str]:
@@ -182,6 +200,7 @@ def harvest_from_type_page(
     type_url: str, legacy_versions: list[str], version: str
 ) -> set[str]:
     """Return current-version example URLs harvested from a single type page's legacy variants."""
+    subdir = subdir_of(type_url)
     found: set[str] = set()
     for legacy in legacy_versions:
         page = fetch(to_version(type_url, legacy))
@@ -190,8 +209,8 @@ def harvest_from_type_page(
         help_text = extract_help_text(page)
         if not help_text:
             continue
-        for href in extract_example_hrefs(help_text):
-            found.add(normalize_example_url(href, type_url, version))
+        for url in extract_example_hrefs(help_text):
+            found.add(normalize_example_url(url, subdir, version))
     return found
 
 

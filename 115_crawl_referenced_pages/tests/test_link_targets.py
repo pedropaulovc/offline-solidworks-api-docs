@@ -100,6 +100,16 @@ def test_iter_page_links_resolves_chm_aliases():
     ]
 
 
+def test_chm_alias_on_a_nested_page_resolves_under_the_api_root():
+    """Programming-guide pages sit two folders below /api; the alias must not join onto them."""
+    page = f"{BASE}/sldworksapiprogguide/Overview/System_Options_and_Document_Properties.htm"
+    assert normalize_request_url("ms-its:swconst.chm::/DP_Dimensions.htm", base=page) == \
+        f"{BASE}/swconst/DP_Dimensions.htm"
+    assert list(iter_page_links('<a href="swconst.chm::/SO_Colors.htm">x</a>', base=page)) == [
+        f"{BASE}/swconst/SO_Colors.htm"
+    ]
+
+
 def test_chm_alias_of_a_shipped_page_is_not_seeded(tmp_path):
     """The alias and the TOC's copy are one page (the key ignores case), so it is not re-crawled."""
     source = tmp_path / "api_types.xml"

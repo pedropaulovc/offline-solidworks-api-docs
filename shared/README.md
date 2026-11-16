@@ -41,19 +41,23 @@ uv run pytest shared/tests/ -v
 
 ### `chm_aliases.py`
 
-`resolve_chm_alias(link)` rewrites a compiled-help alias link to the web page it names.
+`resolve_chm_alias(link)` rewrites a compiled-help alias link to the absolute URL of the
+web page it names; `chm_alias_page(link)` returns that page as a path under the API root.
 Many cross-file links still carry the CHM form, `ms-its:swconst.chm::/DP_Dimensions.htm`
 or `sldworksAPIProgGuide.chm::/OVERVIEW/Type_Libraries.htm`; the web help serves each
-CHM's pages from the folder named after it, lowercased (`swconst/`,
+CHM's pages from the folder under `/api` named after it, lowercased (`swconst/`,
 `sldworksapiprogguide/`). Joined onto the linking page's folder as written, the alias is
-a URL the server answers with its not-found page. The folder before the alias is swapped
-for the CHM's folder, so absolute URLs, API-root paths (`/swconst/ms-its:...`) and
-relative hrefs all resolve. The path inside the CHM keeps its case: the server matches
-paths case-insensitively, as do Phase 115's and Phase 120's in-bundle lookups.
+a URL the server answers with its not-found page. An alias names the same page wherever
+it is written, so whatever precedes the CHM name (the linking folder, `../`, `ms-its:`,
+`mk:@MSITStore:`) is dropped and the page is placed under the API root; the result does
+not depend on how deep the linking page sits. The path inside the CHM keeps its case: the
+server matches paths case-insensitively, as do Phase 115's and Phase 120's in-bundle
+lookups.
 
 Used where links leave the help HTML: `convert_to_full_url` (`<see href>` in phases
-40/50/60), the example URLs phases 40/50 record, Phase 70's legacy example harvester
-and Phase 115's link targets.
+40/50/60), the example URLs phases 40/50 record (as API-root paths, `/sldworksapi/X.htm`),
+Phase 70's legacy example harvester, Phase 115's link targets and Phase 120's guide-link
+rewrite.
 
 ### `help_page_spider.py`
 
