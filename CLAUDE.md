@@ -218,7 +218,7 @@ uv run pytest 10_crawl_toc_pages/tests/ -v
 ## Debugging Tips
 
 ### If Crawl Fails
-1. Check `output/metadata/errors.jsonl` for patterns
+1. A crawl that loses any page (after its retries) exits 1; check the phase's `metadata/errors.jsonl` for the lost URLs and re-run the phase
 2. Verify user agent is set correctly
 3. Test single URL with scrapy shell
 4. Increase DOWNLOAD_DELAY if rate limited

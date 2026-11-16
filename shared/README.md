@@ -38,6 +38,27 @@ result = convert_links_to_see_refs(html)
 uv run pytest shared/tests/ -v
 ```
 
+### `help_page_spider.py`
+
+`HelpPageSpider`, the base class of all five crawl spiders (phases 10, 30, 70, 100,
+115). help.solidworks.com occasionally answers with a corrupt body or an incomplete page;
+the base class retries those instead of dropping the page:
+
+- `handle_error` (the errback) retries errors raised while processing a response, such as
+  "Error -3 while decompressing data", which bypass Scrapy's RetryMiddleware. HTTP error
+  statuses and ignored requests are final; download errors RetryMiddleware already retried
+  are not retried again.
+- `help_text_or_retry` (use as `help_text = yield from self.help_text_or_retry(response)`)
+  retries pages whose `__NEXT_DATA__` is missing or unparseable, or whose
+  `helpContentData`/`helpText` is null or empty.
+
+Retries go through `get_retry_request`, so `RETRY_TIMES` bounds them. Once a page's
+retries are exhausted it counts in `failed_pages` and is logged to `errors.jsonl`;
+`crawl_exit_code(crawler)` then makes `run_crawler.py` exit 1, so `run_pipeline.sh` stops.
+The server's "This page cannot be found." page is retried too (it can be transient); where
+dead cross-reference links are expected (`dead_links_expected = True`, phases 70 and 115)
+a page that still shows it after its retries is skipped instead of failing the crawl.
+
 ## Design Principles
 
 - **Stateless**: All functions are pure and don't rely on global state

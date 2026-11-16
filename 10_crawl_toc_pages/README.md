@@ -191,10 +191,11 @@ The main spider (`api_docs_spider.py`) implements a two-stage crawling approach:
 - Stores complete metadata for reproducibility
 
 ### Error Handling
-- Retries failed requests (up to 3 times)
-- Logs errors to `errors.jsonl`
-- Continues crawling despite individual failures
-- Gracefully handles missing JSON data
+- Retries failed requests (up to `RETRY_TIMES`, 3), including transient faults Scrapy's
+  RetryMiddleware never sees: undecompressible bodies and pages whose `__NEXT_DATA__`
+  has no `helpText` (see `shared/help_page_spider.py`)
+- A page still failing after its retries is counted in `failed_pages` and logged to
+  `errors.jsonl`; the crawl continues, but `run_crawler.py` then exits 1
 
 ## 📦 Pipelines
 
@@ -342,8 +343,7 @@ The validation script checks:
 **Solutions**:
 - Check URL boundary settings
 - Verify expandToc API is returning data
-- Check for pages missing `__NEXT_DATA__` JSON
-- Look for patterns in skipped pages in metadata/errors.jsonl
+- Check `metadata/errors.jsonl` for pages that failed after their retries
 
 ## 🔍 Monitoring Progress
 
